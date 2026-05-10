@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getNewsAnalysis, analyzeNews, getNewsCorrelation } from "../api.js";
+import { useCorrelationQuery } from "./useCorrelationQuery.js";
 
 const BASE = "http://localhost:3000";
 
@@ -68,13 +69,11 @@ export function useNewsAnalysis(ticker) {
     }
   }, [progressCount, ticker, queryClient]);
 
-  const correlation = useQuery({
-    queryKey: ["news-correlation", ticker, lagDays],
-    queryFn: () => getNewsCorrelation(ticker, lagDays),
-    enabled: showCorrelation && !!ticker,
-    retry: false,
-    placeholderData: (prev) => prev,
-  });
+  const correlation = useCorrelationQuery(
+    ["news-correlation", ticker, lagDays],
+    () => getNewsCorrelation(ticker, lagDays),
+    showCorrelation && !!ticker,
+  );
 
   const analyze = useMutation({
     mutationFn: () => analyzeNews(ticker),

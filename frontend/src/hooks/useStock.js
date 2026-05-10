@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { getTicker, getCompanies, getCorrelation } from "../api.js";
+import { withLsCache } from "../utils/lsCache.js";
 
 function percentageDiff(a, b) {
   return (((b - a) / a) * 100).toFixed(2) + "%";
@@ -38,21 +39,29 @@ function filterByPeriod(quotes, days) {
   return quotes.filter((q) => new Date(q.date) >= cutoff);
 }
 
+const TICKER_TTL = 60 * 60 * 1000;
+
 export function useStock(ticker, { compareTicker, period } = {}) {
   const { data, error, isPending } = useQuery({
     queryKey: ["ticker", ticker],
-    queryFn: () => getTicker(ticker),
+    queryFn: withLsCache(`ticker_${ticker}`, TICKER_TTL, () => getTicker(ticker)),
+    staleTime: TICKER_TTL,
+    gcTime: TICKER_TTL,
   });
 
   const { data: companies } = useQuery({
     queryKey: ["companies"],
-    queryFn: getCompanies,
+    queryFn: withLsCache("companies", TICKER_TTL, getCompanies),
+    staleTime: TICKER_TTL,
+    gcTime: TICKER_TTL,
   });
 
   const { data: compareData } = useQuery({
     queryKey: ["ticker", compareTicker],
-    queryFn: () => getTicker(compareTicker),
+    queryFn: withLsCache(`ticker_${compareTicker}`, TICKER_TTL, () => getTicker(compareTicker)),
     enabled: !!compareTicker,
+    staleTime: TICKER_TTL,
+    gcTime: TICKER_TTL,
   });
 
   const allQuotes = useMemo(() => data?.history?.quotes ?? [], [data]);

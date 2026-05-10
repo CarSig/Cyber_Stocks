@@ -18,6 +18,13 @@
 .chart-compare-label { margin-left: 8px; color: var(--color-amber); font-size: 13px; }
 .chart-series-label { font-size: 13px; }
 .chart-container { width: 100%; }
+.chart-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
 .chart-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
 .chart-title-row .chart-title { margin: 0; }
 .ml-auto { margin-left: auto; }

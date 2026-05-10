@@ -40,6 +40,11 @@ export function getTicker(ticker) {
   return apiFetch(`/${ticker}`);
 }
 
+export function getSparklines(tickers) {
+  if (!tickers?.length) return Promise.resolve({});
+  return apiFetch(`/sparklines?tickers=${tickers.join(",")}`);
+}
+
 export async function runSimulation(ticker, actions) {
   return apiFetch(`/simulate/${ticker}`, {
     method: "POST",

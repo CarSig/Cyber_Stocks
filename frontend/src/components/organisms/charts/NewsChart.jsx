@@ -113,10 +113,16 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange }
     });
 
     skipRangeRef.current = true;
-    if (periodRef.current === null) {
+    if (countData.length === 0) {
+      // nothing to do — no data means no time range to set
+    } else if (periodRef.current === null) {
       chart.timeScale().fitContent();
     } else {
-      chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() });
+      try {
+        chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() });
+      } catch {
+        chart.timeScale().fitContent();
+      }
     }
 
     const rangeTimer = setTimeout(() => {
@@ -147,7 +153,11 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange }
     if (period === null) {
       chartRef.current.timeScale().fitContent();
     } else {
-      chartRef.current.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() });
+      try {
+        chartRef.current.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() });
+      } catch {
+        chartRef.current.timeScale().fitContent();
+      }
     }
     setTimeout(() => { skipRangeRef.current = false; }, 150);
   }, [period]);

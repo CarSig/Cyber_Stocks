@@ -3,36 +3,23 @@ node_modules/
 .env.*
 
 # Build output
-backend/dist/
 frontend/dist/
 backend_nest/dist/
 
 # Logs
-backend/logs/
 backend_nest/logs/
 
 # Storage (runtime data — add sample files manually if needed)
-storage/
-backend/storage/
 backend_nest/storage/
 
 # OS
 .DS_Store
 
-# Exclude all modules except frontend/
-backend/
-backend_nest/
-content_analysis/
-frontend_backup/
-data/
-docs/
-storage/
-text_analysis/
+# Frontend
+frontend/node_modules/
 
-# Root-level files not needed in frontend repo
-ai_files.js
-chat.js
-docker-compose.yml
+# Root-level files not needed in repo
 prometheus.yml
 .claude/
 CLAUDE.md
+docs/

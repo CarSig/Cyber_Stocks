@@ -1,12 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
 import { UserButton } from "@clerk/react";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useTheme } from "../../context/ThemeContext.jsx";
 import NotificationBell from "../molecules/NotificationBell.jsx";
 import { Button } from "@/components/ui/button";
 
 export default function Navbar() {
   const { pathname } = useLocation();
   const { user } = useAuth();
+  const { theme, toggle } = useTheme();
   const segments = pathname.split("/").filter(Boolean);
   const isTicker = segments.length === 1 && /^[A-Z]{1,5}$/.test(segments[0].toUpperCase())
     && !["ADMIN"].includes(segments[0].toUpperCase());
@@ -18,6 +20,7 @@ export default function Navbar() {
         {user && <Link to="/" className="navbar-nav-link">Companies</Link>}
         {user && <Link to="/threat-intel" className="navbar-nav-link">Threat Intel</Link>}
         {user && <Link to="/socials" className="navbar-nav-link">Socials</Link>}
+        {user && <Link to="/trading-intelligence" className="navbar-nav-link">Markets</Link>}
         {user && <Link to="/intelligence" className="navbar-nav-link">Intelligence</Link>}
       </div>
       {ticker && (
@@ -28,6 +31,9 @@ export default function Navbar() {
       )}
       {user && (
         <div className="navbar-user">
+          <button className="navbar-theme-toggle" onClick={toggle} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
+            {theme === "dark" ? "☀" : "☽"}
+          </button>
           <NotificationBell />
           <span className="navbar-username">{user.username}</span>
           {user.role === "admin" && (

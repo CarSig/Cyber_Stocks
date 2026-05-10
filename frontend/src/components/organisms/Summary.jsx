@@ -61,7 +61,7 @@ export default function Summary({ summary }) {
         </Card>
       )}
 
-      {f && (
+      {/* {f && (
         <Card title="Financials">
           <Field label="Current Price" value={fmt(f.currentPrice)} />
           <Field label="Target Low" value={fmt(f.targetLowPrice)} />
@@ -74,9 +74,9 @@ export default function Summary({ summary }) {
           <Field label="Operating Margin" value={pct(f.operatingMargins)} />
           <Field label="Return on Equity" value={pct(f.returnOnEquity)} />
         </Card>
-      )}
+      )} */}
 
-      {s && (
+      {/* {s && (
         <Card title="Key Statistics">
           <Field label="Market Cap" value={fmt(s.marketCap)} />
           <Field label="Trailing EPS" value={fmt(s.trailingEps)} />
@@ -87,7 +87,7 @@ export default function Summary({ summary }) {
           <Field label="Shares Out" value={fmt(s.sharesOutstanding)} />
           <Field label="Float Shares" value={fmt(s.floatShares)} />
         </Card>
-      )}
+      )} */}
     </div>
   );
 }

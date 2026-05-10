@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { NotificationProvider } from "./context/NotificationContext.jsx";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 import Navbar from "./components/organisms/Navbar.jsx";
 import ProtectedRoute from "./components/molecules/ProtectedRoute.jsx";
 import AdminRoute from "./components/molecules/AdminRoute.jsx";
@@ -18,9 +19,11 @@ import Socials from "./pages/Socials.jsx";
 import SocialsTruthSocial from "./pages/SocialsTruthSocial.jsx";
 import SocialsReddit from "./pages/SocialsReddit.jsx";
 import Intelligence2 from "./pages/Intelligence2.jsx";
+import TradingIntelligence from "./pages/TradingIntelligence.jsx";
 
 export default function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <NotificationProvider>
         <BrowserRouter>
@@ -39,6 +42,7 @@ export default function App() {
               <Route path="/socials/truth-social" element={<ProtectedRoute><SocialsTruthSocial /></ProtectedRoute>} />
               <Route path="/socials/reddit" element={<ProtectedRoute><SocialsReddit /></ProtectedRoute>} />
               <Route path="/intelligence" element={<ProtectedRoute><Intelligence2 /></ProtectedRoute>} />
+              <Route path="/trading-intelligence" element={<ProtectedRoute><TradingIntelligence /></ProtectedRoute>} />
               <Route path="/:ticker" element={<ProtectedRoute><Ticker /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
@@ -46,5 +50,6 @@ export default function App() {
         </BrowserRouter>
       </NotificationProvider>
     </AuthProvider>
+    </ThemeProvider>
   );
 }

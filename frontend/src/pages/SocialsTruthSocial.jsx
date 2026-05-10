@@ -47,7 +47,7 @@ function filterByCompany(posts, ticker, companies) {
   const nameLower = name.toLowerCase();
   const tickerLower = ticker.toLowerCase();
   return posts.filter((p) => {
-    const text = (p.content ?? p.text ?? "").toLowerCase();
+    const text = (p.content || p.text || "").toLowerCase();
     return text.includes(nameLower) || text.includes(tickerLower);
   });
 }
@@ -61,7 +61,7 @@ export default function Socials() {
   });
   const { data: companies } = useQuery({ queryKey: ["companies"], queryFn: getCompanies });
 
-  const filtered = posts ? filterByCompany(posts, company, companies) : [];
+  const filtered = posts ? filterByCompany(posts, company, companies).filter((p) => p.content || p.text) : [];
   const last30 = filtered.filter((p) => Date.now() - new Date(p.created_at).getTime() < 30 * 86400_000).length;
 
   return (
@@ -109,7 +109,7 @@ export default function Socials() {
                     <span className="socials-post-date">
                       {new Date(p.created_at).toLocaleDateString()}
                     </span>
-                    <span className="socials-post-text">{p.content ?? p.text}</span>
+                    <span className="socials-post-text">{p.content || p.text}</span>
                   </a>
                 ))}
             </div>

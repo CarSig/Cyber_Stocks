@@ -1,37 +1,25 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { getThreatIntelList, getCompanies } from "../api.js";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-const PAGE_SIZE = 50;
+import ThreatIntelShell from "../components/organisms/ThreatIntelShell.jsx";
+import { usePaginatedThreatIntel } from "../hooks/usePaginatedThreatIntel.js";
+import { formatDate } from "../utils/date.js";
 
 export default function ThreatIntelOtx() {
-  const [page, setPage] = useState(0);
   const [company, setCompany] = useState("");
 
-  const { data: companiesData } = useQuery({ queryKey: ["companies"], queryFn: getCompanies });
-
-  const { data, isPending, error } = useQuery({
-    queryKey: ["otx", page, company],
-    queryFn: () => getThreatIntelList("otx", { limit: PAGE_SIZE, offset: page * PAGE_SIZE, company }),
-    keepPreviousData: true,
-  });
-
-  const totalPages = data?.total ? Math.ceil(data.total / PAGE_SIZE) : 0;
+  const { page, setPage, data, isPending, error, totalPages, companiesData } =
+    usePaginatedThreatIntel("otx", { company });
 
   return (
-    <div className="ti-detail-page">
-      <div className="ti-detail-header">
-        <Link to="/threat-intel" className="ti-back">← Threat Intel</Link>
-        <h1>AlienVault OTX</h1>
-        {data?.syncedAt && <span className="ti-synced">Synced {new Date(data.syncedAt).toLocaleString()}</span>}
-      </div>
-
-      {isPending && <p className="ti-loading">Loading…</p>}
-      {error && <p className="ti-error">{error.message}</p>}
-
+    <ThreatIntelShell
+      title="AlienVault OTX"
+      isPending={isPending}
+      error={error}
+      data={data}
+      page={page}
+      setPage={setPage}
+      totalPages={totalPages}
+    >
       {data?.configured === false && (
         <div className="ti-notice">
           <strong>OTX not configured.</strong> Register at{" "}
@@ -44,9 +32,7 @@ export default function ThreatIntelOtx() {
         <>
           <div className="ti-filters">
             <Select value={company} onValueChange={(v) => { setCompany(v); setPage(0); }}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All companies" />
-              </SelectTrigger>
+              <SelectTrigger className="w-48"><SelectValue placeholder="All companies" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="">All companies</SelectItem>
                 {Object.keys(companiesData ?? {}).map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
@@ -59,11 +45,7 @@ export default function ThreatIntelOtx() {
             <table className="ti-table">
               <thead>
                 <tr>
-                  <th>Pulse</th>
-                  <th>Tags</th>
-                  <th>Indicators</th>
-                  <th>TLP</th>
-                  <th>Created</th>
+                  <th>Pulse</th><th>Tags</th><th>Indicators</th><th>TLP</th><th>Created</th>
                 </tr>
               </thead>
               <tbody>
@@ -81,22 +63,14 @@ export default function ThreatIntelOtx() {
                     </td>
                     <td>{p.indicators_count ?? 0}</td>
                     <td><span className={`ti-badge ti-badge--tlp-${p.tlp ?? "white"}`}>{p.tlp ?? "white"}</span></td>
-                    <td className="ti-date">{p.created ? new Date(p.created).toLocaleDateString() : "—"}</td>
+                    <td className="ti-date">{formatDate(p.created)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-
-          {totalPages > 1 && (
-            <div className="ti-pagination">
-              <Button variant="ghost" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>← Prev</Button>
-              <span className="ti-page-info">Page {page + 1} of {totalPages}</span>
-              <Button variant="ghost" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>Next →</Button>
-            </div>
-          )}
         </>
       )}
-    </div>
+    </ThreatIntelShell>
   );
 }

@@ -1,0 +1,74 @@
+import "dotenv/config";
+import { Module } from "@nestjs/common";
+import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from "@nestjs/core";
+import { ConfigModule } from "@nestjs/config";
+import { ScheduleModule } from "@nestjs/schedule";
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { LoggerModule } from "nestjs-pino";
+
+import { HttpExceptionFilter } from "@/common/errors/http-exception.filter";
+import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
+import { MetricsInterceptor } from "@/common/interceptors/metrics.interceptor";
+
+import { AuthModule } from "@/modules/auth/auth.module";
+import { StockModule } from "@/modules/stock/stock.module";
+import { NewsModule } from "@/modules/news/news.module";
+import { TrumpModule } from "@/modules/trump/trump.module";
+import { RedditModule } from "@/modules/reddit/reddit.module";
+import { ThreatIntelModule } from "@/modules/threat-intel/threat-intel.module";
+import { IntelligenceModule } from "@/modules/intelligence/intelligence.module";
+import { AdminModule } from "@/modules/admin/admin.module";
+import { MetricsModule } from "@/modules/metrics/metrics.module";
+import { NotificationsModule } from "@/modules/notifications/notifications.module";
+import { ResearchModule } from "@/modules/research/research.module";
+import { MqModule } from "@/modules/mq/mq.module";
+import { SchedulerModule } from "@/modules/scheduler/scheduler.module";
+import { AuditModule } from "@/modules/audit/audit.module";
+import { CoreDbModule } from "@/shared/core-db.module";
+import { AuthService } from "@/modules/auth/auth.service";
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: ".env" }),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: process.env.LOG_LEVEL ?? "info",
+        genReqId: () => crypto.randomUUID(),
+        redact: ["req.headers.authorization"],
+        transport: {
+          targets: [
+            {
+              target: "pino/file",
+              options: { destination: "logs/app.log", mkdir: true },
+              level: "info",
+            },
+          ],
+        },
+      },
+    }),
+    ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
+    AuthModule,
+    NewsModule,
+    TrumpModule,
+    RedditModule,
+    ThreatIntelModule,
+    IntelligenceModule,
+    AdminModule,
+    MetricsModule,
+    NotificationsModule,
+    ResearchModule,
+    MqModule,
+    SchedulerModule,
+    CoreDbModule,
+    AuditModule,
+    StockModule,
+  ],
+  providers: [
+    { provide: APP_FILTER,      useClass: HttpExceptionFilter },
+    { provide: APP_GUARD,       useClass: JwtAuthGuard },
+    { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor },
+    AuthService,
+  ],
+})
+export class AppModule {}
