@@ -155,8 +155,11 @@ class CybersecurityClient {
     // Batch upsert quotes
     let inserted = 0;
     for (const q of quotes) {
-      const date = String(q["date"] ?? "").slice(0, 10);
-      if (!date) continue;
+      const raw = q["date"];
+      if (!raw) continue;
+      const parsed = raw instanceof Date ? raw : new Date(raw as string);
+      if (Number.isNaN(parsed.getTime())) continue;
+      const date = parsed.toISOString().slice(0, 10);
       const result = await this.pool.query(
         `INSERT INTO stock_quotes (ticker, date, open, high, low, close, adjclose, volume)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)

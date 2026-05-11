@@ -19,7 +19,7 @@ function sentimentToColor(score) {
   return `rgb(${r},${g},${b})`;
 }
 
-function aggregateByDay(articles, analysis) {
+function aggregateByDay(articles, analysis, quoteBounds) {
   const byDay = new Map();
   const seen = new Set();
   for (const a of articles ?? []) {
@@ -39,19 +39,24 @@ function aggregateByDay(articles, analysis) {
   const sorted = [...byDay.entries()].sort();
   const countData = [];
 
-  for (let i = 0; i < sorted.length; i++) {
-    const [time, { sum, count }] = sorted[i];
-    if (i > 0) {
-      const prev = new Date(sorted[i - 1][0]);
-      const curr = new Date(time);
-      const cursor = new Date(prev);
-      cursor.setUTCDate(cursor.getUTCDate() + 1);
-      while (cursor < curr) {
-        countData.push({ time: cursor.toISOString().slice(0, 10), value: 0, color: "transparent" });
-        cursor.setUTCDate(cursor.getUTCDate() + 1);
-      }
+  // Anchor start/end to stock quote bounds so setVisibleRange never snaps
+  const rangeFrom = quoteBounds?.from && (!sorted.length || quoteBounds.from < sorted[0][0]) ? quoteBounds.from : sorted[0]?.[0];
+  const rangeTo   = quoteBounds?.to   && (!sorted.length || quoteBounds.to   > sorted[sorted.length - 1]?.[0]) ? quoteBounds.to : sorted[sorted.length - 1]?.[0];
+
+  if (!rangeFrom) return countData;
+
+  // Build full day-by-day sequence from rangeFrom to rangeTo
+  const cursor = new Date(rangeFrom);
+  const end = new Date(rangeTo);
+  while (cursor <= end) {
+    const time = cursor.toISOString().slice(0, 10);
+    const d = byDay.get(time);
+    if (d) {
+      countData.push({ time, value: d.count, color: sentimentToColor(d.sum / d.count) });
+    } else {
+      countData.push({ time, value: 0, color: "transparent" });
     }
-    countData.push({ time, value: count, color: sentimentToColor(sum / count) });
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
 
   return countData;
@@ -63,17 +68,19 @@ function useSyncRef(value) {
   return ref;
 }
 
-export default function NewsChart({ articles, analysis, period, onPeriodChange }) {
+export default function NewsChart({ articles, analysis, period, onPeriodChange, visibleRange, onRangeChange, quoteBounds }) {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   const skipRangeRef = useRef(false);
   const periodRef = useRef(period);
+  const visibleRangeRef = useRef(visibleRange);
   const [modal, setModal] = useState(null);
 
   const articlesRef = useSyncRef(articles);
   const analysisRef = useSyncRef(analysis);
 
   useEffect(() => { periodRef.current = period; }, [period]);
+  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -85,16 +92,14 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange }
       layout: { background: { color: cv("--surface-0") }, textColor: cv("--text-primary") },
       grid: { vertLines: { color: cv("--surface-3") }, horzLines: { color: cv("--surface-3") } },
       timeScale: { timeVisible: true },
-      leftPriceScale: { visible: true },
-      rightPriceScale: { visible: false },
     });
     chartRef.current = chart;
 
-    const countData = aggregateByDay(articles, analysis);
+    const countData = aggregateByDay(articles, analysis, quoteBounds);
 
     if (countData.length) {
-      const series = chart.addSeries(HistogramSeries, { priceScaleId: "left" });
-      chart.priceScale("left").applyOptions({ scaleMargins: { top: 0.1, bottom: 0 } });
+      const series = chart.addSeries(HistogramSeries, { priceScaleId: "right" });
+      chart.priceScale("right").applyOptions({ scaleMargins: { top: 0.1, bottom: 0 } });
       series.setData(countData);
     }
 
@@ -115,6 +120,8 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange }
     skipRangeRef.current = true;
     if (countData.length === 0) {
       // nothing to do — no data means no time range to set
+    } else if (visibleRangeRef.current) {
+      try { chart.timeScale().setVisibleRange(visibleRangeRef.current); } catch { chart.timeScale().fitContent(); }
     } else if (periodRef.current === null) {
       chart.timeScale().fitContent();
     } else {
@@ -129,6 +136,7 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange }
       skipRangeRef.current = false;
       chart.timeScale().subscribeVisibleTimeRangeChange((range) => {
         if (skipRangeRef.current || !range) return;
+        onRangeChange?.({ from: range.from, to: range.to });
         const days = Math.round((new Date(range.to) - new Date(range.from)) / 86400000);
         onPeriodChange?.(days);
       });
@@ -145,12 +153,14 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange }
       observer.disconnect();
       chart.remove();
     };
-  }, [articles, analysis]);
+  }, [articles, analysis, quoteBounds]);
 
   useEffect(() => {
     if (!chartRef.current) return;
     skipRangeRef.current = true;
-    if (period === null) {
+    if (visibleRange) {
+      try { chartRef.current.timeScale().setVisibleRange(visibleRange); } catch { chartRef.current.timeScale().fitContent(); }
+    } else if (period === null) {
       chartRef.current.timeScale().fitContent();
     } else {
       try {
@@ -160,7 +170,7 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange }
       }
     }
     setTimeout(() => { skipRangeRef.current = false; }, 150);
-  }, [period]);
+  }, [period, visibleRange]);
 
   return (
     <div>

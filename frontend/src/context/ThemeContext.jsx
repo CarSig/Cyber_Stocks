@@ -11,9 +11,12 @@ export function ThemeProvider({ children }) {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const toggle = () => setTheme(t => t === "dark" ? "light" : "dark");
+  const toggle = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
 
   return <ThemeContext.Provider value={{ theme, toggle }}>{children}</ThemeContext.Provider>;
 }
 
-export function useTheme() { return useContext(ThemeContext); }
+// eslint-disable-next-line react-refresh/only-export-components
+export function useTheme() {
+  return useContext(ThemeContext);
+}

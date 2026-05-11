@@ -4,6 +4,7 @@ import { vendorKeyword } from "./vendorKeywords";
 import type { KevClient } from "@/shared/clients/KevClient";
 import type { CompanyConsumerFactory } from "./ThreatIntelSource";
 import { unprocessable } from "@/shared/errors";
+import type { CacheService } from "@/shared/cache.service";
 
 type KevVuln = {
   vendorProject?: string;
@@ -34,7 +35,7 @@ export class KevThreatIntelService extends ThreatIntelSource<
 > {
   readonly source = "CISA KEV";
 
-  constructor(private client: KevClient, consumerFactory: CompanyConsumerFactory) {
+  constructor(private client: KevClient, consumerFactory: CompanyConsumerFactory, private cache?: CacheService) {
     super(consumerFactory);
   }
 
@@ -80,16 +81,21 @@ export class KevThreatIntelService extends ThreatIntelSource<
   async correlate(companyName: string, lagDays = 1) {
     const data = this.read();
     if (!data) throw new Error("KEV data not available");
-    const kw = vendorKeyword(companyName);
-    const dates = (data.vulnerabilities as KevVuln[])
-      .filter((v) => v.vendorProject?.toLowerCase().includes(kw) || v.product?.toLowerCase().includes(kw))
-      .map((v) => v.dateAdded)
-      .filter((d): d is string => !!d);
-    if (dates.length < 1) return null;
-    const quotes = await this.quotes(companyName);
-    return {
-      correlation: correlateThreatIntel(dates, quotes, { lagDays, source: this.source }),
-      lagImpact: threatIntelLagImpact(dates, quotes, { windowDays: lagDays }),
+    const compute = async () => {
+      const kw = vendorKeyword(companyName);
+      const dates = (data.vulnerabilities as KevVuln[])
+        .filter((v) => v.vendorProject?.toLowerCase().includes(kw) || v.product?.toLowerCase().includes(kw))
+        .map((v) => v.dateAdded)
+        .filter((d): d is string => !!d);
+      if (dates.length < 1) return null;
+      const quotes = await this.quotes(companyName);
+      return {
+        correlation: correlateThreatIntel(dates, quotes, { lagDays, source: this.source }),
+        lagImpact: threatIntelLagImpact(dates, quotes, { windowDays: lagDays }),
+      };
     };
+    return this.cache
+      ? this.cache.getOrSet(`corr:${companyName}:kev:${lagDays}`, 1800, compute)
+      : compute();
   }
 }

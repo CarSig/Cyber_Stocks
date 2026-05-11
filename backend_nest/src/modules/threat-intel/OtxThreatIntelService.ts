@@ -4,6 +4,7 @@ import { vendorKeyword } from "./vendorKeywords";
 import type { OtxClient } from "@/shared/clients/OtxClient";
 import type { CompanyConsumerFactory } from "./ThreatIntelSource";
 import { unprocessable } from "@/shared/errors";
+import type { CacheService } from "@/shared/cache.service";
 
 type OtxPulse = {
   name?: string;
@@ -29,7 +30,7 @@ export class OtxThreatIntelService extends ThreatIntelSource<
 > {
   readonly source = "OTX pulse";
 
-  constructor(private client: OtxClient, consumerFactory: CompanyConsumerFactory) {
+  constructor(private client: OtxClient, consumerFactory: CompanyConsumerFactory, private cache?: CacheService) {
     super(consumerFactory);
   }
 
@@ -64,20 +65,25 @@ export class OtxThreatIntelService extends ThreatIntelSource<
     if (!this.client.configured) throw new Error("OTX not configured");
     const data = this.read();
     if (!data) throw new Error("OTX data not available");
-    const kw = vendorKeyword(companyName);
-    const dates = ((data.results ?? []) as OtxPulse[])
-      .filter((p) =>
-        p.name?.toLowerCase().includes(kw) ||
-        p.description?.toLowerCase().includes(kw) ||
-        (p.tags ?? []).some((t) => t.toLowerCase().includes(kw))
-      )
-      .map((p) => p.created?.slice(0, 10))
-      .filter((d): d is string => !!d);
-    if (dates.length < 1) return null;
-    const quotes = await this.quotes(companyName);
-    return {
-      correlation: correlateThreatIntel(dates, quotes, { lagDays, source: this.source }),
-      lagImpact: threatIntelLagImpact(dates, quotes, { windowDays: lagDays }),
+    const compute = async () => {
+      const kw = vendorKeyword(companyName);
+      const dates = ((data.results ?? []) as OtxPulse[])
+        .filter((p) =>
+          p.name?.toLowerCase().includes(kw) ||
+          p.description?.toLowerCase().includes(kw) ||
+          (p.tags ?? []).some((t) => t.toLowerCase().includes(kw))
+        )
+        .map((p) => p.created?.slice(0, 10))
+        .filter((d): d is string => !!d);
+      if (dates.length < 1) return null;
+      const quotes = await this.quotes(companyName);
+      return {
+        correlation: correlateThreatIntel(dates, quotes, { lagDays, source: this.source }),
+        lagImpact: threatIntelLagImpact(dates, quotes, { windowDays: lagDays }),
+      };
     };
+    return this.cache
+      ? this.cache.getOrSet(`corr:${companyName}:otx:${lagDays}`, 1800, compute)
+      : compute();
   }
 }

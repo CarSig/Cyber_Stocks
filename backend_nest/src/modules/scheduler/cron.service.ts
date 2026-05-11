@@ -1,4 +1,4 @@
-import { Injectable, OnApplicationBootstrap } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { DataSyncService } from "./data-sync.service";
@@ -15,7 +15,7 @@ import companies from "@/data/companies";
 import type { Quote } from "@/types/index";
 
 @Injectable()
-export class CronService implements OnApplicationBootstrap {
+export class CronService {
   private dataSyncService!: DataSyncService;
   private readonly kevClient = new KevClient();
   private readonly nvdClient = new NvdClient();
@@ -28,14 +28,6 @@ export class CronService implements OnApplicationBootstrap {
     private readonly coreDb: CoreDbService,
   ) {
     this.dataSyncService = new DataSyncService(coreDb.pool);
-  }
-
-  async onApplicationBootstrap() {
-    await this.runPopulate().catch(() => undefined);
-    await this.runNews().catch(() => undefined);
-    await this.runFetchTrump().catch(() => undefined);
-    await this.runFetchReddit().catch(() => undefined);
-    await this.runThreatIntelSync().catch(() => undefined);
   }
 
   @Cron("0 23 * * *")

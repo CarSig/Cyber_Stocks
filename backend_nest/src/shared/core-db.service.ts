@@ -13,10 +13,12 @@ export class CoreDbService implements OnApplicationBootstrap {
         password_hash TEXT,
         role          TEXT        NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
         email         TEXT,
-        google_id     TEXT        UNIQUE,
+        oauth_id      TEXT        UNIQUE,
         created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
       );
-      CREATE INDEX IF NOT EXISTS users_google_id_idx ON users (google_id) WHERE google_id IS NOT NULL;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS oauth_id TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS email    TEXT;
+      CREATE UNIQUE INDEX IF NOT EXISTS users_oauth_id_idx ON users (oauth_id) WHERE oauth_id IS NOT NULL;
     `);
 
     await this.pool.query(`

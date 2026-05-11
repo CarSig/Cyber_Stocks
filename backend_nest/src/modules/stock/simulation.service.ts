@@ -35,7 +35,7 @@ export class SimulationService {
         [ticker],
       );
       trumpPosts = rows.map((r) => ({
-        created_at: r.created_at,
+        created_at: new Date(r.created_at).toISOString(),
         analysis: { sentiment: r.sentiment, companies: [{ ticker: r.ticker }] },
       }));
     } catch { /* no trump posts yet */ }

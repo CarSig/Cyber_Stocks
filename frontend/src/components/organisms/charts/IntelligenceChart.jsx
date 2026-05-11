@@ -20,7 +20,7 @@ function sentimentToColor(score) {
 
 // articles: BackendArticleResponse[] — each has timestamp, link, publisher, entities[].sentiment
 // entityId: the company slug to pick the right entity sentiment from multi-entity articles
-function aggregateByDay(articles, entityId) {
+function aggregateByDay(articles, entityId, quoteBounds) {
   const byDay = new Map();
   const articlesByDay = new Map();
 
@@ -28,7 +28,6 @@ function aggregateByDay(articles, entityId) {
     if (!a.timestamp) continue;
     const day = new Date(a.timestamp).toISOString().slice(0, 10);
 
-    // pick sentiment for the requested entity if present, else average all entities
     const match = a.entities?.find((e) => e.entityId === entityId);
     const sentiment = match
       ? match.sentiment
@@ -49,20 +48,22 @@ function aggregateByDay(articles, entityId) {
   const sorted = [...byDay.entries()].sort();
   const countData = [];
 
-  for (let i = 0; i < sorted.length; i++) {
-    const [time, { sum, count }] = sorted[i];
-    // fill gap between previous day and this day with zero-value transparent bars
-    if (i > 0) {
-      const prev = new Date(sorted[i - 1][0]);
-      const curr = new Date(time);
-      const cursor = new Date(prev);
-      cursor.setUTCDate(cursor.getUTCDate() + 1);
-      while (cursor < curr) {
-        countData.push({ time: cursor.toISOString().slice(0, 10), value: 0, color: "transparent" });
-        cursor.setUTCDate(cursor.getUTCDate() + 1);
-      }
+  const rangeFrom = quoteBounds?.from && (!sorted.length || quoteBounds.from < sorted[0][0]) ? quoteBounds.from : sorted[0]?.[0];
+  const rangeTo   = quoteBounds?.to   && (!sorted.length || quoteBounds.to   > sorted[sorted.length - 1]?.[0]) ? quoteBounds.to : sorted[sorted.length - 1]?.[0];
+
+  if (!rangeFrom) return { countData, articlesByDay };
+
+  const cursor = new Date(rangeFrom);
+  const end = new Date(rangeTo);
+  while (cursor <= end) {
+    const time = cursor.toISOString().slice(0, 10);
+    const d = byDay.get(time);
+    if (d) {
+      countData.push({ time, value: d.count, color: sentimentToColor(d.sum / d.count) });
+    } else {
+      countData.push({ time, value: 0, color: "transparent" });
     }
-    countData.push({ time, value: count, color: sentimentToColor(sum / count) });
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
 
   return { countData, articlesByDay };
@@ -74,17 +75,19 @@ function useSyncRef(value) {
   return ref;
 }
 
-export default function IntelligenceChart({ articles, entityId, period, onPeriodChange }) {
+export default function IntelligenceChart({ articles, entityId, period, onPeriodChange, visibleRange, onRangeChange, quoteBounds }) {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   const skipRangeRef = useRef(false);
   const periodRef = useRef(period);
+  const visibleRangeRef = useRef(visibleRange);
   const [modal, setModal] = useState(null);
 
   const articlesRef = useSyncRef(articles);
   const entityIdRef = useSyncRef(entityId);
 
   useEffect(() => { periodRef.current = period; }, [period]);
+  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -96,16 +99,14 @@ export default function IntelligenceChart({ articles, entityId, period, onPeriod
       layout: { background: { color: cv("--surface-0") }, textColor: cv("--text-primary") },
       grid: { vertLines: { color: cv("--surface-3") }, horzLines: { color: cv("--surface-3") } },
       timeScale: { timeVisible: true },
-      leftPriceScale: { visible: true },
-      rightPriceScale: { visible: false },
     });
     chartRef.current = chart;
 
-    const { countData } = aggregateByDay(articles, entityId);
+    const { countData } = aggregateByDay(articles, entityId, quoteBounds);
 
     if (countData.length) {
-      const series = chart.addSeries(HistogramSeries, { priceScaleId: "left" });
-      chart.priceScale("left").applyOptions({ scaleMargins: { top: 0.1, bottom: 0 } });
+      const series = chart.addSeries(HistogramSeries, { priceScaleId: "right" });
+      chart.priceScale("right").applyOptions({ scaleMargins: { top: 0.1, bottom: 0 } });
       series.setData(countData);
     }
 
@@ -118,16 +119,19 @@ export default function IntelligenceChart({ articles, entityId, period, onPeriod
     });
 
     skipRangeRef.current = true;
-    if (periodRef.current === null) {
+    if (visibleRangeRef.current) {
+      try { chart.timeScale().setVisibleRange(visibleRangeRef.current); } catch { chart.timeScale().fitContent(); }
+    } else if (periodRef.current === null) {
       chart.timeScale().fitContent();
     } else {
-      chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() });
+      try { chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() }); } catch { chart.timeScale().fitContent(); }
     }
 
     const rangeTimer = setTimeout(() => {
       skipRangeRef.current = false;
       chart.timeScale().subscribeVisibleTimeRangeChange((range) => {
         if (skipRangeRef.current || !range) return;
+        onRangeChange?.({ from: range.from, to: range.to });
         const days = Math.round((new Date(range.to) - new Date(range.from)) / 86400000);
         onPeriodChange?.(days);
       });
@@ -144,18 +148,20 @@ export default function IntelligenceChart({ articles, entityId, period, onPeriod
       observer.disconnect();
       chart.remove();
     };
-  }, [articles, entityId]);
+  }, [articles, entityId, quoteBounds]);
 
   useEffect(() => {
     if (!chartRef.current) return;
     skipRangeRef.current = true;
-    if (period === null) {
+    if (visibleRange) {
+      try { chartRef.current.timeScale().setVisibleRange(visibleRange); } catch { chartRef.current.timeScale().fitContent(); }
+    } else if (period === null) {
       chartRef.current.timeScale().fitContent();
     } else {
-      chartRef.current.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() });
+      try { chartRef.current.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() }); } catch { chartRef.current.timeScale().fitContent(); }
     }
     setTimeout(() => { skipRangeRef.current = false; }, 150);
-  }, [period]);
+  }, [period, visibleRange]);
 
   return (
     <div>

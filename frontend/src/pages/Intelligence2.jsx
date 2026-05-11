@@ -1,9 +1,16 @@
 import { useState } from "react";
-import { useEntityIntelligence2, useGlobalSignals2, useBackendEntities } from "../hooks/useIntelligence.js";
+import { useEntityIntelligence, useGlobalSignals, useBackendEntities, useAllSentimentCorrelations } from "../hooks/useIntelligence.js";
 import { Badge } from "../components/ui/badge.jsx";
+
 
 function sentimentColor(v) {
   return v > 0.1 ? "var(--color-green, #22c55e)" : v < -0.1 ? "var(--color-red, #ef4444)" : "var(--muted-foreground)";
+}
+
+function rColor(r) {
+  if (r > 0.1) return "var(--color-green, #22c55e)";
+  if (r < -0.1) return "var(--color-red, #ef4444)";
+  return "var(--muted-foreground)";
 }
 
 function SentimentBar({ value }) {
@@ -85,8 +92,43 @@ function ArticleDetail({ article, focusEntityId }) {
   );
 }
 
+function EntityCorrelation({ entityId }) {
+  const { data } = useAllSentimentCorrelations(1);
+  const row = data?.find((r) => r.entityId === entityId);
+  if (!row) return null;
+  const res = row.result;
+  const hasError = "error" in res;
+  return (
+    <div style={{ background: "var(--card)", borderRadius: 8, padding: 14, marginBottom: 20 }}>
+      <p style={{ fontSize: 11, fontWeight: 600, color: "var(--muted-foreground)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 10 }}>
+        Sentiment ↔ Price Correlation
+      </p>
+      {hasError ? (
+        <p style={{ fontSize: 12, color: "var(--color-red, #ef4444)" }}>{res.error}</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div style={{ display: "flex", gap: 24 }}>
+            <div>
+              <span style={{ fontSize: 18, fontWeight: 700, color: rColor(res.r) }}>{res.r.toFixed(3)}</span>
+              <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 4 }}>r</span>
+            </div>
+            <div>
+              <span style={{ fontSize: 18, fontWeight: 700 }}>{res.n}</span>
+              <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 4 }}>points</span>
+            </div>
+            <div>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{res.significant ? "✓ significant" : "not significant"}</span>
+            </div>
+          </div>
+          <p style={{ fontSize: 11, color: "var(--muted-foreground)" }}>{res.interpretation}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EntityDetailPanel({ entityId, onClose }) {
-  const { articles, summary } = useEntityIntelligence2(entityId);
+  const { articles, summary } = useEntityIntelligence(entityId);
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 50, display: "flex", justifyContent: "flex-end" }}
@@ -98,6 +140,8 @@ function EntityDetailPanel({ entityId, onClose }) {
           <h2 style={{ fontWeight: 700, fontSize: 20, textTransform: "capitalize" }}>{entityId}</h2>
           <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20, color: "var(--muted-foreground)" }}>✕</button>
         </div>
+
+        <EntityCorrelation entityId={entityId} />
 
         {summary.data && (
           <div style={{ background: "var(--card)", borderRadius: 8, padding: 14, marginBottom: 20 }}>
@@ -137,7 +181,7 @@ function EntityDetailPanel({ entityId, onClose }) {
 }
 
 function EntityCard({ entity, onClick }) {
-  const { summary } = useEntityIntelligence2(entity.entityId);
+  const { summary } = useEntityIntelligence(entity.entityId);
 
   return (
     <div className="ti-card" style={{ cursor: "pointer" }} onClick={onClick}>
@@ -154,24 +198,21 @@ function EntityCard({ entity, onClick }) {
         {summary.error && <p className="ti-empty">No data</p>}
         {summary.data && (
           <>
-            <div className="ti-stats-row" style={{ marginBottom: 12 }}>
+            <div className="ti-stats-row">
               <div className="ti-stat">
                 <div className="ti-stat-value">{summary.data.articleCount}</div>
-                <div className="ti-stat-label">Articles</div>
+                <div className="ti-stat-label">art</div>
               </div>
               <div className="ti-stat">
                 <div className="ti-stat-value" style={{ color: "var(--color-green, #22c55e)" }}>{summary.data.positiveCount}</div>
-                <div className="ti-stat-label">Positive</div>
+                <div className="ti-stat-label">pos</div>
               </div>
               <div className="ti-stat">
                 <div className="ti-stat-value" style={{ color: "var(--color-red, #ef4444)" }}>{summary.data.negativeCount}</div>
-                <div className="ti-stat-label">Negative</div>
+                <div className="ti-stat-label">neg</div>
               </div>
             </div>
             <SentimentBar value={summary.data.avgSentiment} />
-            <p style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 8 }}>
-              Click to see all articles →
-            </p>
           </>
         )}
       </div>
@@ -180,7 +221,11 @@ function EntityCard({ entity, onClick }) {
 }
 
 function SignalsPanel() {
-  const { data, isPending, error } = useGlobalSignals2();
+  const [expanded, setExpanded] = useState(false);
+  const { data, isPending, error } = useGlobalSignals();
+  const filtered = data?.filter((s) => s.count >= 5) ?? [];
+  const visible = expanded ? filtered : filtered.slice(0, 10);
+
   return (
     <div className="ti-card" style={{ cursor: "default" }}>
       <div className="ti-card-head">
@@ -190,14 +235,100 @@ function SignalsPanel() {
       <div className="ti-card-body">
         {isPending && <p className="ti-loading">Loading…</p>}
         {error && <p className="ti-error">{error.message}</p>}
-        {data?.length === 0 && <p className="ti-empty">No signals detected</p>}
-        {data?.map((s) => (
+        {filtered.length === 0 && !isPending && <p className="ti-empty">No signals detected</p>}
+        {visible.map((s) => (
           <div key={s.signalType} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 13, borderBottom: "1px solid var(--border)" }}>
             <span style={{ color: "var(--foreground)" }}>{s.signalType}</span>
             <Badge variant="secondary">{s.count}</Badge>
           </div>
         ))}
+        {filtered.length > 10 && (
+          <button onClick={() => setExpanded((e) => !e)} style={{ marginTop: 10, fontSize: 12, color: "var(--muted-foreground)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+            {expanded ? "Show less ↑" : `Show all ${filtered.length} signals ↓`}
+          </button>
+        )}
       </div>
+    </div>
+  );
+}
+
+function CorrelationSection() {
+  const [lagDays, setLagDays] = useState(1);
+  const { data, isPending, error } = useAllSentimentCorrelations(lagDays);
+
+  const thStyle = { padding: "8px 12px", textAlign: "left", fontSize: 11, color: "var(--muted-foreground)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" };
+
+  return (
+    <div style={{ marginBottom: 40 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
+        <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--muted-foreground)", textTransform: "uppercase", letterSpacing: "0.05em", margin: 0 }}>
+          Sentiment ↔ Price Correlation
+        </h2>
+        <select
+          value={lagDays}
+          onChange={(e) => setLagDays(Number(e.target.value))}
+          style={{ fontSize: 12, padding: "6px 10px", borderRadius: 6, background: "var(--muted)", border: "1px solid var(--border)", color: "var(--foreground)", cursor: "pointer" }}
+        >
+          {[1, 2, 3, 5, 7, 14].map((d) => (
+            <option key={d} value={d}>{`${d}d lag`}</option>
+          ))}
+        </select>
+        <span style={{ fontSize: 11, color: "var(--muted-foreground)" }}>
+          Each company's news sentiment (weighted by relevance) vs its own stock's {lagDays}d price return
+        </span>
+      </div>
+
+      {isPending && <p className="ti-loading">Computing correlations…</p>}
+      {error && <p className="ti-error">{error.message}</p>}
+      {data && (
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: "2px solid var(--border)" }}>
+                <th style={{ ...thStyle }}>Company</th>
+                <th style={{ ...thStyle, textAlign: "right" }}>r</th>
+                <th style={{ ...thStyle, textAlign: "right" }}>p-value</th>
+                <th style={{ ...thStyle, textAlign: "center" }}>Sig.</th>
+                <th style={{ ...thStyle, textAlign: "right" }}>n</th>
+                <th style={{ ...thStyle }}>Interpretation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((row) => {
+                const res = row.result;
+                const hasError = "error" in res;
+                return (
+                  <tr key={row.entityId} style={{ borderBottom: "1px solid var(--border)" }}>
+                    <td style={{ padding: "10px 12px", fontSize: 13, fontWeight: 500, color: "var(--foreground)" }}>
+                      {row.name}
+                      <span style={{ fontSize: 11, color: "var(--muted-foreground)", marginLeft: 6 }}>{row.ticker}</span>
+                    </td>
+                    <td style={{ padding: "10px 12px", textAlign: "right" }}>
+                      {hasError ? "—" : <span style={{ color: rColor(res.r), fontWeight: 600 }}>{res.r.toFixed(3)}</span>}
+                    </td>
+                    <td style={{ padding: "10px 12px", textAlign: "right", color: "var(--muted-foreground)" }}>
+                      {hasError ? "—" : (res.pValue < 0.001 ? "< 0.001" : res.pValue.toFixed(3))}
+                    </td>
+                    <td style={{ padding: "10px 12px", textAlign: "center" }}>
+                      {!hasError && (
+                        <Badge variant={res.significant ? "default" : "secondary"} style={{ fontSize: 10 }}>
+                          {res.significant ? "Yes" : "No"}
+                        </Badge>
+                      )}
+                    </td>
+                    <td style={{ padding: "10px 12px", textAlign: "right", color: "var(--muted-foreground)" }}>
+                      {hasError ? "—" : res.n}
+                    </td>
+                    <td style={{ padding: "10px 12px", fontSize: 11, color: "var(--muted-foreground)" }}>
+                      {hasError ? <span style={{ color: "var(--color-red, #ef4444)" }}>{res.error}</span> : res.interpretation}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
@@ -206,7 +337,6 @@ export default function Intelligence2() {
   const [selected, setSelected] = useState(null);
   const { data: entities, isPending } = useBackendEntities();
 
-  // dedupe by entityId, keep highest articleCount
   const uniqueEntities = entities
     ? [...new Map(entities.map((e) => [e.entityId, e])).values()]
     : [];
@@ -227,6 +357,8 @@ export default function Intelligence2() {
           <EntityCard key={e.entityId} entity={e} onClick={() => setSelected(e.entityId)} />
         ))}
       </div>
+
+      <CorrelationSection />
 
       <h2 style={{ fontSize: 14, fontWeight: 600, color: "var(--muted-foreground)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
         Macro Signals

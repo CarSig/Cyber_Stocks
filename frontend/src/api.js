@@ -1,4 +1,7 @@
-const BASE = "http://localhost:3000";
+const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const BASE = isLocalhost
+  ? "http://localhost:3000"
+  : (import.meta.env.VITE_API_URL ?? "http://localhost:3000");
 
 function authHeader() {
   const token = localStorage.getItem("auth_token");
@@ -8,7 +11,7 @@ function authHeader() {
 async function apiFetch(path, opts = {}) {
   const res = await fetch(`${BASE}${path}`, {
     ...opts,
-    headers: { ...authHeader(), ...opts.headers },
+    headers: { ...authHeader(), "ngrok-skip-browser-warning": "1", ...opts.headers },
   });
   if (res.status === 401) {
     throw new Error("Unauthorized");
@@ -96,6 +99,13 @@ export function getTrumpLagImpact(ticker, lagDays = 7) {
   return apiFetch(`/trump-lag-impact/${ticker}?lagDays=${lagDays}`);
 }
 
+export function getCorrelationMatrix({ lagDays = 0, windowDays = 90, startDate, endDate } = {}) {
+  const p = new URLSearchParams({ lagDays, windowDays });
+  if (startDate) p.set("startDate", startDate);
+  if (endDate) p.set("endDate", endDate);
+  return apiFetch(`/correlation-matrix?${p}`);
+}
+
 export function getCorrelation(tickerA, tickerB, windowDays, lagDays) {
   const p = new URLSearchParams();
   if (windowDays) p.set("windowDays", windowDays);
@@ -163,25 +173,11 @@ export function getIntelligenceSignals() {
   return apiFetch("/intelligence/signals");
 }
 
-export function getIntelligenceArticle(id) {
-  return apiFetch(`/intelligence/articles/${encodeURIComponent(id)}`);
+export function getIntelligenceEntities() {
+  return apiFetch("/intelligence/entities");
 }
 
-// ── Intelligence2 (backend storage / Yahoo news) ──────────────────────────────
-
-export function getIntelligence2EntityArticles(entityId) {
-  return apiFetch(`/intelligence2/entities/${encodeURIComponent(entityId)}/articles`);
-}
-
-export function getIntelligence2EntitySummary(entityId) {
-  return apiFetch(`/intelligence2/entities/${encodeURIComponent(entityId)}/summary`);
-}
-
-export function getIntelligence2Signals() {
-  return apiFetch("/intelligence2/signals");
-}
-
-export function getIntelligence2Entities() {
-  return apiFetch("/intelligence2/entities");
+export function getIntelligenceSentimentCorrelations(lagDays = 1) {
+  return apiFetch(`/intelligence/sentiment-correlations?lagDays=${lagDays}`);
 }
 

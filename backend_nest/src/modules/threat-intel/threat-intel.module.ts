@@ -11,6 +11,7 @@ import { MispClient } from "@/shared/clients/MispClient";
 import { CybersecurityConsumer } from "@/shared/clients/YahooCompanyClient";
 import { CoreDbService } from "@/shared/core-db.service";
 import { CoreDbModule } from "@/shared/core-db.module";
+import { CacheService } from "@/shared/cache.service";
 
 @Module({
   imports: [CoreDbModule],
@@ -18,21 +19,21 @@ import { CoreDbModule } from "@/shared/core-db.module";
   providers: [
     {
       provide: "KEV_INTEL",
-      useFactory: (db: CoreDbService) =>
-        new KevThreatIntelService(new KevClient(), (name) => new CybersecurityConsumer(name, db.pool)),
-      inject: [CoreDbService],
+      useFactory: (db: CoreDbService, cache: CacheService) =>
+        new KevThreatIntelService(new KevClient(), (name) => new CybersecurityConsumer(name, db.pool), cache),
+      inject: [CoreDbService, CacheService],
     },
     {
       provide: "NVD_INTEL",
-      useFactory: (db: CoreDbService) =>
-        new NvdThreatIntelService(new NvdClient(), (name) => new CybersecurityConsumer(name, db.pool)),
-      inject: [CoreDbService],
+      useFactory: (db: CoreDbService, cache: CacheService) =>
+        new NvdThreatIntelService(new NvdClient(), (name) => new CybersecurityConsumer(name, db.pool), cache),
+      inject: [CoreDbService, CacheService],
     },
     {
       provide: "OTX_INTEL",
-      useFactory: (db: CoreDbService) =>
-        new OtxThreatIntelService(new OtxClient(), (name) => new CybersecurityConsumer(name, db.pool)),
-      inject: [CoreDbService],
+      useFactory: (db: CoreDbService, cache: CacheService) =>
+        new OtxThreatIntelService(new OtxClient(), (name) => new CybersecurityConsumer(name, db.pool), cache),
+      inject: [CoreDbService, CacheService],
     },
     {
       provide: "MISP_INTEL",

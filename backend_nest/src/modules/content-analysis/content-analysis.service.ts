@@ -4,6 +4,9 @@ import { EmbeddingService } from "./embedding.service";
 import { EntityService } from "./entity.service";
 import { SentimentService } from "./sentiment.service";
 import { sha256 } from "./hash.util";
+import { CybersecurityConsumer } from "@/shared/clients/YahooCompanyClient";
+import { CoreDbService } from "@/shared/core-db.service";
+import { runCorrelation } from "@/shared/utils/correlations/correlationCore";
 import type {
   ArticleResponse,
   BackendArticleInput,
@@ -14,6 +17,7 @@ import type {
   ProcessArticleInput,
   SignalCount,
 } from "./content-analysis.types";
+import type { CorrelationResult } from "@/shared/utils/correlations/correlationCore";
 
 function classifyNewsType(mentions: EntityMention[]): NewsType {
   if (mentions.length === 0) return "macro_global";
@@ -28,6 +32,7 @@ export class ContentAnalysisService {
     private readonly embedding: EmbeddingService,
     private readonly entity: EntityService,
     private readonly sentiment: SentimentService,
+    private readonly coreDb: CoreDbService,
   ) {}
 
   async processArticle(input: ProcessArticleInput): Promise<ArticleResponse> {
@@ -273,6 +278,45 @@ export class ContentAnalysisService {
        FROM backend_global_signals GROUP BY signal_type ORDER BY count DESC`,
     );
     return res.rows.map((r) => ({ signalType: r.signal_type, count: Number(r.count) }));
+  }
+
+  async getAllSentimentCorrelations(
+    entities: { entityId: string; name: string; ticker: string }[],
+    lagDays: number,
+  ): Promise<{ entityId: string; name: string; ticker: string; result: CorrelationResult | { error: string } }[]> {
+    const rows = await this.db.pool.query<{ entity_id: string; day: string; weighted_sentiment: string }>(
+      `SELECT
+         em.entity_id,
+         DATE(a.timestamp)::text AS day,
+         (em.sentiment * em.score) AS weighted_sentiment
+       FROM backend_articles a
+       JOIN backend_entity_mentions em ON em.article_id = a.id
+       WHERE em.entity_id = ANY($1)
+       ORDER BY day`,
+      [entities.map((e) => e.entityId)],
+    );
+
+    const byEntity = new Map<string, { day: string; value: number }[]>();
+    for (const r of rows.rows) {
+      if (r.weighted_sentiment == null) continue;
+      const arr = byEntity.get(r.entity_id) ?? [];
+      arr.push({ day: r.day.slice(0, 10), value: Number(r.weighted_sentiment) });
+      byEntity.set(r.entity_id, arr);
+    }
+
+    return Promise.all(
+      entities.map(async ({ entityId, name, ticker }) => {
+        const dayValues = byEntity.get(entityId) ?? [];
+        try {
+          const consumer = new CybersecurityConsumer(name, this.coreDb.pool);
+          const history = await consumer.history();
+          const result = runCorrelation(dayValues, history.quotes ?? [], { lagDays, source: "news sentiment (relevance-weighted)" });
+          return { entityId, name, ticker, result };
+        } catch (e: unknown) {
+          return { entityId, name, ticker, result: { error: e instanceof Error ? e.message : String(e) } };
+        }
+      }),
+    );
   }
 
   private async buildResponse(articleId: string, newsType: NewsType): Promise<ArticleResponse> {

@@ -4,6 +4,7 @@ import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
 import { EventEmitterModule } from "@nestjs/event-emitter";
+import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
 import { LoggerModule } from "nestjs-pino";
 
 import { HttpExceptionFilter } from "@/common/errors/http-exception.filter";
@@ -25,11 +26,16 @@ import { MqModule } from "@/modules/mq/mq.module";
 import { SchedulerModule } from "@/modules/scheduler/scheduler.module";
 import { AuditModule } from "@/modules/audit/audit.module";
 import { CoreDbModule } from "@/shared/core-db.module";
+import { CacheModule } from "@/shared/cache.module";
 import { AuthService } from "@/modules/auth/auth.service";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ".env" }),
+    ThrottlerModule.forRoot([
+      { name: "default", ttl: 60_000, limit: 100 },  // 100 req/min per IP (general API)
+      { name: "strict",  ttl: 60_000, limit: 20  },  // 20 req/min — use @Throttle({ strict: ... }) on heavy endpoints
+    ]),
     LoggerModule.forRoot({
       pinoHttp: {
         level: process.env.LOG_LEVEL ?? "info",
@@ -61,11 +67,13 @@ import { AuthService } from "@/modules/auth/auth.service";
     MqModule,
     SchedulerModule,
     CoreDbModule,
+    CacheModule,
     AuditModule,
     StockModule,
   ],
   providers: [
     { provide: APP_FILTER,      useClass: HttpExceptionFilter },
+    { provide: APP_GUARD,       useClass: ThrottlerGuard },
     { provide: APP_GUARD,       useClass: JwtAuthGuard },
     { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor },
     AuthService,

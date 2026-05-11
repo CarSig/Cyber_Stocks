@@ -54,16 +54,18 @@ function toSorted(quotes) {
     .filter((q) => { if (seen.has(q.time)) return false; seen.add(q.time); return true; });
 }
 
-export default function VolatilityChart({ quotes, period, onPeriodChange }) {
+export default function VolatilityChart({ quotes, period, onPeriodChange, visibleRange, onRangeChange }) {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   const skipRangeRef = useRef(false);
   const periodRef = useRef(period);
+  const visibleRangeRef = useRef(visibleRange);
   const [type, setType] = useState("Line");
   const [showHV, setShowHV] = useState(true);
   const [showATR, setShowATR] = useState(true);
 
   useEffect(() => { periodRef.current = period; }, [period]);
+  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
 
   useEffect(() => {
     if (!containerRef.current || !quotes?.length) return;
@@ -98,7 +100,9 @@ export default function VolatilityChart({ quotes, period, onPeriodChange }) {
     }
 
     skipRangeRef.current = true;
-    if (periodRef.current === null) {
+    if (visibleRangeRef.current) {
+      chart.timeScale().setVisibleRange(visibleRangeRef.current);
+    } else if (periodRef.current === null) {
       chart.timeScale().fitContent();
     } else {
       chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() });
@@ -108,6 +112,7 @@ export default function VolatilityChart({ quotes, period, onPeriodChange }) {
       skipRangeRef.current = false;
       chart.timeScale().subscribeVisibleTimeRangeChange((range) => {
         if (skipRangeRef.current || !range) return;
+        onRangeChange?.({ from: range.from, to: range.to });
         const days = Math.round((new Date(range.to) - new Date(range.from)) / 86400000);
         onPeriodChange?.(days);
       });
@@ -129,13 +134,15 @@ export default function VolatilityChart({ quotes, period, onPeriodChange }) {
   useEffect(() => {
     if (!chartRef.current) return;
     skipRangeRef.current = true;
-    if (period === null) {
+    if (visibleRange) {
+      chartRef.current.timeScale().setVisibleRange(visibleRange);
+    } else if (period === null) {
       chartRef.current.timeScale().fitContent();
     } else {
       chartRef.current.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() });
     }
     setTimeout(() => { skipRangeRef.current = false; }, 150);
-  }, [period]);
+  }, [period, visibleRange]);
 
   return (
     <div>

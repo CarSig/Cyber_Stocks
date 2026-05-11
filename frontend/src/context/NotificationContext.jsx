@@ -6,8 +6,11 @@ const STORAGE_KEY = "notifications";
 const NotificationContext = createContext(null);
 
 function load() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]"); }
-  catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
 }
 
 function save(notifications) {
@@ -40,7 +43,10 @@ export function NotificationProvider({ children }) {
 
     es.onerror = () => es.close();
 
-    return () => { es.close(); esRef.current = null; };
+    return () => {
+      es.close();
+      esRef.current = null;
+    };
   }, [user]);
 
   function markAllRead() {
@@ -67,13 +73,10 @@ export function NotificationProvider({ children }) {
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  return (
-    <NotificationContext.Provider value={{ notifications, unread, markAllRead, dismiss, clearAll }}>
-      {children}
-    </NotificationContext.Provider>
-  );
+  return <NotificationContext.Provider value={{ notifications, unread, markAllRead, dismiss, clearAll }}>{children}</NotificationContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useNotifications() {
   return useContext(NotificationContext);
 }

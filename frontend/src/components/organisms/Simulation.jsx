@@ -144,9 +144,11 @@ export default function Simulation({ ticker, quotes = [], onResult }) {
     fromTextRef.current = false;
   }
 
-  const { data: presets } = useQuery({
+  const { data: presets, error: presetsError, isLoading: presetsLoading } = useQuery({
     queryKey: ["simulation-presets", ticker],
     queryFn: () => getSimulationPresets(ticker),
+    enabled: !!ticker,
+    retry: false,
   });
 
   const applyPreset = useCallback(
@@ -165,12 +167,10 @@ export default function Simulation({ ticker, quotes = [], onResult }) {
     [presets],
   );
 
+  const validActions = actions.filter((a) => a.date && a.value).map(({ date, type, value }) => ({ date, type, value: Number(value) }));
+
   const { mutate, data, isPending, error, reset } = useMutation({
-    mutationFn: () =>
-      runSimulation(
-        ticker,
-        actions.filter((a) => a.date && a.value).map(({ date, type, value }) => ({ date, type, value: Number(value) })),
-      ),
+    mutationFn: () => runSimulation(ticker, validActions),
     onSuccess: (result) => onResult?.(result),
   });
 
@@ -275,18 +275,16 @@ export default function Simulation({ ticker, quotes = [], onResult }) {
   return (
     <div>
       <div className="sim-editor-toggle">
-        {presets && (
-          <Select onValueChange={(v) => v && applyPreset(v)}>
-            <SelectTrigger className="w-44">
-              <SelectValue placeholder="Load preset…" />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.keys(presets).map((name) => (
-                <SelectItem key={name} value={name}>{name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        <Select onValueChange={(v) => v && applyPreset(v)} disabled={!presets}>
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder={presetsError ? `Error: ${presetsError.message}` : presetsLoading ? "Loading…" : "Load preset…"} />
+          </SelectTrigger>
+          <SelectContent>
+            {presets && Object.keys(presets).map((name) => (
+              <SelectItem key={name} value={name}>{name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button variant="ghost" onClick={() => setTextMode((v) => !v)}>
           {textMode ? "Visual editor" : "Text editor"}
         </Button>
@@ -303,7 +301,7 @@ export default function Simulation({ ticker, quotes = [], onResult }) {
               <div key={a.id} className="sim-action-row">
                 <DatePicker value={a.date} min={actionMin} max={actionMax} onChange={(v) => update(a.id, "date", v ? snapToWeekday(v) : v)} />
                 <Select value={a.type} onValueChange={(v) => update(a.id, "type", v)}>
-                  <SelectTrigger className="w-32">
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -344,7 +342,7 @@ export default function Simulation({ ticker, quotes = [], onResult }) {
         {!textMode && (
           <Button variant="ghost" onClick={add}>+ Add action</Button>
         )}
-        <Button onClick={() => mutate()} disabled={isPending}>
+        <Button onClick={() => mutate()} disabled={isPending || validActions.length === 0}>
           {isPending ? "Running…" : "Run simulation"}
         </Button>
         <Button variant="ghost" onClick={clear}>Clear</Button>

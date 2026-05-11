@@ -54,7 +54,7 @@ export default function ThreatIntelKev() {
             </tr>
           </thead>
           <tbody>
-            {data.items.map((v) => (
+            {data?.items?.map((v) => (
               <tr key={v.cveID}>
                 <td><a href={`https://nvd.nist.gov/vuln/detail/${v.cveID}`} target="_blank" rel="noreferrer" className="ti-link">{v.cveID}</a></td>
                 <td>{v.vendorProject}</td>

@@ -13,6 +13,7 @@ const companies: Record<string, string> = {
   Microsoft: "MSFT",
   Apple: "AAPL",
   Palantir: "PLTR",
+  Cisco: "CSCO",
 };
 
 export default companies;

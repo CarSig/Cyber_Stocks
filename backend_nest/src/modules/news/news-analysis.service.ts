@@ -6,6 +6,7 @@ import { logger } from "@/shared/logger";
 import { notFound } from "@/shared/errors";
 import companies from "@/data/companies";
 import { CoreDbService } from "@/shared/core-db.service";
+import { CacheService } from "@/shared/cache.service";
 
 type ArticleScores = {
   sentiment: number;
@@ -27,7 +28,7 @@ type NewsArticle = {
 
 @Injectable()
 export class NewsAnalysisService {
-  constructor(private readonly db: CoreDbService) {}
+  constructor(private readonly db: CoreDbService, private readonly cache: CacheService) {}
 
   async readAnalysis(companyName: string): Promise<Record<string, ArticleScores>> {
     const { rows } = await this.db.pool.query<{ article_url: string } & ArticleScores>(
@@ -116,30 +117,32 @@ export class NewsAnalysisService {
     if (!entry) throw notFound(`Unknown ticker: ${ticker}`);
     const [companyName] = entry;
 
-    const consumer = new CybersecurityConsumer(companyName, this.db.pool);
-    const [{ news }, { quotes }, analysis] = await Promise.all([
-      consumer.news() as Promise<{ news: NewsArticle[] }>,
-      consumer.history(),
-      this.readAnalysis(companyName),
-    ]);
+    return this.cache.getOrSet(`corr:${ticker}:news:${lagDays}`, 1800, async () => {
+      const consumer = new CybersecurityConsumer(companyName, this.db.pool);
+      const [{ news }, { quotes }, analysis] = await Promise.all([
+        consumer.news() as Promise<{ news: NewsArticle[] }>,
+        consumer.history(),
+        this.readAnalysis(companyName),
+      ]);
 
-    const dateByLink = Object.fromEntries(
-      (news ?? []).filter((a) => a.link && typeof a.providerPublishTime === "string")
-        .map((a) => [a.link as string, (a.providerPublishTime as string).slice(0, 10)]),
-    );
+      const dateByLink = Object.fromEntries(
+        (news ?? []).filter((a) => a.link && typeof a.providerPublishTime === "string")
+          .map((a) => [a.link as string, (a.providerPublishTime as string).slice(0, 10)]),
+      );
 
-    const events: { date: string; score: number }[] = [];
-    for (const [link, scores] of Object.entries(analysis)) {
-      const date = dateByLink[link];
-      if (!date || scores.sentiment === 0) continue;
-      const score = scores.sentiment * (scores.importance * scores.relevance) / 100;
-      events.push({ date, score });
-    }
+      const events: { date: string; score: number }[] = [];
+      for (const [link, scores] of Object.entries(analysis)) {
+        const date = dateByLink[link];
+        if (!date || scores.sentiment === 0) continue;
+        const score = scores.sentiment * (scores.importance * scores.relevance) / 100;
+        events.push({ date, score });
+      }
 
-    return {
-      correlation: correlateNewsScores(events, quotes, { lagDays }),
-      lagImpact: newsLagImpact(events, quotes, { windowDays: lagDays }),
-    };
+      return {
+        correlation: correlateNewsScores(events, quotes, { lagDays }),
+        lagImpact: newsLagImpact(events, quotes, { windowDays: lagDays }),
+      };
+    });
   }
 }
 

@@ -1,68 +1,72 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from "@nestjs/swagger";
 import { ContentAnalysisService } from "@/modules/content-analysis/content-analysis.service";
 import { AppError } from "@/shared/errors";
+import { LagDaysDto } from "@/shared/dto";
 import companies from "@/data/companies";
-import type { ProcessArticleInput, BackendArticleInput } from "@/modules/content-analysis/content-analysis.types";
+import type { BackendArticleInput } from "@/modules/content-analysis/content-analysis.types";
 
+@ApiTags("Intelligence")
+@ApiBearerAuth("bearer")
 @Controller()
 export class IntelligenceController {
   constructor(private readonly contentAnalysis: ContentAnalysisService) {}
 
   @Post("intelligence/articles/process")
-  async processArticle(@Body() body: ProcessArticleInput) {
-    return this.contentAnalysis.processArticle(body);
-  }
-
-  @Get("intelligence/articles/:id")
-  async getArticle(@Param("id") id: string) {
-    const article = await this.contentAnalysis.getArticle(id);
-    if (!article) throw new AppError(`Article ${id} not found`, 404);
-    return article;
-  }
-
-  @Get("intelligence/entities/:entityId/articles")
-  async getEntityArticles(@Param("entityId") entityId: string) {
-    return this.contentAnalysis.getArticlesByEntity(entityId);
-  }
-
-  @Get("intelligence/entities/:entityId/summary")
-  async getEntitySummary(@Param("entityId") entityId: string) {
-    const summary = await this.contentAnalysis.getEntitySummary(entityId);
-    if (!summary) throw new AppError(`Entity ${entityId} not found`, 404);
-    return summary;
-  }
-
-  @Get("intelligence/signals")
-  async getGlobalSignals() {
-    return this.contentAnalysis.getGlobalSignals();
-  }
-
-  @Post("intelligence2/articles/process")
+  @ApiOperation({ summary: "Process backend article", description: "Runs backend content analysis pipeline on a submitted article." })
+  @ApiResponse({ status: 201, description: "Processed article result" })
   async processBackendArticle(@Body() body: BackendArticleInput) {
     return this.contentAnalysis.processBackendArticle(body);
   }
 
-  @Get("intelligence2/entities")
+  @Get("intelligence/entities")
+  @ApiOperation({ summary: "Get entities", description: "Returns all entities that match tracked companies." })
+  @ApiResponse({ status: 200, description: "Filtered entity list" })
   async getBackendEntities() {
     const all = await this.contentAnalysis.getBackendEntities();
     const companyNames = new Set(Object.keys(companies).map((n) => n.toLowerCase()));
     return all.filter((e) => companyNames.has(e.name.toLowerCase()));
   }
 
-  @Get("intelligence2/entities/:entityId/articles")
+  @Get("intelligence/entities/:entityId/articles")
+  @ApiOperation({ summary: "Get entity articles", description: "Returns all articles associated with an entity." })
+  @ApiParam({ name: "entityId", description: "Entity ID" })
+  @ApiResponse({ status: 200, description: "Article list" })
   async getBackendEntityArticles(@Param("entityId") entityId: string) {
     return this.contentAnalysis.getBackendArticlesByEntity(entityId);
   }
 
-  @Get("intelligence2/entities/:entityId/summary")
+  @Get("intelligence/entities/:entityId/summary")
+  @ApiOperation({ summary: "Get entity summary", description: "Returns the aggregated intelligence summary for an entity." })
+  @ApiParam({ name: "entityId", description: "Entity ID" })
+  @ApiResponse({ status: 200, description: "Entity summary" })
+  @ApiResponse({ status: 404, description: "Entity not found" })
   async getBackendEntitySummary(@Param("entityId") entityId: string) {
     const summary = await this.contentAnalysis.getBackendEntitySummary(entityId);
     if (!summary) throw new AppError(`Entity ${entityId} not found`, 404);
     return summary;
   }
 
-  @Get("intelligence2/signals")
+  @Get("intelligence/signals")
+  @ApiOperation({ summary: "Global signals", description: "Returns aggregated intelligence signals across all entities." })
+  @ApiResponse({ status: 200, description: "Global signals" })
   async getBackendGlobalSignals() {
     return this.contentAnalysis.getBackendGlobalSignals();
+  }
+
+  @Get("intelligence/sentiment-correlations")
+  @ApiOperation({ summary: "Sentiment correlations", description: "Correlates entity sentiment scores with stock price movements for all tracked companies." })
+  @ApiResponse({ status: 200, description: "Array of { entity, ticker, correlation, lagImpact }" })
+  async getAllSentimentCorrelations(@Query() { lagDays }: LagDaysDto) {
+    const all = await this.contentAnalysis.getBackendEntities();
+    const companyNames = new Set(Object.keys(companies));
+    const known = all
+      .filter((e) => [...companyNames].some((n) => n.toLowerCase() === e.name.toLowerCase()))
+      .map((e) => {
+        const name = [...companyNames].find((n) => n.toLowerCase() === e.name.toLowerCase())!;
+        const ticker = companies[name];
+        return { entityId: e.entityId, name, ticker };
+      });
+    return this.contentAnalysis.getAllSentimentCorrelations(known, lagDays ?? 1);
   }
 }

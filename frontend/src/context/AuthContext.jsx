@@ -23,22 +23,26 @@ export function AuthProvider({ children }) {
     if (!clerkUser) {
       localStorage.removeItem("auth_token");
       localStorage.removeItem("auth_user");
-      setUser(null);
-      setReady(true);
+      queueMicrotask(() => {
+        setUser(null);
+        setReady(true);
+      });
       return;
     }
     getToken().then(async (clerkToken) => {
-      if (!clerkToken) { setReady(true); return; }
+      if (!clerkToken) {
+        setReady(true);
+        return;
+      }
       try {
         const data = await apiClerkAuth(clerkToken);
         persist(data.token, data.user);
       } catch (e) {
         console.error("[clerk exchange failed]", e.message);
-        // don't clear — leave any cached user in place, just unblock the UI
-      } finally {
-        setReady(true);
       }
+      setReady(true);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clerkUser?.id, clerkLoaded]);
 
   const logout = useCallback(async () => {

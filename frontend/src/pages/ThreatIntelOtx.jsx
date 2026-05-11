@@ -49,7 +49,7 @@ export default function ThreatIntelOtx() {
                 </tr>
               </thead>
               <tbody>
-                {data.items.map((p) => (
+                {data?.items?.map((p) => (
                   <tr key={p.id}>
                     <td>
                       <a href={`https://otx.alienvault.com/pulse/${p.id}`} target="_blank" rel="noreferrer" className="ti-link ti-pulse-name">

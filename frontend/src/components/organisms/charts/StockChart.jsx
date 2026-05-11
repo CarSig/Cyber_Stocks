@@ -28,18 +28,20 @@ function useSyncRef(value) {
 
 
 export default function StockChart({
-  quotes, compareQuotes, compareName, analysis, period, onPeriodChange,
-  trumpPosts, showTrump, onTrumpToggle,
-  nvdVulns, showNvd, onNvdToggle,
-  otxPulses, showOtx, onOtxToggle,
-  kevItems, showKev, onKevToggle,
-  newsArticles, newsAnalysis, showNews, onNewsToggle,
-  onShowCorrelations,
+  quotes, compareQuotes, compareName, analysis, period, onPeriodChange, visibleRange, onRangeChange,
+  overlays = {}, onShowCorrelations,
 }) {
+  const { trump = {}, nvd = {}, otx = {}, kev = {}, news = {} } = overlays;
+  const { posts: trumpPosts, show: showTrump, onToggle: onTrumpToggle } = trump;
+  const { data: nvdVulns,   show: showNvd,   onToggle: onNvdToggle }   = nvd;
+  const { data: otxPulses,  show: showOtx,   onToggle: onOtxToggle }   = otx;
+  const { data: kevItems,   show: showKev,   onToggle: onKevToggle }   = kev;
+  const { articles: newsArticles, analysis: newsAnalysis, show: showNews, onToggle: onNewsToggle } = news;
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   const skipRangeRef = useRef(false);
   const periodRef = useRef(period);
+  const visibleRangeRef = useRef(visibleRange);
   const [type, setType] = useState("Area");
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [markerModal, setMarkerModal] = useState(null);
@@ -57,17 +59,20 @@ export default function StockChart({
   const showKevRef     = useSyncRef(showKev);
 
   useEffect(() => { periodRef.current = period; }, [period]);
+  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
 
   useEffect(() => {
     if (!chartRef.current) return;
     skipRangeRef.current = true;
-    if (period === null) {
+    if (visibleRange) {
+      chartRef.current.timeScale().setVisibleRange(visibleRange);
+    } else if (period === null) {
       chartRef.current.timeScale().fitContent();
     } else {
       chartRef.current.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() });
     }
     setTimeout(() => { skipRangeRef.current = false; }, 150);
-  }, [period]);
+  }, [period, visibleRange]);
 
   useEffect(() => {
     const cv = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -106,7 +111,9 @@ export default function StockChart({
     }
 
     skipRangeRef.current = true;
-    if (periodRef.current === null) {
+    if (visibleRangeRef.current) {
+      chart.timeScale().setVisibleRange(visibleRangeRef.current);
+    } else if (periodRef.current === null) {
       chart.timeScale().fitContent();
     } else {
       chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() });
@@ -116,6 +123,7 @@ export default function StockChart({
       skipRangeRef.current = false;
       chart.timeScale().subscribeVisibleTimeRangeChange((range) => {
         if (skipRangeRef.current || !range) return;
+        onRangeChange?.({ from: range.from, to: range.to });
         const days = Math.round((new Date(range.to) - new Date(range.from)) / 86400000);
         onPeriodChange?.(days);
       });

@@ -3,6 +3,7 @@ import { useQuery, useQueries } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { getCompanies, getTicker } from "../api.js";
 import MultiChart from "../components/organisms/charts/MultiChart.jsx";
+import CorrelationMatrix from "../components/organisms/CorrelationMatrix.jsx";
 import { Button } from "@/components/ui/button";
 
 const MAX = 10;
@@ -89,6 +90,8 @@ export default function Home() {
         />
       )}
       {toggled.size === 0 && <p>Toggle companies to compare them on the chart.</p>}
+
+      <CorrelationMatrix />
     </div>
   );
 }

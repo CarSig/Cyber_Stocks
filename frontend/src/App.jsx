@@ -7,7 +7,7 @@ import Navbar from "./components/organisms/Navbar.jsx";
 import ProtectedRoute from "./components/molecules/ProtectedRoute.jsx";
 import AdminRoute from "./components/molecules/AdminRoute.jsx";
 import Home from "./pages/Home.jsx";
-import Ticker from "./pages/Ticker.jsx";
+import Ticker from "./pages/Ticker/index.jsx";
 import AdminAudit from "./pages/AdminAudit.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import ThreatIntel from "./pages/ThreatIntel.jsx";
@@ -19,7 +19,6 @@ import Socials from "./pages/Socials.jsx";
 import SocialsTruthSocial from "./pages/SocialsTruthSocial.jsx";
 import SocialsReddit from "./pages/SocialsReddit.jsx";
 import Intelligence2 from "./pages/Intelligence2.jsx";
-import TradingIntelligence from "./pages/TradingIntelligence.jsx";
 
 export default function App() {
   return (
@@ -42,7 +41,6 @@ export default function App() {
               <Route path="/socials/truth-social" element={<ProtectedRoute><SocialsTruthSocial /></ProtectedRoute>} />
               <Route path="/socials/reddit" element={<ProtectedRoute><SocialsReddit /></ProtectedRoute>} />
               <Route path="/intelligence" element={<ProtectedRoute><Intelligence2 /></ProtectedRoute>} />
-              <Route path="/trading-intelligence" element={<ProtectedRoute><TradingIntelligence /></ProtectedRoute>} />
               <Route path="/:ticker" element={<ProtectedRoute><Ticker /></ProtectedRoute>} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

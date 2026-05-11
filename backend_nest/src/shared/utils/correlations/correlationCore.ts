@@ -59,11 +59,14 @@ export function runCorrelation(
   const ys: number[] = [];
 
   for (const { day, value } of [...dayValues].sort((a, b) => (a.day < b.day ? -1 : 1))) {
-    const targetDay = new Date(day);
-    targetDay.setDate(targetDay.getDate() + lagDays);
-    const base   = nearestPrice(priceMap, day);
-    const lagged = nearestPrice(priceMap, targetDay.toISOString().slice(0, 10));
-    if (!base || !lagged) continue;
+    // Resolve base to the next available trading day (handles weekend/holiday news).
+    const base = nearestPrice(priceMap, day);
+    if (!base) continue;
+    // Apply lag from the resolved trading day, not from the raw news date.
+    const laggedDate = new Date(base.day);
+    laggedDate.setDate(laggedDate.getDate() + Math.max(lagDays, 1));
+    const lagged = nearestPrice(priceMap, laggedDate.toISOString().slice(0, 10));
+    if (!lagged || lagged.day === base.day) continue;
     xs.push(value);
     ys.push(((lagged.price - base.price) / base.price) * 100);
   }

@@ -24,7 +24,7 @@ export class TrumpService {
        FROM trump_posts
        ORDER BY created_at DESC`,
     );
-    return rows;
+    return rows.map((r) => ({ ...r, created_at: new Date(r.created_at).toISOString() }));
   }
 
   async getPostsForTicker(ticker: string): Promise<TrumpPost[]> {
@@ -34,11 +34,13 @@ export class TrumpService {
        FROM trump_posts tp
        JOIN trump_post_tickers tpt ON tpt.post_id = tp.id
        WHERE tpt.ticker = $1
+       GROUP BY tp.id, tp.created_at, tp.content, tp.url, tp.sentiment, tp.tags
        ORDER BY tp.created_at DESC`,
       [ticker],
     );
     return rows.map((r) => ({
       ...r,
+      created_at: new Date(r.created_at).toISOString(),
       analysis: { sentiment: r.sentiment ?? undefined, companies: r.companies },
     }));
   }

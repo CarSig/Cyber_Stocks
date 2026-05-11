@@ -65,7 +65,7 @@ export default function ThreatIntelNvd() {
             </tr>
           </thead>
           <tbody>
-            {data.items.map((v) => (
+            {data?.items?.map((v) => (
               <tr key={v.id}>
                 <td><a href={`https://nvd.nist.gov/vuln/detail/${v.id}`} target="_blank" rel="noreferrer" className="ti-link">{v.id}</a></td>
                 <td>

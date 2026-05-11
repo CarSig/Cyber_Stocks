@@ -41,7 +41,7 @@ export default function ThreatIntelMisp() {
                 </tr>
               </thead>
               <tbody>
-                {data.items.map((item) => {
+                {data?.items?.map((item) => {
                   const e = item.Event ?? item;
                   const level = e.threat_level_id;
                   return (

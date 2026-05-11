@@ -193,14 +193,17 @@ describe('NewsSection', () => {
 
   it('shows analyzed count when analysis data is present', () => {
     vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
-      makeHook({ analysis: { data: ANALYSIS_DATA } })
+      makeHook({ analysis: { data: ANALYSIS_DATA }, analyzedCount: 2 })
     );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
-    expect(screen.getByText('2 / 2 analyzed')).toBeInTheDocument();
+    expect(screen.getByText(/2\s*\/\s*2\s*analyzed/)).toBeInTheDocument();
   });
 
   it('shows 0 analyzed when no analysis data', () => {
+    vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
+      makeHook({ analyzedCount: 0 })
+    );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
-    expect(screen.getByText('0 / 2 analyzed')).toBeInTheDocument();
+    expect(screen.getByText(/0\s*\/\s*2\s*analyzed/)).toBeInTheDocument();
   });
 });

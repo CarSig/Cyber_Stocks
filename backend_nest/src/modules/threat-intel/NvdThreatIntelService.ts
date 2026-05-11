@@ -4,6 +4,7 @@ import { vendorKeyword, cpeKeyword } from "./vendorKeywords";
 import type { NvdClient } from "@/shared/clients/NvdClient";
 import type { CompanyConsumerFactory } from "./ThreatIntelSource";
 import { unprocessable } from "@/shared/errors";
+import type { CacheService } from "@/shared/cache.service";
 
 type CvssMetric = { cvssData?: { baseSeverity?: string; baseScore?: number } }
 export type NvdVuln = {
@@ -70,7 +71,7 @@ export class NvdThreatIntelService extends ThreatIntelSource<
 > {
   readonly source = "NVD CVE";
 
-  constructor(private client: NvdClient, consumerFactory: CompanyConsumerFactory) {
+  constructor(private client: NvdClient, consumerFactory: CompanyConsumerFactory, private cache?: CacheService) {
     super(consumerFactory);
   }
 
@@ -127,25 +128,30 @@ export class NvdThreatIntelService extends ThreatIntelSource<
   async correlate(companyName: string, lagDays = 1) {
     const data = this.read();
     if (!data) throw new Error("NVD data not available");
-    const kw = vendorKeyword(companyName);
-    const cpe = cpeKeyword(companyName);
-    const dates = ((data.vulnerabilities ?? []) as NvdVuln[])
-      .filter((v) => {
-        const desc = v.cve?.descriptions?.find((d) => d.lang === "en")?.value?.toLowerCase() ?? "";
-        if (desc.includes(kw)) return true;
-        return (v.cve?.configurations ?? []).some((cfg) =>
-          (cfg.nodes ?? []).some((node) =>
-            (node.cpeMatch ?? []).some((c) => c.criteria?.toLowerCase().includes(cpe))
-          )
-        );
-      })
-      .map((v) => v.cve?.lastModified?.slice(0, 10))
-      .filter((d): d is string => !!d);
-    if (dates.length < 1) return null;
-    const quotes = await this.quotes(companyName);
-    return {
-      correlation: correlateThreatIntel(dates, quotes, { lagDays, source: this.source }),
-      lagImpact: threatIntelLagImpact(dates, quotes, { windowDays: lagDays }),
+    const compute = async () => {
+      const kw = vendorKeyword(companyName);
+      const cpe = cpeKeyword(companyName);
+      const dates = ((data.vulnerabilities ?? []) as NvdVuln[])
+        .filter((v) => {
+          const desc = v.cve?.descriptions?.find((d) => d.lang === "en")?.value?.toLowerCase() ?? "";
+          if (desc.includes(kw)) return true;
+          return (v.cve?.configurations ?? []).some((cfg) =>
+            (cfg.nodes ?? []).some((node) =>
+              (node.cpeMatch ?? []).some((c) => c.criteria?.toLowerCase().includes(cpe))
+            )
+          );
+        })
+        .map((v) => v.cve?.lastModified?.slice(0, 10))
+        .filter((d): d is string => !!d);
+      if (dates.length < 1) return null;
+      const quotes = await this.quotes(companyName);
+      return {
+        correlation: correlateThreatIntel(dates, quotes, { lagDays, source: this.source }),
+        lagImpact: threatIntelLagImpact(dates, quotes, { windowDays: lagDays }),
+      };
     };
+    return this.cache
+      ? this.cache.getOrSet(`corr:${companyName}:nvd:${lagDays}`, 1800, compute)
+      : compute();
   }
 }
