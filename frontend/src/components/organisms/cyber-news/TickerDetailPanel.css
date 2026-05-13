@@ -1,0 +1,53 @@
+:root {
+  --tdp-width: 640px;
+  --tdp-padding: 24px;
+  --tdp-margin-bottom: 20px;
+  --tdp-overlay-bg: rgba(0, 0, 0, 0.6);
+  --tdp-z-index: 50;
+  --tdp-heading: 20px;
+  --tdp-label: 13px;
+  --tdp-close-icon: 20px;
+}
+
+.ticker-detail-overlay {
+  /* layout provided by .overlay-panel-backdrop */
+}
+
+.ticker-detail-panel {
+  width: min(var(--tdp-width), 100vw);
+  height: 100vh;
+  background: var(--background);
+  overflow-y: auto;
+  padding: var(--tdp-padding);
+}
+
+.ticker-detail-header {
+  margin-bottom: var(--tdp-margin-bottom);
+  /* flex provided by .header-flex-between */
+}
+
+.ticker-detail-info h2 {
+  font-weight: 700;
+  font-size: var(--tdp-heading);
+  margin: 0;
+}
+
+.ticker-detail-info span {
+  font-size: var(--tdp-label);
+  color: var(--muted-foreground);
+}
+
+.ticker-detail-close-btn {
+  font-size: var(--tdp-close-icon);
+  /* base provided by .btn-close-icon */
+}
+
+.ticker-detail-articles-title {
+  font-size: var(--tdp-label);
+  font-weight: 600;
+  margin-bottom: var(--tdp-margin-bottom);
+  /* color, text-transform, letter-spacing from .label-sm-caps (font-size overridden to 13px) */
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

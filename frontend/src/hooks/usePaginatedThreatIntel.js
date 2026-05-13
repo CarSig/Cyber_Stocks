@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getThreatIntelList, getCompanies } from "../api.js";
+import { getThreatIntelList, getCompanies } from "@/api.js";
 
 const PAGE_SIZE = 50;
 

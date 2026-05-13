@@ -6,7 +6,7 @@ import { startWith } from "rxjs/operators";
 import { NewsAnalysisService } from "./news-analysis.service";
 import { AuditService } from "@/modules/audit/audit.service";
 import { NotificationsService } from "@/modules/notifications/notifications.service";
-import { checkOllama } from "@/shared/utils/ollamaAnalyzer";
+import { checkAnthropic } from "@/shared/utils/anthropicAnalyzer";
 import { resolveTicker } from "@/shared/ticker.utils";
 import { LagDaysDto, ArticleSentimentDto, CorrelationWithImpactDto } from "@/shared/dto";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
@@ -23,11 +23,11 @@ export class NewsController {
     private readonly notificationsService: NotificationsService,
   ) {}
 
-  @Get("ollama/status")
-  @ApiOperation({ summary: "Ollama status", description: "Checks whether the local Ollama LLM service is reachable and returns the active model name." })
-  @ApiResponse({ status: 200, description: "{ running: boolean, model: string }" })
-  async ollamaStatus() {
-    return checkOllama();
+  @Get("anthropic/status")
+  @ApiOperation({ summary: "Anthropic status", description: "Checks whether the Anthropic API key is configured and returns the active model name." })
+  @ApiResponse({ status: 200, description: "{ url: string, model: string }" })
+  async anthropicStatus() {
+    return checkAnthropic();
   }
 
   @Get("news-analysis/:ticker")
@@ -42,7 +42,7 @@ export class NewsController {
 
   @Post("news-analyze/:ticker")
   @Throttle({ strict: { ttl: 60_000, limit: 10 } })
-  @ApiOperation({ summary: "Enqueue news for analysis", description: "Queues all unanalysed news articles for the ticker to RabbitMQ for Ollama sentiment processing. Rate limited to 10 req/60s." })
+  @ApiOperation({ summary: "Enqueue news for analysis", description: "Queues all unanalysed news articles for the ticker to RabbitMQ for Anthropic sentiment processing. Rate limited to 10 req/60s." })
   @ApiParam({ name: "ticker", description: "Ticker symbol" })
   @ApiResponse({ status: 201, description: "{ queued: number, total: number }" })
   @ApiResponse({ status: 404, description: "Unknown ticker" })

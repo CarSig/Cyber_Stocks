@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getThreatIntelCorrelation } from "../api.js";
+import { getThreatIntelCorrelation } from "@/api.js";
 import { useCorrelationQuery } from "./useCorrelationQuery.js";
 
 export function useThreatIntel(ticker) {

@@ -1,0 +1,52 @@
+:root {
+  --ts-sidebar-width: 280px;
+  --ts-spacing-md: 12px;
+  --ts-spacing-lg: 20px;
+  --ts-spacing-sm: 8px;
+  --ts-radius: 8px;
+  --ts-text-label: 11px;
+  --ts-text-body: 12px;
+  --ts-heading: 16px;
+  --ts-count: 24px;
+}
+
+.topics-sidebar {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: var(--ts-sidebar-width);
+  height: 100vh;
+  background: var(--background);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  padding: var(--ts-spacing-lg);
+  z-index: 40;
+}
+
+.topics-sidebar-header {
+  margin-bottom: var(--ts-spacing-lg);
+}
+
+.topics-sidebar-title {
+  font-weight: 700;
+  font-size: var(--ts-heading);
+  margin: 0;
+  word-break: break-word;
+}
+
+.topics-sidebar-card {
+  background: var(--card);
+  border-radius: var(--ts-radius);
+  padding: var(--ts-spacing-md);
+  margin-bottom: var(--ts-spacing-lg);
+}
+
+.topics-sidebar-description {
+  font-size: var(--ts-text-body);
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+
+.topics-sidebar-description strong {
+  font-weight: 600;
+}

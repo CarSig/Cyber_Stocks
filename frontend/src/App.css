@@ -1835,6 +1835,42 @@
   color: var(--accent);
 }
 
+.admin-jobs {
+  margin-top: 40px;
+}
+.admin-jobs-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 16px;
+}
+.admin-jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.admin-job-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--surface-3);
+  border-radius: 8px;
+  padding: 10px 16px;
+}
+.admin-job-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  min-width: 100px;
+}
+.admin-job-status {
+  font-size: 0.8rem;
+}
+.admin-job-status--ok { color: var(--color-green, #22c55e); }
+.admin-job-status--err { color: var(--color-red, #ef4444); }
+
 .admin-credits-body {
   margin-top: 10px;
   display: flex;
@@ -2036,7 +2072,7 @@
 /* Dashboard grid */
 .ti-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
   gap: 12px;
 }
 
@@ -2481,4 +2517,9 @@
   color: var(--accent);
   padding: 1px 7px;
   border-radius: 10px;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

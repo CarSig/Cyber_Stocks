@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import Summary from "../../../components/organisms/Summary.jsx";
+import Summary from "@/components/organisms/ticker/Summary.jsx";
 
 export default function InfoTab({ summary, research }) {
   return (

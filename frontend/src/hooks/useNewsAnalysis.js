@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getNewsAnalysis, analyzeNews, getNewsCorrelation } from "../api.js";
+import { getNewsAnalysis, analyzeNews, getNewsCorrelation } from "@/api.js";
 import { useCorrelationQuery } from "./useCorrelationQuery.js";
 
 const BASE = "http://localhost:3000";

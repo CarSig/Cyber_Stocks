@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getTrumpPostsForTicker, getTrumpCorrelation, getTrumpLagImpact } from "../api.js";
+import { getTrumpPostsForTicker, getTrumpCorrelation, getTrumpLagImpact } from "@/api.js";
 import { useCorrelationQuery } from "./useCorrelationQuery.js";
 
 export function useTrump(ticker) {

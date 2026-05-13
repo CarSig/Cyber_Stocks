@@ -12,6 +12,9 @@
     "start:debug": "nest start --debug --watch",
     "worker": "node dist/workers/newsWorker.js",
     "worker:dev": "tsx src/workers/newsWorker.ts | npx pino-pretty",
+    "ingest:archive": "tsx src/workers/archiveIngester.ts | npx pino-pretty",
+    "ingest:reanalyze": "tsx src/workers/archiveIngester.ts --reanalyze | npx pino-pretty",
+    "ingest:parse-dry-run": "tsx src/workers/archiveDryRun.ts | npx pino-pretty",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
@@ -34,6 +37,7 @@
     "@opentelemetry/sdk-node": "^0.217.0",
     "@sentry/node": "^10.49.0",
     "@stdlib/stats-pcorrtest": "^0.2.3",
+    "@xmldom/xmldom": "^0.9.10",
     "amqplib": "^1.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",

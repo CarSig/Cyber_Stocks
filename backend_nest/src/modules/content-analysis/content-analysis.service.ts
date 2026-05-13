@@ -4,6 +4,7 @@ import { EmbeddingService } from "./embedding.service";
 import { EntityService } from "./entity.service";
 import { SentimentService } from "./sentiment.service";
 import { sha256 } from "./hash.util";
+import { classifyUrgency } from "./urgency.util";
 import { CybersecurityConsumer } from "@/shared/clients/YahooCompanyClient";
 import { CoreDbService } from "@/shared/core-db.service";
 import { runCorrelation } from "@/shared/utils/correlations/correlationCore";
@@ -179,12 +180,13 @@ export class ContentAnalysisService {
       rawEntities,
     );
     const newsType = classifyNewsType(mentions);
+    const urgency = classifyUrgency(input.timestamp, globalSignals, companySignals);
 
     await this.db.pool.query(
-      `INSERT INTO backend_articles (id, uuid, title, link, publisher, ticker, timestamp, news_type, embedding)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `INSERT INTO backend_articles (id, uuid, title, link, publisher, ticker, timestamp, news_type, urgency, embedding)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
        ON CONFLICT (id) DO NOTHING`,
-      [input.id, input.uuid ?? null, input.title, input.link, input.publisher ?? null, input.ticker, input.timestamp, newsType, JSON.stringify(vector)],
+      [input.id, input.uuid ?? null, input.title, input.link, input.publisher ?? null, input.ticker, input.timestamp, newsType, urgency, JSON.stringify(vector)],
     );
 
     for (const m of mentions) {
@@ -216,31 +218,48 @@ export class ContentAnalysisService {
     return this.buildBackendResponse(input.id, newsType);
   }
 
-  async getBackendArticlesByEntity(entityId: string): Promise<BackendArticleResponse[]> {
-    const rows = await this.db.pool.query<{ id: string; news_type: string }>(
-      `SELECT a.id, a.news_type FROM backend_articles a
-       JOIN backend_entity_mentions em ON em.article_id = a.id
-       WHERE em.entity_id = $1
-       ORDER BY a.timestamp DESC`,
-      [entityId],
-    );
+  async getBackendArticlesByEntity(entityId: string, signal?: string): Promise<BackendArticleResponse[]> {
+    const query = signal
+      ? `SELECT a.id, a.news_type FROM backend_articles a
+         JOIN backend_entity_mentions em ON em.article_id = a.id
+         WHERE em.entity_id = $1 AND (
+           EXISTS (SELECT 1 FROM backend_global_signals WHERE article_id = a.id AND signal_type = $2)
+           OR EXISTS (SELECT 1 FROM backend_company_signals WHERE article_id = a.id AND signal_type = $2)
+         )
+         ORDER BY a.timestamp DESC`
+      : `SELECT a.id, a.news_type FROM backend_articles a
+         JOIN backend_entity_mentions em ON em.article_id = a.id
+         WHERE em.entity_id = $1
+         ORDER BY a.timestamp DESC`;
+    const rows = await this.db.pool.query<{ id: string; news_type: string }>(query, signal ? [entityId, signal] : [entityId]);
     return Promise.all(rows.rows.map((r) => this.buildBackendResponse(r.id, r.news_type as NewsType)));
   }
 
-  async getBackendEntitySummary(entityId: string): Promise<EntitySummary | null> {
-    const res = await this.db.pool.query<{
-      article_count: string; avg_sentiment: string;
-      positive_count: string; negative_count: string; neutral_count: string;
-    }>(
-      `SELECT
+  async getBackendEntitySummary(entityId: string, signal?: string): Promise<EntitySummary | null> {
+    const query = signal
+      ? `SELECT
          COUNT(*) AS article_count,
          AVG(sentiment) AS avg_sentiment,
          SUM(CASE WHEN sentiment > 0.1 THEN 1 ELSE 0 END) AS positive_count,
          SUM(CASE WHEN sentiment < -0.1 THEN 1 ELSE 0 END) AS negative_count,
          SUM(CASE WHEN sentiment BETWEEN -0.1 AND 0.1 THEN 1 ELSE 0 END) AS neutral_count
-       FROM backend_entity_mentions WHERE entity_id = $1`,
-      [entityId],
-    );
+       FROM backend_entity_mentions em
+       JOIN backend_articles a ON a.id = em.article_id
+       WHERE em.entity_id = $1 AND (
+         EXISTS (SELECT 1 FROM backend_global_signals WHERE article_id = a.id AND signal_type = $2)
+         OR EXISTS (SELECT 1 FROM backend_company_signals WHERE article_id = a.id AND signal_type = $2)
+       )`
+      : `SELECT
+         COUNT(*) AS article_count,
+         AVG(sentiment) AS avg_sentiment,
+         SUM(CASE WHEN sentiment > 0.1 THEN 1 ELSE 0 END) AS positive_count,
+         SUM(CASE WHEN sentiment < -0.1 THEN 1 ELSE 0 END) AS negative_count,
+         SUM(CASE WHEN sentiment BETWEEN -0.1 AND 0.1 THEN 1 ELSE 0 END) AS neutral_count
+       FROM backend_entity_mentions WHERE entity_id = $1`;
+    const res = await this.db.pool.query<{
+      article_count: string; avg_sentiment: string;
+      positive_count: string; negative_count: string; neutral_count: string;
+    }>(query, signal ? [entityId, signal] : [entityId]);
     if (!res.rows.length || res.rows[0].article_count === "0") return null;
 
     const roleRes = await this.db.pool.query<{ role: string }>(
@@ -283,17 +302,31 @@ export class ContentAnalysisService {
   async getAllSentimentCorrelations(
     entities: { entityId: string; name: string; ticker: string }[],
     lagDays: number,
+    signal?: string,
   ): Promise<{ entityId: string; name: string; ticker: string; result: CorrelationResult | { error: string } }[]> {
-    const rows = await this.db.pool.query<{ entity_id: string; day: string; weighted_sentiment: string }>(
-      `SELECT
+    const query = signal
+      ? `SELECT
+         em.entity_id,
+         DATE(a.timestamp)::text AS day,
+         (em.sentiment * em.score) AS weighted_sentiment
+       FROM backend_articles a
+       JOIN backend_entity_mentions em ON em.article_id = a.id
+       WHERE em.entity_id = ANY($1) AND (
+         EXISTS (SELECT 1 FROM backend_global_signals WHERE article_id = a.id AND signal_type = $2)
+         OR EXISTS (SELECT 1 FROM backend_company_signals WHERE article_id = a.id AND signal_type = $2)
+       )
+       ORDER BY day`
+      : `SELECT
          em.entity_id,
          DATE(a.timestamp)::text AS day,
          (em.sentiment * em.score) AS weighted_sentiment
        FROM backend_articles a
        JOIN backend_entity_mentions em ON em.article_id = a.id
        WHERE em.entity_id = ANY($1)
-       ORDER BY day`,
-      [entities.map((e) => e.entityId)],
+       ORDER BY day`;
+    const rows = await this.db.pool.query<{ entity_id: string; day: string; weighted_sentiment: string }>(
+      query,
+      signal ? [entities.map((e) => e.entityId), signal] : [entities.map((e) => e.entityId)],
     );
 
     const byEntity = new Map<string, { day: string; value: number }[]>();
@@ -355,8 +388,8 @@ export class ContentAnalysisService {
   }
 
   private async buildBackendResponse(articleId: string, newsType: NewsType): Promise<BackendArticleResponse> {
-    const articleRes = await this.db.pool.query<{ link: string; publisher: string | null; ticker: string; timestamp: string }>(
-      "SELECT link, publisher, ticker, timestamp FROM backend_articles WHERE id = $1",
+    const articleRes = await this.db.pool.query<{ link: string; publisher: string | null; ticker: string; timestamp: string; urgency: string }>(
+      "SELECT link, publisher, ticker, timestamp, urgency FROM backend_articles WHERE id = $1",
       [articleId],
     );
     const meta = articleRes.rows[0];
@@ -384,6 +417,7 @@ export class ContentAnalysisService {
       publisher: meta?.publisher ?? null,
       ticker: meta?.ticker ?? "",
       timestamp: meta?.timestamp ?? "",
+      urgency: meta?.urgency ?? "recent",
       entities: mentionsRes.rows.map((r) => ({
         entityId: r.entity_id,
         name: r.name,

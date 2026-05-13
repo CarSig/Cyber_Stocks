@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { getTicker, getCompanies, getCorrelation } from "../api.js";
-import { withLsCache } from "../utils/lsCache.js";
+import { getTicker, getCompanies, getCorrelation } from "@/api.js";
+import { withLsCache } from "@/utils/lsCache.js";
 
 function percentageDiff(a, b) {
   return (((b - a) / a) * 100).toFixed(2) + "%";

@@ -114,6 +114,10 @@ export function getCorrelation(tickerA, tickerB, windowDays, lagDays) {
   return apiFetch(`/correlate/${tickerA}/${tickerB}${qs}`);
 }
 
+export function triggerJob(job) {
+  return apiFetch(`/admin/trigger/${job}`, { method: "POST" });
+}
+
 export function getAuditLog({ limit = 100, offset = 0, userId, action } = {}) {
   const params = new URLSearchParams({ limit, offset });
   if (userId) params.set("userId", userId);
@@ -161,12 +165,14 @@ export function getNewsCorrelation(ticker, lagDays = 1) {
 
 // ── Intelligence ──────────────────────────────────────────────────────────────
 
-export function getIntelligenceEntityArticles(entityId) {
-  return apiFetch(`/intelligence/entities/${encodeURIComponent(entityId)}/articles`);
+export function getIntelligenceEntityArticles(entityId, signal) {
+  const qs = signal ? `?signal=${encodeURIComponent(signal)}` : "";
+  return apiFetch(`/intelligence/entities/${encodeURIComponent(entityId)}/articles${qs}`);
 }
 
-export function getIntelligenceEntitySummary(entityId) {
-  return apiFetch(`/intelligence/entities/${encodeURIComponent(entityId)}/summary`);
+export function getIntelligenceEntitySummary(entityId, signal) {
+  const qs = signal ? `?signal=${encodeURIComponent(signal)}` : "";
+  return apiFetch(`/intelligence/entities/${encodeURIComponent(entityId)}/summary${qs}`);
 }
 
 export function getIntelligenceSignals() {
@@ -177,7 +183,40 @@ export function getIntelligenceEntities() {
   return apiFetch("/intelligence/entities");
 }
 
-export function getIntelligenceSentimentCorrelations(lagDays = 1) {
-  return apiFetch(`/intelligence/sentiment-correlations?lagDays=${lagDays}`);
+export function getIntelligenceSentimentCorrelations(lagDays = 1, signal) {
+  const qs = new URLSearchParams({ lagDays });
+  if (signal) qs.set("signal", signal);
+  return apiFetch(`/intelligence/sentiment-correlations?${qs}`);
+}
+
+// ── Cyber News ────────────────────────────────────────────────────────────────
+
+export function getCyberNewsTickers(topic) {
+  const qs = topic ? `?topic=${encodeURIComponent(topic)}` : "";
+  return apiFetch(`/cyber-news/tickers${qs}`);
+}
+
+export function getCyberNewsSummary(ticker, topic) {
+  const qs = topic ? `?topic=${encodeURIComponent(topic)}` : "";
+  return apiFetch(`/cyber-news/${ticker}/summary${qs}`);
+}
+
+export function getCyberNewsArticles(ticker, topic) {
+  const qs = topic ? `?topic=${encodeURIComponent(topic)}` : "";
+  return apiFetch(`/cyber-news/${ticker}/articles${qs}`);
+}
+
+export function getCyberNewsTopics() {
+  return apiFetch("/cyber-news/topics");
+}
+
+export function getCyberNewsRecent(limit = 50) {
+  return apiFetch(`/cyber-news/recent?limit=${limit}`);
+}
+
+export function getCyberNewsCorrelations(lagDays = 1, topic) {
+  const qs = new URLSearchParams({ lagDays });
+  if (topic) qs.set("topic", topic);
+  return apiFetch(`/cyber-news/correlations?${qs}`);
 }
 

@@ -1,0 +1,83 @@
+.article-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 10px;
+  background: var(--card);
+}
+
+.article-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.article-card-title {
+  font-weight: 600;
+  font-size: 13px;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.article-card-badge {
+  margin-left: 8px;
+  flex-shrink: 0;
+  text-transform: capitalize;
+}
+
+.article-card-meta {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  margin-bottom: 6px;
+}
+
+.article-card-link {
+  color: var(--muted-foreground);
+  text-decoration: underline;
+}
+
+.article-card-sentiment {
+  margin-bottom: 6px;
+}
+
+.article-card-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.article-card-topics {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.article-card-summary {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  margin-bottom: 6px;
+}
+
+.article-card-summary.no-margin {
+  margin-bottom: 0;
+}
+
+.article-card-button {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 4px;
+}
+
+.article-card-other-matches {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}

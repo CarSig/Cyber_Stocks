@@ -1,0 +1,44 @@
+:root {
+  --tlr-gap: 24px;
+  --tlr-padding: 16px;
+  --tlr-margin-bottom: 12px;
+  --tlr-radius: 8px;
+  --tlr-transition: 0.2s;
+  --tlr-info-width: 200px;
+  --tlr-text-company: 14px;
+  --tlr-text-ticker: 12px;
+  --tlr-opacity-loading: 0.6;
+}
+
+.ticker-list-row {
+  /* layout provided by .list-row-card */
+}
+
+.ticker-list-row:hover {
+  border-color: var(--primary);
+}
+
+.ticker-list-row.loading {
+  opacity: var(--tlr-opacity-loading);
+}
+
+.ticker-list-row-info {
+  flex: 0 0 auto;
+  min-width: var(--tlr-info-width);
+}
+
+.ticker-list-row-company {
+  font-weight: 600;
+  font-size: var(--tlr-text-company);
+}
+
+.ticker-list-row-ticker {
+  font-size: var(--tlr-text-ticker);
+  color: var(--muted-foreground);
+}
+
+.ticker-list-row-empty {
+  flex: 1;
+  color: var(--muted-foreground);
+  font-size: var(--tlr-text-ticker);
+}

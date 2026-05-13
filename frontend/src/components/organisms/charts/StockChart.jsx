@@ -3,8 +3,9 @@ import "./charts.css";
 import { createChart, createSeriesMarkers, CandlestickSeries, BarSeries, LineSeries, AreaSeries, BaselineSeries } from "lightweight-charts";
 import { daysAgoString, todayString, toSortedOHLC } from "./chartUtils.js";
 import { buildMarkers, buildCountMarkers, buildNvdMarkers, buildTrumpMarkers, buildNewsMarkers } from "./chartMarkers.js";
-import ChartToggleButton from "../../atoms/ChartToggleButton.jsx";
-import ModalItem from "../../atoms/ModalItem.jsx";
+import ChartToggleButton from "@/components/atoms/ChartToggleButton.jsx";
+import ModalItem from "@/components/atoms/ModalItem.jsx";
+import ChartModal from "./ChartModal.jsx";
 
 const CHART_TYPES = ["Candlestick", "Bar", "Line", "Area", "Baseline"];
 
@@ -22,21 +23,60 @@ const SENTIMENT_COLORS = { positive: "#22c55e", negative: "#ef4444", neutral: "#
 // Keeps a ref always in sync with a prop without cluttering the component body
 function useSyncRef(value) {
   const ref = useRef(value);
-  useEffect(() => { ref.current = value; }, [value]);
+  useEffect(() => {
+    ref.current = value;
+  }, [value]);
   return ref;
 }
 
-
-export default function StockChart({
-  quotes, compareQuotes, compareName, analysis, period, onPeriodChange, visibleRange, onRangeChange,
-  overlays = {}, onShowCorrelations,
-}) {
-  const { trump = {}, nvd = {}, otx = {}, kev = {}, news = {} } = overlays;
+function OverlayToggles({ trump, nvd, otx, kev, news, showAnalysis, onAnalysisToggle }) {
   const { posts: trumpPosts, show: showTrump, onToggle: onTrumpToggle } = trump;
-  const { data: nvdVulns,   show: showNvd,   onToggle: onNvdToggle }   = nvd;
-  const { data: otxPulses,  show: showOtx,   onToggle: onOtxToggle }   = otx;
-  const { data: kevItems,   show: showKev,   onToggle: onKevToggle }   = kev;
-  const { articles: newsArticles, analysis: newsAnalysis, show: showNews, onToggle: onNewsToggle } = news;
+  const { data: nvdVulns, show: showNvd, onToggle: onNvdToggle } = nvd;
+  const { data: otxPulses, show: showOtx, onToggle: onOtxToggle } = otx;
+  const { data: kevItems, show: showKev, onToggle: onKevToggle } = kev;
+  const { articles: newsArticles, show: showNews, onToggle: onNewsToggle } = news;
+  return (
+    <>
+      <ChartToggleButton visible={trumpPosts?.length > 0} active={showTrump} onClick={() => onTrumpToggle?.(!showTrump)}>Trump</ChartToggleButton>
+      <ChartToggleButton visible={nvdVulns?.length > 0} active={showNvd} onClick={() => onNvdToggle?.(!showNvd)}>NVD</ChartToggleButton>
+      <ChartToggleButton visible={otxPulses?.length > 0} active={showOtx} onClick={() => onOtxToggle?.(!showOtx)}>OTX</ChartToggleButton>
+      <ChartToggleButton visible={kevItems?.length > 0} active={showKev} onClick={() => onKevToggle?.(!showKev)}>KEV</ChartToggleButton>
+      <ChartToggleButton visible={newsArticles?.length > 0} active={showNews} onClick={() => onNewsToggle?.(!showNews)}>News</ChartToggleButton>
+      <ChartToggleButton active={showAnalysis} onClick={onAnalysisToggle}>Biggest Swings</ChartToggleButton>
+    </>
+  );
+}
+
+function MarkerModalItems({ type, items, newsAnalysis }) {
+  if (type === "news") return items.map((a) => {
+    const score = newsAnalysis?.[a.link]?.sentiment ?? null;
+    const color = score === null ? "var(--text-muted)" : score >= 0.1 ? "var(--color-green)" : score <= -0.1 ? "var(--color-red)" : "var(--color-amber)";
+    const icon = score === null ? "?" : score >= 0.1 ? "▲" : score <= -0.1 ? "▼" : "●";
+    return <ModalItem key={a.link} href={a.link} icon={icon} iconColor={color} title={a.title} subtitle={a.publisher} />;
+  });
+  if (type === "trump") return items.map((p, i) => {
+    const s = p.analysis?.sentiment ?? "neutral";
+    return <ModalItem key={i} icon={s === "positive" ? "▲" : s === "negative" ? "▼" : "●"} iconColor={SENTIMENT_COLORS[s]} title={p.content} subtitle={p.created_at?.slice(0, 16).replace("T", " ")} />;
+  });
+  if (type === "nvd") return items.map((v, i) => (
+    <ModalItem key={i} href={`https://nvd.nist.gov/vuln/detail/${v.cveId ?? v.cveID}`} icon="●" iconColor={NVD_SEVERITY_COLORS[v.severity ?? "UNKNOWN"]} title={`${v.cveId ?? v.cveID} — ${v.description}`} subtitle={v.severity ?? "UNKNOWN"} />
+  ));
+  if (type === "otx") return items.map((p, i) => (
+    <ModalItem key={i} icon="●" iconColor="#a855f7" title={p.name} subtitle={p.created?.slice(0, 10)} />
+  ));
+  if (type === "kev") return items.map((v, i) => (
+    <ModalItem key={i} href={`https://nvd.nist.gov/vuln/detail/${v.cveID}`} icon="▼" iconColor="#f97316" title={`${v.cveID} — ${v.vulnerabilityName}`} subtitle={`${v.vendorProject} / ${v.product}`} />
+  ));
+  return null;
+}
+
+export default function StockChart({ quotes, compareQuotes, compareName, analysis, period, onPeriodChange, visibleRange, onRangeChange, overlays = {} }) {
+  const { trump = {}, nvd = {}, otx = {}, kev = {}, news = {} } = overlays;
+  const { posts: trumpPosts, show: showTrump } = trump;
+  const { data: nvdVulns, show: showNvd } = nvd;
+  const { data: otxPulses, show: showOtx } = otx;
+  const { data: kevItems, show: showKev } = kev;
+  const { articles: newsArticles, analysis: newsAnalysis, show: showNews } = news;
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   const skipRangeRef = useRef(false);
@@ -48,18 +88,22 @@ export default function StockChart({
 
   const newsArticlesRef = useSyncRef(newsArticles);
   const newsAnalysisRef = useSyncRef(newsAnalysis);
-  const showNewsRef    = useSyncRef(showNews);
-  const trumpPostsRef  = useSyncRef(trumpPosts);
-  const showTrumpRef   = useSyncRef(showTrump);
-  const nvdVulnsRef    = useSyncRef(nvdVulns);
-  const showNvdRef     = useSyncRef(showNvd);
-  const otxPulsesRef   = useSyncRef(otxPulses);
-  const showOtxRef     = useSyncRef(showOtx);
-  const kevItemsRef    = useSyncRef(kevItems);
-  const showKevRef     = useSyncRef(showKev);
+  const showNewsRef = useSyncRef(showNews);
+  const trumpPostsRef = useSyncRef(trumpPosts);
+  const showTrumpRef = useSyncRef(showTrump);
+  const nvdVulnsRef = useSyncRef(nvdVulns);
+  const showNvdRef = useSyncRef(showNvd);
+  const otxPulsesRef = useSyncRef(otxPulses);
+  const showOtxRef = useSyncRef(showOtx);
+  const kevItemsRef = useSyncRef(kevItems);
+  const showKevRef = useSyncRef(showKev);
 
-  useEffect(() => { periodRef.current = period; }, [period]);
-  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
+  useEffect(() => {
+    periodRef.current = period;
+  }, [period]);
+  useEffect(() => {
+    visibleRangeRef.current = visibleRange;
+  }, [visibleRange]);
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -71,7 +115,9 @@ export default function StockChart({
     } else {
       chartRef.current.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() });
     }
-    setTimeout(() => { skipRangeRef.current = false; }, 150);
+    setTimeout(() => {
+      skipRangeRef.current = false;
+    }, 150);
   }, [period, visibleRange]);
 
   useEffect(() => {
@@ -94,12 +140,14 @@ export default function StockChart({
 
     const markers = [
       ...(showAnalysis ? buildMarkers(analysis) : []),
-      ...(showTrump ? buildTrumpMarkers(trumpPosts, quotes) : []),
-      ...(showNvd ? buildNvdMarkers(nvdVulns) : []),
-      ...(showOtx ? buildCountMarkers(otxPulses, { dateField: "created",   position: "belowBar", color: "#a855f7", shape: "circle",    label: "OTX" }) : []),
-      ...(showKev ? buildCountMarkers(kevItems,  { dateField: "dateAdded", position: "belowBar", color: "#f97316", shape: "arrowDown", label: "KEV" }) : []),
-      ...(showNews ? buildNewsMarkers(newsArticles, newsAnalysis, quotes) : []),
-    ].filter(inRange).sort((a, b) => (a.time < b.time ? -1 : 1));
+      ...(showTrumpRef.current ? buildTrumpMarkers(trumpPostsRef.current, quotes) : []),
+      ...(showNvdRef.current ? buildNvdMarkers(nvdVulnsRef.current) : []),
+      ...(showOtxRef.current ? buildCountMarkers(otxPulsesRef.current, { dateField: "created", position: "belowBar", color: "#a855f7", shape: "circle", label: "OTX" }) : []),
+      ...(showKevRef.current ? buildCountMarkers(kevItemsRef.current, { dateField: "dateAdded", position: "belowBar", color: "#f97316", shape: "arrowDown", label: "KEV" }) : []),
+      ...(showNewsRef.current ? buildNewsMarkers(newsArticlesRef.current, newsAnalysisRef.current, quotes) : []),
+    ]
+      .filter(inRange)
+      .sort((a, b) => (a.time < b.time ? -1 : 1));
 
     const dedupedMarkers = [...new Map(markers.map((m) => [`${m.time}|${m.position}|${m.color}`, m])).values()];
     if (dedupedMarkers.length) createSeriesMarkers(primary, dedupedMarkers);
@@ -140,19 +188,25 @@ export default function StockChart({
           const d = new Date(typeof ts === "number" || (typeof ts === "string" && /^\d{10}$/.test(ts)) ? Number(ts) * 1000 : ts).toISOString().slice(0, 10);
           return d === date && (newsAnalysisRef.current?.[a.link]?.sentiment ?? null) !== null;
         });
-        if (items.length) { setMarkerModal({ type: "news", date, items }); return; }
+        if (items.length) {
+          setMarkerModal({ type: "news", date, items });
+          return;
+        }
       }
 
       const overlays = [
         { showRef: showTrumpRef, dataRef: trumpPostsRef, type: "trump", filter: (p) => p.created_at?.slice(0, 10) === date },
-        { showRef: showNvdRef,   dataRef: nvdVulnsRef,   type: "nvd",   filter: (v) => v.published?.slice(0, 10) === date },
-        { showRef: showOtxRef,   dataRef: otxPulsesRef,  type: "otx",   filter: (p) => p.created?.slice(0, 10) === date },
-        { showRef: showKevRef,   dataRef: kevItemsRef,   type: "kev",   filter: (v) => v.dateAdded === date },
+        { showRef: showNvdRef, dataRef: nvdVulnsRef, type: "nvd", filter: (v) => v.published?.slice(0, 10) === date },
+        { showRef: showOtxRef, dataRef: otxPulsesRef, type: "otx", filter: (p) => p.created?.slice(0, 10) === date },
+        { showRef: showKevRef, dataRef: kevItemsRef, type: "kev", filter: (v) => v.dateAdded === date },
       ];
       for (const { showRef, dataRef, type: t, filter } of overlays) {
         if (!showRef.current) continue;
         const items = (dataRef.current ?? []).filter(filter);
-        if (items.length) { setMarkerModal({ type: t, date, items }); return; }
+        if (items.length) {
+          setMarkerModal({ type: t, date, items });
+          return;
+        }
       }
     });
 
@@ -167,7 +221,7 @@ export default function StockChart({
       observer.disconnect();
       chart.remove();
     };
-  }, [quotes, compareQuotes, type, analysis, showAnalysis, showTrump, trumpPosts, showNvd, nvdVulns, showOtx, otxPulses, showKev, kevItems, showNews, newsArticles, newsAnalysis]);
+  }, [quotes, compareQuotes, type, analysis, showAnalysis]);
 
   return (
     <div>
@@ -178,48 +232,14 @@ export default function StockChart({
           </button>
         ))}
         {compareName && <span className="chart-compare-label">● {compareName}</span>}
-        <ChartToggleButton visible={trumpPosts?.length > 0}   active={showTrump} onClick={() => onTrumpToggle?.(!showTrump)}>Trump</ChartToggleButton>
-        <ChartToggleButton visible={nvdVulns?.length > 0}    active={showNvd}   onClick={() => onNvdToggle?.(!showNvd)}>NVD</ChartToggleButton>
-        <ChartToggleButton visible={otxPulses?.length > 0}   active={showOtx}   onClick={() => onOtxToggle?.(!showOtx)}>OTX</ChartToggleButton>
-        <ChartToggleButton visible={kevItems?.length > 0}    active={showKev}   onClick={() => onKevToggle?.(!showKev)}>KEV</ChartToggleButton>
-        <ChartToggleButton visible={newsArticles?.length > 0} active={showNews}  onClick={() => onNewsToggle?.(!showNews)}>News</ChartToggleButton>
-        {onShowCorrelations && (
-          <ChartToggleButton onClick={onShowCorrelations}>Correlations</ChartToggleButton>
-        )}
-        <ChartToggleButton active={showAnalysis} onClick={() => setShowAnalysis((v) => !v)}>Biggest Swings</ChartToggleButton>
+        <OverlayToggles trump={trump} nvd={nvd} otx={otx} kev={kev} news={news} showAnalysis={showAnalysis} onAnalysisToggle={() => setShowAnalysis((v) => !v)} />
       </div>
       <div ref={containerRef} className="chart-container" />
 
       {markerModal && (
-        <div className="news-modal-overlay" onClick={() => setMarkerModal(null)}>
-          <div className="news-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="news-modal-header">
-              <span className="news-modal-date">{markerModal.date}</span>
-              <button className="news-modal-close" onClick={() => setMarkerModal(null)}>✕</button>
-            </div>
-            <div className="news-modal-list">
-              {markerModal.type === "news" && markerModal.items.map((a) => {
-                const score = newsAnalysis?.[a.link]?.sentiment ?? null;
-                const color = score === null ? "var(--text-muted)" : score >= 0.1 ? "var(--color-green)" : score <= -0.1 ? "var(--color-red)" : "var(--color-amber)";
-                const icon = score === null ? "?" : score >= 0.1 ? "▲" : score <= -0.1 ? "▼" : "●";
-                return <ModalItem key={a.link} href={a.link} icon={icon} iconColor={color} title={a.title} subtitle={a.publisher} />;
-              })}
-              {markerModal.type === "trump" && markerModal.items.map((p, i) => {
-                const s = p.analysis?.sentiment ?? "neutral";
-                return <ModalItem key={i} icon={s === "positive" ? "▲" : s === "negative" ? "▼" : "●"} iconColor={SENTIMENT_COLORS[s]} title={p.content} subtitle={p.created_at?.slice(0, 16).replace("T", " ")} />;
-              })}
-              {markerModal.type === "nvd" && markerModal.items.map((v, i) => (
-                <ModalItem key={i} href={`https://nvd.nist.gov/vuln/detail/${v.cveId ?? v.cveID}`} icon="●" iconColor={NVD_SEVERITY_COLORS[v.severity ?? "UNKNOWN"]} title={`${v.cveId ?? v.cveID} — ${v.description}`} subtitle={v.severity ?? "UNKNOWN"} />
-              ))}
-              {markerModal.type === "otx" && markerModal.items.map((p, i) => (
-                <ModalItem key={i} icon="●" iconColor="#a855f7" title={p.name} subtitle={p.created?.slice(0, 10)} />
-              ))}
-              {markerModal.type === "kev" && markerModal.items.map((v, i) => (
-                <ModalItem key={i} href={`https://nvd.nist.gov/vuln/detail/${v.cveID}`} icon="▼" iconColor="#f97316" title={`${v.cveID} — ${v.vulnerabilityName}`} subtitle={`${v.vendorProject} / ${v.product}`} />
-              ))}
-            </div>
-          </div>
-        </div>
+        <ChartModal date={markerModal.date} onClose={() => setMarkerModal(null)}>
+          <MarkerModalItems type={markerModal.type} items={markerModal.items} newsAnalysis={newsAnalysis} />
+        </ChartModal>
       )}
     </div>
   );

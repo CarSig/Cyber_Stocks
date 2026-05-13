@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { withLsCache } from "../utils/lsCache.js";
+import { withLsCache } from "@/utils/lsCache.js";
 
 export function useCachedQuery(queryKey, fetcher, { ttl, enabled = true, cacheKey } = {}) {
   return useQuery({

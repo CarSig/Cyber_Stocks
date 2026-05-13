@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import "./charts.css";
 import { createChart, LineSeries, AreaSeries } from "lightweight-charts";
 import { daysAgoString, todayString } from "./chartUtils.js";
-import ChartToggleButton from "../../atoms/ChartToggleButton.jsx";
-import ChartSep from "../../atoms/ChartSep.jsx";
+import ChartToggleButton from "@/components/atoms/ChartToggleButton.jsx";
+import ChartSep from "@/components/atoms/ChartSep.jsx";
 
 const CHART_TYPES = ["Line", "Area"];
 

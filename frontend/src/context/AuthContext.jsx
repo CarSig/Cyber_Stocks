@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { useAuth as useClerkAuth, useUser } from "@clerk/react";
-import { apiClerkAuth } from "../api.js";
+import { apiClerkAuth } from "@/api.js";
 
 const AuthContext = createContext(null);
 
@@ -8,7 +8,11 @@ export function AuthProvider({ children }) {
   const { getToken, signOut } = useClerkAuth();
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
   const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("auth_user")); } catch { return null; }
+    try {
+      return JSON.parse(localStorage.getItem("auth_user"));
+    } catch {
+      return null;
+    }
   });
   const [ready, setReady] = useState(false);
 
@@ -52,13 +56,10 @@ export function AuthProvider({ children }) {
     await signOut();
   }, [signOut]);
 
-  return (
-    <AuthContext.Provider value={{ user, logout, ready }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, logout, ready }}>{children}</AuthContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");

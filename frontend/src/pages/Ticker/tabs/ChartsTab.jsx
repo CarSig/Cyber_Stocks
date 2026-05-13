@@ -1,22 +1,44 @@
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import StockChart from "../../../components/organisms/charts/StockChart.jsx";
-import VolatilityChart from "../../../components/organisms/charts/VolatilityChart.jsx";
-import NewsChart from "../../../components/organisms/charts/NewsChart.jsx";
-import IntelligenceChart from "../../../components/organisms/charts/IntelligenceChart.jsx";
-import PeriodButtons from "../../../components/molecules/PeriodButtons.jsx";
-import ChartToggleButton from "../../../components/atoms/ChartToggleButton.jsx";
-import Analysis from "../../../components/organisms/Analysis.jsx";
-import TickerKPI from "../TickerKPI.jsx";
+import { useTickerContext } from "@/context/TickerContext.jsx";
+import StockChart from "@/components/organisms/charts/StockChart.jsx";
+import VolatilityChart from "@/components/organisms/charts/VolatilityChart.jsx";
+import NewsChart from "@/components/organisms/charts/NewsChart.jsx";
+import IntelligenceChart from "@/components/organisms/charts/IntelligenceChart.jsx";
+import PeriodButtons from "@/components/molecules/shared/PeriodButtons.jsx";
+import ChartToggleButton from "@/components/atoms/ChartToggleButton.jsx";
+import Analysis from "@/components/organisms/ticker/Analysis.jsx";
+import TickerKPI from "@/pages/Ticker/TickerKPI.jsx";
 
 export default function ChartsTab({
-  summary, allQuotes, compareQuotes, compareTicker, setCompareTicker, otherTickers,
-  period, setPeriod, visibleRange, setVisibleRange, periodAnalysis,
-  hidePrice, setHidePrice, hideVolatility, setHideVolatility,
-  hideNewsSentiment, setHideNewsSentiment, hideIntelligence, setHideIntelligence,
-  overlays, intelligenceArticles, entityId, quoteBounds,
-  onShowCorrelations,
+  summary,
+  allQuotes,
+  compareQuotes,
+  otherTickers,
+  periodAnalysis,
+  overlays,
+  intelligenceArticles,
+  entityId,
+  quoteBounds,
+  hideCyberNewsSentiment,
+  setHideCyberNewsSentiment,
 }) {
+  const {
+    compareTicker,
+    setCompareTicker,
+    period,
+    setPeriod,
+    visibleRange,
+    setVisibleRange,
+    hidePrice,
+    setHidePrice,
+    hideVolatility,
+    setHideVolatility,
+    hideNewsSentiment,
+    setHideNewsSentiment,
+    hideIntelligence,
+    setHideIntelligence,
+  } = useTickerContext();
   return (
     <section>
       <div className="compare-row">
@@ -28,7 +50,9 @@ export default function ChartsTab({
           <SelectContent>
             <SelectItem value="">None</SelectItem>
             {otherTickers.map(([name, t]) => (
-              <SelectItem key={t} value={t}>{name} ({t})</SelectItem>
+              <SelectItem key={t} value={t}>
+                {name} ({t})
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -36,7 +60,14 @@ export default function ChartsTab({
 
       <TickerKPI summary={summary} quotes={allQuotes} />
 
-      <PeriodButtons activeDays={period} onSelect={(days) => { setVisibleRange(null); setPeriod(days); }} showCustomLabel />
+      <PeriodButtons
+        activeDays={period}
+        onSelect={(days) => {
+          setVisibleRange(null);
+          setPeriod(days);
+        }}
+        showCustomLabel
+      />
 
       <div className="chart-card">
         <div className="chart-title-row">
@@ -56,7 +87,6 @@ export default function ChartsTab({
             visibleRange={visibleRange}
             onRangeChange={setVisibleRange}
             overlays={overlays}
-            onShowCorrelations={onShowCorrelations}
           />
         )}
       </div>
@@ -82,7 +112,15 @@ export default function ChartsTab({
             </ChartToggleButton>
           </div>
           {!hideNewsSentiment && (
-            <NewsChart articles={overlays.news.articles} analysis={overlays.news.analysis} period={period} onPeriodChange={setPeriod} visibleRange={visibleRange} onRangeChange={setVisibleRange} quoteBounds={quoteBounds} />
+            <NewsChart
+              articles={overlays.news.articles}
+              analysis={overlays.news.analysis}
+              period={period}
+              onPeriodChange={setPeriod}
+              visibleRange={visibleRange}
+              onRangeChange={setVisibleRange}
+              quoteBounds={quoteBounds}
+            />
           )}
         </div>
       )}
@@ -96,7 +134,37 @@ export default function ChartsTab({
             </ChartToggleButton>
           </div>
           {!hideIntelligence && (
-            <IntelligenceChart articles={intelligenceArticles} entityId={entityId} period={period} onPeriodChange={setPeriod} visibleRange={visibleRange} onRangeChange={setVisibleRange} quoteBounds={quoteBounds} />
+            <IntelligenceChart
+              articles={intelligenceArticles}
+              entityId={entityId}
+              period={period}
+              onPeriodChange={setPeriod}
+              visibleRange={visibleRange}
+              onRangeChange={setVisibleRange}
+              quoteBounds={quoteBounds}
+            />
+          )}
+        </div>
+      )}
+
+      {overlays.cyberNews.articles?.length > 0 && (
+        <div className="chart-card">
+          <div className="chart-title-row">
+            <h3 className="chart-title">Cyber News Sentiment</h3>
+            <ChartToggleButton active={hideCyberNewsSentiment} onClick={() => setHideCyberNewsSentiment((v) => !v)}>
+              {hideCyberNewsSentiment ? "Show Chart" : "Hide Chart"}
+            </ChartToggleButton>
+          </div>
+          {!hideCyberNewsSentiment && (
+            <NewsChart
+              articles={overlays.cyberNews.articles}
+              analysis={overlays.cyberNews.analysis}
+              period={period}
+              onPeriodChange={setPeriod}
+              visibleRange={visibleRange}
+              onRangeChange={setVisibleRange}
+              quoteBounds={quoteBounds}
+            />
           )}
         </div>
       )}

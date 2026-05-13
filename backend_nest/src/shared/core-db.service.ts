@@ -119,6 +119,45 @@ export class CoreDbService implements OnApplicationBootstrap {
     `);
 
     await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS cybersecurity_news (
+        id              BIGSERIAL   PRIMARY KEY,
+        source          TEXT        NOT NULL,
+        title           TEXT        NOT NULL,
+        link            TEXT        NOT NULL UNIQUE,
+        published_at    TIMESTAMPTZ,
+        author          TEXT,
+        categories      TEXT[]      NOT NULL DEFAULT '{}',
+        description     TEXT        NOT NULL DEFAULT '',
+        scraped_text    TEXT        NOT NULL DEFAULT '',
+        matched_company TEXT,
+        matched_ticker  TEXT,
+        all_matches     JSONB       NOT NULL DEFAULT '[]',
+        ingested_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+      ALTER TABLE cybersecurity_news ADD COLUMN IF NOT EXISTS scraped_text TEXT NOT NULL DEFAULT '';
+      CREATE INDEX IF NOT EXISTS cybersecurity_news_link_idx         ON cybersecurity_news (link);
+      CREATE INDEX IF NOT EXISTS cybersecurity_news_published_at_idx ON cybersecurity_news (published_at DESC);
+      CREATE INDEX IF NOT EXISTS cybersecurity_news_ticker_idx       ON cybersecurity_news (matched_ticker);
+
+      CREATE TABLE IF NOT EXISTS cybersecurity_news_analysis (
+        article_url  TEXT        PRIMARY KEY,
+        ticker       TEXT        NOT NULL,
+        company_name TEXT        NOT NULL,
+        sentiment    REAL        NOT NULL,
+        importance   INT         NOT NULL,
+        relevance    INT         NOT NULL,
+        summary      TEXT        NOT NULL DEFAULT '',
+        topics       TEXT[]      NOT NULL DEFAULT '{}',
+        catalyst     BOOLEAN     NOT NULL DEFAULT false,
+        timeframe    TEXT,
+        entities     TEXT[]      NOT NULL DEFAULT '{}',
+        model        TEXT,
+        analyzed_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+      CREATE INDEX IF NOT EXISTS cybersecurity_news_analysis_ticker_idx ON cybersecurity_news_analysis (ticker);
+    `);
+
+    await this.pool.query(`
       CREATE TABLE IF NOT EXISTS audit_log (
         id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id    UUID        NOT NULL,

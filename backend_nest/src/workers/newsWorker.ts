@@ -6,7 +6,7 @@ import amqplib from 'amqplib';
 import type { Channel, ConsumeMessage } from 'amqplib';
 import { Pool } from 'pg';
 import { logger } from '@/shared/logger';
-import { analyzeArticleWithOllama as analyzeArticleWithAnthropic } from '@/shared/utils/ollamaAnalyzer';
+import { analyzeArticleWithAnthropic } from '@/shared/utils/anthropicAnalyzer';
 import { NEWS_ANALYZED_QUEUE } from '@/shared/mq/connection';
 
 const AMQP_URL = process.env.AMQP_URL ?? 'amqp://localhost';
@@ -30,7 +30,10 @@ async function processMessage(msg: ConsumeMessage, ch: Channel): Promise<void> {
       [article.link],
     );
     if (rows.length > 0) {
-      logger.debug({ ticker, link: article.link }, 'already analyzed, skipping');
+      logger.debug(
+        { ticker, link: article.link },
+        'already analyzed, skipping',
+      );
       ch.ack(msg);
       return;
     }
@@ -46,10 +49,18 @@ async function processMessage(msg: ConsumeMessage, ch: Channel): Promise<void> {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
        ON CONFLICT (article_url) DO NOTHING`,
       [
-        article.link, ticker, companyName,
-        scores.sentiment, scores.importance, scores.relevance,
-        scores.summary ?? '', scores.topics ?? [], scores.catalyst ?? false,
-        scores.timeframe ?? null, scores.entities ?? [], scores.model ?? null,
+        article.link,
+        ticker,
+        companyName,
+        scores.sentiment,
+        scores.importance,
+        scores.relevance,
+        scores.summary ?? '',
+        scores.topics ?? [],
+        scores.catalyst ?? false,
+        scores.timeframe ?? null,
+        scores.entities ?? [],
+        scores.model ?? null,
       ],
     );
     await pool.query(
@@ -59,7 +70,15 @@ async function processMessage(msg: ConsumeMessage, ch: Channel): Promise<void> {
     );
   }
 
-  logger.info({ ticker, title: article.title, sentiment: scores.sentiment, importance: scores.importance }, 'analysis saved');
+  logger.info(
+    {
+      ticker,
+      title: article.title,
+      sentiment: scores.sentiment,
+      importance: scores.importance,
+    },
+    'analysis saved',
+  );
   ch.sendToQueue(
     NEWS_ANALYZED_QUEUE,
     Buffer.from(JSON.stringify({ ticker, title: article.title, scores })),
@@ -73,7 +92,10 @@ async function connect(retries = 10, delayMs = 3000) {
     try {
       return await amqplib.connect(AMQP_URL);
     } catch (err) {
-      logger.warn({ attempt: i, retries, err: (err as Error).message }, 'RabbitMQ not ready, retrying...');
+      logger.warn(
+        { attempt: i, retries, err: (err as Error).message },
+        'RabbitMQ not ready, retrying...',
+      );
       if (i === retries) throw err;
       await new Promise((r) => setTimeout(r, delayMs));
     }
@@ -87,7 +109,13 @@ async function start(): Promise<void> {
   await ch.assertQueue(QUEUE, { durable: true });
   ch.prefetch(1);
 
-  logger.info({ queue: QUEUE, model: process.env.ANTHROPIC_NEWS_MODEL ?? 'claude-haiku-4-5-20251001' }, 'news worker started');
+  logger.info(
+    {
+      queue: QUEUE,
+      model: process.env.ANTHROPIC_NEWS_MODEL ?? 'claude-haiku-4-5-20251001',
+    },
+    'news worker started',
+  );
 
   ch.consume(QUEUE, async (msg) => {
     if (!msg) return;
@@ -111,7 +139,3 @@ start().catch((err: unknown) => {
   logger.error({ err }, 'worker failed to start');
   process.exit(1);
 });
-
-// --- OLD FILE-BASED IMPLEMENTATION ---
-// readAnalysis / writeAnalysis: fs read/write of PATHS.newsAnalysis(companyName)
-// clearQueued: fs read/write of PATHS.newsQueued(companyName)

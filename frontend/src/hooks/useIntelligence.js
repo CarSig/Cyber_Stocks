@@ -5,22 +5,20 @@ import {
   getIntelligenceSignals,
   getIntelligenceEntities,
   getIntelligenceSentimentCorrelations,
-} from "../api.js";
+} from "@/api.js";
 
-export function useEntityIntelligence(entityId) {
+export function useEntityIntelligence(entityId, signal) {
   const articles = useQuery({
-    queryKey: ["intelligence-articles", entityId],
-    queryFn: () => getIntelligenceEntityArticles(entityId),
+    queryKey: ["intelligence-articles", entityId, signal],
+    queryFn: () => getIntelligenceEntityArticles(entityId, signal),
     enabled: !!entityId,
-    placeholderData: (prev) => prev,
   });
 
   const summary = useQuery({
-    queryKey: ["intelligence-summary", entityId],
-    queryFn: () => getIntelligenceEntitySummary(entityId),
+    queryKey: ["intelligence-summary", entityId, signal],
+    queryFn: () => getIntelligenceEntitySummary(entityId, signal),
     enabled: !!entityId,
     retry: false,
-    placeholderData: (prev) => prev,
   });
 
   return { articles, summary };
@@ -30,7 +28,6 @@ export function useGlobalSignals() {
   return useQuery({
     queryKey: ["intelligence-signals"],
     queryFn: getIntelligenceSignals,
-    placeholderData: (prev) => prev,
   });
 }
 
@@ -38,15 +35,13 @@ export function useBackendEntities() {
   return useQuery({
     queryKey: ["intelligence-entities"],
     queryFn: getIntelligenceEntities,
-    placeholderData: (prev) => prev,
   });
 }
 
-export function useAllSentimentCorrelations(lagDays = 1) {
+export function useAllSentimentCorrelations(lagDays = 1, signal) {
   return useQuery({
-    queryKey: ["intelligence-sentiment-correlations", lagDays],
-    queryFn: () => getIntelligenceSentimentCorrelations(lagDays),
+    queryKey: ["intelligence-sentiment-correlations", lagDays, signal],
+    queryFn: () => getIntelligenceSentimentCorrelations(lagDays, signal),
     retry: false,
-    placeholderData: (prev) => prev,
   });
 }

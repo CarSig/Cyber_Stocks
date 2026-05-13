@@ -1,4 +1,4 @@
-import Simulation from "../../../components/organisms/Simulation.jsx";
+import Simulation from "@/components/organisms/ticker/Simulation.jsx";
 
 export default function SimulationTab({ ticker, allQuotes, onResult }) {
   return (

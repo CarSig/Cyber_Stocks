@@ -34,20 +34,18 @@ export function makeChartOptions(container, height = 400) {
   };
 }
 
-export function toSortedOHLC(quotes) {
+function toSorted(quotes, ...fields) {
   const seen = new Set();
   return quotes
     .filter((q) => q.close)
-    .map((q) => ({ time: String(q.date).slice(0, 10), open: q.open, high: q.high, low: q.low, close: q.close, value: q.close }))
-    .sort((a, b) => (a.time < b.time ? -1 : 1))
-    .filter((q) => { if (seen.has(q.time)) return false; seen.add(q.time); return true; });
+    .map((q) => {
+      const base = { time: String(q.date).slice(0, 10) };
+      for (const f of fields) base[f] = f === "value" ? (q.value ?? q.close) : q[f];
+      return base;
+    })
+    .sort((a, b) => a.time.localeCompare(b.time))
+    .filter((q) => !seen.has(q.time) && seen.add(q.time));
 }
 
-export function toSortedClose(quotes) {
-  const seen = new Set();
-  return quotes
-    .filter((q) => q.close)
-    .map((q) => ({ time: String(q.date).slice(0, 10), value: q.close }))
-    .sort((a, b) => (a.time < b.time ? -1 : 1))
-    .filter((q) => { if (seen.has(q.time)) return false; seen.add(q.time); return true; });
-}
+export const toSortedOHLC = (quotes) => toSorted(quotes, "open", "high", "low", "close", "value");
+export const toSortedClose = (quotes) => toSorted(quotes, "value");

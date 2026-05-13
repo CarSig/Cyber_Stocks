@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Page from "@/components/atoms/Page.jsx";
 
 function SocialCard({ to, icon, title, description }) {
   return (
@@ -16,8 +17,7 @@ function SocialCard({ to, icon, title, description }) {
 
 export default function Socials() {
   return (
-    <div className="ti-page">
-      <h1 className="ti-page-title">Socials</h1>
+    <Page title="Socials">
       <div className="ti-grid">
         <SocialCard
           to="/socials/truth-social"
@@ -32,6 +32,6 @@ export default function Socials() {
           description="Posts from r/ExperiencedDevs and r/cybersecurity"
         />
       </div>
-    </div>
+    </Page>
   );
 }

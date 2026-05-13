@@ -1,4 +1,4 @@
-import Chat from "../../components/organisms/Chat.jsx";
+import Chat from "@/components/organisms/ticker/Chat.jsx";
 
 export default function TickerChat({ showChat, onOpen, onClose, context }) {
   return (

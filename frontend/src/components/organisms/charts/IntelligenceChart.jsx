@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import "./charts.css";
 import { createChart, HistogramSeries } from "lightweight-charts";
 import { daysAgoString, todayString } from "./chartUtils.js";
-import ModalItem from "../../atoms/ModalItem.jsx";
+import ModalItem from "@/components/atoms/ModalItem.jsx";
+import ChartModal from "./ChartModal.jsx";
 
 function sentimentToColor(score) {
   const clamped = Math.max(-1, Math.min(1, score));
@@ -174,31 +175,23 @@ export default function IntelligenceChart({ articles, entityId, period, onPeriod
       <div ref={containerRef} className="chart-container" />
 
       {modal && (
-        <div className="news-modal-overlay" onClick={() => setModal(null)}>
-          <div className="news-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="news-modal-header">
-              <span className="news-modal-date">{modal.date}</span>
-              <button className="news-modal-close" onClick={() => setModal(null)}>✕</button>
-            </div>
-            <div className="news-modal-list">
-              {modal.items.map((a) => {
-                const score = a._sentiment;
-                const color = score >= 0.1 ? "var(--color-green)" : score <= -0.1 ? "var(--color-red)" : "var(--color-amber)";
-                const icon = score >= 0.1 ? "▲" : score <= -0.1 ? "▼" : "●";
-                return (
-                  <ModalItem
-                    key={a.id}
-                    href={a.link || undefined}
-                    icon={icon}
-                    iconColor={color}
-                    title={a.id}
-                    subtitle={a.publisher}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        <ChartModal date={modal.date} onClose={() => setModal(null)}>
+          {modal.items.map((a) => {
+            const score = a._sentiment;
+            const color = score >= 0.1 ? "var(--color-green)" : score <= -0.1 ? "var(--color-red)" : "var(--color-amber)";
+            const icon = score >= 0.1 ? "▲" : score <= -0.1 ? "▼" : "●";
+            return (
+              <ModalItem
+                key={a.id}
+                href={a.link || undefined}
+                icon={icon}
+                iconColor={color}
+                title={a.id}
+                subtitle={a.publisher}
+              />
+            );
+          })}
+        </ChartModal>
       )}
     </div>
   );

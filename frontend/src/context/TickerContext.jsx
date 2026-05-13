@@ -19,6 +19,8 @@ export function TickerProvider({ children }) {
   const [hideVolatility, setHideVolatility] = useState(false);
   const [hideNewsSentiment, setHideNewsSentiment] = useState(false);
   const [hideIntelligence, setHideIntelligence] = useState(false);
+  const [showCyberNews, setShowCyberNews] = useState(false);
+  const [hideCyberNewsSentiment, setHideCyberNewsSentiment] = useState(false);
 
   const value = {
     activeTab,
@@ -53,6 +55,10 @@ export function TickerProvider({ children }) {
     setHideNewsSentiment,
     hideIntelligence,
     setHideIntelligence,
+    showCyberNews,
+    setShowCyberNews,
+    hideCyberNewsSentiment,
+    setHideCyberNewsSentiment,
   };
 
   return <TickerContext.Provider value={value}>{children}</TickerContext.Provider>;

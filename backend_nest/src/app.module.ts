@@ -4,7 +4,7 @@ import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
 import { EventEmitterModule } from "@nestjs/event-emitter";
-import { ThrottlerModule, ThrottlerGuard } from "@nestjs/throttler";
+import { ThrottlerModule } from "@nestjs/throttler";
 import { LoggerModule } from "nestjs-pino";
 
 import { HttpExceptionFilter } from "@/common/errors/http-exception.filter";
@@ -18,6 +18,7 @@ import { TrumpModule } from "@/modules/trump/trump.module";
 import { RedditModule } from "@/modules/reddit/reddit.module";
 import { ThreatIntelModule } from "@/modules/threat-intel/threat-intel.module";
 import { IntelligenceModule } from "@/modules/intelligence/intelligence.module";
+import { CyberNewsModule } from "@/modules/cyber-news/cyber-news.module";
 import { AdminModule } from "@/modules/admin/admin.module";
 import { MetricsModule } from "@/modules/metrics/metrics.module";
 import { NotificationsModule } from "@/modules/notifications/notifications.module";
@@ -60,6 +61,7 @@ import { AuthService } from "@/modules/auth/auth.service";
     RedditModule,
     ThreatIntelModule,
     IntelligenceModule,
+    CyberNewsModule,
     AdminModule,
     MetricsModule,
     NotificationsModule,
@@ -73,7 +75,7 @@ import { AuthService } from "@/modules/auth/auth.service";
   ],
   providers: [
     { provide: APP_FILTER,      useClass: HttpExceptionFilter },
-    { provide: APP_GUARD,       useClass: ThrottlerGuard },
+    // { provide: APP_GUARD,       useClass: ThrottlerGuard }, // Disabled — using endpoint-specific throttling instead
     { provide: APP_GUARD,       useClass: JwtAuthGuard },
     { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor },
     AuthService,

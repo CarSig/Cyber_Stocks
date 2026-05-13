@@ -1,15 +1,17 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import CorrelationBox from "../../../components/organisms/CorrelationBox.jsx";
-import CorrLagTable from "../CorrLagTable.jsx";
+import { useTickerContext } from "@/context/TickerContext.jsx";
+import CorrelationBox from "@/components/organisms/ticker/CorrelationBox.jsx";
+import CorrLagTable from "@/pages/Ticker/CorrLagTable.jsx";
 
 export default function CorrelationsTab({
   ticker, companies, sparklinesData,
-  compareTicker, setCompareTicker, otherTickers,
-  correlationData, correlationFetching, correlagDays, setCorrelagDays,
+  otherTickers,
+  correlationData, correlationFetching,
   trump, threatIntel,
 }) {
+  const { compareTicker, setCompareTicker, correlagDays, setCorrelagDays } = useTickerContext();
   return (
     <section>
       {sparklinesData && (

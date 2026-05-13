@@ -32,8 +32,8 @@ export class IntelligenceController {
   @ApiOperation({ summary: "Get entity articles", description: "Returns all articles associated with an entity." })
   @ApiParam({ name: "entityId", description: "Entity ID" })
   @ApiResponse({ status: 200, description: "Article list" })
-  async getBackendEntityArticles(@Param("entityId") entityId: string) {
-    return this.contentAnalysis.getBackendArticlesByEntity(entityId);
+  async getBackendEntityArticles(@Param("entityId") entityId: string, @Query("signal") signal?: string) {
+    return this.contentAnalysis.getBackendArticlesByEntity(entityId, signal);
   }
 
   @Get("intelligence/entities/:entityId/summary")
@@ -41,8 +41,8 @@ export class IntelligenceController {
   @ApiParam({ name: "entityId", description: "Entity ID" })
   @ApiResponse({ status: 200, description: "Entity summary" })
   @ApiResponse({ status: 404, description: "Entity not found" })
-  async getBackendEntitySummary(@Param("entityId") entityId: string) {
-    const summary = await this.contentAnalysis.getBackendEntitySummary(entityId);
+  async getBackendEntitySummary(@Param("entityId") entityId: string, @Query("signal") signal?: string) {
+    const summary = await this.contentAnalysis.getBackendEntitySummary(entityId, signal);
     if (!summary) throw new AppError(`Entity ${entityId} not found`, 404);
     return summary;
   }
@@ -57,7 +57,7 @@ export class IntelligenceController {
   @Get("intelligence/sentiment-correlations")
   @ApiOperation({ summary: "Sentiment correlations", description: "Correlates entity sentiment scores with stock price movements for all tracked companies." })
   @ApiResponse({ status: 200, description: "Array of { entity, ticker, correlation, lagImpact }" })
-  async getAllSentimentCorrelations(@Query() { lagDays }: LagDaysDto) {
+  async getAllSentimentCorrelations(@Query() { lagDays }: LagDaysDto, @Query("signal") signal?: string) {
     const all = await this.contentAnalysis.getBackendEntities();
     const companyNames = new Set(Object.keys(companies));
     const known = all
@@ -67,6 +67,6 @@ export class IntelligenceController {
         const ticker = companies[name];
         return { entityId: e.entityId, name, ticker };
       });
-    return this.contentAnalysis.getAllSentimentCorrelations(known, lagDays ?? 1);
+    return this.contentAnalysis.getAllSentimentCorrelations(known, lagDays ?? 1, signal);
   }
 }

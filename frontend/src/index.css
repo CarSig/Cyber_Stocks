@@ -256,3 +256,67 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* ── Generic utilities ── */
+
+/* Small uppercase section label — 11px, muted, spaced caps */
+.label-sm-caps {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Inset card block — card bg, 8px radius, 14px padding, 20px bottom margin */
+.card-inset {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 20px;
+}
+
+/* Icon-only close button — no chrome, muted color */
+.btn-close-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted-foreground);
+}
+
+/* Flex row spaced between, vertically centered */
+.header-flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Fixed full-screen overlay backdrop, slide-in from right */
+.overlay-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 50;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Bordered list row card — card bg, hover-ready */
+.list-row-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  background: var(--card);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  transition: all 0.2s;
+}
+
+/* Large metric / count number */
+.metric-value {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+}

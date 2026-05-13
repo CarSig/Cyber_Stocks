@@ -25,6 +25,7 @@ export type BackendArticleResponse = ArticleResponse & {
   publisher: string | null;
   ticker: string;
   timestamp: string;
+  urgency?: string;
 };
 
 export type ProcessArticleInput = {

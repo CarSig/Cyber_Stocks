@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { createChart, HistogramSeries } from "lightweight-charts";
-import { getTrumpPosts, getCompanies } from "../api.js";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getTrumpPosts, getCompanies } from "@/api.js";
+import Page from "@/components/atoms/Page.jsx";
+import FilterSelect from "@/components/molecules/shared/FilterSelect";
 
 function TrumpPostsChart({ posts }) {
   const ref = useRef(null);
@@ -54,6 +56,7 @@ function filterByCompany(posts, ticker, companies) {
 
 export default function Socials() {
   const [company, setCompany] = useState("");
+  const [NOW] = useState(() => Date.now());
 
   const { data: posts, isPending, error } = useQuery({
     queryKey: ["trump-posts"],
@@ -62,10 +65,10 @@ export default function Socials() {
   const { data: companies } = useQuery({ queryKey: ["companies"], queryFn: getCompanies });
 
   const filtered = posts ? filterByCompany(posts, company, companies).filter((p) => p.content || p.text) : [];
-  const last30 = filtered.filter((p) => Date.now() - new Date(p.created_at).getTime() < 30 * 86400_000).length;
+  const last30 = filtered.filter((p) => NOW - new Date(p.created_at).getTime() < 30 * 86400_000).length;
 
   return (
-    <div className="ti-detail-page">
+    <Page>
       <div className="ti-detail-header">
         <Link to="/socials" className="ti-back">← Socials</Link>
         <h1>Truth Social</h1>
@@ -78,17 +81,12 @@ export default function Socials() {
         {posts && (
           <>
             <div className="ti-filters" style={{ marginBottom: 16 }}>
-              <Select value={company} onValueChange={setCompany}>
-                <SelectTrigger className="w-56">
-                  <SelectValue placeholder="All companies" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">All companies</SelectItem>
-                  {Object.entries(companies ?? {}).map(([name, ticker]) => (
-                    <SelectItem key={ticker} value={ticker}>{name} ({ticker})</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FilterSelect
+                value={company}
+                onChange={setCompany}
+                placeholder="Companies"
+                options={Object.entries(companies ?? {}).map(([name, ticker]) => ({ label: `${name} (${ticker})`, value: ticker }))}
+              />
               <span className="ti-count">{filtered.length} posts</span>
               <span className="ti-count">{last30} in last 30d</span>
             </div>
@@ -116,6 +114,6 @@ export default function Socials() {
           </>
         )}
       </section>
-    </div>
+    </Page>
   );
 }

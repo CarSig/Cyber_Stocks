@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { streamResearch } from "../api.js";
+import { streamResearch } from "@/api.js";
 
 export function useResearch(ticker) {
   const [sections, setSections] = useState(null);

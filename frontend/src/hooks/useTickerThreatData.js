@@ -1,4 +1,4 @@
-import { getNvd, getOtx, getKev } from "../api.js";
+import { getNvd, getOtx, getKev } from "@/api.js";
 import { useCachedQuery } from "./useCachedQuery.js";
 
 const HOUR = 60 * 60 * 1000;

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import "./charts.css";
 import { createChart, HistogramSeries } from "lightweight-charts";
 import { daysAgoString, todayString } from "./chartUtils.js";
-import ModalItem from "../../atoms/ModalItem.jsx";
+import ModalItem from "@/components/atoms/ModalItem.jsx";
+import ChartModal from "./ChartModal.jsx";
 
 // Interpolates red→amber→green across -1..+1
 function sentimentToColor(score) {
@@ -183,22 +184,14 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange, 
       <div ref={containerRef} className="chart-container" />
 
       {modal && (
-        <div className="news-modal-overlay" onClick={() => setModal(null)}>
-          <div className="news-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="news-modal-header">
-              <span className="news-modal-date">{modal.date}</span>
-              <button className="news-modal-close" onClick={() => setModal(null)}>✕</button>
-            </div>
-            <div className="news-modal-list">
-              {modal.items.map((a) => {
-                const score = analysis?.[a.link]?.sentiment ?? null;
-                const color = score === null ? "var(--text-muted)" : score >= 0.1 ? "var(--color-green)" : score <= -0.1 ? "var(--color-red)" : "var(--color-amber)";
-                const icon = score === null ? "?" : score >= 0.1 ? "▲" : score <= -0.1 ? "▼" : "●";
-                return <ModalItem key={a.link} href={a.link} icon={icon} iconColor={color} title={a.title} subtitle={a.publisher} />;
-              })}
-            </div>
-          </div>
-        </div>
+        <ChartModal date={modal.date} onClose={() => setModal(null)}>
+          {modal.items.map((a) => {
+            const score = analysis?.[a.link]?.sentiment ?? null;
+            const color = score === null ? "var(--text-muted)" : score >= 0.1 ? "var(--color-green)" : score <= -0.1 ? "var(--color-red)" : "var(--color-amber)";
+            const icon = score === null ? "?" : score >= 0.1 ? "▲" : score <= -0.1 ? "▼" : "●";
+            return <ModalItem key={a.link} href={a.link} icon={icon} iconColor={color} title={a.title} subtitle={a.publisher} />;
+          })}
+        </ChartModal>
       )}
     </div>
   );

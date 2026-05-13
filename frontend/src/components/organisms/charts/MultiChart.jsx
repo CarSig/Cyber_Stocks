@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import "./charts.css";
 import { createChart, LineSeries, createSeriesMarkers } from "lightweight-charts";
-import DatePicker from "../../atoms/DatePicker.jsx";
+import DatePicker from "@/components/atoms/DatePicker.jsx";
 import { daysAgoString, todayString, toSortedClose } from "./chartUtils.js";
 import { buildMarkers } from "./chartMarkers.js";
-import PeriodButtons from "../../molecules/PeriodButtons.jsx";
-import ChartToggleButton from "../../atoms/ChartToggleButton.jsx";
-import ChartSep from "../../atoms/ChartSep.jsx";
+import PeriodButtons from "@/components/molecules/shared/PeriodButtons.jsx";
+import ChartToggleButton from "@/components/atoms/ChartToggleButton.jsx";
+import ChartSep from "@/components/atoms/ChartSep.jsx";
 
 const COLOR_VARS = ["--series-1","--series-2","--series-3","--series-4","--series-5","--series-6","--series-7","--series-8","--series-9","--series-10"];
 const cv = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();

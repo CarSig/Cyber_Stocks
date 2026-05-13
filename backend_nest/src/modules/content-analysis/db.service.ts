@@ -64,8 +64,14 @@ export class DbService implements OnApplicationBootstrap, OnApplicationShutdown 
         ticker      TEXT NOT NULL,
         timestamp   TIMESTAMPTZ NOT NULL,
         news_type   TEXT NOT NULL DEFAULT 'company_specific',
-        embedding   vector(1536)
+        embedding   vector(1536),
+        urgency     TEXT DEFAULT 'recent'
       )
+    `);
+
+    // Add urgency column to existing table if it doesn't exist
+    await this.pool.query(`
+      ALTER TABLE backend_articles ADD COLUMN IF NOT EXISTS urgency TEXT DEFAULT 'recent'
     `);
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS backend_entity_mentions (
