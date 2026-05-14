@@ -1,0 +1,20 @@
+.base-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.base-card--stats {
+  background: var(--card);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 20px;
+}
+
+.base-card--article {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 10px;
+}

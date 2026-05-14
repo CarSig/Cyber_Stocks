@@ -1,5 +1,6 @@
 import { useEntityIntelligence } from "@/hooks/useIntelligence.js";
 import useCorrelationMetrics from "@/hooks/useCorrelationMetrics.js";
+import BaseCard from "@/components/atoms/BaseCard.jsx";
 import StatRowSummary from "@/components/molecules/shared/StatRowSummary.jsx";
 
 export default function EntityCard({ entity, onClick, signal, correlation }) {
@@ -7,7 +8,7 @@ export default function EntityCard({ entity, onClick, signal, correlation }) {
   const { corrResult, hasCorrelation, strength, sentimentInfo } = useCorrelationMetrics(correlation, summary.data);
 
   return (
-    <div className="ti-card" style={{ cursor: "pointer", opacity: summary.isPending ? 0.6 : 1 }} onClick={onClick}>
+    <BaseCard className="ti-card" style={{ cursor: "pointer", opacity: summary.isPending ? 0.6 : 1 }} onClick={onClick}>
       <div className="ti-card-head">
         <span className="ti-card-title entity-name-capitalize">{entity.name}</span>
       </div>
@@ -16,7 +17,7 @@ export default function EntityCard({ entity, onClick, signal, correlation }) {
         {!summary.isPending && summary.error && <p className="ti-empty">No data</p>}
         {summary.data && (
           <>
-            <StatRowSummary articleCount={summary.data.articleCount} positiveCount={summary.data.positiveCount} negativeCount={summary.data.negativeCount} />
+            <StatRowSummary summary={summary.data} />
 
             <div className="entity-card-metrics">
               {sentimentInfo && (
@@ -43,6 +44,6 @@ export default function EntityCard({ entity, onClick, signal, correlation }) {
           </>
         )}
       </div>
-    </div>
+    </BaseCard>
   );
 }

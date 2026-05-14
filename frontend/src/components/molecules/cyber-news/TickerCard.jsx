@@ -8,19 +8,31 @@ export default function TickerCard({ row, onClick, topic, correlation }) {
 
   return (
     <div className="ti-card" style={{ cursor: "pointer", opacity: isPending ? 0.6 : 1 }} onClick={onClick}>
-      <div className="ti-card-head">
-        <span className="ti-card-title">{row.company}</span>
-        <span style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{row.ticker}</span>
-      </div>
-      <div className="ti-card-body">
-        {isPending ? (
-          <p className="ti-loading">Loading…</p>
-        ) : summary ? (
-          <CardContent summary={summary} sentimentInfo={sentimentInfo} hasCorrelation={hasCorrelation} strength={strength} corrResult={corrResult} />
-        ) : (
-          <p className="ti-loading">Loading…</p>
-        )}
-      </div>
+      <TickerCardHead row={row} />
+      <TickerCardBody isPending={isPending} summary={summary} sentimentInfo={sentimentInfo} hasCorrelation={hasCorrelation} strength={strength} corrResult={corrResult} />
+    </div>
+  );
+}
+
+function TickerCardHead({ row }) {
+  return (
+    <div className="ti-card-head">
+      <span className="ti-card-title">{row.company}</span>
+      <span style={{ fontSize: 12, color: "var(--muted-foreground)" }}>{row.ticker}</span>
+    </div>
+  );
+}
+
+function TickerCardBody({ isPending, summary, sentimentInfo, hasCorrelation, strength, corrResult }) {
+  return (
+    <div className="ti-card-body">
+      {isPending ? (
+        <p className="ti-loading">Loading…</p>
+      ) : summary ? (
+        <CardContent summary={summary} sentimentInfo={sentimentInfo} hasCorrelation={hasCorrelation} strength={strength} corrResult={corrResult} />
+      ) : (
+        <p className="ti-loading">Loading…</p>
+      )}
     </div>
   );
 }

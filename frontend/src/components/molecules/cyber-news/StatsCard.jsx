@@ -1,3 +1,4 @@
+import BaseCard from "@/components/atoms/BaseCard.jsx";
 import SentimentBar from "@/components/molecules/shared/SentimentBar.jsx";
 
 const StatItem = ({ value, label, color }) => (
@@ -11,7 +12,7 @@ const StatItem = ({ value, label, color }) => (
 
 export default function StatsCard({ summary }) {
   return (
-    <div style={{ background: "var(--card)", borderRadius: 8, padding: 14, marginBottom: 20 }}>
+    <BaseCard variant="stats">
       <div className="ti-stats-row" style={{ marginBottom: 12 }}>
         <StatItem value={summary.articleCount} label="Articles" />
         <StatItem value={summary.positiveCount} label="Positive" color="var(--color-green, #22c55e)" />
@@ -20,6 +21,6 @@ export default function StatsCard({ summary }) {
       </div>
       <p style={{ fontSize: 12, color: "var(--muted-foreground)", marginBottom: 6 }}>Avg sentiment</p>
       <SentimentBar value={summary.avgSentiment} />
-    </div>
+    </BaseCard>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import BaseCard from "@/components/atoms/BaseCard.jsx";
 import CountBadge from "@/components/atoms/CountBadge.jsx";
 import { useGlobalSignals } from "@/hooks/useIntelligence.js";
 
@@ -9,7 +10,7 @@ export default function SignalsPanel({ selectedSignal, onSelectSignal }) {
   const visible = expanded ? filtered : filtered.slice(0, 10);
 
   return (
-    <div className="ti-card signals-panel">
+    <BaseCard className="ti-card signals-panel">
       <div className="ti-card-head">
         <span className="ti-card-icon">📡</span>
         <span className="ti-card-title">Global Macro Signals</span>

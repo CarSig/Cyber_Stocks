@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge.jsx";
 import TagBadge from "@/components/atoms/TagBadge.jsx";
 import CountBadge from "@/components/atoms/CountBadge.jsx";
+import BaseCard from "@/components/atoms/BaseCard.jsx";
 import SentimentBar from "@/components/molecules/shared/SentimentBar.jsx";
 import ArticleMeta from "./ArticleMeta.jsx";
 import ArticleHeader from "./ArticleHeader.jsx";
@@ -63,11 +64,11 @@ export default function ArticleCard({ article }) {
   const analysis = article.analysis;
 
   return (
-    <div className="article-card">
+    <BaseCard variant="article" className="article-card">
       <ArticleHeader article={article} />
       <ArticleMeta article={article} />
       {analysis && <ArticleAnalysis analysis={analysis} />}
       <OtherMatchesSection allMatches={article.allMatches} matchedTicker={article.matchedTicker} open={open} setOpen={setOpen} />
-    </div>
+    </BaseCard>
   );
 }
