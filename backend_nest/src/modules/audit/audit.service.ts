@@ -17,11 +17,15 @@ export class AuditService {
   constructor(private readonly db: CoreDbService) {}
 
   async log(user: User, action: string, meta: Record<string, unknown> = {}): Promise<void> {
-    await this.db.pool.query(
-      `INSERT INTO audit_log (user_id, username, role, action, meta)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [user.id, user.username, user.role, action, JSON.stringify(meta)],
-    );
+    try {
+      await this.db.pool.query(
+        `INSERT INTO audit_log (user_id, username, role, action, meta)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [user.id, user.username, user.role, action, JSON.stringify(meta)],
+      );
+    } catch {
+      // non-fatal: audit write failure must not crash the server
+    }
   }
 
   async getAll({ limit = 100, offset = 0, userId, action }: { limit?: number; offset?: number; userId?: string; action?: string } = {}): Promise<{ total: number; entries: AuditEntry[] }> {

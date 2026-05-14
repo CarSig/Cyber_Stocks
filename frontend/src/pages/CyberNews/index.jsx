@@ -3,10 +3,10 @@ import { LoadingSpinner } from "@/components/shared/LoadingSpinner.jsx";
 import { CorrelationSelector, ViewToggle } from "@/components/shared/CorrelationControls.jsx";
 import { useCyberNewsTickers, useCyberNewsTopics, useCyberNewsCorrelations } from "@/hooks/useCyberNews.js";
 import indexBy from "@/utils/indexBy.js";
-import TickerCard from "@/components/molecules/cyber-news/TickerCard.jsx";
+import TickerCard from "@/components/organisms/cards/TickerCard.jsx";
 import TickerListRow from "@/components/molecules/cyber-news/TickerListRow.jsx";
 import TickerDetailPanel from "@/components/organisms/cyber-news/TickerDetailPanel.jsx";
-import TopicsSidebar from "@/components/molecules/cyber-news/TopicsSidebar.jsx";
+import TopicsSidebar from "@/components/organisms/cards/TopicsSidebar.jsx";
 import "./CyberNews.css";
 import Page from "@/components/atoms/Page.jsx";
 

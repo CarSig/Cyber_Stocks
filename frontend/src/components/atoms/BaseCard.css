@@ -18,3 +18,33 @@
   padding: 14px;
   margin-bottom: 10px;
 }
+
+.base-card--interactive {
+  background: var(--surface-2);
+  border: 1px solid var(--surface-3);
+  border-radius: 10px;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.base-card--interactive:hover {
+  background: var(--surface-3);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.base-card--disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+.base-card--interactive.base-card--disabled:hover {
+  background: var(--surface-2);
+  border-color: var(--surface-3);
+  transform: none;
+}
+
+.card-metrics { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.card-metric-label { font-size: 11px; color: var(--muted-foreground); margin-bottom: 2px; }
+.card-metric-value { font-weight: 600; font-size: 12px; }
+.card-metric-details { display: flex; gap: 12px; font-size: 9px; color: var(--muted-foreground); margin-top: 3px; }

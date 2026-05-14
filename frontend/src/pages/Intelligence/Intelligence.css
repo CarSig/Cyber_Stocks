@@ -286,33 +286,6 @@
   font-size: 12px;
 }
 
-/* Entity Card */
-.entity-card-metrics {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.entity-card-metric-label {
-  font-size: 11px;
-  color: var(--muted-foreground);
-  margin-bottom: 2px;
-}
-
-.entity-card-metric-value {
-  font-weight: 600;
-  font-size: 12px;
-}
-
-.entity-card-correlation-details {
-  display: flex;
-  gap: 12px;
-  font-size: 9px;
-  color: var(--muted-foreground);
-  margin-top: 3px;
-}
-
 /* Entity Name - capitalize text */
 .entity-name-capitalize {
   text-transform: capitalize;

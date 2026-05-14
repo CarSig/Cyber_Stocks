@@ -6,7 +6,7 @@ import { URGENCY_CONFIG } from "@/utils/urgencyUtils.js";
 import indexBy from "@/utils/indexBy.js";
 import CountBadge from "@/components/atoms/CountBadge.jsx";
 import EntityDetailPanel from "@/components/organisms/intelligence/EntityDetailPanel.jsx";
-import EntityCard from "@/components/molecules/intelligence/EntityCard.jsx";
+import EntityCard from "@/components/organisms/cards/EntityCard.jsx";
 import EntityListRow from "@/components/molecules/intelligence/EntityListRow.jsx";
 import SignalSidebar from "@/components/molecules/intelligence/SignalSidebar.jsx";
 import ExpandableFilterSection from "@/components/molecules/shared/ExpandableFilterSection.jsx";

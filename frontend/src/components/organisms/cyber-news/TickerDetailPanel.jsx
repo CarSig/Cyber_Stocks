@@ -1,6 +1,6 @@
 import { useCyberNewsArticles, useCyberNewsSummary } from "@/hooks/useCyberNews.js";
-import StatsCard from "@/components/molecules/cyber-news/StatsCard.jsx";
-import ArticleCard from "@/components/molecules/cyber-news/ArticleCard.jsx";
+import StatsCard from "@/components/organisms/cards/StatsCard.jsx";
+import ArticleCard from "@/components/organisms/cards/ArticleCard.jsx";
 import DetailPanelOverlay from "@/components/molecules/shared/DetailPanelOverlay.jsx";
 import "./TickerDetailPanel.css";
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import BaseCard from "@/components/atoms/BaseCard.jsx";
+import CardHeader from "@/components/atoms/CardHeader.jsx";
 import CountBadge from "@/components/atoms/CountBadge.jsx";
 import { useGlobalSignals } from "@/hooks/useIntelligence.js";
 
@@ -10,11 +11,8 @@ export default function SignalsPanel({ selectedSignal, onSelectSignal }) {
   const visible = expanded ? filtered : filtered.slice(0, 10);
 
   return (
-    <BaseCard className="ti-card signals-panel">
-      <div className="ti-card-head">
-        <span className="ti-card-icon">📡</span>
-        <span className="ti-card-title">Global Macro Signals</span>
-      </div>
+    <BaseCard variant="interactive" className="signals-panel">
+      <CardHeader icon="📡" title="Global Macro Signals" />
       <div className="ti-card-body">
         {isPending && <p className="ti-loading">Loading…</p>}
         {error && <p className="ti-error">{error.message}</p>}
@@ -35,6 +33,6 @@ export default function SignalsPanel({ selectedSignal, onSelectSignal }) {
           </button>
         )}
       </div>
-    </div>
+    </BaseCard>
   );
 }

@@ -57,6 +57,11 @@ export default function Navbar() {
           </Link>
         )}
         {user && (
+          <Link to="/alpaca" className="navbar-nav-link" onClick={closeMenu}>
+            Intraday
+          </Link>
+        )}
+        {user && (
           <a
             href={`http://localhost:3000/api-docs?token=${localStorage.getItem("auth_token") ?? ""}`}
             target="_blank"

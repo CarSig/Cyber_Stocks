@@ -26,6 +26,7 @@ import { ResearchModule } from "@/modules/research/research.module";
 import { MqModule } from "@/modules/mq/mq.module";
 import { SchedulerModule } from "@/modules/scheduler/scheduler.module";
 import { AuditModule } from "@/modules/audit/audit.module";
+import { AlpacaModule } from "@/modules/alpaca/alpaca.module";
 import { CoreDbModule } from "@/shared/core-db.module";
 import { CacheModule } from "@/shared/cache.module";
 import { AuthService } from "@/modules/auth/auth.service";
@@ -71,6 +72,7 @@ import { AuthService } from "@/modules/auth/auth.service";
     CoreDbModule,
     CacheModule,
     AuditModule,
+    AlpacaModule,
     StockModule,
   ],
   providers: [

@@ -1,17 +1,16 @@
 import { Link } from "react-router-dom";
 import Page from "@/components/atoms/Page.jsx";
+import BaseCard from "@/components/atoms/BaseCard.jsx";
+import CardHeader from "@/components/atoms/CardHeader.jsx";
 
 function SocialCard({ to, icon, title, description }) {
   return (
-    <Link to={to} className="ti-card">
-      <div className="ti-card-head">
-        <span className="ti-card-icon">{icon}</span>
-        <span className="ti-card-title">{title}</span>
-      </div>
+    <BaseCard variant="interactive" as={Link} to={to}>
+      <CardHeader icon={icon} title={title} />
       <div className="ti-card-body">
         <p className="ti-empty" style={{ marginTop: 0 }}>{description}</p>
       </div>
-    </Link>
+    </BaseCard>
   );
 }
 

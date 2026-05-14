@@ -4,8 +4,8 @@ import TagBadge from "@/components/atoms/TagBadge.jsx";
 import CountBadge from "@/components/atoms/CountBadge.jsx";
 import BaseCard from "@/components/atoms/BaseCard.jsx";
 import SentimentBar from "@/components/molecules/shared/SentimentBar.jsx";
-import ArticleMeta from "./ArticleMeta.jsx";
-import ArticleHeader from "./ArticleHeader.jsx";
+import ArticleMeta from "@/components/molecules/cyber-news/ArticleMeta.jsx";
+import ArticleHeader from "@/components/molecules/cyber-news/ArticleHeader.jsx";
 import "./ArticleCard.css";
 
 function ArticleAnalysis({ analysis }) {
@@ -64,7 +64,7 @@ export default function ArticleCard({ article }) {
   const analysis = article.analysis;
 
   return (
-    <BaseCard variant="article" className="article-card">
+    <BaseCard variant="article">
       <ArticleHeader article={article} />
       <ArticleMeta article={article} />
       {analysis && <ArticleAnalysis analysis={analysis} />}

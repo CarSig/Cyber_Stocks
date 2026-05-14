@@ -220,3 +220,9 @@ export function getCyberNewsCorrelations(lagDays = 1, topic) {
   return apiFetch(`/cyber-news/correlations?${qs}`);
 }
 
+// ── Alpaca ────────────────────────────────────────────────────────────────────
+
+export function getAlpacaBars(ticker, date, timeframe = "1Min") {
+  return apiFetch(`/alpaca/bars/${encodeURIComponent(ticker)}?date=${date}&timeframe=${timeframe}`);
+}
+

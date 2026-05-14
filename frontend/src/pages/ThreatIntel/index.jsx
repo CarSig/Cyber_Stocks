@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import StateHandler from "@/components/organisms/shared/StateHandler.jsx";
-import ThreatIntelCard from "@/components/molecules/threat-intel/shared/ThreatIntelCard.jsx";
+import ThreatIntelCard from "@/components/organisms/cards/ThreatIntelCard.jsx";
 import { getThreatIntelStatus } from "@/api.js";
 import Page from "@/components/atoms/Page.jsx";
 

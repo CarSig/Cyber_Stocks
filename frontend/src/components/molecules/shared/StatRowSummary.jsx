@@ -1,4 +1,5 @@
 export default function StatRowSummary({ summary, labels, style }) {
+  if (!summary) return null;
   const { articleCount, positiveCount, negativeCount, neutralCount } = summary;
   const l = {
     articles: "art",

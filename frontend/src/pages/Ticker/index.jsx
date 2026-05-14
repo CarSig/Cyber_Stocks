@@ -12,7 +12,6 @@ import { getNewsAnalysis, getSparklines } from "@/api.js";
 import { useCachedQuery } from "@/hooks/useCachedQuery.js";
 import { useTickerThreatData } from "@/hooks/useTickerThreatData.js";
 import { TickerProvider, useTickerContext } from "@/context/TickerContext.jsx";
-import { TABS } from "./constants.js";
 import TickerWatchlist from "./TickerWatchlist.jsx";
 import { buildChatContext } from "./buildChatContext.js";
 import TickerChat from "./TickerChat.jsx";
@@ -21,6 +20,7 @@ import SimulationTab from "./tabs/SimulationTab.jsx";
 import CorrelationsTab from "./tabs/CorrelationsTab.jsx";
 import ArticlesTab from "./tabs/ArticlesTab.jsx";
 import InfoTab from "./tabs/InfoTab.jsx";
+import DayTradeTab from "./tabs/DayTradeTab.jsx";
 
 function TickerContent() {
   const {
@@ -162,7 +162,7 @@ function TickerContent() {
             <h1>{ticker}</h1>
 
             <nav className="ticker-tabs">
-              {TABS.map((tab) => (
+              {["charts", "simulation", "correlations", "articles", "info", "day trade"].map((tab) => (
                 <button key={tab} className={`ticker-tab${activeTab === tab ? " ticker-tab--active" : ""}`} onClick={() => setActiveTab(tab)}>
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 </button>
@@ -221,6 +221,8 @@ function TickerContent() {
             {activeTab === "articles" && <ArticlesTab ticker={ticker} newsArticles={newsArticles} />}
 
             {activeTab === "info" && <InfoTab summary={summary} research={research} />}
+
+            {activeTab === "day trade" && <DayTradeTab ticker={ticker} companies={companies} />}
           </div>
 
           <TickerChat showChat={showChat} onOpen={() => setShowChat(true)} onClose={() => setShowChat(false)} context={chatContext} />

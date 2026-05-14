@@ -20,6 +20,7 @@ import SocialsTruthSocial from "./pages/Socials/SocialsTruthSocial.jsx";
 import SocialsReddit from "./pages/Socials/SocialsReddit/index.jsx";
 import Intelligence from "./pages/Intelligence/index.jsx";
 import CyberNews from "./pages/CyberNews/index.jsx";
+import Alpaca from "./pages/Alpaca/index.jsx";
 
 export default function App() {
   return (
@@ -131,6 +132,14 @@ export default function App() {
                   element={
                     <ProtectedRoute>
                       <CyberNews />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/alpaca"
+                  element={
+                    <ProtectedRoute>
+                      <Alpaca />
                     </ProtectedRoute>
                   }
                 />

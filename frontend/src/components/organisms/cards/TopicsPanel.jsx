@@ -1,23 +1,20 @@
 import { useState } from "react";
 import CountBadge from "@/components/atoms/CountBadge.jsx";
+import BaseCard from "@/components/atoms/BaseCard.jsx";
+import CardHeader from "@/components/atoms/CardHeader.jsx";
 import { useCyberNewsTopics } from "@/hooks/useCyberNews.js";
 
 export default function TopicsPanel({ selectedTopic, onSelectTopic }) {
   return (
-    <div className="ti-card" style={{ cursor: "default" }}>
+    <BaseCard variant="interactive" disabled>
       <TopicsPanelHeader />
       <TopicsPanelBody selectedTopic={selectedTopic} onSelectTopic={onSelectTopic} />
-    </div>
+    </BaseCard>
   );
 }
 
 function TopicsPanelHeader() {
-  return (
-    <div className="ti-card-head">
-      <span className="ti-card-icon">🏷️</span>
-      <span className="ti-card-title">Top Topics</span>
-    </div>
-  );
+  return <CardHeader icon="🏷️" title="Top Topics" />;
 }
 
 function TopicsPanelBody({ selectedTopic, onSelectTopic }) {

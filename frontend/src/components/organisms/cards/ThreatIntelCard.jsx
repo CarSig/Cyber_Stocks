@@ -1,4 +1,4 @@
-import StatusCard from "@/components/organisms/shared/StatusCard.jsx";
+import StatusCard from "./StatusCard.jsx";
 import StatusCardContent from "@/components/molecules/shared/StatusCardContent";
 
 export default function ThreatIntelCard({ to, icon, title, data, type, configured }) {
