@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { classifyUrgency, URGENCY_CONFIG } from "@/utils/urgencyUtils.js";
+import { useState } from 'react';
+import { classifyUrgency, URGENCY_CONFIG } from '@/utils/urgencyUtils.js';
 
 export default function useUrgencyFilter(articles) {
-  const [activeUrgency, setActiveUrgency] = useState("all");
+  const [activeUrgency, setActiveUrgency] = useState('all');
 
   const enriched = (articles ?? []).map((a) => {
     try {
       const urgency = a.urgency || classifyUrgency(a.timestamp, a.globalSignals ?? [], a.companySignals ?? []);
       return { ...a, _urgency: urgency };
     } catch {
-      return { ...a, _urgency: a.urgency || "future_short" };
+      return { ...a, _urgency: a.urgency || 'future_short' };
     }
   });
 
@@ -19,7 +19,7 @@ export default function useUrgencyFilter(articles) {
   });
 
   const filtered = enriched
-    .filter((a) => activeUrgency === "all" || a._urgency === activeUrgency)
+    .filter((a) => activeUrgency === 'all' || a._urgency === activeUrgency)
     .sort((a, b) => URGENCY_CONFIG[a._urgency].order - URGENCY_CONFIG[b._urgency].order);
 
   return { enriched, counts, activeUrgency, setActiveUrgency, filtered };

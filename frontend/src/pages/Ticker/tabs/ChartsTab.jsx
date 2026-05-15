@@ -1,13 +1,13 @@
-import FilterSelect from "@/components/molecules/shared/FilterSelect.jsx";
-import ChartCard from "@/components/molecules/shared/ChartCard.jsx";
-import { useTickerContext } from "@/context/TickerContext.jsx";
-import StockChart from "@/components/organisms/charts/StockChart.jsx";
-import VolatilityChart from "@/components/organisms/charts/VolatilityChart.jsx";
-import NewsChart from "@/components/organisms/charts/NewsChart.jsx";
-import IntelligenceChart from "@/components/organisms/charts/IntelligenceChart.jsx";
-import PeriodButtons from "@/components/molecules/shared/PeriodButtons.jsx";
-import Analysis from "@/components/organisms/ticker/Analysis.jsx";
-import TickerKPI from "@/pages/Ticker/TickerKPI.jsx";
+import FilterSelect from '@/components/molecules/shared/FilterSelect.jsx';
+import ChartCard from '@/components/molecules/shared/ChartCard.jsx';
+import { useTickerContext } from '@/context/TickerContext.jsx';
+import StockChart from '@/components/organisms/charts/StockChart.jsx';
+import VolatilityChart from '@/components/organisms/charts/VolatilityChart.jsx';
+import NewsChart from '@/components/organisms/charts/NewsChart.jsx';
+import IntelligenceChart from '@/components/organisms/charts/IntelligenceChart.jsx';
+import PeriodButtons from '@/components/molecules/shared/PeriodButtons.jsx';
+import Analysis from '@/components/organisms/ticker/Analysis.jsx';
+import TickerKPI from '@/pages/Ticker/TickerKPI.jsx';
 
 export default function ChartsTab({
   summary,
@@ -78,7 +78,13 @@ export default function ChartsTab({
       </ChartCard>
 
       <ChartCard title="Volatility" hidden={hideVolatility} onToggle={() => setHideVolatility((v) => !v)}>
-        <VolatilityChart quotes={allQuotes} period={period} onPeriodChange={setPeriod} visibleRange={visibleRange} onRangeChange={setVisibleRange} />
+        <VolatilityChart
+          quotes={allQuotes}
+          period={period}
+          onPeriodChange={setPeriod}
+          visibleRange={visibleRange}
+          onRangeChange={setVisibleRange}
+        />
       </ChartCard>
 
       {overlays.news.articles.length > 0 && (
@@ -96,7 +102,11 @@ export default function ChartsTab({
       )}
 
       {intelligenceArticles?.length > 0 && (
-        <ChartCard title="Intelligence Sentiment" hidden={hideIntelligence} onToggle={() => setHideIntelligence((v) => !v)}>
+        <ChartCard
+          title="Intelligence Sentiment"
+          hidden={hideIntelligence}
+          onToggle={() => setHideIntelligence((v) => !v)}
+        >
           <IntelligenceChart
             articles={intelligenceArticles}
             entityId={entityId}
@@ -110,7 +120,11 @@ export default function ChartsTab({
       )}
 
       {overlays.cyberNews.articles?.length > 0 && (
-        <ChartCard title="Cyber News Sentiment" hidden={hideCyberNewsSentiment} onToggle={() => setHideCyberNewsSentiment((v) => !v)}>
+        <ChartCard
+          title="Cyber News Sentiment"
+          hidden={hideCyberNewsSentiment}
+          onToggle={() => setHideCyberNewsSentiment((v) => !v)}
+        >
           <NewsChart
             articles={overlays.cyberNews.articles}
             analysis={overlays.cyberNews.analysis}

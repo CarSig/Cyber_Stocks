@@ -1,4 +1,4 @@
-import ChartToggleButton from "@/components/atoms/ChartToggleButton.jsx";
+import ChartToggleButton from '@/components/atoms/ChartToggleButton.jsx';
 
 export default function ChartCard({ title, hidden, onToggle, children }) {
   return (
@@ -6,7 +6,7 @@ export default function ChartCard({ title, hidden, onToggle, children }) {
       <div className="chart-title-row">
         <h3 className="chart-title">{title}</h3>
         <ChartToggleButton active={hidden} onClick={onToggle}>
-          {hidden ? "Show Chart" : "Hide Chart"}
+          {hidden ? 'Show Chart' : 'Hide Chart'}
         </ChartToggleButton>
       </div>
       {!hidden && children}

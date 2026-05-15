@@ -1,7 +1,7 @@
-import { Navigate } from "react-router-dom";
-import { SignInButton, useUser } from "@clerk/react";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext.jsx";
+import { Navigate } from 'react-router-dom';
+import { SignInButton, useUser } from '@clerk/react';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/AuthContext.jsx';
 
 export default function AdminRoute({ children }) {
   const { isSignedIn, isLoaded: clerkLoaded } = useUser();
@@ -22,6 +22,6 @@ export default function AdminRoute({ children }) {
     );
   }
 
-  if (!user || user.role !== "admin") return <Navigate to="/" replace />;
+  if (!user || user.role !== 'admin') return <Navigate to="/" replace />;
   return children;
 }

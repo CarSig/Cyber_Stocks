@@ -1,4 +1,4 @@
-import { daysAgoString, todayString } from "./dates.js";
+import { daysAgoString, todayString } from './dates.js';
 
 export function attachResizeObserver(chart, containerRef) {
   const observer = new ResizeObserver(() => {
@@ -24,11 +24,21 @@ export function subscribeRangeChange(chart, skipRangeRef, { onRangeChange, onPer
 export function applyRange(chart, skipRangeRef, { period, visibleRange } = {}) {
   skipRangeRef.current = true;
   if (visibleRange) {
-    try { chart.timeScale().setVisibleRange(visibleRange); } catch { chart.timeScale().fitContent(); }
+    try {
+      chart.timeScale().setVisibleRange(visibleRange);
+    } catch {
+      chart.timeScale().fitContent();
+    }
   } else if (period === null) {
     chart.timeScale().fitContent();
   } else {
-    try { chart.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() }); } catch { chart.timeScale().fitContent(); }
+    try {
+      chart.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() });
+    } catch {
+      chart.timeScale().fitContent();
+    }
   }
-  setTimeout(() => { skipRangeRef.current = false; }, 150);
+  setTimeout(() => {
+    skipRangeRef.current = false;
+  }, 150);
 }

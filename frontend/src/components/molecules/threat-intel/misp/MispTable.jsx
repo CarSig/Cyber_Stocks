@@ -1,7 +1,7 @@
-import TiTable from "../TiTable.jsx";
-import MispRow from "./MispRow.jsx";
+import TiTable from '../TiTable.jsx';
+import MispRow from './MispRow.jsx';
 
-const HEADERS = ["Event", "Org", "Threat Level", "Date"];
+const HEADERS = ['Event', 'Org', 'Threat Level', 'Date'];
 
 export default function MispTable({ data }) {
   return (

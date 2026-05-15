@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge.jsx";
-import TagBadge from "@/components/atoms/TagBadge.jsx";
-import CountBadge from "@/components/atoms/CountBadge.jsx";
-import BaseCard from "@/components/atoms/BaseCard.jsx";
-import SentimentBar from "@/components/molecules/shared/SentimentBar.jsx";
-import ArticleMeta from "./ArticleMeta.jsx";
-import ArticleHeader from "./ArticleHeader.jsx";
-import "./ArticleCard.css";
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge.jsx';
+import TagBadge from '@/components/atoms/TagBadge.jsx';
+import CountBadge from '@/components/atoms/CountBadge.jsx';
+import BaseCard from '@/components/atoms/BaseCard.jsx';
+import SentimentBar from '@/components/molecules/shared/SentimentBar.jsx';
+import ArticleMeta from './ArticleMeta.jsx';
+import ArticleHeader from './ArticleHeader.jsx';
+import './ArticleCard.css';
 
 function ArticleAnalysis({ analysis }) {
   return (
@@ -30,7 +30,9 @@ function ArticleAnalysis({ analysis }) {
         </div>
       )}
 
-      {analysis?.summary && <p className={`article-card-summary ${!analysis.entities?.length ? "no-margin" : ""}`}>{analysis.summary}</p>}
+      {analysis?.summary && (
+        <p className={`article-card-summary ${!analysis.entities?.length ? 'no-margin' : ''}`}>{analysis.summary}</p>
+      )}
     </>
   );
 }
@@ -40,8 +42,8 @@ function OtherMatchesSection({ allMatches, matchedTicker, open, setOpen }) {
     <>
       {allMatches?.length > 1 && (
         <button onClick={() => setOpen((o) => !o)} className="article-card-button">
-          {open ? "Hide" : `Also mentions ${allMatches.length - 1} other company`}
-          {allMatches.length - 1 > 1 ? "ies" : ""} ↓
+          {open ? 'Hide' : `Also mentions ${allMatches.length - 1} other company`}
+          {allMatches.length - 1 > 1 ? 'ies' : ''} ↓
         </button>
       )}
       {open && (
@@ -68,7 +70,12 @@ export default function ArticleCard({ article }) {
       <ArticleHeader article={article} />
       <ArticleMeta article={article} />
       {analysis && <ArticleAnalysis analysis={analysis} />}
-      <OtherMatchesSection allMatches={article.allMatches} matchedTicker={article.matchedTicker} open={open} setOpen={setOpen} />
+      <OtherMatchesSection
+        allMatches={article.allMatches}
+        matchedTicker={article.matchedTicker}
+        open={open}
+        setOpen={setOpen}
+      />
     </BaseCard>
   );
 }

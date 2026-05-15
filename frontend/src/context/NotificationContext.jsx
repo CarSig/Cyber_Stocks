@@ -1,13 +1,12 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { useAuth } from "./AuthContext.jsx";
-
-const BASE = "http://localhost:3000";
-const STORAGE_KEY = "notifications";
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { useAuth } from './AuthContext.jsx';
+import { BASE } from '@/api/core.js';
+const STORAGE_KEY = 'notifications';
 const NotificationContext = createContext(null);
 
 function load() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
   } catch {
     return [];
   }
@@ -25,13 +24,13 @@ export function NotificationProvider({ children }) {
 
   useEffect(() => {
     if (!user) return;
-    const token = localStorage.getItem("auth_token") ?? "";
+    const token = localStorage.getItem('auth_token') ?? '';
     const es = new EventSource(`${BASE}/notifications/stream?token=${encodeURIComponent(token)}`);
     esRef.current = es;
 
     es.onmessage = (e) => {
       const data = JSON.parse(e.data);
-      if (data.type === "connected" || data.type === "ping") return;
+      if (data.type === 'connected' || data.type === 'ping') return;
       const notification = { ...data, id: crypto.randomUUID(), read: false };
       setNotifications((prev) => {
         const next = [notification, ...prev].slice(0, 50);
@@ -73,7 +72,11 @@ export function NotificationProvider({ children }) {
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  return <NotificationContext.Provider value={{ notifications, unread, markAllRead, dismiss, clearAll }}>{children}</NotificationContext.Provider>;
+  return (
+    <NotificationContext.Provider value={{ notifications, unread, markAllRead, dismiss, clearAll }}>
+      {children}
+    </NotificationContext.Provider>
+  );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

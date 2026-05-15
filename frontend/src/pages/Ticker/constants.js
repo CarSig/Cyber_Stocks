@@ -1,1 +1,1 @@
-export const TABS = ["charts", "simulation", "correlations", "articles", "info", "day trade"];
+export const TABS = ['charts', 'simulation', 'correlations', 'articles', 'info', 'day trade'];

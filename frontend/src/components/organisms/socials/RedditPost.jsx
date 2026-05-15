@@ -1,23 +1,29 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import StateHandler from "@/components/organisms/shared/StateHandler.jsx";
-import { getComments } from "@/api/reddit.js";
-import CountBadge from "@/components/atoms/CountBadge";
-import TagBadge from "@/components/atoms/TagBadge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import CommentNode from "@/components/molecules/socials/CommentNode.jsx";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import StateHandler from '@/components/organisms/shared/StateHandler.jsx';
+import { getComments } from '@/api/reddit.js';
+import CountBadge from '@/components/atoms/CountBadge';
+import TagBadge from '@/components/atoms/TagBadge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import CommentNode from '@/components/molecules/socials/CommentNode.jsx';
 
 function Comments({ subreddit, postId }) {
   const { data, isPending, error } = useQuery({
-    queryKey: ["reddit-comments", subreddit, postId],
+    queryKey: ['reddit-comments', subreddit, postId],
     queryFn: () => getComments(subreddit, postId),
     staleTime: 5 * 60 * 1000,
   });
 
   return (
-    <StateHandler isPending={isPending} error={error} empty={!data?.length} loadingMessage="Loading comments…" emptyMessage="No comments">
+    <StateHandler
+      isPending={isPending}
+      error={error}
+      empty={!data?.length}
+      loadingMessage="Loading comments…"
+      emptyMessage="No comments"
+    >
       <div className="flex flex-col gap-3 mt-3">
         {data.map((c) => (
           <CommentNode key={c.id} comment={c} />
@@ -38,7 +44,12 @@ export default function RedditPost({ post, subreddit }) {
           <CountBadge count={post.score} icon="▲" />
           <TagBadge>💬 {post.numComments}</TagBadge>
           <span className="text-xs text-muted-foreground">u/{post.author}</span>
-          <a href={post.url} target="_blank" rel="noreferrer" className="ml-auto text-xs text-(--color-blue) hover:underline">
+          <a
+            href={post.url}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-auto text-xs text-(--color-blue) hover:underline"
+          >
             open ↗
           </a>
         </div>
@@ -52,8 +63,13 @@ export default function RedditPost({ post, subreddit }) {
       )}
 
       <CardContent className="px-4 pb-3 pt-0">
-        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground" onClick={() => setExpanded((v) => !v)}>
-          {expanded ? "▲ hide comments" : `▼ show comments (${post.numComments})`}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? '▲ hide comments' : `▼ show comments (${post.numComments})`}
         </Button>
 
         {expanded && (

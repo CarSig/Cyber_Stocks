@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Param, Query, Sse, MessageEvent } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 import { Observable } from "rxjs";
 import { startWith } from "rxjs/operators";
@@ -8,14 +8,15 @@ import { AuditService } from "@/modules/audit/audit.service";
 import { NotificationsService } from "@/modules/notifications/notifications.service";
 import { checkAnthropic } from "@/shared/utils/anthropicAnalyzer";
 import { resolveTicker } from "@/shared/ticker.utils";
-import { LagDaysDto, ArticleSentimentDto, CorrelationWithImpactDto } from "@/shared/dto";
+import { LagDaysDto } from "@/shared/dto";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { AllowQueryToken } from "@/common/decorators/allow-query-token.decorator";
+import { AnthropicStatusDoc, GetAnalysisDoc, AnalyzeDoc, ProgressDoc, NewsCorrelationDoc } from "./news.docs";
 import type { User } from "@/types/index";
 
 @ApiTags("News")
 @ApiBearerAuth("bearer")
-@Controller()
+@Controller("news")
 export class NewsController {
   constructor(
     private readonly newsAnalysisService: NewsAnalysisService,
@@ -24,17 +25,13 @@ export class NewsController {
   ) {}
 
   @Get("anthropic/status")
-  @ApiOperation({ summary: "Anthropic status", description: "Checks whether the Anthropic API key is configured and returns the active model name." })
-  @ApiResponse({ status: 200, description: "{ url: string, model: string }" })
+  @AnthropicStatusDoc()
   async anthropicStatus() {
     return checkAnthropic();
   }
 
   @Get("news-analysis/:ticker")
-  @ApiOperation({ summary: "Get sentiment scores", description: "Returns stored sentiment, importance, and relevance scores for all analysed news articles for the ticker." })
-  @ApiParam({ name: "ticker", description: "Ticker symbol" })
-  @ApiResponse({ status: 200, schema: { type: "object", additionalProperties: { $ref: "#/components/schemas/ArticleSentimentDto" }, description: "Map of article URL → ArticleSentimentDto" } })
-  @ApiResponse({ status: 404, description: "Unknown ticker" })
+  @GetAnalysisDoc()
   async getAnalysis(@Param("ticker") ticker: string) {
     const r = resolveTicker(ticker);
     return this.newsAnalysisService.readAnalysis(r.name);
@@ -42,11 +39,7 @@ export class NewsController {
 
   @Post("news-analyze/:ticker")
   @Throttle({ strict: { ttl: 60_000, limit: 10 } })
-  @ApiOperation({ summary: "Enqueue news for analysis", description: "Queues all unanalysed news articles for the ticker to RabbitMQ for Anthropic sentiment processing. Rate limited to 10 req/60s." })
-  @ApiParam({ name: "ticker", description: "Ticker symbol" })
-  @ApiResponse({ status: 201, description: "{ queued: number, total: number }" })
-  @ApiResponse({ status: 404, description: "Unknown ticker" })
-  @ApiResponse({ status: 429, description: "Rate limit exceeded" })
+  @AnalyzeDoc()
   async analyze(@Param("ticker") ticker: string, @CurrentUser() user: User) {
     const r = resolveTicker(ticker);
     this.auditService.log(user, "news_analyze", { ticker: r.ticker });
@@ -57,9 +50,7 @@ export class NewsController {
 
   @Sse("news-analyze/:ticker/progress")
   @AllowQueryToken()
-  @ApiOperation({ summary: "Analysis progress stream (SSE)", description: "Server-Sent Events stream reporting progress of a running news analysis job. Accepts ?token= instead of Authorization header." })
-  @ApiParam({ name: "ticker", description: "Ticker symbol" })
-  @ApiResponse({ status: 200, description: "SSE stream: { type, ticker, done?, progress? }" })
+  @ProgressDoc()
   progress(@Param("ticker") ticker: string): Observable<MessageEvent> {
     const r = resolveTicker(ticker);
     return this.notificationsService.streamProgress(r.ticker).pipe(
@@ -68,10 +59,7 @@ export class NewsController {
   }
 
   @Get("news-correlation/:ticker")
-  @ApiOperation({ summary: "News–price correlation", description: "Correlates news sentiment events with stock price movements using Pearson correlation and lag-bucketed impact analysis." })
-  @ApiParam({ name: "ticker", description: "Ticker symbol" })
-  @ApiResponse({ status: 200, type: CorrelationWithImpactDto })
-  @ApiResponse({ status: 404, description: "Unknown ticker" })
+  @NewsCorrelationDoc()
   async correlation(@Param("ticker") ticker: string, @Query() { lagDays }: LagDaysDto) {
     const r = resolveTicker(ticker);
     return this.newsAnalysisService.correlate(r.ticker, lagDays ?? 1);

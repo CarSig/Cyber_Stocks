@@ -1,5 +1,5 @@
-import { useEntityIntelligence } from "@/hooks/useIntelligence.js";
-import useCorrelationMetrics from "@/hooks/useCorrelationMetrics.js";
+import { useEntityIntelligence } from '@/hooks/useIntelligence.js';
+import useCorrelationMetrics from '@/hooks/useCorrelationMetrics.js';
 
 function EntityListRowContent({ summary, sentimentInfo, hasCorrelation, corrResult, strength }) {
   return (
@@ -12,11 +12,15 @@ function EntityListRowContent({ summary, sentimentInfo, hasCorrelation, corrResu
             <div className="entity-list-row-stat-label">total</div>
           </div>
           <div className="entity-list-row-stat">
-            <div className="entity-list-row-stat-value" style={{ color: "var(--color-green, #22c55e)" }}>{summary.data.positiveCount}</div>
+            <div className="entity-list-row-stat-value" style={{ color: 'var(--color-green, #22c55e)' }}>
+              {summary.data.positiveCount}
+            </div>
             <div className="entity-list-row-stat-label">positive</div>
           </div>
           <div className="entity-list-row-stat">
-            <div className="entity-list-row-stat-value" style={{ color: "var(--color-red, #ef4444)" }}>{summary.data.negativeCount}</div>
+            <div className="entity-list-row-stat-value" style={{ color: 'var(--color-red, #ef4444)' }}>
+              {summary.data.negativeCount}
+            </div>
             <div className="entity-list-row-stat-label">negative</div>
           </div>
         </div>
@@ -28,7 +32,8 @@ function EntityListRowContent({ summary, sentimentInfo, hasCorrelation, corrResu
           {sentimentInfo?.label}
         </div>
         <div className="entity-list-row-section-label">
-          {summary.data.avgSentiment > 0 ? "+" : ""}{summary.data.avgSentiment.toFixed(2)}
+          {summary.data.avgSentiment > 0 ? '+' : ''}
+          {summary.data.avgSentiment.toFixed(2)}
         </div>
       </div>
 
@@ -40,7 +45,7 @@ function EntityListRowContent({ summary, sentimentInfo, hasCorrelation, corrResu
           </div>
           <div className="entity-list-row-divider-detail">
             <span>r: {corrResult.r.toFixed(3)}</span>
-            <span>p: {corrResult.pValue < 0.001 ? "< 0.001" : corrResult.pValue.toFixed(3)}</span>
+            <span>p: {corrResult.pValue < 0.001 ? '< 0.001' : corrResult.pValue.toFixed(3)}</span>
           </div>
         </div>
       )}
@@ -53,7 +58,10 @@ export default function EntityListRow({ entity, onClick, signal, correlation }) 
   const { corrResult, hasCorrelation, strength, sentimentInfo } = useCorrelationMetrics(correlation, summary.data);
 
   return (
-    <div onClick={onClick} className={`entity-list-row list-row-card ${summary.isPending ? "entity-list-row-loading" : ""}`}>
+    <div
+      onClick={onClick}
+      className={`entity-list-row list-row-card ${summary.isPending ? 'entity-list-row-loading' : ''}`}
+    >
       <div className="entity-list-row-name">
         <div className="entity-list-row-name-text">{entity.name}</div>
       </div>
@@ -61,7 +69,13 @@ export default function EntityListRow({ entity, onClick, signal, correlation }) 
       {summary.isPending ? (
         <div className="entity-list-row-loading-message">Loading…</div>
       ) : summary.data ? (
-        <EntityListRowContent summary={summary} sentimentInfo={sentimentInfo} hasCorrelation={hasCorrelation} corrResult={corrResult} strength={strength} />
+        <EntityListRowContent
+          summary={summary}
+          sentimentInfo={sentimentInfo}
+          hasCorrelation={hasCorrelation}
+          corrResult={corrResult}
+          strength={strength}
+        />
       ) : (
         <div className="entity-list-row-loading-message">No data</div>
       )}

@@ -1,5 +1,5 @@
-import { postJson } from "./core.js";
+import { postJson } from './core.js';
 
 export function clerkAuth(clerkToken) {
-  return postJson("/auth/clerk", { token: clerkToken });
+  return postJson('/auth/clerk', { token: clerkToken });
 }

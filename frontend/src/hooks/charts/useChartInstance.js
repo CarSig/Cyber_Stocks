@@ -1,8 +1,16 @@
-import { useEffect, useRef } from "react";
-import { createChart, createSeriesMarkers, CandlestickSeries, BarSeries, LineSeries, AreaSeries, BaselineSeries } from "lightweight-charts";
-import { makeChartOptions } from "@/components/organisms/charts/utils/theme.js";
-import { toSortedOHLC, addCompareOverlay } from "@/components/organisms/charts/utils/series.js";
-import { dedupeMarkers, buildOverlayMarkers } from "@/components/organisms/charts/utils/markers.js";
+import { useEffect, useRef } from 'react';
+import {
+  createChart,
+  createSeriesMarkers,
+  CandlestickSeries,
+  BarSeries,
+  LineSeries,
+  AreaSeries,
+  BaselineSeries,
+} from 'lightweight-charts';
+import { makeChartOptions } from '@/components/organisms/charts/utils/theme.js';
+import { toSortedOHLC, addCompareOverlay } from '@/components/organisms/charts/utils/series.js';
+import { dedupeMarkers, buildOverlayMarkers } from '@/components/organisms/charts/utils/markers.js';
 
 const SERIES_MAP = {
   Candlestick: CandlestickSeries,
@@ -34,7 +42,7 @@ export function useChartInstance(containerRef, { quotes, compareQuotes, type, an
     const markers = dedupeMarkers(
       buildOverlayMarkers(overlayRefs, quotes, analysis, showAnalysis)
         .filter(inRange)
-        .sort((a, b) => (a.time < b.time ? -1 : 1))
+        .sort((a, b) => (a.time < b.time ? -1 : 1)),
     );
     if (markers.length) createSeriesMarkers(primary, markers);
 

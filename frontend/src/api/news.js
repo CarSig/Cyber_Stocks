@@ -1,13 +1,13 @@
-import { apiFetch } from "./core.js";
+import { apiFetch } from './core.js';
 
 export function getAnalysis(ticker) {
-  return apiFetch(`/news-analysis/${ticker}`);
+  return apiFetch(`/news/news-analysis/${ticker}`);
 }
 
 export function analyze(ticker) {
-  return apiFetch(`/news-analyze/${ticker}`, { method: "POST" });
+  return apiFetch(`/news/news-analyze/${ticker}`, { method: 'POST' });
 }
 
 export function getCorrelation(ticker, lagDays = 1) {
-  return apiFetch(`/news-correlation/${ticker}?lagDays=${lagDays}`);
+  return apiFetch(`/news/news-correlation/${ticker}?lagDays=${lagDays}`);
 }

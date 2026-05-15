@@ -1,5 +1,5 @@
 import { Controller, Post, Param, Body, Res, Sse, MessageEvent } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 import { Observable } from "rxjs";
 import { finalize } from "rxjs/operators";
@@ -12,11 +12,12 @@ import { AppError } from "@/shared/errors";
 import { AllowQueryToken } from "@/common/decorators/allow-query-token.decorator";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { sseActiveConnections } from "@/shared/metrics";
+import { StreamResearchDoc, StreamChatDoc } from "./research.docs";
 import type { User } from "@/types/index";
 
 @ApiTags("Research")
 @ApiBearerAuth("bearer")
-@Controller()
+@Controller("research")
 export class ResearchController {
   constructor(
     private readonly researchService: ResearchService,
@@ -26,11 +27,7 @@ export class ResearchController {
   @Sse("research/:ticker")
   @AllowQueryToken()
   @Throttle({ strict: { ttl: 60_000, limit: 5 } })
-  @ApiOperation({ summary: "Market research stream (SSE)", description: "Streams AI-generated market research for a ticker across three sections: Latest News, Analyst Outlook, and Competitive Landscape. Accepts ?token= instead of Authorization header. Rate limited to 5 req/60s." })
-  @ApiParam({ name: "ticker", description: "Ticker symbol" })
-  @ApiResponse({ status: 200, description: "SSE stream: { section, text?, sectionDone, done }" })
-  @ApiResponse({ status: 429, description: "Rate limit exceeded (strict tier)" })
-  @ApiResponse({ status: 503, description: "Tavily API key not configured" })
+  @StreamResearchDoc()
   streamResearch(@Param("ticker") ticker: string, @CurrentUser() user: User): Observable<MessageEvent> {
     if (!process.env.TAVILY_API_KEY) throw new AppError("Tavily API key not configured", 503);
     const r = resolveTicker(ticker);
@@ -49,10 +46,7 @@ export class ResearchController {
 
   @Post("chat")
   @Throttle({ strict: { ttl: 60_000, limit: 10 } })
-  @ApiOperation({ summary: "AI chat stream (SSE)", description: "Streams a conversational AI response as Server-Sent Events. Pass the full message history to maintain context across turns. Rate limited to 10 req/60s." })
-  @ApiResponse({ status: 201, description: "SSE stream: { text, done } then { done: true, messages }" })
-  @ApiResponse({ status: 400, description: "Invalid request body" })
-  @ApiResponse({ status: 429, description: "Rate limit exceeded (strict tier)" })
+  @StreamChatDoc()
   async streamChat(@Body() body: ChatBodyDto, @Res() res: Response, @CurrentUser() user: User): Promise<void> {
     this.auditService.log(user, "chat", { messageCount: body.messages.length });
     res.setHeader("Content-Type", "text/event-stream");

@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
-import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { createChart, HistogramSeries } from "lightweight-charts";
-import { getPosts } from "@/api/trump.js";
-import { getCompanies } from "@/api/stock.js";
-import Page from "@/components/atoms/Page.jsx";
-import FilterSelect from "@/components/molecules/shared/FilterSelect";
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { createChart, HistogramSeries } from 'lightweight-charts';
+import { getPosts } from '@/api/trump.js';
+import { getCompanies } from '@/api/stock.js';
+import Page from '@/components/atoms/Page.jsx';
+import FilterSelect from '@/components/molecules/shared/FilterSelect';
 
 function TrumpPostsChart({ posts }) {
   const ref = useRef(null);
@@ -27,18 +27,23 @@ function TrumpPostsChart({ posts }) {
     const chart = createChart(ref.current, {
       width: ref.current.clientWidth,
       height: 260,
-      layout: { background: { color: cv("--surface-0") }, textColor: cv("--text-primary") },
-      grid: { vertLines: { color: cv("--surface-3") }, horzLines: { color: cv("--surface-3") } },
+      layout: { background: { color: cv('--surface-0') }, textColor: cv('--text-primary') },
+      grid: { vertLines: { color: cv('--surface-3') }, horzLines: { color: cv('--surface-3') } },
       timeScale: { timeVisible: false },
       rightPriceScale: { borderVisible: false },
     });
-    const s = chart.addSeries(HistogramSeries, { color: cv("--color-amber"), priceLineVisible: false });
+    const s = chart.addSeries(HistogramSeries, { color: cv('--color-amber'), priceLineVisible: false });
     s.setData(data);
     chart.timeScale().fitContent();
 
-    const obs = new ResizeObserver(() => { if (ref.current) chart.applyOptions({ width: ref.current.clientWidth }); });
+    const obs = new ResizeObserver(() => {
+      if (ref.current) chart.applyOptions({ width: ref.current.clientWidth });
+    });
     obs.observe(ref.current);
-    return () => { obs.disconnect(); chart.remove(); };
+    return () => {
+      obs.disconnect();
+      chart.remove();
+    };
   }, [posts]);
 
   return <div ref={ref} className="chart-container" />;
@@ -46,24 +51,28 @@ function TrumpPostsChart({ posts }) {
 
 function filterByCompany(posts, ticker, companies) {
   if (!ticker || !companies) return posts;
-  const name = Object.entries(companies).find(([, t]) => t === ticker)?.[0] ?? "";
+  const name = Object.entries(companies).find(([, t]) => t === ticker)?.[0] ?? '';
   const nameLower = name.toLowerCase();
   const tickerLower = ticker.toLowerCase();
   return posts.filter((p) => {
-    const text = (p.content || p.text || "").toLowerCase();
+    const text = (p.content || p.text || '').toLowerCase();
     return text.includes(nameLower) || text.includes(tickerLower);
   });
 }
 
 export default function Socials() {
-  const [company, setCompany] = useState("");
+  const [company, setCompany] = useState('');
   const [NOW] = useState(() => Date.now());
 
-  const { data: posts, isPending, error } = useQuery({
-    queryKey: ["trump-posts"],
+  const {
+    data: posts,
+    isPending,
+    error,
+  } = useQuery({
+    queryKey: ['trump-posts'],
     queryFn: getPosts,
   });
-  const { data: companies } = useQuery({ queryKey: ["companies"], queryFn: getCompanies });
+  const { data: companies } = useQuery({ queryKey: ['companies'], queryFn: getCompanies });
 
   const filtered = posts ? filterByCompany(posts, company, companies).filter((p) => p.content || p.text) : [];
   const last30 = filtered.filter((p) => NOW - new Date(p.created_at).getTime() < 30 * 86400_000).length;
@@ -71,7 +80,9 @@ export default function Socials() {
   return (
     <Page>
       <div className="ti-detail-header">
-        <Link to="/socials" className="ti-back">← Socials</Link>
+        <Link to="/socials" className="ti-back">
+          ← Socials
+        </Link>
         <h1>Truth Social</h1>
       </div>
 
@@ -86,7 +97,10 @@ export default function Socials() {
                 value={company}
                 onChange={setCompany}
                 placeholder="Companies"
-                options={Object.entries(companies ?? {}).map(([name, ticker]) => ({ label: `${name} (${ticker})`, value: ticker }))}
+                options={Object.entries(companies ?? {}).map(([name, ticker]) => ({
+                  label: `${name} (${ticker})`,
+                  value: ticker,
+                }))}
               />
               <span className="ti-count">{filtered.length} posts</span>
               <span className="ti-count">{last30} in last 30d</span>
@@ -98,16 +112,8 @@ export default function Socials() {
                 .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                 .slice(0, 10)
                 .map((p) => (
-                  <a
-                    key={p.id}
-                    href={p.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="socials-post"
-                  >
-                    <span className="socials-post-date">
-                      {new Date(p.created_at).toLocaleDateString()}
-                    </span>
+                  <a key={p.id} href={p.url} target="_blank" rel="noreferrer" className="socials-post">
+                    <span className="socials-post-date">{new Date(p.created_at).toLocaleDateString()}</span>
                     <span className="socials-post-text">{p.content || p.text}</span>
                   </a>
                 ))}

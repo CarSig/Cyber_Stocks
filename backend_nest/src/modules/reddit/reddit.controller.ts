@@ -2,7 +2,7 @@ import { Controller, Get, Param, Query } from "@nestjs/common";
 import { RedditService, SUBREDDITS, type Subreddit } from "./reddit.service";
 import { AppError } from "@/shared/errors";
 
-@Controller()
+@Controller("reddit")
 export class RedditController {
   constructor(private readonly redditService: RedditService) {}
 

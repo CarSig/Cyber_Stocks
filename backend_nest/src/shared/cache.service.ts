@@ -31,6 +31,11 @@ export class CacheService implements OnModuleDestroy {
     }
   }
 
+  async ping(): Promise<boolean> {
+    if (!this.client) return false;
+    return this.client.ping().then(() => true).catch(() => false);
+  }
+
   async del(key: string): Promise<void> {
     await this.client?.del(key).catch(() => {});
   }

@@ -1,5 +1,5 @@
 export function fmtCompact(n) {
-  if (n == null) return "—";
+  if (n == null) return '—';
   if (n >= 1e12) return `$${(n / 1e12).toFixed(2)}T`;
   if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
   if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
@@ -7,7 +7,7 @@ export function fmtCompact(n) {
 }
 
 export function fmtVol(n) {
-  if (n == null) return "—";
+  if (n == null) return '—';
   if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
   if (n >= 1e6) return `${(n / 1e6).toFixed(2)}M`;
   if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
@@ -15,8 +15,8 @@ export function fmtVol(n) {
 }
 
 export function fmtPct(n) {
-  if (n == null) return "—";
-  const sign = n >= 0 ? "+" : "";
+  if (n == null) return '—';
+  const sign = n >= 0 ? '+' : '';
   return `${sign}${(n * 100).toFixed(2)}%`;
 }
 
@@ -37,7 +37,8 @@ export function pearsonLag(a, b, lag) {
   const sa = lag >= 0 ? a.slice(lag) : a.slice(0, a.length + lag);
   const sb = lag >= 0 ? b.slice(0, b.length - lag) : b.slice(-lag);
   const len = Math.min(sa.length, sb.length);
-  const ra = [], rb = [];
+  const ra = [],
+    rb = [];
   for (let i = 1; i < len; i++) {
     if (sa[i] > 0 && sa[i - 1] > 0) ra.push(Math.log(sa[i] / sa[i - 1]));
     if (sb[i] > 0 && sb[i - 1] > 0) rb.push(Math.log(sb[i] / sb[i - 1]));
@@ -46,7 +47,9 @@ export function pearsonLag(a, b, lag) {
   if (l < 5) return null;
   const ma = ra.slice(0, l).reduce((s, v) => s + v, 0) / l;
   const mb = rb.slice(0, l).reduce((s, v) => s + v, 0) / l;
-  let num = 0, va = 0, vb = 0;
+  let num = 0,
+    va = 0,
+    vb = 0;
   for (let i = 0; i < l; i++) {
     num += (ra[i] - ma) * (rb[i] - mb);
     va += (ra[i] - ma) ** 2;
@@ -57,7 +60,7 @@ export function pearsonLag(a, b, lag) {
 }
 
 export function corrColor(v) {
-  if (v == null) return "transparent";
+  if (v == null) return 'transparent';
   const intensity = Math.abs(v);
   return v > 0 ? `oklch(0.45 ${0.15 * intensity} 150)` : `oklch(0.45 ${0.15 * intensity} 25)`;
 }

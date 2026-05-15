@@ -8,7 +8,7 @@ import type { BackendArticleInput } from "@/modules/content-analysis/content-ana
 
 @ApiTags("Intelligence")
 @ApiBearerAuth("bearer")
-@Controller()
+@Controller("intelligence")
 export class IntelligenceController {
   constructor(private readonly contentAnalysis: ContentAnalysisService) {}
 

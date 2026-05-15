@@ -1,19 +1,19 @@
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import FilterSelect from "@/components/molecules/shared/FilterSelect.jsx";
-import ThreatIntelShell from "@/components/organisms/layout/ThreatIntelShell.jsx";
-import { usePaginatedThreatIntel } from "@/hooks/usePaginatedThreatIntel.js";
-import useFilterWithPageReset from "@/hooks/useFilterWithPageReset.js";
-import { formatDate } from "@/utils/date.js";
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import FilterSelect from '@/components/molecules/shared/FilterSelect.jsx';
+import ThreatIntelShell from '@/components/organisms/layout/ThreatIntelShell.jsx';
+import { usePaginatedThreatIntel } from '@/hooks/usePaginatedThreatIntel.js';
+import useFilterWithPageReset from '@/hooks/useFilterWithPageReset.js';
+import { formatDate } from '@/utils/date.js';
 
 export default function ThreatIntelKev() {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [ransomware, setRansomware] = useState(false);
-  const [company, setCompany] = useState("");
+  const [company, setCompany] = useState('');
 
-  const { page, setPage, data, isPending, error, totalPages, companiesData } = usePaginatedThreatIntel("kev", {
+  const { page, setPage, data, isPending, error, totalPages, companiesData } = usePaginatedThreatIntel('kev', {
     search,
-    ransomware: ransomware ? "true" : "",
+    ransomware: ransomware ? 'true' : '',
     company,
   });
 
@@ -30,8 +30,18 @@ export default function ThreatIntelKev() {
       totalPages={totalPages}
       filters={
         <>
-          <FilterSelect value={company} onChange={withReset(setCompany)} placeholder="Companies" options={Object.keys(companiesData ?? {})} />
-          <Input className="ti-search" placeholder="Search CVE, vendor, product…" value={search} onChange={(e) => withReset(setSearch)(e.target.value)} />
+          <FilterSelect
+            value={company}
+            onChange={withReset(setCompany)}
+            placeholder="Companies"
+            options={Object.keys(companiesData ?? {})}
+          />
+          <Input
+            className="ti-search"
+            placeholder="Search CVE, vendor, product…"
+            value={search}
+            onChange={(e) => withReset(setSearch)(e.target.value)}
+          />
           <label className="ti-checkbox">
             <input type="checkbox" checked={ransomware} onChange={(e) => withReset(setRansomware)(e.target.checked)} />
             Ransomware only
@@ -57,7 +67,12 @@ export default function ThreatIntelKev() {
             {data?.items?.map((v) => (
               <tr key={v.cveID}>
                 <td>
-                  <a href={`https://nvd.nist.gov/vuln/detail/${v.cveID}`} target="_blank" rel="noreferrer" className="ti-link">
+                  <a
+                    href={`https://nvd.nist.gov/vuln/detail/${v.cveID}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ti-link"
+                  >
                     {v.cveID}
                   </a>
                 </td>
@@ -67,7 +82,7 @@ export default function ThreatIntelKev() {
                 <td className="ti-date">{formatDate(v.dateAdded)}</td>
                 <td className="ti-date">{formatDate(v.dueDate)}</td>
                 <td>
-                  {v.knownRansomwareCampaignUse === "Known" ? (
+                  {v.knownRansomwareCampaignUse === 'Known' ? (
                     <span className="ti-badge ti-badge--danger">Known</span>
                   ) : (
                     <span className="ti-badge ti-badge--muted">Unknown</span>

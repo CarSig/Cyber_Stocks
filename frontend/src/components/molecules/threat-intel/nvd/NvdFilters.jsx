@@ -1,12 +1,26 @@
-import { Input } from "@/components/ui/input";
-import FilterSelect from "@/components/molecules/shared/FilterSelect.jsx";
+import { Input } from '@/components/ui/input';
+import FilterSelect from '@/components/molecules/shared/FilterSelect.jsx';
 
-const SEVERITIES = ["CRITICAL", "HIGH", "MEDIUM", "LOW"];
+const SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
 
-export default function NvdFilters({ search, onSearchChange, severity, onSeverityChange, company, onCompanyChange, companiesData, resultCount }) {
+export default function NvdFilters({
+  search,
+  onSearchChange,
+  severity,
+  onSeverityChange,
+  company,
+  onCompanyChange,
+  companiesData,
+  resultCount,
+}) {
   return (
     <>
-      <FilterSelect value={company} onChange={onCompanyChange} placeholder="Companies" options={Object.keys(companiesData ?? {})} />
+      <FilterSelect
+        value={company}
+        onChange={onCompanyChange}
+        placeholder="Companies"
+        options={Object.keys(companiesData ?? {})}
+      />
       <Input
         className="ti-search"
         placeholder="Search CVE ID or description…"

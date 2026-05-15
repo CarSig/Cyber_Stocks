@@ -13,7 +13,9 @@ export default function SignalSidebar({ selectedSignal, data }) {
         <p className="signal-sidebar-count metric-value">{signal.count}</p>
       </div>
       <div className="signal-sidebar-description">
-        <p>This signal appears in <strong>{signal.count}</strong> articles across your tracked entities.</p>
+        <p>
+          This signal appears in <strong>{signal.count}</strong> articles across your tracked entities.
+        </p>
       </div>
     </div>
   );

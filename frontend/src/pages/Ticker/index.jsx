@@ -1,27 +1,27 @@
-import { useParams } from "react-router-dom";
-import { useMemo } from "react";
-import StateHandler from "@/components/organisms/shared/StateHandler.jsx";
-import { useStock, useCorrelation } from "@/hooks/useStock.js";
-import { useEntityIntelligence } from "@/hooks/useIntelligence.js";
-import { useTrump } from "@/hooks/useTrump.js";
-import { useResearch } from "@/hooks/useResearch.js";
-import { useSimulation } from "@/hooks/useSimulation.js";
-import { useThreatIntel } from "@/hooks/useThreatIntel.js";
-import { useCyberNewsArticles } from "@/hooks/useCyberNews.js";
-import { getAnalysis } from "@/api/news.js";
-import { getSparklines } from "@/api/stock.js";
-import { useCachedQuery } from "@/hooks/useCachedQuery.js";
-import { useTickerThreatData } from "@/hooks/useTickerThreatData.js";
-import { TickerProvider, useTickerContext } from "@/context/TickerContext.jsx";
-import TickerWatchlist from "./TickerWatchlist.jsx";
-import { buildChatContext } from "./buildChatContext.js";
-import TickerChat from "./TickerChat.jsx";
-import ChartsTab from "./tabs/ChartsTab.jsx";
-import SimulationTab from "./tabs/SimulationTab.jsx";
-import CorrelationsTab from "./tabs/CorrelationsTab.jsx";
-import ArticlesTab from "./tabs/ArticlesTab.jsx";
-import InfoTab from "./tabs/InfoTab.jsx";
-import DayTradeTab from "./tabs/DayTradeTab.jsx";
+import { useParams } from 'react-router-dom';
+import { useMemo, useEffect } from 'react';
+import StateHandler from '@/components/organisms/shared/StateHandler.jsx';
+import { useStock, useCorrelation } from '@/hooks/useStock.js';
+import { useEntityIntelligence } from '@/hooks/useIntelligence.js';
+import { useTrump } from '@/hooks/useTrump.js';
+import { useResearch } from '@/hooks/useResearch.js';
+import { useSimulation } from '@/hooks/useSimulation.js';
+import { useThreatIntel } from '@/hooks/useThreatIntel.js';
+import { useCyberNewsArticles } from '@/hooks/useCyberNews.js';
+import { getAnalysis } from '@/api/news.js';
+import { getSparklines } from '@/api/stock.js';
+import { useCachedQuery } from '@/hooks/useCachedQuery.js';
+import { useTickerThreatData } from '@/hooks/useTickerThreatData.js';
+import { TickerProvider, useTickerContext } from '@/context/TickerContext.jsx';
+import TickerWatchlist from './TickerWatchlist.jsx';
+import { buildChatContext } from './buildChatContext.js';
+import TickerChat from './TickerChat.jsx';
+import ChartsTab from './tabs/ChartsTab.jsx';
+import SimulationTab from './tabs/SimulationTab.jsx';
+import CorrelationsTab from './tabs/CorrelationsTab.jsx';
+import ArticlesTab from './tabs/ArticlesTab.jsx';
+import InfoTab from './tabs/InfoTab.jsx';
+import DayTradeTab from './tabs/DayTradeTab.jsx';
 
 function TickerContent() {
   const {
@@ -61,11 +61,19 @@ function TickerContent() {
     setShowCyberNews,
     hideCyberNewsSentiment,
     setHideCyberNewsSentiment,
+    reset,
   } = useTickerContext();
 
   const { ticker } = useParams();
 
-  const { error, isPending, allQuotes, compareQuotes, periodAnalysis, news, summary, companies } = useStock(ticker, { compareTicker, period });
+  useEffect(() => {
+    reset();
+  }, [ticker]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const { error, isPending, allQuotes, compareQuotes, periodAnalysis, news, summary, companies } = useStock(ticker, {
+    compareTicker,
+    period,
+  });
   const quoteBounds = allQuotes?.length
     ? {
         from: [...allQuotes].sort((a, b) => a.date.localeCompare(b.date))[0].date.slice(0, 10),
@@ -73,27 +81,36 @@ function TickerContent() {
       }
     : null;
 
-  const companyName = companies ? (Object.entries(companies).find(([, t]) => t === ticker)?.[0] ?? "") : "";
-  const entityId = companyName ? companyName.toLowerCase().replace(/\s+/g, "_") : "";
+  const companyName = companies ? (Object.entries(companies).find(([, t]) => t === ticker)?.[0] ?? '') : '';
+  const entityId = companyName ? companyName.toLowerCase().replace(/\s+/g, '_') : '';
   const { articles: intelligenceArticles } = useEntityIntelligence(entityId || null);
   const HOUR = 60 * 60 * 1000;
 
   const { nvdData, otxData, kevData } = useTickerThreatData(companyName);
-  const { data: newsAnalysisData } = useCachedQuery(["news-analysis", ticker], () => getAnalysis(ticker), {
+  const { data: newsAnalysisData } = useCachedQuery(['news-analysis', ticker], () => getAnalysis(ticker), {
     ttl: HOUR,
     enabled: !!ticker,
     cacheKey: `news_analysis_${ticker}`,
   });
-  const { data: correlationData, isFetching: correlationFetching } = useCorrelation(ticker, compareTicker, period, correlagDays);
+  const { data: correlationData, isFetching: correlationFetching } = useCorrelation(
+    ticker,
+    compareTicker,
+    period,
+    correlagDays,
+  );
   const newsArticles = useMemo(() => news?.news ?? [], [news?.news]);
 
   const allTickers = companies ? Object.values(companies) : [];
   const SPARKLINES_TTL = 24 * 60 * 60 * 1000;
-  const { data: sparklinesData } = useCachedQuery(["sparklines", allTickers.join(",")], () => getSparklines(allTickers), {
-    ttl: SPARKLINES_TTL,
-    enabled: allTickers.length > 0,
-    cacheKey: "sparklines",
-  });
+  const { data: sparklinesData } = useCachedQuery(
+    ['sparklines', allTickers.join(',')],
+    () => getSparklines(allTickers),
+    {
+      ttl: SPARKLINES_TTL,
+      enabled: allTickers.length > 0,
+      cacheKey: 'sparklines',
+    },
+  );
 
   const trump = useTrump(ticker);
   const research = useResearch(ticker);
@@ -114,7 +131,9 @@ function TickerContent() {
 
   const cyberNewsAnalysis = useMemo(() => {
     if (!cyberNewsArticles) return {};
-    return Object.fromEntries((cyberNewsArticles ?? []).map((article) => [article.link, { sentiment: article.analysis?.sentiment ?? 0 }]));
+    return Object.fromEntries(
+      (cyberNewsArticles ?? []).map((article) => [article.link, { sentiment: article.analysis?.sentiment ?? 0 }]),
+    );
   }, [cyberNewsArticles]);
 
   const otherTickers = companies ? Object.entries(companies).filter(([, t]) => t !== ticker) : [];
@@ -125,7 +144,12 @@ function TickerContent() {
     otx: { data: otxData?.items, show: showOtx, onToggle: setShowOtx },
     kev: { data: kevData?.items, show: showKev, onToggle: setShowKev },
     news: { articles: newsArticles, analysis: newsAnalysisData, show: showNews, onToggle: setShowNews },
-    cyberNews: { articles: cyberNewsForChart, analysis: cyberNewsAnalysis, show: showCyberNews, onToggle: setShowCyberNews },
+    cyberNews: {
+      articles: cyberNewsForChart,
+      analysis: cyberNewsAnalysis,
+      show: showCyberNews,
+      onToggle: setShowCyberNews,
+    },
   };
 
   const chatContext = buildChatContext({
@@ -150,7 +174,7 @@ function TickerContent() {
   return (
     <div>
       <StateHandler isPending={isPending} error={error}>
-        <div className={`ticker-layout${showChat ? " ticker-layout--chat-open" : ""}`}>
+        <div className={`ticker-layout${showChat ? ' ticker-layout--chat-open' : ''}`}>
           <TickerWatchlist
             ticker={ticker}
             companies={companies}
@@ -163,14 +187,18 @@ function TickerContent() {
             <h1>{ticker}</h1>
 
             <nav className="ticker-tabs">
-              {["charts", "simulation", "correlations", "articles", "info", "day trade"].map((tab) => (
-                <button key={tab} className={`ticker-tab${activeTab === tab ? " ticker-tab--active" : ""}`} onClick={() => setActiveTab(tab)}>
+              {['charts', 'simulation', 'correlations', 'articles', 'info', 'day trade'].map((tab) => (
+                <button
+                  key={tab}
+                  className={`ticker-tab${activeTab === tab ? ' ticker-tab--active' : ''}`}
+                  onClick={() => setActiveTab(tab)}
+                >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 </button>
               ))}
             </nav>
 
-            {activeTab === "charts" && (
+            {activeTab === 'charts' && (
               <ChartsTab
                 summary={summary}
                 allQuotes={allQuotes}
@@ -200,9 +228,11 @@ function TickerContent() {
               />
             )}
 
-            {activeTab === "simulation" && <SimulationTab ticker={ticker} allQuotes={allQuotes} onResult={simulation.onResult} />}
+            {activeTab === 'simulation' && (
+              <SimulationTab ticker={ticker} allQuotes={allQuotes} onResult={simulation.onResult} />
+            )}
 
-            {activeTab === "correlations" && (
+            {activeTab === 'correlations' && (
               <CorrelationsTab
                 ticker={ticker}
                 companies={companies}
@@ -219,14 +249,19 @@ function TickerContent() {
               />
             )}
 
-            {activeTab === "articles" && <ArticlesTab ticker={ticker} newsArticles={newsArticles} />}
+            {activeTab === 'articles' && <ArticlesTab ticker={ticker} newsArticles={newsArticles} />}
 
-            {activeTab === "info" && <InfoTab summary={summary} research={research} />}
+            {activeTab === 'info' && <InfoTab summary={summary} research={research} />}
 
-            {activeTab === "day trade" && <DayTradeTab ticker={ticker} companies={companies} />}
+            {activeTab === 'day trade' && <DayTradeTab ticker={ticker} companies={companies} />}
           </div>
 
-          <TickerChat showChat={showChat} onOpen={() => setShowChat(true)} onClose={() => setShowChat(false)} context={chatContext} />
+          <TickerChat
+            showChat={showChat}
+            onOpen={() => setShowChat(true)}
+            onClose={() => setShowChat(false)}
+            context={chatContext}
+          />
         </div>
       </StateHandler>
     </div>

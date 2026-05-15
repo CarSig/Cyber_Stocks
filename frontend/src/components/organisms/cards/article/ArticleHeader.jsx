@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge.jsx";
+import { Badge } from '@/components/ui/badge.jsx';
 
 export default function ArticleHeader({ article }) {
   return (

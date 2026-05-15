@@ -1,19 +1,29 @@
-import { useEffect, useRef, useState } from "react";
-import "./charts.css";
-import { createChart, LineSeries, createSeriesMarkers } from "lightweight-charts";
-import DatePicker from "@/components/atoms/DatePicker.jsx";
-import { cssVar, makeChartOptions } from "./utils/theme.js";
-import { daysAgoString, todayString } from "./utils/dates.js";
-import { toSortedClose } from "./utils/series.js";
-import { buildMarkers } from "./utils/markers.js";
-import { attachResizeObserver } from "./utils/chartSetup.js";
-import PeriodButtons from "@/components/molecules/shared/PeriodButtons.jsx";
-import ChartToggleButton from "@/components/atoms/ChartToggleButton.jsx";
-import ChartSep from "@/components/atoms/ChartSep.jsx";
+import { useEffect, useRef, useState } from 'react';
+import './charts.css';
+import { createChart, LineSeries, createSeriesMarkers } from 'lightweight-charts';
+import DatePicker from '@/components/atoms/DatePicker.jsx';
+import { cssVar, makeChartOptions } from './utils/theme.js';
+import { daysAgoString, todayString } from './utils/dates.js';
+import { toSortedClose } from './utils/series.js';
+import { buildMarkers } from './utils/markers.js';
+import { attachResizeObserver } from './utils/chartSetup.js';
+import PeriodButtons from '@/components/molecules/shared/PeriodButtons.jsx';
+import ChartToggleButton from '@/components/atoms/ChartToggleButton.jsx';
+import ChartSep from '@/components/atoms/ChartSep.jsx';
 
-const COLOR_VARS = ["--series-1","--series-2","--series-3","--series-4","--series-5","--series-6","--series-7","--series-8","--series-9","--series-10"];
+const COLOR_VARS = [
+  '--series-1',
+  '--series-2',
+  '--series-3',
+  '--series-4',
+  '--series-5',
+  '--series-6',
+  '--series-7',
+  '--series-8',
+  '--series-9',
+  '--series-10',
+];
 const COLORS = COLOR_VARS.map(cssVar);
-
 
 export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }) {
   const containerRef = useRef(null);
@@ -31,7 +41,9 @@ export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }
     } else {
       chartRef.current.timeScale().fitContent();
     }
-    setTimeout(() => { skipRangeRef.current = false; }, 150);
+    setTimeout(() => {
+      skipRangeRef.current = false;
+    }, 150);
   }, [rangeFrom, rangeTo]);
 
   useEffect(() => {
@@ -58,7 +70,7 @@ export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }
       skipRangeRef.current = false;
       chart.timeScale().subscribeVisibleTimeRangeChange((range) => {
         if (skipRangeRef.current || !range) return;
-        setActivePeriod("custom");
+        setActivePeriod('custom');
         onRangeChange?.(range.from, range.to);
       });
     }, 150);
@@ -76,7 +88,9 @@ export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }
   function handlePeriodClick(days) {
     setActivePeriod(days);
     if (days === null) {
-      const allDates = series.flatMap(({ quotes }) => quotes.filter((q) => q.close).map((q) => new Date(q.date).toISOString().slice(0, 10)));
+      const allDates = series.flatMap(({ quotes }) =>
+        quotes.filter((q) => q.close).map((q) => new Date(q.date).toISOString().slice(0, 10)),
+      );
       const minDate = allDates.length ? allDates.reduce((a, b) => (a < b ? a : b)) : null;
       onRangeChange?.(minDate, todayString());
     } else {
@@ -96,10 +110,12 @@ export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }
         )}
         <ChartSep />
         {series.map(({ ticker }, i) => (
-          <span key={ticker} style={{ color: COLORS[i % COLORS.length] }} className="chart-series-label">● {ticker}</span>
+          <span key={ticker} style={{ color: COLORS[i % COLORS.length] }} className="chart-series-label">
+            ● {ticker}
+          </span>
         ))}
         <ChartToggleButton active={showAnalysis} onClick={() => setShowAnalysis((v) => !v)} className="ml-auto">
-          {showAnalysis ? "Hide Analysis" : "Show Analysis"}
+          {showAnalysis ? 'Hide Analysis' : 'Show Analysis'}
         </ChartToggleButton>
       </div>
       <div ref={containerRef} className="chart-container" />

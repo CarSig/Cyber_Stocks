@@ -1,25 +1,25 @@
-import { useState } from "react";
-import { LoadingSpinner } from "@/components/shared/LoadingSpinner.jsx";
-import { CorrelationSelector, ViewToggle } from "@/components/shared/CorrelationControls.jsx";
-import { useCyberNewsTickers, useCyberNewsTopics, useCyberNewsCorrelations } from "@/hooks/useCyberNews.js";
-import indexBy from "@/utils/indexBy.js";
-import TickerCard from "@/components/organisms/cards/ticker/TickerCard.jsx";
-import TickerListRow from "@/components/molecules/cyber-news/TickerListRow.jsx";
-import TickerDetailPanel from "@/components/organisms/cyber-news/TickerDetailPanel.jsx";
-import TopicsSidebar from "@/components/organisms/cards/TopicsSidebar.jsx";
-import "./CyberNews.css";
-import Page from "@/components/atoms/Page.jsx";
+import { useState } from 'react';
+import { LoadingSpinner } from '@/components/shared/LoadingSpinner.jsx';
+import { CorrelationSelector, ViewToggle } from '@/components/shared/CorrelationControls.jsx';
+import { useCyberNewsTickers, useCyberNewsTopics, useCyberNewsCorrelations } from '@/hooks/useCyberNews.js';
+import indexBy from '@/utils/indexBy.js';
+import TickerCard from '@/components/organisms/cards/ticker/TickerCard.jsx';
+import TickerListRow from '@/components/molecules/cyber-news/TickerListRow.jsx';
+import TickerDetailPanel from '@/components/organisms/cyber-news/TickerDetailPanel.jsx';
+import TopicsSidebar from '@/components/organisms/cards/TopicsSidebar.jsx';
+import './CyberNews.css';
+import Page from '@/components/atoms/Page.jsx';
 
 export default function CyberNews() {
   const [selected, setSelected] = useState(null);
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [lagDays, setLagDays] = useState(1);
-  const [viewMode, setViewMode] = useState("list"); // "grid" or "list"
+  const [viewMode, setViewMode] = useState('list'); // "grid" or "list"
   const { data: tickers, isPending } = useCyberNewsTickers(selectedTopic);
   const { data: correlations } = useCyberNewsCorrelations(lagDays, selectedTopic);
   const { data: allTopics, isPending: topicsLoading } = useCyberNewsTopics();
 
-  const correlationByTicker = indexBy(correlations, "ticker");
+  const correlationByTicker = indexBy(correlations, 'ticker');
 
   return (
     <div className="cyber-news-layout">
@@ -31,7 +31,7 @@ export default function CyberNews() {
           <div
             key={t.topic}
             onClick={() => setSelectedTopic(selectedTopic === t.topic ? null : t.topic)}
-            className={`cyber-news-topic-item ${selectedTopic === t.topic ? "active" : ""}`}
+            className={`cyber-news-topic-item ${selectedTopic === t.topic ? 'active' : ''}`}
           >
             <span className="cyber-news-topic-text">{t.topic}</span>
           </div>
@@ -39,10 +39,11 @@ export default function CyberNews() {
       </div>
 
       {/* Main Content */}
-      <div className={`cyber-news-main ${selectedTopic ? "with-sidebar" : ""}`}>
+      <div className={`cyber-news-main ${selectedTopic ? 'with-sidebar' : ''}`}>
         <Page title="Cyber News">
-          <p style={{ color: "var(--muted-foreground)", marginBottom: 24 }}>
-            Archived cybersecurity news (2025+) matched to tracked companies and analyzed with AI. Click a company to see all articles.
+          <p style={{ color: 'var(--muted-foreground)', marginBottom: 24 }}>
+            Archived cybersecurity news (2025+) matched to tracked companies and analyzed with AI. Click a company to
+            see all articles.
           </p>
 
           {selectedTopic && (
@@ -65,10 +66,16 @@ export default function CyberNews() {
 
           {isPending ? (
             <LoadingSpinner />
-          ) : viewMode === "grid" ? (
+          ) : viewMode === 'grid' ? (
             <div className="ti-grid cyber-news-grid-container">
               {tickers?.map((row) => (
-                <TickerCard key={row.ticker} row={row} onClick={() => setSelected(row)} topic={selectedTopic} correlation={correlationByTicker[row.ticker]} />
+                <TickerCard
+                  key={row.ticker}
+                  row={row}
+                  onClick={() => setSelected(row)}
+                  topic={selectedTopic}
+                  correlation={correlationByTicker[row.ticker]}
+                />
               ))}
             </div>
           ) : (
@@ -85,7 +92,14 @@ export default function CyberNews() {
             </div>
           )}
 
-          {selected && <TickerDetailPanel ticker={selected.ticker} company={selected.company} onClose={() => setSelected(null)} topic={selectedTopic} />}
+          {selected && (
+            <TickerDetailPanel
+              ticker={selected.ticker}
+              company={selected.company}
+              onClose={() => setSelected(null)}
+              topic={selectedTopic}
+            />
+          )}
         </Page>
       </div>
 

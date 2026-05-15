@@ -1,14 +1,16 @@
-import { Link } from "react-router-dom";
-import Page from "@/components/atoms/Page.jsx";
-import BaseCard from "@/components/atoms/BaseCard.jsx";
-import CardHeader from "@/components/atoms/CardHeader.jsx";
+import { Link } from 'react-router-dom';
+import Page from '@/components/atoms/Page.jsx';
+import BaseCard from '@/components/atoms/BaseCard.jsx';
+import CardHeader from '@/components/atoms/CardHeader.jsx';
 
 function SocialCard({ to, icon, title, description }) {
   return (
     <BaseCard variant="interactive" as={Link} to={to}>
       <CardHeader icon={icon} title={title} />
       <div className="ti-card-body">
-        <p className="ti-empty" style={{ marginTop: 0 }}>{description}</p>
+        <p className="ti-empty" style={{ marginTop: 0 }}>
+          {description}
+        </p>
       </div>
     </BaseCard>
   );

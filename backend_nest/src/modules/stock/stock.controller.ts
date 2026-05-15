@@ -1,19 +1,19 @@
 import { Controller, Get, Post, Param, Query, Body } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
 import companies from "@/data/companies";
 import { StockService } from "./stock.service";
 import { SimulationService } from "./simulation.service";
 import { AuditService } from "@/modules/audit/audit.service";
 import { resolveTicker, tickerToName } from "@/shared/ticker.utils";
 import { AppError } from "@/shared/errors";
-import { CorrelationQueryDto, CorrelationMatrixQueryDto, SimulateBodyDto,
-         CorrelationResultDto, SimulationResultDto, SparklineDto } from "@/shared/dto";
+import { CorrelationQueryDto, CorrelationMatrixQueryDto, SimulateBodyDto } from "@/shared/dto";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
+import { GetCompaniesDoc, CorrelationMatrixDoc, CorrelateDoc, GetSparklinesDoc, GetPresetsDoc, GetTickerDoc, SimulateDoc } from "./stock.docs";
 import type { User } from "@/types/index";
 
 @ApiTags("Stock")
 @ApiBearerAuth("bearer")
-@Controller()
+@Controller("stocks")
 export class StockController {
   constructor(
     private readonly stockService: StockService,
@@ -22,24 +22,13 @@ export class StockController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: "List all companies", description: "Returns the full ticker → company name map for all tracked companies." })
-  @ApiResponse({ status: 200, schema: { type: "object", additionalProperties: { type: "string" }, example: { CRWD: "CrowdStrike", PANW: "Palo Alto Networks", FTNT: "Fortinet" } } })
+  @GetCompaniesDoc()
   getCompanies() {
     return companies;
   }
 
   @Get("correlation-matrix")
-  @ApiOperation({ summary: "Pearson correlation matrix", description: "Full NxN Pearson correlation matrix for all companies using log-returns. Cached server-side with a 7-day TTL." })
-  @ApiResponse({ status: 200, schema: { type: "object", properties: {
-    matrix: { type: "object", additionalProperties: { type: "object", additionalProperties: { type: "number", nullable: true } }, description: "NxN Pearson correlation matrix keyed by company name" },
-    tickers: { type: "array", items: { type: "string" } },
-    names: { type: "array", items: { type: "string" } },
-    lagDays: { type: "number" },
-    windowDays: { type: "number" },
-    startDate: { type: "string", nullable: true },
-    endDate: { type: "string", nullable: true },
-  } } })
-  @ApiResponse({ status: 400, description: "Invalid query parameter" })
+  @CorrelationMatrixDoc()
   async correlationMatrix(@Query() query: CorrelationMatrixQueryDto) {
     const { lagDays = 0, windowDays = 90, startDate, endDate } = query;
 
@@ -52,11 +41,7 @@ export class StockController {
   }
 
   @Get("correlate/:tickerA/:tickerB")
-  @ApiOperation({ summary: "Correlate two stocks", description: "Computes Pearson correlation between two tickers using log-returns over a configurable window." })
-  @ApiParam({ name: "tickerA", description: "First ticker symbol (e.g. CRWD)" })
-  @ApiParam({ name: "tickerB", description: "Second ticker symbol (e.g. PANW)" })
-  @ApiResponse({ status: 200, type: CorrelationResultDto })
-  @ApiResponse({ status: 404, description: "Unknown ticker" })
+  @CorrelateDoc()
   async correlate(
     @Param("tickerA") tickerA: string,
     @Param("tickerB") tickerB: string,
@@ -74,8 +59,7 @@ export class StockController {
   }
 
   @Get("sparklines")
-  @ApiOperation({ summary: "Sparkline data", description: "Lightweight last-30-day price series for multiple tickers in one request. Cached server-side with a 24h TTL." })
-  @ApiResponse({ status: 200, schema: { type: "object", additionalProperties: { $ref: "#/components/schemas/SparklineDto" }, description: "Map of ticker symbol → SparklineDto" } })
+  @GetSparklinesDoc()
   async getSparklines(@Query("tickers") tickers: string) {
     if (!tickers) return {};
     const tickerList = tickers.split(",").map((t) => t.trim().toUpperCase()).filter(Boolean);
@@ -93,29 +77,14 @@ export class StockController {
   }
 
   @Get("simulation-presets/:ticker")
-  @ApiOperation({ summary: "Simulation presets", description: "Returns pre-built buy/sell signal strategies for a ticker, ready to pass to POST /simulate/:ticker." })
-  @ApiParam({ name: "ticker", description: "Ticker symbol" })
-  @ApiResponse({ status: 200, description: "Map of strategy name → SimulationAction[]" })
-  @ApiResponse({ status: 404, description: "Unknown ticker" })
+  @GetPresetsDoc()
   async getPresets(@Param("ticker") ticker: string) {
     const r = resolveTicker(ticker);
     return this.simulationService.getPresets(r.name, r.ticker);
   }
 
   @Get(":ticker")
-  @ApiOperation({ summary: "Full ticker data", description: "Returns price history, latest news articles, Yahoo Finance summary, and trend/momentum/volatility analysis for one ticker." })
-  @ApiParam({ name: "ticker", description: "Ticker symbol (e.g. CRWD)" })
-  @ApiResponse({ status: 200, schema: { type: "object", properties: {
-    history: { type: "object", properties: { quotes: { type: "array", items: { $ref: "#/components/schemas/QuoteDto" } } } },
-    news: { type: "array", items: { type: "object" } },
-    summary: { type: "object", description: "Yahoo Finance summary data" },
-    analysis: { type: "object", properties: {
-      trend: { type: "string" },
-      momentum: { type: "number" },
-      volatility: { type: "number" },
-    } },
-  } } })
-  @ApiResponse({ status: 404, description: "Unknown ticker" })
+  @GetTickerDoc()
   async getTicker(@Param("ticker") ticker: string, @CurrentUser() user: User) {
     const r = resolveTicker(ticker);
     this.auditService.log(user, "view_ticker", { ticker: r.ticker });
@@ -123,11 +92,7 @@ export class StockController {
   }
 
   @Post("simulate/:ticker")
-  @ApiOperation({ summary: "Run backtest simulation", description: "Runs a portfolio backtest for a ticker given a sequence of buy/sell actions with dates and share values." })
-  @ApiParam({ name: "ticker", description: "Ticker symbol" })
-  @ApiResponse({ status: 201, type: SimulationResultDto })
-  @ApiResponse({ status: 400, description: "Invalid actions payload" })
-  @ApiResponse({ status: 404, description: "Unknown ticker" })
+  @SimulateDoc()
   async simulate(
     @Param("ticker") ticker: string,
     @Body() body: SimulateBodyDto,

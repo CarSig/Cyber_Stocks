@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button.jsx";
+import { Button } from '@/components/ui/button.jsx';
 
 export default function Pagination({ page, setPage, totalPages }) {
   if (totalPages <= 1) return null;

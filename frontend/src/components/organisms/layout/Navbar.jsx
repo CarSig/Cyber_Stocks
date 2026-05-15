@@ -1,10 +1,10 @@
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { UserButton } from "@clerk/react";
-import { useAuth } from "@/context/AuthContext.jsx";
-import { useTheme } from "@/context/ThemeContext.jsx";
-import NotificationBell from "@/components/molecules/shared/NotificationBell.jsx";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { UserButton } from '@clerk/react';
+import { useAuth } from '@/context/AuthContext.jsx';
+import { useTheme } from '@/context/ThemeContext.jsx';
+import NotificationBell from '@/components/molecules/shared/NotificationBell.jsx';
+import { Button } from '@/components/ui/button';
 
 export default function Navbar() {
   const { pathname } = useLocation();
@@ -12,8 +12,11 @@ export default function Navbar() {
   const { theme, toggle } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const segments = pathname.split("/").filter(Boolean);
-  const isTicker = segments.length === 1 && /^[A-Z]{1,5}$/.test(segments[0].toUpperCase()) && !["ADMIN"].includes(segments[0].toUpperCase());
+  const segments = pathname.split('/').filter(Boolean);
+  const isTicker =
+    segments.length === 1 &&
+    /^[A-Z]{1,5}$/.test(segments[0].toUpperCase()) &&
+    !['ADMIN'].includes(segments[0].toUpperCase());
   const ticker = isTicker ? segments[0].toUpperCase() : null;
 
   const closeMenu = () => setMenuOpen(false);
@@ -25,12 +28,17 @@ export default function Navbar() {
       </Link>
 
       {user && (
-        <button className="navbar-hamburger" onClick={() => setMenuOpen((o) => !o)} aria-label="Toggle navigation" aria-expanded={menuOpen}>
-          <span className={`navbar-hamburger-icon${menuOpen ? " open" : ""}`} />
+        <button
+          className="navbar-hamburger"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Toggle navigation"
+          aria-expanded={menuOpen}
+        >
+          <span className={`navbar-hamburger-icon${menuOpen ? ' open' : ''}`} />
         </button>
       )}
 
-      <div className={`navbar-nav${menuOpen ? " navbar-nav--open" : ""}`}>
+      <div className={`navbar-nav${menuOpen ? ' navbar-nav--open' : ''}`}>
         {user && (
           <Link to="/" className="navbar-nav-link" onClick={closeMenu}>
             Companies
@@ -63,7 +71,7 @@ export default function Navbar() {
         )}
         {user && (
           <a
-            href={`http://localhost:3000/api-docs?token=${localStorage.getItem("auth_token") ?? ""}`}
+            href={`http://localhost:3000/api-docs?token=${localStorage.getItem('auth_token') ?? ''}`}
             target="_blank"
             rel="noreferrer"
             className="navbar-nav-link"
@@ -83,12 +91,16 @@ export default function Navbar() {
 
       {user && (
         <div className="navbar-user">
-          <button className="navbar-theme-toggle" onClick={toggle} title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}>
-            {theme === "dark" ? "☀" : "☽"}
+          <button
+            className="navbar-theme-toggle"
+            onClick={toggle}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? '☀' : '☽'}
           </button>
           <NotificationBell />
           <span className="navbar-username">{user.username}</span>
-          {user.role === "admin" && (
+          {user.role === 'admin' && (
             <>
               <span className="navbar-role">admin</span>
               <Button variant="ghost" asChild className="navbar-logout">

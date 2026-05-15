@@ -1,7 +1,7 @@
-import { apiFetch, qs } from "./core.js";
+import { apiFetch, qs } from './core.js';
 
 export function triggerJob(job) {
-  return apiFetch(`/admin/trigger/${job}`, { method: "POST" });
+  return apiFetch(`/admin/trigger/${job}`, { method: 'POST' });
 }
 
 export function getAuditLog({ limit = 100, offset = 0, userId, action } = {}) {

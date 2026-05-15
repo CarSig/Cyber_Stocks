@@ -1,9 +1,9 @@
-import ThreatIntelShell from "@/components/organisms/layout/ThreatIntelShell.jsx";
-import MispTable from "@/components/molecules/threat-intel/misp/MispTable.jsx";
-import { usePaginatedThreatIntel } from "@/hooks/usePaginatedThreatIntel.js";
+import ThreatIntelShell from '@/components/organisms/layout/ThreatIntelShell.jsx';
+import MispTable from '@/components/molecules/threat-intel/misp/MispTable.jsx';
+import { usePaginatedThreatIntel } from '@/hooks/usePaginatedThreatIntel.js';
 
 export default function ThreatIntelMisp() {
-  const { page, setPage, data, isPending, error, totalPages } = usePaginatedThreatIntel("misp", {});
+  const { page, setPage, data, isPending, error, totalPages } = usePaginatedThreatIntel('misp', {});
 
   return (
     <ThreatIntelShell
@@ -20,7 +20,7 @@ export default function ThreatIntelMisp() {
           <strong>MISP not configured.</strong> MISP requires a self-hosted instance.
           <ol className="ti-notice-steps">
             <li>
-              Deploy MISP via Docker:{" "}
+              Deploy MISP via Docker:{' '}
               <a href="https://github.com/MISP/misp-docker" target="_blank" rel="noreferrer" className="ti-link">
                 misp-docker
               </a>
@@ -41,7 +41,9 @@ export default function ThreatIntelMisp() {
 
       {data?.configured && (
         <>
-          {data.items.length === 0 && !isPending && <p className="ti-empty">No events yet — sync runs daily at 06:00 UTC.</p>}
+          {data.items.length === 0 && !isPending && (
+            <p className="ti-empty">No events yet — sync runs daily at 06:00 UTC.</p>
+          )}
           <MispTable data={data} />
         </>
       )}

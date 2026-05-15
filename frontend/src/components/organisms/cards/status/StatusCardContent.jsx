@@ -1,9 +1,9 @@
-import Stat from "@/components/atoms/Stat.jsx";
+import Stat from '@/components/atoms/Stat.jsx';
 
 export default function StatusCardContent({ data, type }) {
   if (!data) return <p className="ti-empty">No data — sync pending</p>;
 
-  if (type === "kev") {
+  if (type === 'kev') {
     return (
       <div className="ti-stats-row">
         <Stat label="Total" value={data.count} />
@@ -13,7 +13,7 @@ export default function StatusCardContent({ data, type }) {
     );
   }
 
-  if (type === "nvd") {
+  if (type === 'nvd') {
     return (
       <div className="ti-stats-row">
         <Stat label="Fetched" value={data.fetched} />
@@ -23,23 +23,27 @@ export default function StatusCardContent({ data, type }) {
     );
   }
 
-  if (type === "otx") {
+  if (type === 'otx') {
     return data.configured ? (
       <div className="ti-stats-row">
         <Stat label="Pulses" value={data.count} />
       </div>
     ) : (
-      <p className="ti-empty">Set <code>OTX_API_KEY</code> in backend/.env</p>
+      <p className="ti-empty">
+        Set <code>OTX_API_KEY</code> in backend/.env
+      </p>
     );
   }
 
-  if (type === "misp") {
+  if (type === 'misp') {
     return data.configured ? (
       <div className="ti-stats-row">
         <Stat label="Events" value={data.count} />
       </div>
     ) : (
-      <p className="ti-empty">Set <code>MISP_URL</code> + <code>MISP_API_KEY</code> in backend/.env</p>
+      <p className="ti-empty">
+        Set <code>MISP_URL</code> + <code>MISP_API_KEY</code> in backend/.env
+      </p>
     );
   }
 

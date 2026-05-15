@@ -1,4 +1,4 @@
-import { apiFetch, qs } from "./core.js";
+import { apiFetch, qs } from './core.js';
 
 export function getEntityArticles(entityId, signal) {
   return apiFetch(`/intelligence/entities/${encodeURIComponent(entityId)}/articles${qs({ signal })}`);
@@ -9,11 +9,11 @@ export function getEntitySummary(entityId, signal) {
 }
 
 export function getSignals() {
-  return apiFetch("/intelligence/signals");
+  return apiFetch('/intelligence/signals');
 }
 
 export function getEntities() {
-  return apiFetch("/intelligence/entities");
+  return apiFetch('/intelligence/entities');
 }
 
 export function getSentimentCorrelations(lagDays = 1, signal) {

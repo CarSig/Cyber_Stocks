@@ -1,10 +1,10 @@
-import { formatDate } from "@/utils/date.js";
+import { formatDate } from '@/utils/date.js';
 
 const SEVERITY_COLORS = {
-  CRITICAL: "var(--color-red)",
-  HIGH: "var(--color-amber)",
-  MEDIUM: "#f59e0b",
-  LOW: "var(--color-blue-toggle)",
+  CRITICAL: 'var(--color-red)',
+  HIGH: 'var(--color-amber)',
+  MEDIUM: '#f59e0b',
+  LOW: 'var(--color-blue-toggle)',
 };
 
 export default function NvdRow({ cve }) {
@@ -16,11 +16,11 @@ export default function NvdRow({ cve }) {
         </a>
       </td>
       <td>
-        <span className="ti-severity" style={{ color: SEVERITY_COLORS[cve.severity] ?? "var(--text-muted)" }}>
+        <span className="ti-severity" style={{ color: SEVERITY_COLORS[cve.severity] ?? 'var(--text-muted)' }}>
           {cve.severity}
         </span>
       </td>
-      <td className="ti-score">{cve.score ?? "—"}</td>
+      <td className="ti-score">{cve.score ?? '—'}</td>
       <td className="ti-desc">{cve.description}</td>
       <td className="ti-date">{formatDate(cve.published)}</td>
       <td className="ti-muted">{cve.status}</td>

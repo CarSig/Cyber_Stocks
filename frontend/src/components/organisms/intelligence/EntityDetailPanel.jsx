@@ -1,19 +1,28 @@
-import { useEntityIntelligence } from "@/hooks/useIntelligence.js";
-import { URGENCY_CONFIG } from "@/utils/urgencyUtils.js";
-import useUrgencyFilter from "@/hooks/useUrgencyFilter.js";
-import SentimentBar from "@/components/molecules/shared/SentimentBar.jsx";
-import StatRowSummary from "@/components/molecules/shared/StatRowSummary.jsx";
-import DetailPanelOverlay from "@/components/molecules/shared/DetailPanelOverlay.jsx";
-import EntityCorrelation from "@/components/molecules/intelligence/EntityCorrelation.jsx";
-import ArticleDetail from "@/components/molecules/intelligence/ArticleDetail.jsx";
+import { useEntityIntelligence } from '@/hooks/useIntelligence.js';
+import { URGENCY_CONFIG } from '@/utils/urgencyUtils.js';
+import useUrgencyFilter from '@/hooks/useUrgencyFilter.js';
+import SentimentBar from '@/components/molecules/shared/SentimentBar.jsx';
+import StatRowSummary from '@/components/molecules/shared/StatRowSummary.jsx';
+import DetailPanelOverlay from '@/components/molecules/shared/DetailPanelOverlay.jsx';
+import EntityCorrelation from '@/components/molecules/intelligence/EntityCorrelation.jsx';
+import ArticleDetail from '@/components/molecules/intelligence/ArticleDetail.jsx';
 
-export default function EntityDetailPanel({ entityId, onClose, signal, urgencyFilter: globalUrgencyFilter, onUrgencyChange, onUrgencyCounts }) {
+export default function EntityDetailPanel({
+  entityId,
+  onClose,
+  signal,
+  urgencyFilter: globalUrgencyFilter,
+  onUrgencyChange,
+  onUrgencyCounts,
+}) {
   const { articles, summary } = useEntityIntelligence(entityId, signal);
   const { enriched, counts, activeUrgency, setActiveUrgency, filtered } = useUrgencyFilter(articles.data);
 
   const activeFilter = globalUrgencyFilter || activeUrgency;
   const filteredArticles = globalUrgencyFilter
-    ? enriched.filter((a) => a._urgency === globalUrgencyFilter).sort((a, b) => URGENCY_CONFIG[a._urgency].order - URGENCY_CONFIG[b._urgency].order)
+    ? enriched
+        .filter((a) => a._urgency === globalUrgencyFilter)
+        .sort((a, b) => URGENCY_CONFIG[a._urgency].order - URGENCY_CONFIG[b._urgency].order)
     : filtered;
 
   if (onUrgencyCounts) onUrgencyCounts(counts);
@@ -36,16 +45,21 @@ export default function EntityDetailPanel({ entityId, onClose, signal, urgencyFi
       )}
 
       <p className="entity-detail-panel-articles-title">
-        Articles ({activeFilter === "all" ? filteredArticles.length : `${filteredArticles.length} of ${enriched.length}`})
-        {globalUrgencyFilter && <span style={{ marginLeft: 6, color: URGENCY_CONFIG[globalUrgencyFilter].color }}>({URGENCY_CONFIG[globalUrgencyFilter].label} from sidebar)</span>}
+        Articles (
+        {activeFilter === 'all' ? filteredArticles.length : `${filteredArticles.length} of ${enriched.length}`})
+        {globalUrgencyFilter && (
+          <span style={{ marginLeft: 6, color: URGENCY_CONFIG[globalUrgencyFilter].color }}>
+            ({URGENCY_CONFIG[globalUrgencyFilter].label} from sidebar)
+          </span>
+        )}
       </p>
 
       <div className="urgency-filter-tabs">
-        {["all", "now", "today", "recent", "future_short", "future_long", "past"].map((key) => {
+        {['all', 'now', 'today', 'recent', 'future_short', 'future_long', 'past'].map((key) => {
           const active = activeFilter === key;
-          const cfg = key === "all" ? null : URGENCY_CONFIG[key];
-          const color = key === "all" ? "var(--border)" : cfg.color;
-          const count = key === "all" ? enriched.length : (counts[key] || 0);
+          const cfg = key === 'all' ? null : URGENCY_CONFIG[key];
+          const color = key === 'all' ? 'var(--border)' : cfg.color;
+          const count = key === 'all' ? enriched.length : counts[key] || 0;
           return (
             <button
               key={key}
@@ -53,15 +67,15 @@ export default function EntityDetailPanel({ entityId, onClose, signal, urgencyFi
                 if (onUrgencyChange) onUrgencyChange(active ? null : key);
                 else if (!globalUrgencyFilter) setActiveUrgency(key);
               }}
-              className={`urgency-filter-button ${active ? "urgency-filter-button-active" : ""}`}
+              className={`urgency-filter-button ${active ? 'urgency-filter-button-active' : ''}`}
               style={{
-                borderColor: active ? color : "var(--border)",
-                background: active ? (key === "all" ? "rgba(255,255,255,0.05)" : cfg.bg) : "transparent",
-                color: active ? (key === "all" ? "var(--foreground)" : color) : "var(--muted-foreground)",
+                borderColor: active ? color : 'var(--border)',
+                background: active ? (key === 'all' ? 'rgba(255,255,255,0.05)' : cfg.bg) : 'transparent',
+                color: active ? (key === 'all' ? 'var(--foreground)' : color) : 'var(--muted-foreground)',
                 fontWeight: active ? 600 : 400,
               }}
             >
-              {key === "all" ? "All" : cfg.label}
+              {key === 'all' ? 'All' : cfg.label}
               <span className="urgency-filter-button-count">({count})</span>
             </button>
           );

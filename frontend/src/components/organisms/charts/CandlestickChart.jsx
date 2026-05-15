@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
-import "./charts.css";
-import { createChart, CandlestickSeries } from "lightweight-charts";
-import { cssVar, makeChartOptions } from "./utils/theme.js";
-import { toSortedOHLC } from "./utils/series.js";
-import { attachResizeObserver } from "./utils/chartSetup.js";
+import { useEffect, useRef } from 'react';
+import './charts.css';
+import { createChart, CandlestickSeries } from 'lightweight-charts';
+import { cssVar, makeChartOptions } from './utils/theme.js';
+import { toSortedOHLC } from './utils/series.js';
+import { attachResizeObserver } from './utils/chartSetup.js';
 
 export default function CandlestickChart({ quotes }) {
   const containerRef = useRef(null);
@@ -12,11 +12,11 @@ export default function CandlestickChart({ quotes }) {
     const chart = createChart(containerRef.current, makeChartOptions(containerRef.current));
 
     const series = chart.addSeries(CandlestickSeries, {
-      upColor: cssVar("--candle-up"),
-      downColor: cssVar("--candle-down"),
+      upColor: cssVar('--candle-up'),
+      downColor: cssVar('--candle-down'),
       borderVisible: false,
-      wickUpColor: cssVar("--candle-up"),
-      wickDownColor: cssVar("--candle-down"),
+      wickUpColor: cssVar('--candle-up'),
+      wickDownColor: cssVar('--candle-down'),
     });
 
     series.setData(toSortedOHLC(quotes));

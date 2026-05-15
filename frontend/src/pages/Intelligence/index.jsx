@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { useBackendEntities, useAllSentimentCorrelations, useGlobalSignals } from "@/hooks/useIntelligence.js";
-import { LoadingSpinner } from "@/components/shared/LoadingSpinner.jsx";
-import { CorrelationSelector, ViewToggle } from "@/components/shared/CorrelationControls.jsx";
-import { URGENCY_CONFIG } from "@/utils/urgencyUtils.js";
-import indexBy from "@/utils/indexBy.js";
-import CountBadge from "@/components/atoms/CountBadge.jsx";
-import EntityDetailPanel from "@/components/organisms/intelligence/EntityDetailPanel.jsx";
-import EntityCard from "@/components/organisms/cards/entity/EntityCard.jsx";
-import EntityListRow from "@/components/molecules/intelligence/EntityListRow.jsx";
-import SignalSidebar from "@/components/molecules/intelligence/SignalSidebar.jsx";
-import ExpandableFilterSection from "@/components/molecules/shared/ExpandableFilterSection.jsx";
-import "./Intelligence.css";
-import Page from "@/components/atoms/Page.jsx";
+import { useState } from 'react';
+import { useBackendEntities, useAllSentimentCorrelations, useGlobalSignals } from '@/hooks/useIntelligence.js';
+import { LoadingSpinner } from '@/components/shared/LoadingSpinner.jsx';
+import { CorrelationSelector, ViewToggle } from '@/components/shared/CorrelationControls.jsx';
+import { URGENCY_CONFIG } from '@/utils/urgencyUtils.js';
+import indexBy from '@/utils/indexBy.js';
+import CountBadge from '@/components/atoms/CountBadge.jsx';
+import EntityDetailPanel from '@/components/organisms/intelligence/EntityDetailPanel.jsx';
+import EntityCard from '@/components/organisms/cards/entity/EntityCard.jsx';
+import EntityListRow from '@/components/molecules/intelligence/EntityListRow.jsx';
+import SignalSidebar from '@/components/molecules/intelligence/SignalSidebar.jsx';
+import ExpandableFilterSection from '@/components/molecules/shared/ExpandableFilterSection.jsx';
+import './Intelligence.css';
+import Page from '@/components/atoms/Page.jsx';
 
 export default function Intelligence() {
   const [selected, setSelected] = useState(null);
@@ -19,18 +19,16 @@ export default function Intelligence() {
   const [selectedUrgency, setSelectedUrgency] = useState(null);
   const [urgencyCounts, setUrgencyCounts] = useState({});
   const [lagDays, setLagDays] = useState(1);
-  const [viewMode, setViewMode] = useState("list");
+  const [viewMode, setViewMode] = useState('list');
   const [signalsExpanded, setSignalsExpanded] = useState(true);
   const [urgencyExpanded, setUrgencyExpanded] = useState(true);
   const { data: entities, isPending } = useBackendEntities();
   const { data: correlations } = useAllSentimentCorrelations(lagDays, selectedSignal);
   const { data: allSignals, isPending: signalsLoading } = useGlobalSignals();
 
-  const uniqueEntities = entities
-    ? [...new Map(entities.map((e) => [e.entityId, e])).values()]
-    : [];
+  const uniqueEntities = entities ? [...new Map(entities.map((e) => [e.entityId, e])).values()] : [];
 
-  const correlationByEntityId = indexBy(correlations, "entityId");
+  const correlationByEntityId = indexBy(correlations, 'entityId');
   const filteredSignals = allSignals?.filter((s) => s.count >= 5) ?? [];
   const displayedEntities = uniqueEntities;
 
@@ -40,12 +38,18 @@ export default function Intelligence() {
       <div className="intelligence-left-sidebar">
         <h2 className="intelligence-left-sidebar-title">Filters</h2>
 
-        <ExpandableFilterSection title="Signals" icon="📡" isExpanded={signalsExpanded} onToggle={() => setSignalsExpanded((e) => !e)} loading={signalsLoading}>
+        <ExpandableFilterSection
+          title="Signals"
+          icon="📡"
+          isExpanded={signalsExpanded}
+          onToggle={() => setSignalsExpanded((e) => !e)}
+          loading={signalsLoading}
+        >
           {filteredSignals?.slice(0, 15).map((s) => (
             <div
               key={s.signalType}
               onClick={() => setSelectedSignal(selectedSignal === s.signalType ? null : s.signalType)}
-              className={`sidebar-signal-item ${selectedSignal === s.signalType ? "sidebar-signal-item-active" : ""}`}
+              className={`sidebar-signal-item ${selectedSignal === s.signalType ? 'sidebar-signal-item-active' : ''}`}
             >
               <span className="sidebar-signal-item-name">{s.signalType}</span>
               <CountBadge count={s.count} className="sidebar-signal-item-count" />
@@ -53,9 +57,14 @@ export default function Intelligence() {
           ))}
         </ExpandableFilterSection>
 
-        <ExpandableFilterSection title="Urgency" icon="⏱" isExpanded={urgencyExpanded} onToggle={() => setUrgencyExpanded((e) => !e)}>
+        <ExpandableFilterSection
+          title="Urgency"
+          icon="⏱"
+          isExpanded={urgencyExpanded}
+          onToggle={() => setUrgencyExpanded((e) => !e)}
+        >
           <div className="sidebar-urgency-list">
-            {["now", "today", "recent", "future_short", "future_long", "past"].map((key) => {
+            {['now', 'today', 'recent', 'future_short', 'future_long', 'past'].map((key) => {
               const cfg = URGENCY_CONFIG[key];
               const isActive = selectedUrgency === key;
               const count = urgencyCounts[key] || 0;
@@ -66,7 +75,7 @@ export default function Intelligence() {
                   className="sidebar-urgency-button"
                   style={{
                     borderColor: cfg.color,
-                    background: isActive ? cfg.bg : "transparent",
+                    background: isActive ? cfg.bg : 'transparent',
                     color: cfg.color,
                     fontWeight: isActive ? 600 : 400,
                   }}
@@ -84,7 +93,8 @@ export default function Intelligence() {
       <div className="intelligence-main-content" style={{ paddingRight: selectedSignal ? 300 : 0 }}>
         <Page title="News Intelligence">
           <p className="intelligence-description">
-            AI-extracted entities, per-entity sentiment, and macro signals from Yahoo news. Click a company to see all articles.
+            AI-extracted entities, per-entity sentiment, and macro signals from Yahoo news. Click a company to see all
+            articles.
           </p>
 
           {selectedSignal && (
@@ -106,16 +116,28 @@ export default function Intelligence() {
 
           {isPending ? (
             <LoadingSpinner />
-          ) : viewMode === "grid" ? (
+          ) : viewMode === 'grid' ? (
             <div className="ti-grid" style={{ marginBottom: 32 }}>
               {displayedEntities.map((e) => (
-                <EntityCard key={e.entityId} entity={e} onClick={() => setSelected(e.entityId)} signal={selectedSignal} correlation={correlationByEntityId[e.entityId]} />
+                <EntityCard
+                  key={e.entityId}
+                  entity={e}
+                  onClick={() => setSelected(e.entityId)}
+                  signal={selectedSignal}
+                  correlation={correlationByEntityId[e.entityId]}
+                />
               ))}
             </div>
           ) : (
             <div style={{ marginBottom: 32 }}>
               {displayedEntities.map((e) => (
-                <EntityListRow key={e.entityId} entity={e} onClick={() => setSelected(e.entityId)} signal={selectedSignal} correlation={correlationByEntityId[e.entityId]} />
+                <EntityListRow
+                  key={e.entityId}
+                  entity={e}
+                  onClick={() => setSelected(e.entityId)}
+                  signal={selectedSignal}
+                  correlation={correlationByEntityId[e.entityId]}
+                />
               ))}
             </div>
           )}

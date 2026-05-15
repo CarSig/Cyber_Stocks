@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from "react";
-import { streamResearch } from "@/api/research.js";
+import { useState, useCallback, useRef } from 'react';
+import { streamResearch } from '@/api/research.js';
 
 export function useResearch(ticker) {
   const [sections, setSections] = useState(null);
@@ -14,18 +14,19 @@ export function useResearch(ticker) {
     cancelRef.current = streamResearch(
       ticker,
       (section) => {
-        current = [...current, { title: section, text: "" }];
+        current = [...current, { title: section, text: '' }];
         setSections([...current]);
       },
       (text) => {
         if (!current.length) return;
-        current = current.map((s, i) =>
-          i === current.length - 1 ? { ...s, text: s.text + text } : s,
-        );
+        current = current.map((s, i) => (i === current.length - 1 ? { ...s, text: s.text + text } : s));
         setSections([...current]);
       },
       () => setIsPending(false),
-      (err) => { setSections([{ title: "Error", text: err }]); setIsPending(false); },
+      (err) => {
+        setSections([{ title: 'Error', text: err }]);
+        setIsPending(false);
+      },
     );
   }, [ticker]);
 

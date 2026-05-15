@@ -412,7 +412,7 @@
 
   &::before,
   &::after {
-    content: "";
+    content: '';
     position: absolute;
     top: -4.5px;
     border: 5px solid transparent;
@@ -521,22 +521,30 @@
   height: 2px;
   background: var(--text-muted);
   border-radius: 2px;
-  transition: transform 0.2s, opacity 0.2s;
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
 }
 .navbar-hamburger-icon {
   position: relative;
 }
 .navbar-hamburger-icon::before,
 .navbar-hamburger-icon::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
 }
-.navbar-hamburger-icon::before { top: -5px; }
-.navbar-hamburger-icon::after  { top: 5px; }
+.navbar-hamburger-icon::before {
+  top: -5px;
+}
+.navbar-hamburger-icon::after {
+  top: 5px;
+}
 
 /* X state */
-.navbar-hamburger-icon.open { background: transparent; }
+.navbar-hamburger-icon.open {
+  background: transparent;
+}
 .navbar-hamburger-icon.open::before {
   transform: translateY(5px) rotate(45deg);
 }
@@ -737,7 +745,9 @@
   margin-bottom: -1px;
   cursor: pointer;
   transition: color 0.15s;
-  &:hover { color: var(--text-primary); }
+  &:hover {
+    color: var(--text-primary);
+  }
 }
 .ticker-tab--active {
   color: var(--accent-color);
@@ -834,7 +844,7 @@
   background: var(--surface-2);
 }
 .ticker-wl-row.is-active::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 6px;
@@ -1443,9 +1453,13 @@
   align-items: center;
   @media (max-width: 640px) {
     grid-template-columns: 1fr 1fr;
-    & > *:nth-child(3) { grid-column: 1 / -1; }
+    & > *:nth-child(3) {
+      grid-column: 1 / -1;
+    }
     & > *:nth-child(4),
-    & > *:nth-child(5) { justify-self: start; }
+    & > *:nth-child(5) {
+      justify-self: start;
+    }
   }
 }
 .sim-action-row .btn {
@@ -1608,7 +1622,7 @@
 }
 .auth-divider::before,
 .auth-divider::after {
-  content: "";
+  content: '';
   flex: 1;
   height: 1px;
   background: var(--surface-3);
@@ -1868,8 +1882,12 @@
 .admin-job-status {
   font-size: 0.8rem;
 }
-.admin-job-status--ok { color: var(--color-green, #22c55e); }
-.admin-job-status--err { color: var(--color-red, #ef4444); }
+.admin-job-status--ok {
+  color: var(--color-green, #22c55e);
+}
+.admin-job-status--err {
+  color: var(--color-red, #ef4444);
+}
 
 .admin-credits-body {
   margin-top: 10px;
@@ -2491,5 +2509,7 @@
 
 /* Loading spinner animation */
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }

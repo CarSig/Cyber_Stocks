@@ -1,8 +1,8 @@
-import { useState } from "react";
-import BaseCard from "@/components/atoms/BaseCard.jsx";
-import CardHeader from "@/components/atoms/CardHeader.jsx";
-import CountBadge from "@/components/atoms/CountBadge.jsx";
-import { useGlobalSignals } from "@/hooks/useIntelligence.js";
+import { useState } from 'react';
+import BaseCard from '@/components/atoms/BaseCard.jsx';
+import CardHeader from '@/components/atoms/CardHeader.jsx';
+import CountBadge from '@/components/atoms/CountBadge.jsx';
+import { useGlobalSignals } from '@/hooks/useIntelligence.js';
 
 export default function SignalsPanel({ selectedSignal, onSelectSignal }) {
   const [expanded, setExpanded] = useState(false);
@@ -21,15 +21,15 @@ export default function SignalsPanel({ selectedSignal, onSelectSignal }) {
           <div
             key={s.signalType}
             onClick={() => onSelectSignal(selectedSignal === s.signalType ? null : s.signalType)}
-            className={`signals-panel-item ${selectedSignal === s.signalType ? "signals-panel-item-active" : ""}`}
+            className={`signals-panel-item ${selectedSignal === s.signalType ? 'signals-panel-item-active' : ''}`}
           >
-            <span style={{ color: "var(--foreground)" }}>{s.signalType}</span>
+            <span style={{ color: 'var(--foreground)' }}>{s.signalType}</span>
             <CountBadge count={s.count} />
           </div>
         ))}
         {filtered.length > 10 && (
           <button onClick={() => setExpanded((e) => !e)} className="signals-panel-expand-button">
-            {expanded ? "Show less ↑" : `Show all ${filtered.length} signals ↓`}
+            {expanded ? 'Show less ↑' : `Show all ${filtered.length} signals ↓`}
           </button>
         )}
       </div>

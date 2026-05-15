@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { createChart, CandlestickSeries } from "lightweight-charts";
-import { getBars } from "@/api/alpaca.js";
-import Page from "@/components/atoms/Page.jsx";
-import "./Alpaca.css";
+import { useState, useEffect, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { createChart, CandlestickSeries } from 'lightweight-charts';
+import { getBars } from '@/api/alpaca.js';
+import Page from '@/components/atoms/Page.jsx';
+import './Alpaca.css';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -11,7 +11,7 @@ function todayStr() {
 
 function useAlpacaBars(ticker, date) {
   return useQuery({
-    queryKey: ["alpaca-bars", ticker, date],
+    queryKey: ['alpaca-bars', ticker, date],
     queryFn: () => getBars(ticker, date),
     enabled: Boolean(ticker && date),
     staleTime: 5 * 60 * 1000,
@@ -27,22 +27,22 @@ function IntradayChart({ bars }) {
     if (!containerRef.current) return;
 
     const chart = createChart(containerRef.current, {
-      layout: { background: { color: "transparent" }, textColor: "var(--foreground, #e5e7eb)" },
-      grid: { vertLines: { color: "rgba(255,255,255,0.05)" }, horzLines: { color: "rgba(255,255,255,0.05)" } },
-      timeScale: { timeVisible: true, secondsVisible: false, borderColor: "rgba(255,255,255,0.1)" },
-      rightPriceScale: { borderColor: "rgba(255,255,255,0.1)" },
+      layout: { background: { color: 'transparent' }, textColor: 'var(--foreground, #e5e7eb)' },
+      grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
+      timeScale: { timeVisible: true, secondsVisible: false, borderColor: 'rgba(255,255,255,0.1)' },
+      rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
       crosshair: { mode: 1 },
       handleScroll: true,
       handleScale: true,
     });
 
     const series = chart.addSeries(CandlestickSeries, {
-      upColor: "#22c55e",
-      downColor: "#ef4444",
-      borderUpColor: "#22c55e",
-      borderDownColor: "#ef4444",
-      wickUpColor: "#22c55e",
-      wickDownColor: "#ef4444",
+      upColor: '#22c55e',
+      downColor: '#ef4444',
+      borderUpColor: '#22c55e',
+      borderDownColor: '#ef4444',
+      wickUpColor: '#22c55e',
+      wickDownColor: '#ef4444',
     });
 
     chartRef.current = chart;
@@ -89,7 +89,7 @@ function BarStats({ bars }) {
   const volume = bars.reduce((s, b) => s + b.v, 0);
   const change = close - open;
   const changePct = ((change / open) * 100).toFixed(2);
-  const changeColor = change >= 0 ? "var(--color-green, #22c55e)" : "var(--color-red, #ef4444)";
+  const changeColor = change >= 0 ? 'var(--color-green, #22c55e)' : 'var(--color-red, #ef4444)';
 
   return (
     <div className="alpaca-stats">
@@ -103,16 +103,21 @@ function BarStats({ bars }) {
       </div>
       <div className="alpaca-stat">
         <span className="alpaca-stat-label">High</span>
-        <span className="alpaca-stat-value" style={{ color: "var(--color-green, #22c55e)" }}>${high.toFixed(2)}</span>
+        <span className="alpaca-stat-value" style={{ color: 'var(--color-green, #22c55e)' }}>
+          ${high.toFixed(2)}
+        </span>
       </div>
       <div className="alpaca-stat">
         <span className="alpaca-stat-label">Low</span>
-        <span className="alpaca-stat-value" style={{ color: "var(--color-red, #ef4444)" }}>${low.toFixed(2)}</span>
+        <span className="alpaca-stat-value" style={{ color: 'var(--color-red, #ef4444)' }}>
+          ${low.toFixed(2)}
+        </span>
       </div>
       <div className="alpaca-stat">
         <span className="alpaca-stat-label">Change</span>
         <span className="alpaca-stat-value" style={{ color: changeColor }}>
-          {change >= 0 ? "+" : ""}{change.toFixed(2)} ({changePct}%)
+          {change >= 0 ? '+' : ''}
+          {change.toFixed(2)} ({changePct}%)
         </span>
       </div>
       <div className="alpaca-stat">
@@ -128,9 +133,9 @@ function BarStats({ bars }) {
 }
 
 export default function Alpaca() {
-  const [ticker, setTicker] = useState("AAPL");
+  const [ticker, setTicker] = useState('AAPL');
   const [date, setDate] = useState(todayStr());
-  const [query, setQuery] = useState({ ticker: "AAPL", date: todayStr() });
+  const [query, setQuery] = useState({ ticker: 'AAPL', date: todayStr() });
 
   const { data, isPending, error } = useAlpacaBars(query.ticker, query.date);
 
@@ -142,44 +147,47 @@ export default function Alpaca() {
   return (
     <Page>
       <div className="alpaca-page">
-      <div className="alpaca-header">
-        <h2 className="alpaca-title">Intraday Chart</h2>
-        <form className="alpaca-form" onSubmit={handleSubmit}>
-          <input
-            className="alpaca-input"
-            value={ticker}
-            onChange={(e) => setTicker(e.target.value)}
-            placeholder="Ticker"
-            maxLength={10}
-          />
-          <input
-            className="alpaca-input"
-            type="date"
-            value={date}
-            max={todayStr()}
-            onChange={(e) => setDate(e.target.value)}
-          />
-          <button className="alpaca-btn" type="submit">Load</button>
-        </form>
-      </div>
+        <div className="alpaca-header">
+          <h2 className="alpaca-title">Intraday Chart</h2>
+          <form className="alpaca-form" onSubmit={handleSubmit}>
+            <input
+              className="alpaca-input"
+              value={ticker}
+              onChange={(e) => setTicker(e.target.value)}
+              placeholder="Ticker"
+              maxLength={10}
+            />
+            <input
+              className="alpaca-input"
+              type="date"
+              value={date}
+              max={todayStr()}
+              onChange={(e) => setDate(e.target.value)}
+            />
+            <button className="alpaca-btn" type="submit">
+              Load
+            </button>
+          </form>
+        </div>
 
-      {isPending && <p className="alpaca-status">Loading…</p>}
-      {error && <p className="alpaca-status alpaca-error">{error.message}</p>}
+        {isPending && <p className="alpaca-status">Loading…</p>}
+        {error && <p className="alpaca-status alpaca-error">{error.message}</p>}
 
-      {data && (
-        <>
-          <div className="alpaca-chart-header">
-            <span className="alpaca-chart-symbol">{data.symbol}</span>
-            <span className="alpaca-chart-date">{query.date}</span>
-            <span className="alpaca-chart-timeframe">1-minute bars</span>
-          </div>
-          <BarStats bars={data.bars} />
-          {data.bars?.length > 0
-            ? <IntradayChart bars={data.bars} />
-            : <p className="alpaca-status">No bars returned — market may have been closed on this date.</p>
-          }
-        </>
-      )}
+        {data && (
+          <>
+            <div className="alpaca-chart-header">
+              <span className="alpaca-chart-symbol">{data.symbol}</span>
+              <span className="alpaca-chart-date">{query.date}</span>
+              <span className="alpaca-chart-timeframe">1-minute bars</span>
+            </div>
+            <BarStats bars={data.bars} />
+            {data.bars?.length > 0 ? (
+              <IntradayChart bars={data.bars} />
+            ) : (
+              <p className="alpaca-status">No bars returned — market may have been closed on this date.</p>
+            )}
+          </>
+        )}
       </div>
     </Page>
   );

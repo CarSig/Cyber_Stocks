@@ -7,7 +7,7 @@ import type { Channel, ConsumeMessage } from 'amqplib';
 import { Pool } from 'pg';
 import { logger } from '@/shared/logger';
 import { analyzeArticleWithAnthropic } from '@/shared/utils/anthropicAnalyzer';
-import { NEWS_ANALYZED_QUEUE } from '@/shared/mq/connection';
+import { NEWS_ANALYZED_QUEUE, MAX_RETRIES } from '@/shared/mq/connection';
 
 const AMQP_URL = process.env.AMQP_URL ?? 'amqp://localhost';
 const QUEUE = 'news.articles';
@@ -122,8 +122,10 @@ async function start(): Promise<void> {
     try {
       await processMessage(msg, ch);
     } catch (err) {
-      logger.error({ err }, 'failed to process message');
-      ch.nack(msg, false, true);
+      const deaths = (msg.properties.headers?.["x-death"] as Array<{ count: number }> | undefined)?.[0]?.count ?? 0;
+      const requeue = deaths < MAX_RETRIES;
+      logger.error({ err, deaths, requeue }, 'failed to process message');
+      ch.nack(msg, false, requeue);
     }
   });
 

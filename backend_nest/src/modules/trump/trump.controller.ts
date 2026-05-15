@@ -9,7 +9,7 @@ import type { User } from "@/types/index";
 
 @ApiTags("Trump")
 @ApiBearerAuth("bearer")
-@Controller()
+@Controller("trump")
 export class TrumpController {
   constructor(
     private readonly trumpService: TrumpService,

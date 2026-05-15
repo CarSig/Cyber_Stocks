@@ -1,14 +1,18 @@
-import { Input } from "@/components/ui/input";
-import FilterSelect from "@/components/molecules/shared/FilterSelect.jsx";
-import { useTickerContext } from "@/context/TickerContext.jsx";
-import CorrelationBox from "@/components/organisms/ticker/CorrelationBox.jsx";
-import CorrLagTable from "@/pages/Ticker/CorrLagTable.jsx";
+import { Input } from '@/components/ui/input';
+import FilterSelect from '@/components/molecules/shared/FilterSelect.jsx';
+import { useTickerContext } from '@/context/TickerContext.jsx';
+import CorrelationBox from '@/components/organisms/ticker/CorrelationBox.jsx';
+import CorrLagTable from '@/pages/Ticker/CorrLagTable.jsx';
 
 export default function CorrelationsTab({
-  ticker, companies, sparklinesData,
+  ticker,
+  companies,
+  sparklinesData,
   otherTickers,
-  correlationData, correlationFetching,
-  trump, threatIntel,
+  correlationData,
+  correlationFetching,
+  trump,
+  threatIntel,
 }) {
   const { compareTicker, setCompareTicker, correlagDays, setCorrelagDays } = useTickerContext();
   return (
@@ -23,7 +27,7 @@ export default function CorrelationsTab({
         </div>
       )}
 
-      <div className="compare-row" style={{ marginTop: "1rem" }}>
+      <div className="compare-row" style={{ marginTop: '1rem' }}>
         <FilterSelect
           value={compareTicker}
           onChange={setCompareTicker}
@@ -61,9 +65,9 @@ export default function CorrelationsTab({
       )}
 
       {[
-        { key: "nvd", label: "NVD CVEs", eventLabel: "CVE disclosure" },
-        { key: "kev", label: "CISA KEV", eventLabel: "KEV listing" },
-        { key: "otx", label: "OTX Pulses", eventLabel: "OTX pulse" },
+        { key: 'nvd', label: 'NVD CVEs', eventLabel: 'CVE disclosure' },
+        { key: 'kev', label: 'CISA KEV', eventLabel: 'KEV listing' },
+        { key: 'otx', label: 'OTX Pulses', eventLabel: 'OTX pulse' },
       ].map(({ key, label, eventLabel }) => {
         const q = threatIntel[key];
         if (!q.data && !q.error) return null;

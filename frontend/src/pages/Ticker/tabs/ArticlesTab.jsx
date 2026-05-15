@@ -1,4 +1,4 @@
-import NewsSection from "@/components/organisms/ticker/NewsSection.jsx";
+import NewsSection from '@/components/organisms/ticker/NewsSection.jsx';
 
 export default function ArticlesTab({ ticker, newsArticles }) {
   return (

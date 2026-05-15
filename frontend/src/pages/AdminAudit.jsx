@@ -1,45 +1,45 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import StateHandler from "@/components/organisms/shared/StateHandler.jsx";
-import { getAuditLog } from "@/api/admin.js";
-import FilterSelect from "@/components/molecules/shared/FilterSelect.jsx";
-import Pagination from "@/components/molecules/shared/Pagination.jsx";
-import Page from "@/components/atoms/Page.jsx";
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import StateHandler from '@/components/organisms/shared/StateHandler.jsx';
+import { getAuditLog } from '@/api/admin.js';
+import FilterSelect from '@/components/molecules/shared/FilterSelect.jsx';
+import Pagination from '@/components/molecules/shared/Pagination.jsx';
+import Page from '@/components/atoms/Page.jsx';
 
 const ACTION_LABELS = {
-  login: "Login",
-  register: "Register",
-  google_auth: "Google Auth",
-  view_ticker: "View Ticker",
-  correlate: "Correlate",
-  simulate: "Simulate",
-  research: "Research",
-  chat: "Chat",
-  trump_correlation: "Trump Correlation",
-  trump_weekly_impact: "Trump Weekly Impact",
+  login: 'Login',
+  register: 'Register',
+  google_auth: 'Google Auth',
+  view_ticker: 'View Ticker',
+  correlate: 'Correlate',
+  simulate: 'Simulate',
+  research: 'Research',
+  chat: 'Chat',
+  trump_correlation: 'Trump Correlation',
+  trump_weekly_impact: 'Trump Weekly Impact',
 };
 
 const ACTION_COLORS = {
-  login: "var(--color-green)",
-  register: "var(--color-blue-toggle)",
-  google_auth: "var(--color-blue-toggle)",
-  simulate: "var(--color-amber)",
-  research: "var(--accent)",
-  chat: "var(--accent)",
+  login: 'var(--color-green)',
+  register: 'var(--color-blue-toggle)',
+  google_auth: 'var(--color-blue-toggle)',
+  simulate: 'var(--color-amber)',
+  research: 'var(--accent)',
+  chat: 'var(--accent)',
 };
 
 const PAGE_SIZE = 50;
 
 function formatMeta(meta) {
-  if (!meta || !Object.keys(meta).length) return "—";
+  if (!meta || !Object.keys(meta).length) return '—';
   return Object.entries(meta)
     .map(([k, v]) => `${k}: ${v}`)
-    .join(", ");
+    .join(', ');
 }
 
 function formatTime(iso) {
   const d = new Date(iso);
-  return d.toLocaleString(undefined, { dateStyle: "short", timeStyle: "medium" });
+  return d.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'medium' });
 }
 
 function AuditTableHead() {
@@ -61,9 +61,9 @@ function AuditTableRow({ entry }) {
     <tr key={entry.id}>
       <td className="audit-time">{formatTime(entry.timestamp)}</td>
       <td className="audit-user">{entry.username}</td>
-      <td>{entry.role === "admin" && <span className="navbar-role">admin</span>}</td>
+      <td>{entry.role === 'admin' && <span className="navbar-role">admin</span>}</td>
       <td>
-        <span className="audit-action" style={{ color: ACTION_COLORS[entry.action] ?? "var(--text-faint)" }}>
+        <span className="audit-action" style={{ color: ACTION_COLORS[entry.action] ?? 'var(--text-faint)' }}>
           {ACTION_LABELS[entry.action] ?? entry.action}
         </span>
       </td>
@@ -74,10 +74,10 @@ function AuditTableRow({ entry }) {
 
 export default function AdminAudit() {
   const [page, setPage] = useState(0);
-  const [actionFilter, setActionFilter] = useState("");
+  const [actionFilter, setActionFilter] = useState('');
 
   const { data, isPending, error } = useQuery({
-    queryKey: ["audit", page, actionFilter],
+    queryKey: ['audit', page, actionFilter],
     queryFn: () =>
       getAuditLog({
         limit: PAGE_SIZE,

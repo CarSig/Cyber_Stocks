@@ -1,16 +1,20 @@
-import { useState } from "react";
-import ThreatIntelShell from "@/components/organisms/layout/ThreatIntelShell.jsx";
-import useFilterWithPageReset from "@/hooks/useFilterWithPageReset.js";
-import NvdFilters from "@/components/molecules/threat-intel/nvd/NvdFilters.jsx";
-import NvdTable from "@/components/molecules/threat-intel/nvd/NvdTable.jsx";
-import { usePaginatedThreatIntel } from "@/hooks/usePaginatedThreatIntel.js";
+import { useState } from 'react';
+import ThreatIntelShell from '@/components/organisms/layout/ThreatIntelShell.jsx';
+import useFilterWithPageReset from '@/hooks/useFilterWithPageReset.js';
+import NvdFilters from '@/components/molecules/threat-intel/nvd/NvdFilters.jsx';
+import NvdTable from '@/components/molecules/threat-intel/nvd/NvdTable.jsx';
+import { usePaginatedThreatIntel } from '@/hooks/usePaginatedThreatIntel.js';
 
 export default function ThreatIntelNvd() {
-  const [search, setSearch] = useState("");
-  const [severity, setSeverity] = useState("");
-  const [company, setCompany] = useState("");
+  const [search, setSearch] = useState('');
+  const [severity, setSeverity] = useState('');
+  const [company, setCompany] = useState('');
 
-  const { page, setPage, data, isPending, error, totalPages, companiesData } = usePaginatedThreatIntel("nvd", { search, severity, company });
+  const { page, setPage, data, isPending, error, totalPages, companiesData } = usePaginatedThreatIntel('nvd', {
+    search,
+    severity,
+    company,
+  });
 
   const withReset = useFilterWithPageReset(setPage);
 

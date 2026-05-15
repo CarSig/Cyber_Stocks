@@ -1,31 +1,49 @@
-import { useState } from "react";
-import { useNewsAnalysis } from "@/hooks/useNewsAnalysis.js";
-import CorrelationBox from "./CorrelationBox.jsx";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import TagBadge from "@/components/atoms/TagBadge";
-import CountBadge from "@/components/atoms/CountBadge";
+import { useState } from 'react';
+import { useNewsAnalysis } from '@/hooks/useNewsAnalysis.js';
+import CorrelationBox from './CorrelationBox.jsx';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import TagBadge from '@/components/atoms/TagBadge';
+import CountBadge from '@/components/atoms/CountBadge';
 
 const PAGE_SIZE = 10;
 
 function sentimentVariant(s) {
-  return s >= 0.1 ? "default" : s <= -0.1 ? "destructive" : "secondary";
+  return s >= 0.1 ? 'default' : s <= -0.1 ? 'destructive' : 'secondary';
 }
 
 function sentimentArrow(s) {
-  return s >= 0.6 ? "▲▲" : s >= 0.1 ? "▲" : s <= -0.6 ? "▼▼" : s <= -0.1 ? "▼" : "●";
+  return s >= 0.6 ? '▲▲' : s >= 0.1 ? '▲' : s <= -0.6 ? '▼▼' : s <= -0.1 ? '▼' : '●';
 }
 
 export default function NewsSection({ ticker, news }) {
-  const { analysis, correlation, analyze, showCorrelation, setShowCorrelation, polling, lagDays, setLagDays, currentTitle, analyzedCount, totalCount: progressTotal } = useNewsAnalysis(ticker);
+  const {
+    analysis,
+    correlation,
+    analyze,
+    showCorrelation,
+    setShowCorrelation,
+    polling,
+    lagDays,
+    setLagDays,
+    currentTitle,
+    analyzedCount,
+    totalCount: progressTotal,
+  } = useNewsAnalysis(ticker);
   const [page, setPage] = useState(0);
 
   const totalCount = news?.length ?? 0;
   const displayAnalyzed = analyzedCount;
   const displayTotal = progressTotal ?? totalCount;
   const sortedNews = (news ?? []).slice().sort((a, b) => {
-    const ta = typeof a.providerPublishTime === "number" || /^\d{10}$/.test(String(a.providerPublishTime)) ? Number(a.providerPublishTime) * 1000 : new Date(a.providerPublishTime).getTime();
-    const tb = typeof b.providerPublishTime === "number" || /^\d{10}$/.test(String(b.providerPublishTime)) ? Number(b.providerPublishTime) * 1000 : new Date(b.providerPublishTime).getTime();
+    const ta =
+      typeof a.providerPublishTime === 'number' || /^\d{10}$/.test(String(a.providerPublishTime))
+        ? Number(a.providerPublishTime) * 1000
+        : new Date(a.providerPublishTime).getTime();
+    const tb =
+      typeof b.providerPublishTime === 'number' || /^\d{10}$/.test(String(b.providerPublishTime))
+        ? Number(b.providerPublishTime) * 1000
+        : new Date(b.providerPublishTime).getTime();
     return tb - ta;
   });
   const pageCount = Math.ceil(totalCount / PAGE_SIZE);
@@ -37,11 +55,15 @@ export default function NewsSection({ ticker, news }) {
 
       <div className="news-toolbar">
         <Button onClick={() => analyze.mutate()} disabled={analyze.isPending || polling}>
-          {analyze.isPending ? "Queuing…" : polling ? "Processing…" : "Analyze Sentiment"}
+          {analyze.isPending ? 'Queuing…' : polling ? 'Processing…' : 'Analyze Sentiment'}
         </Button>
-        <span className="news-analyzed-count">{displayAnalyzed} / {displayTotal} analyzed</span>
+        <span className="news-analyzed-count">
+          {displayAnalyzed} / {displayTotal} analyzed
+        </span>
         {polling && (
-          <span className="news-current-title" title={currentTitle ?? ""}>↻ {currentTitle ?? "waiting…"}</span>
+          <span className="news-current-title" title={currentTitle ?? ''}>
+            ↻ {currentTitle ?? 'waiting…'}
+          </span>
         )}
         <Button
           variant="ghost"
@@ -52,9 +74,7 @@ export default function NewsSection({ ticker, news }) {
         </Button>
         {analyze.data && !polling && (
           <span className="news-analyze-result">
-            {analyze.data.queued > 0
-              ? `Queued ${analyze.data.queued} articles`
-              : "All articles already analyzed"}
+            {analyze.data.queued > 0 ? `Queued ${analyze.data.queued} articles` : 'All articles already analyzed'}
           </span>
         )}
       </div>
@@ -79,8 +99,13 @@ export default function NewsSection({ ticker, news }) {
           return (
             <li key={article.link} className="news-item">
               <div className="news-item-main">
-                <a href={article.link} target="_blank" rel="noreferrer">{article.title}</a>
-                <span className="news-meta"> — {article.publisher} · {new Date(article.providerPublishTime).toLocaleDateString()}</span>
+                <a href={article.link} target="_blank" rel="noreferrer">
+                  {article.title}
+                </a>
+                <span className="news-meta">
+                  {' '}
+                  — {article.publisher} · {new Date(article.providerPublishTime).toLocaleDateString()}
+                </span>
               </div>
               {scores && (
                 <div className="news-analysis">
@@ -96,8 +121,14 @@ export default function NewsSection({ ticker, news }) {
                   {scores.summary && <p className="news-summary">{scores.summary}</p>}
                   {scores.topics?.length > 0 && (
                     <div className="news-topics">
-                      {scores.topics.map((t) => <CountBadge key={t} count={t} />)}
-                      {scores.entities?.map((e) => <TagBadge key={e} className="news-entity">{e}</TagBadge>)}
+                      {scores.topics.map((t) => (
+                        <CountBadge key={t} count={t} />
+                      ))}
+                      {scores.entities?.map((e) => (
+                        <TagBadge key={e} className="news-entity">
+                          {e}
+                        </TagBadge>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -109,11 +140,21 @@ export default function NewsSection({ ticker, news }) {
 
       {pageCount > 1 && (
         <div className="news-pagination">
-          <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(0)}>«</Button>
-          <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>‹</Button>
-          <span className="news-pagination-label">{page + 1} / {pageCount}</span>
-          <Button variant="outline" size="sm" disabled={page >= pageCount - 1} onClick={() => setPage((p) => p + 1)}>›</Button>
-          <Button variant="outline" size="sm" disabled={page >= pageCount - 1} onClick={() => setPage(pageCount - 1)}>»</Button>
+          <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(0)}>
+            «
+          </Button>
+          <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => p - 1)}>
+            ‹
+          </Button>
+          <span className="news-pagination-label">
+            {page + 1} / {pageCount}
+          </span>
+          <Button variant="outline" size="sm" disabled={page >= pageCount - 1} onClick={() => setPage((p) => p + 1)}>
+            ›
+          </Button>
+          <Button variant="outline" size="sm" disabled={page >= pageCount - 1} onClick={() => setPage(pageCount - 1)}>
+            »
+          </Button>
         </div>
       )}
     </section>

@@ -1,19 +1,19 @@
-import { Badge } from "@/components/ui/badge.jsx";
-import TagBadge from "@/components/atoms/TagBadge.jsx";
-import { sentimentColor } from "@/utils/sentimentUtils.js";
-import { classifyUrgency } from "@/utils/urgencyUtils.js";
-import { formatArticleTitle } from "@/utils/articleUtils.js";
-import SentimentBar from "@/components/molecules/shared/SentimentBar.jsx";
-import UrgencyBadge from "@/components/atoms/UrgencyBadge.jsx";
+import { Badge } from '@/components/ui/badge.jsx';
+import TagBadge from '@/components/atoms/TagBadge.jsx';
+import { sentimentColor } from '@/utils/sentimentUtils.js';
+import { classifyUrgency } from '@/utils/urgencyUtils.js';
+import { formatArticleTitle } from '@/utils/articleUtils.js';
+import SentimentBar from '@/components/molecules/shared/SentimentBar.jsx';
+import UrgencyBadge from '@/components/atoms/UrgencyBadge.jsx';
 
 export default function ArticleDetail({ article, focusEntityId }) {
   const mention = article.entities.find((e) => e.entityId === focusEntityId);
   const title = formatArticleTitle(article);
-  let urgency = "future_short";
+  let urgency = 'future_short';
   try {
     urgency = classifyUrgency(article.timestamp, article.globalSignals ?? [], article.companySignals ?? []);
   } catch (e) {
-    console.error("Error classifying urgency:", e);
+    console.error('Error classifying urgency:', e);
   }
 
   return (
@@ -22,7 +22,7 @@ export default function ArticleDetail({ article, focusEntityId }) {
         <span className="article-detail-title">{title}</span>
         <div className="article-detail-badges">
           <UrgencyBadge urgency={urgency} />
-          <Badge variant="secondary">{article.newsType.replace(/_/g, " ")}</Badge>
+          <Badge variant="secondary">{article.newsType.replace(/_/g, ' ')}</Badge>
         </div>
       </div>
 
@@ -31,8 +31,8 @@ export default function ArticleDetail({ article, focusEntityId }) {
           {article.publisher}
           {article.link && (
             <>
-              {" "}
-              ·{" "}
+              {' '}
+              ·{' '}
               <a href={article.link} target="_blank" rel="noopener noreferrer">
                 source ↗
               </a>
@@ -45,9 +45,9 @@ export default function ArticleDetail({ article, focusEntityId }) {
         <div className="article-detail-sentiment">
           <p className="article-detail-sentiment-label">
             Sentiment for <strong className="entity-name-capitalize">{focusEntityId}</strong>
-            {" · "}
-            <span>{mention.role.replace(/_/g, " ")}</span>
-            {" · "}relevance {mention.score.toFixed(2)}
+            {' · '}
+            <span>{mention.role.replace(/_/g, ' ')}</span>
+            {' · '}relevance {mention.score.toFixed(2)}
           </p>
           <SentimentBar value={mention.sentiment} />
         </div>
@@ -63,10 +63,10 @@ export default function ArticleDetail({ article, focusEntityId }) {
                 className="article-detail-entity-tag"
                 style={{
                   color: sentimentColor(e.sentiment),
-                  border: e.entityId === focusEntityId ? "1px solid currentColor" : "1px solid transparent",
+                  border: e.entityId === focusEntityId ? '1px solid currentColor' : '1px solid transparent',
                 }}
               >
-                {e.name} {e.sentiment > 0 ? "+" : ""}
+                {e.name} {e.sentiment > 0 ? '+' : ''}
                 {e.sentiment.toFixed(2)}
               </span>
             ))}

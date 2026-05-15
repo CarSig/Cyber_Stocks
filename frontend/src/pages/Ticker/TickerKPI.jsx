@@ -1,4 +1,4 @@
-import { fmtCompact, fmtVol, fmtPct, changePctOverBars } from "./tickerUtils.js";
+import { fmtCompact, fmtVol, fmtPct, changePctOverBars } from './tickerUtils.js';
 
 export default function TickerKPI({ summary, quotes }) {
   const ks = summary?.defaultKeyStatistics;
@@ -19,25 +19,25 @@ export default function TickerKPI({ summary, quotes }) {
   const peg = ks?.pegRatio;
 
   const items = [
-    { k: "Market Cap", v: fmtCompact(mcap) },
-    { k: "Volume", v: fmtVol(volume) },
-    { k: "52w High", v: high52 != null ? `$${high52.toFixed(2)}` : "—" },
-    { k: "52w Low", v: low52 != null ? `$${low52.toFixed(2)}` : "—" },
-    { k: "Day", v: fmtPct(changePctOverBars(sorted, 1)), pct: true },
-    { k: "Week", v: fmtPct(changePctOverBars(sorted, 5)), pct: true },
-    { k: "Month", v: fmtPct(changePctOverBars(sorted, 21)), pct: true },
-    { k: "Year", v: fmtPct(ks?.["52WeekChange"] ?? changePctOverBars(sorted, 252)), pct: true },
-    { k: "PEG", v: peg != null ? peg.toFixed(2) : "—" },
-    { k: "Sector", v: sp?.sector ?? "—" },
+    { k: 'Market Cap', v: fmtCompact(mcap) },
+    { k: 'Volume', v: fmtVol(volume) },
+    { k: '52w High', v: high52 != null ? `$${high52.toFixed(2)}` : '—' },
+    { k: '52w Low', v: low52 != null ? `$${low52.toFixed(2)}` : '—' },
+    { k: 'Day', v: fmtPct(changePctOverBars(sorted, 1)), pct: true },
+    { k: 'Week', v: fmtPct(changePctOverBars(sorted, 5)), pct: true },
+    { k: 'Month', v: fmtPct(changePctOverBars(sorted, 21)), pct: true },
+    { k: 'Year', v: fmtPct(ks?.['52WeekChange'] ?? changePctOverBars(sorted, 252)), pct: true },
+    { k: 'PEG', v: peg != null ? peg.toFixed(2) : '—' },
+    { k: 'Sector', v: sp?.sector ?? '—' },
   ];
 
   return (
     <div className="ticker-kpi-strip">
       {items.map(({ k, v, pct }) => {
-        let cls = "";
-        if (pct && v !== "—") {
+        let cls = '';
+        if (pct && v !== '—') {
           const n = parseFloat(v);
-          cls = n > 0 ? "ticker-kpi-pos" : n < 0 ? "ticker-kpi-neg" : "";
+          cls = n > 0 ? 'ticker-kpi-pos' : n < 0 ? 'ticker-kpi-neg' : '';
         }
         return (
           <div className="ticker-kpi" key={k}>

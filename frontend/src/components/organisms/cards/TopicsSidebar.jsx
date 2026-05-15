@@ -1,5 +1,5 @@
-import BaseCard from "@/components/atoms/BaseCard.jsx";
-import "./TopicsSidebar.css";
+import BaseCard from '@/components/atoms/BaseCard.jsx';
+import './TopicsSidebar.css';
 
 export default function TopicsSidebar({ selectedTopic, data }) {
   if (!selectedTopic || !data) return null;
@@ -26,7 +26,7 @@ function TopicsSidebarHeader({ selectedTopic }) {
 function TopicsSidebarCard({ count }) {
   return (
     <div className="topics-sidebar-card">
-      <p className="label-sm-caps" style={{ marginBottom: "var(--ts-spacing-sm)" }}>
+      <p className="label-sm-caps" style={{ marginBottom: 'var(--ts-spacing-sm)' }}>
         Articles
       </p>
       <p className="metric-value">{count}</p>

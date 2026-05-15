@@ -1,8 +1,18 @@
-import { Link } from "react-router-dom";
-import { formatDateTime } from "@/utils/date.js";
-import Pagination from "@/components/molecules/shared/Pagination.jsx";
+import { Link } from 'react-router-dom';
+import { formatDateTime } from '@/utils/date.js';
+import Pagination from '@/components/molecules/shared/Pagination.jsx';
 
-export default function ThreatIntelShell({ title, isPending, error, data, page, setPage, totalPages, filters, children }) {
+export default function ThreatIntelShell({
+  title,
+  isPending,
+  error,
+  data,
+  page,
+  setPage,
+  totalPages,
+  filters,
+  children,
+}) {
   return (
     <div className="ti-detail-page">
       <div className="ti-detail-header">

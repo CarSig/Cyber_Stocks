@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { pearsonLag, corrColor, LAG_COLS } from "./tickerUtils.js";
+import { useMemo } from 'react';
+import { pearsonLag, corrColor, LAG_COLS } from './tickerUtils.js';
 
 export default function CorrLagTable({ ticker, sparklinesData, companies }) {
   const rows = useMemo(() => {
@@ -27,7 +27,9 @@ export default function CorrLagTable({ ticker, sparklinesData, companies }) {
             <th className="clt-th clt-ticker">Ticker</th>
             <th className="clt-th clt-name">Company</th>
             {LAG_COLS.map((d) => (
-              <th key={d} className="clt-th clt-val">+{d}d</th>
+              <th key={d} className="clt-th clt-val">
+                +{d}d
+              </th>
             ))}
           </tr>
         </thead>
@@ -37,11 +39,11 @@ export default function CorrLagTable({ ticker, sparklinesData, companies }) {
               <td className="clt-td clt-ticker">{t}</td>
               <td className="clt-td clt-name">{name}</td>
               {cols.map((v, i) => {
-                const bg = v == null ? "transparent" : corrColor(v);
-                const fg = v == null ? "var(--text-faint)" : "white";
+                const bg = v == null ? 'transparent' : corrColor(v);
+                const fg = v == null ? 'var(--text-faint)' : 'white';
                 return (
                   <td key={i} className="clt-td clt-val" style={{ background: bg, color: fg }}>
-                    {v != null ? v.toFixed(2) : "—"}
+                    {v != null ? v.toFixed(2) : '—'}
                   </td>
                 );
               })}
@@ -49,7 +51,9 @@ export default function CorrLagTable({ ticker, sparklinesData, companies }) {
           ))}
         </tbody>
       </table>
-      <div className="corr-lag-note">Each column shows Pearson r of log-returns with base ticker leading by N trading days</div>
+      <div className="corr-lag-note">
+        Each column shows Pearson r of log-returns with base ticker leading by N trading days
+      </div>
     </div>
   );
 }

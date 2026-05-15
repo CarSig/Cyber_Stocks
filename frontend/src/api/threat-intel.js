@@ -1,15 +1,26 @@
-import { apiFetch, qs } from "./core.js";
+import { apiFetch, qs } from './core.js';
 
 export function getStatus() {
-  return apiFetch("/threat-intel/status");
+  return apiFetch('/threat-intel/status');
 }
 
-export function getKev(opts)  { return getList("kev",  opts); }
-export function getNvd(opts)  { return getList("nvd",  opts); }
-export function getOtx(opts)  { return getList("otx",  opts); }
-export function getMisp(opts) { return getList("misp", opts); }
+export function getKev(opts) {
+  return getList('kev', opts);
+}
+export function getNvd(opts) {
+  return getList('nvd', opts);
+}
+export function getOtx(opts) {
+  return getList('otx', opts);
+}
+export function getMisp(opts) {
+  return getList('misp', opts);
+}
 
-export function getList(source, { limit = 50, offset = 0, search = "", ransomware = "", severity = "", company = "" } = {}) {
+export function getList(
+  source,
+  { limit = 50, offset = 0, search = '', ransomware = '', severity = '', company = '' } = {},
+) {
   return apiFetch(`/threat-intel/list/${source}${qs({ limit, offset, search, ransomware, severity, company })}`);
 }
 

@@ -1,9 +1,14 @@
-import "./BaseCard.css";
+import './BaseCard.css';
 
-export default function BaseCard({ variant, disabled, as: Tag = "div", className = "", style, children, ...props }) {
-  const classes = ["base-card", variant ? `base-card--${variant}` : null, disabled ? "base-card--disabled" : null, className]
+export default function BaseCard({ variant, disabled, as: Tag = 'div', className = '', style, children, ...props }) {
+  const classes = [
+    'base-card',
+    variant ? `base-card--${variant}` : null,
+    disabled ? 'base-card--disabled' : null,
+    className,
+  ]
     .filter(Boolean)
-    .join(" ");
+    .join(' ');
 
   return (
     <Tag className={classes} style={style} {...props}>

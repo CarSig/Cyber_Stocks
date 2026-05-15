@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import "./charts.css";
-import { createChart, HistogramSeries } from "lightweight-charts";
-import { makeChartOptions } from "./utils/theme.js";
-import { sentimentToColor, sentimentScoreStyle } from "./utils/colors.js";
-import { attachResizeObserver, subscribeRangeChange, applyRange } from "./utils/chartSetup.js";
-import { daysAgoString, todayString } from "./utils/dates.js";
-import { useSyncRef } from "@/hooks/charts/useOverlayRefs.js";
-import ModalItem from "@/components/atoms/ModalItem.jsx";
-import ChartModal from "./ChartModal.jsx";
+import { useEffect, useRef, useState } from 'react';
+import './charts.css';
+import { createChart, HistogramSeries } from 'lightweight-charts';
+import { makeChartOptions } from './utils/theme.js';
+import { sentimentToColor, sentimentScoreStyle } from './utils/colors.js';
+import { attachResizeObserver, subscribeRangeChange, applyRange } from './utils/chartSetup.js';
+import { daysAgoString, todayString } from './utils/dates.js';
+import { useSyncRef } from '@/hooks/charts/useOverlayRefs.js';
+import ModalItem from '@/components/atoms/ModalItem.jsx';
+import ChartModal from './ChartModal.jsx';
 
 // articles: BackendArticleResponse[] — each has timestamp, link, publisher, entities[].sentiment
 // entityId: the company slug to pick the right entity sentiment from multi-entity articles
@@ -20,9 +20,7 @@ function aggregateByDay(articles, entityId, quoteBounds) {
     const day = new Date(a.timestamp).toISOString().slice(0, 10);
 
     const match = a.entities?.find((e) => e.entityId === entityId);
-    const avgSentiment = a.entities?.length
-      ? a.entities.reduce((s, e) => s + e.sentiment, 0) / a.entities.length
-      : 0;
+    const avgSentiment = a.entities?.length ? a.entities.reduce((s, e) => s + e.sentiment, 0) / a.entities.length : 0;
     const sentiment = match?.sentiment ?? avgSentiment;
 
     if (!byDay.has(day)) {
@@ -39,10 +37,10 @@ function aggregateByDay(articles, entityId, quoteBounds) {
   const countData = [];
   const { from: boundsFrom, to: boundsTo } = quoteBounds ?? {};
   const firstDay = sorted[0]?.[0];
-  const lastDay  = sorted[sorted.length - 1]?.[0];
+  const lastDay = sorted[sorted.length - 1]?.[0];
 
   const rangeFrom = boundsFrom && (!sorted.length || boundsFrom < firstDay) ? boundsFrom : firstDay;
-  const rangeTo   = boundsTo   && (!sorted.length || boundsTo   > lastDay)  ? boundsTo  : lastDay;
+  const rangeTo = boundsTo && (!sorted.length || boundsTo > lastDay) ? boundsTo : lastDay;
 
   if (!rangeFrom) return { countData, articlesByDay };
 
@@ -54,7 +52,7 @@ function aggregateByDay(articles, entityId, quoteBounds) {
     if (d) {
       countData.push({ time, value: d.count, color: sentimentToColor(d.sum / d.count) });
     } else {
-      countData.push({ time, value: 0, color: "transparent" });
+      countData.push({ time, value: 0, color: 'transparent' });
     }
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
@@ -62,7 +60,15 @@ function aggregateByDay(articles, entityId, quoteBounds) {
   return { countData, articlesByDay };
 }
 
-export default function IntelligenceChart({ articles, entityId, period, onPeriodChange, visibleRange, onRangeChange, quoteBounds }) {
+export default function IntelligenceChart({
+  articles,
+  entityId,
+  period,
+  onPeriodChange,
+  visibleRange,
+  onRangeChange,
+  quoteBounds,
+}) {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
   const skipRangeRef = useRef(false);
@@ -73,8 +79,12 @@ export default function IntelligenceChart({ articles, entityId, period, onPeriod
   const articlesRef = useSyncRef(articles);
   const entityIdRef = useSyncRef(entityId);
 
-  useEffect(() => { periodRef.current = period; }, [period]);
-  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
+  useEffect(() => {
+    periodRef.current = period;
+  }, [period]);
+  useEffect(() => {
+    visibleRangeRef.current = visibleRange;
+  }, [visibleRange]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -85,14 +95,14 @@ export default function IntelligenceChart({ articles, entityId, period, onPeriod
     const { countData } = aggregateByDay(articles, entityId, quoteBounds);
 
     if (countData.length) {
-      const series = chart.addSeries(HistogramSeries, { priceScaleId: "right" });
-      chart.priceScale("right").applyOptions({ scaleMargins: { top: 0.1, bottom: 0 } });
+      const series = chart.addSeries(HistogramSeries, { priceScaleId: 'right' });
+      chart.priceScale('right').applyOptions({ scaleMargins: { top: 0.1, bottom: 0 } });
       series.setData(countData);
     }
 
     chart.subscribeClick((param) => {
       if (!param.time) return;
-      const date = typeof param.time === "string" ? param.time : new Date(param.time * 1000).toISOString().slice(0, 10);
+      const date = typeof param.time === 'string' ? param.time : new Date(param.time * 1000).toISOString().slice(0, 10);
       const { articlesByDay: abd } = aggregateByDay(articlesRef.current, entityIdRef.current);
       const items = abd.get(date) ?? [];
       if (items.length) setModal({ date, items });
@@ -100,11 +110,19 @@ export default function IntelligenceChart({ articles, entityId, period, onPeriod
 
     skipRangeRef.current = true;
     if (visibleRangeRef.current) {
-      try { chart.timeScale().setVisibleRange(visibleRangeRef.current); } catch { chart.timeScale().fitContent(); }
+      try {
+        chart.timeScale().setVisibleRange(visibleRangeRef.current);
+      } catch {
+        chart.timeScale().fitContent();
+      }
     } else if (periodRef.current === null) {
       chart.timeScale().fitContent();
     } else {
-      try { chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() }); } catch { chart.timeScale().fitContent(); }
+      try {
+        chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() });
+      } catch {
+        chart.timeScale().fitContent();
+      }
     }
 
     const rangeTimer = subscribeRangeChange(chart, skipRangeRef, { onRangeChange, onPeriodChange });
@@ -128,7 +146,17 @@ export default function IntelligenceChart({ articles, entityId, period, onPeriod
       <div className="chart-toolbar">
         <span className="chart-series-label" style={{ marginLeft: 8 }}>
           Bar height = article count · Color = avg sentiment
-          <span style={{ background: "linear-gradient(to right, #ef4444, #eab308, #22c55e)", borderRadius: 3, display: "inline-block", width: 80, height: 8, marginLeft: 6, verticalAlign: "middle" }} />
+          <span
+            style={{
+              background: 'linear-gradient(to right, #ef4444, #eab308, #22c55e)',
+              borderRadius: 3,
+              display: 'inline-block',
+              width: 80,
+              height: 8,
+              marginLeft: 6,
+              verticalAlign: 'middle',
+            }}
+          />
         </span>
       </div>
       <div ref={containerRef} className="chart-container" />

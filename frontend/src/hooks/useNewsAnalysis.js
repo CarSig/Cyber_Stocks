@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAnalysis, analyze as analyzeNews, getCorrelation } from "@/api/news.js";
-import { useCorrelationQuery } from "./useCorrelationQuery.js";
-
-const BASE = "http://localhost:3000";
+import { useState, useEffect, useRef } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { BASE } from '@/api/core.js';
+import { getAnalysis, analyze as analyzeNews, getCorrelation } from '@/api/news.js';
+import { useCorrelationQuery } from './useCorrelationQuery.js';
 
 export function useNewsAnalysis(ticker) {
   const queryClient = useQueryClient();
@@ -15,7 +14,7 @@ export function useNewsAnalysis(ticker) {
   const esRef = useRef(null);
 
   const analysis = useQuery({
-    queryKey: ["news-analysis", ticker],
+    queryKey: ['news-analysis', ticker],
     queryFn: () => getAnalysis(ticker),
     enabled: !!ticker,
   });
@@ -25,14 +24,14 @@ export function useNewsAnalysis(ticker) {
 
   function connectProgress() {
     if (esRef.current) esRef.current.close();
-    const token = localStorage.getItem("auth_token") ?? "";
+    const token = localStorage.getItem('auth_token') ?? '';
     const es = new EventSource(`${BASE}/news-analyze/${ticker}/progress?token=${encodeURIComponent(token)}`);
     esRef.current = es;
     setPolling(true);
 
     es.onmessage = (e) => {
       const data = JSON.parse(e.data);
-      if (data.type === "progress") {
+      if (data.type === 'progress') {
         setCurrentTitle(data.title ?? null);
         setProgressCount({ current: data.current, total: data.total });
       }
@@ -43,8 +42,8 @@ export function useNewsAnalysis(ticker) {
       esRef.current = null;
       setPolling(false);
       setCurrentTitle(null);
-      queryClient.invalidateQueries({ queryKey: ["news-analysis", ticker] });
-      queryClient.invalidateQueries({ queryKey: ["news-correlation", ticker] });
+      queryClient.invalidateQueries({ queryKey: ['news-analysis', ticker] });
+      queryClient.invalidateQueries({ queryKey: ['news-correlation', ticker] });
     };
   }
 
@@ -64,13 +63,13 @@ export function useNewsAnalysis(ticker) {
       setPolling(false);
       setCurrentTitle(null);
       setProgressCount(null);
-      queryClient.invalidateQueries({ queryKey: ["news-analysis", ticker] });
-      queryClient.invalidateQueries({ queryKey: ["news-correlation", ticker] });
+      queryClient.invalidateQueries({ queryKey: ['news-analysis', ticker] });
+      queryClient.invalidateQueries({ queryKey: ['news-correlation', ticker] });
     }
   }, [progressCount, ticker, queryClient]);
 
   const correlation = useCorrelationQuery(
-    ["news-correlation", ticker, lagDays],
+    ['news-correlation', ticker, lagDays],
     () => getCorrelation(ticker, lagDays),
     showCorrelation && !!ticker,
   );
@@ -85,5 +84,17 @@ export function useNewsAnalysis(ticker) {
     },
   });
 
-  return { analysis, correlation, analyze, showCorrelation, setShowCorrelation, polling, lagDays, setLagDays, currentTitle, analyzedCount, totalCount };
+  return {
+    analysis,
+    correlation,
+    analyze,
+    showCorrelation,
+    setShowCorrelation,
+    polling,
+    lagDays,
+    setLagDays,
+    currentTitle,
+    analyzedCount,
+    totalCount,
+  };
 }

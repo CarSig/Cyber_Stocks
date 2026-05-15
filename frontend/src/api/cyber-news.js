@@ -1,4 +1,4 @@
-import { apiFetch, qs } from "./core.js";
+import { apiFetch, qs } from './core.js';
 
 export function getTickers(topic) {
   return apiFetch(`/cyber-news/tickers${qs({ topic })}`);
@@ -13,7 +13,7 @@ export function getArticles(ticker, topic) {
 }
 
 export function getTopics() {
-  return apiFetch("/cyber-news/topics");
+  return apiFetch('/cyber-news/topics');
 }
 
 export function getRecent(limit = 50) {

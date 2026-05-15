@@ -1,10 +1,12 @@
 import { Controller, Get, Post, Param, Query, UseGuards } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from "@nestjs/swagger";
+import { ApiTags, ApiBearerAuth } from "@nestjs/swagger";
 import { AuditService } from "@/modules/audit/audit.service";
 import { CronService } from "@/modules/scheduler/cron.service";
-import { AuditQueryDto, PaginatedAuditDto } from "@/shared/dto";
+import { AuditQueryDto } from "@/shared/dto";
 import { AppError } from "@/shared/errors";
-import { AdminGuard } from "@/common/guards/admin.guard";
+import { RolesGuard } from "@/common/guards/roles.guard";
+import { Roles } from "@/common/decorators/roles.decorator";
+import { GetAuditDoc, TriggerJobDoc } from "./admin.docs";
 
 const JOBS = ["populate", "news", "trump", "reddit", "threatintel"] as const;
 type Job = typeof JOBS[number];
@@ -12,7 +14,8 @@ type Job = typeof JOBS[number];
 @ApiTags("Admin")
 @ApiBearerAuth("bearer")
 @Controller("admin")
-@UseGuards(AdminGuard)
+@UseGuards(RolesGuard)
+@Roles("admin")
 export class AdminController {
   constructor(
     private readonly auditService: AuditService,
@@ -20,9 +23,7 @@ export class AdminController {
   ) {}
 
   @Get("audit")
-  @ApiOperation({ summary: "Audit log", description: "Paginated audit log of all user actions, newest first. Filterable by userId and action type. Admin only." })
-  @ApiResponse({ status: 200, type: PaginatedAuditDto })
-  @ApiResponse({ status: 403, description: "Admin role required" })
+  @GetAuditDoc()
   getAudit(@Query() query: AuditQueryDto) {
     return this.auditService.getAll({
       limit: query.limit ?? 50,
@@ -33,11 +34,7 @@ export class AdminController {
   }
 
   @Post("trigger/:job")
-  @ApiOperation({ summary: "Trigger cron job", description: "Manually triggers a background job outside its normal schedule. Admin only." })
-  @ApiParam({ name: "job", description: "Job name", enum: ["populate", "news", "trump", "reddit", "threatintel"] })
-  @ApiResponse({ status: 201, description: "{ triggered: string, at: string }" })
-  @ApiResponse({ status: 400, description: "Unknown job name" })
-  @ApiResponse({ status: 403, description: "Admin role required" })
+  @TriggerJobDoc()
   async triggerJob(@Param("job") job: string) {
     if (!JOBS.includes(job as Job)) throw new AppError(`Unknown job. Valid: ${JOBS.join(", ")}`, 400);
     switch (job as Job) {

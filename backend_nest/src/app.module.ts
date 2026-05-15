@@ -1,5 +1,7 @@
 import "dotenv/config";
-import { Module } from "@nestjs/common";
+import type { IncomingMessage } from "node:http";
+import type { Request } from "express";
+import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
 import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
@@ -10,6 +12,9 @@ import { LoggerModule } from "nestjs-pino";
 import { HttpExceptionFilter } from "@/common/errors/http-exception.filter";
 import { JwtAuthGuard } from "@/common/guards/jwt-auth.guard";
 import { MetricsInterceptor } from "@/common/interceptors/metrics.interceptor";
+import { TimeoutInterceptor } from "@/common/interceptors/timeout.interceptor";
+import { LoggingInterceptor } from "@/common/interceptors/logging.interceptor";
+import { RequestIdMiddleware } from "@/common/middleware/request-id.middleware";
 
 import { AuthModule } from "@/modules/auth/auth.module";
 import { StockModule } from "@/modules/stock/stock.module";
@@ -27,6 +32,7 @@ import { MqModule } from "@/modules/mq/mq.module";
 import { SchedulerModule } from "@/modules/scheduler/scheduler.module";
 import { AuditModule } from "@/modules/audit/audit.module";
 import { AlpacaModule } from "@/modules/alpaca/alpaca.module";
+import { HealthModule } from "@/modules/health/health.module";
 import { CoreDbModule } from "@/shared/core-db.module";
 import { CacheModule } from "@/shared/cache.module";
 import { AuthService } from "@/modules/auth/auth.service";
@@ -41,7 +47,7 @@ import { AuthService } from "@/modules/auth/auth.service";
     LoggerModule.forRoot({
       pinoHttp: {
         level: process.env.LOG_LEVEL ?? "info",
-        genReqId: () => crypto.randomUUID(),
+        genReqId: (req: IncomingMessage) => (req as Request).requestId ?? crypto.randomUUID(),
         redact: ["req.headers.authorization"],
         transport: {
           targets: [
@@ -74,13 +80,20 @@ import { AuthService } from "@/modules/auth/auth.service";
     AuditModule,
     AlpacaModule,
     StockModule,
+    HealthModule,
   ],
   providers: [
     { provide: APP_FILTER,      useClass: HttpExceptionFilter },
     // { provide: APP_GUARD,       useClass: ThrottlerGuard }, // Disabled — using endpoint-specific throttling instead
     { provide: APP_GUARD,       useClass: JwtAuthGuard },
     { provide: APP_INTERCEPTOR, useClass: MetricsInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: TimeoutInterceptor },
     AuthService,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestIdMiddleware).forRoutes("*");
+  }
+}

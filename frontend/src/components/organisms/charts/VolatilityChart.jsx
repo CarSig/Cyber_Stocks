@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from "react";
-import "./charts.css";
-import { createChart, LineSeries, AreaSeries } from "lightweight-charts";
-import { cssVar, makeChartOptions } from "./utils/theme.js";
-import { toSortedOHLC } from "./utils/series.js";
-import { daysAgoString, todayString } from "./utils/dates.js";
-import { attachResizeObserver, subscribeRangeChange, applyRange } from "./utils/chartSetup.js";
-import ChartToggleButton from "@/components/atoms/ChartToggleButton.jsx";
-import ChartSep from "@/components/atoms/ChartSep.jsx";
+import { useEffect, useRef, useState } from 'react';
+import './charts.css';
+import { createChart, LineSeries, AreaSeries } from 'lightweight-charts';
+import { cssVar, makeChartOptions } from './utils/theme.js';
+import { toSortedOHLC } from './utils/series.js';
+import { daysAgoString, todayString } from './utils/dates.js';
+import { attachResizeObserver, subscribeRangeChange, applyRange } from './utils/chartSetup.js';
+import ChartToggleButton from '@/components/atoms/ChartToggleButton.jsx';
+import ChartSep from '@/components/atoms/ChartSep.jsx';
 
-const CHART_TYPES = ["Line", "Area"];
+const CHART_TYPES = ['Line', 'Area'];
 
 // Historical Volatility: annualised rolling stddev of log returns (window days)
 function calcHV(quotes, window = 20) {
@@ -18,8 +18,7 @@ function calcHV(quotes, window = 20) {
     const slice = quotes.slice(i - window, i + 1);
     const logReturns = [];
     for (let j = 1; j < slice.length; j++) {
-      if (slice[j - 1].close > 0 && slice[j].close > 0)
-        logReturns.push(Math.log(slice[j].close / slice[j - 1].close));
+      if (slice[j - 1].close > 0 && slice[j].close > 0) logReturns.push(Math.log(slice[j].close / slice[j - 1].close));
     }
     if (!logReturns.length) continue;
     const mean = logReturns.reduce((a, b) => a + b, 0) / logReturns.length;
@@ -35,7 +34,9 @@ function calcATR(quotes, window = 14) {
   if (quotes.length < window + 1) return [];
   const trs = [];
   for (let i = 1; i < quotes.length; i++) {
-    const high = quotes[i].high, low = quotes[i].low, prevClose = quotes[i - 1].close;
+    const high = quotes[i].high,
+      low = quotes[i].low,
+      prevClose = quotes[i - 1].close;
     trs.push(Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose)));
   }
   const result = [];
@@ -54,12 +55,16 @@ export default function VolatilityChart({ quotes, period, onPeriodChange, visibl
   const skipRangeRef = useRef(false);
   const periodRef = useRef(period);
   const visibleRangeRef = useRef(visibleRange);
-  const [type, setType] = useState("Line");
+  const [type, setType] = useState('Line');
   const [showHV, setShowHV] = useState(true);
   const [showATR, setShowATR] = useState(true);
 
-  useEffect(() => { periodRef.current = period; }, [period]);
-  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
+  useEffect(() => {
+    periodRef.current = period;
+  }, [period]);
+  useEffect(() => {
+    visibleRangeRef.current = visibleRange;
+  }, [visibleRange]);
 
   useEffect(() => {
     if (!containerRef.current || !quotes?.length) return;
@@ -68,12 +73,12 @@ export default function VolatilityChart({ quotes, period, onPeriodChange, visibl
     chartRef.current = chart;
 
     const sorted = toSortedOHLC(quotes);
-    const SeriesType = type === "Area" ? AreaSeries : LineSeries;
+    const SeriesType = type === 'Area' ? AreaSeries : LineSeries;
 
     if (showHV) {
       const hvData = calcHV(sorted);
       if (hvData.length) {
-        const hvSeries = chart.addSeries(SeriesType, { color: cssVar("--color-amber"), lineWidth: 2, title: "HV20%" });
+        const hvSeries = chart.addSeries(SeriesType, { color: cssVar('--color-amber'), lineWidth: 2, title: 'HV20%' });
         hvSeries.setData(hvData);
       }
     }
@@ -81,7 +86,7 @@ export default function VolatilityChart({ quotes, period, onPeriodChange, visibl
     if (showATR) {
       const atrData = calcATR(sorted);
       if (atrData.length) {
-        const atrSeries = chart.addSeries(SeriesType, { color: cssVar("--color-red"), lineWidth: 2, title: "ATR14%" });
+        const atrSeries = chart.addSeries(SeriesType, { color: cssVar('--color-red'), lineWidth: 2, title: 'ATR14%' });
         atrSeries.setData(atrData);
       }
     }
@@ -115,15 +120,23 @@ export default function VolatilityChart({ quotes, period, onPeriodChange, visibl
     <div>
       <div className="chart-toolbar">
         {CHART_TYPES.map((t) => (
-          <button key={t} onClick={() => setType(t)} className={`btn btn-chart${type === t ? " active" : ""}`}>
+          <button key={t} onClick={() => setType(t)} className={`btn btn-chart${type === t ? ' active' : ''}`}>
             {t}
           </button>
         ))}
         <ChartSep />
-        <ChartToggleButton active={showHV} onClick={() => setShowHV((v) => !v)}>HV20</ChartToggleButton>
-        <ChartToggleButton active={showATR} onClick={() => setShowATR((v) => !v)}>ATR14</ChartToggleButton>
-        <span className="chart-series-label" style={{ color: "var(--color-amber)", marginLeft: 8 }}>— HV20%</span>
-        <span className="chart-series-label" style={{ color: "var(--color-red)", marginLeft: 8 }}>— ATR14%</span>
+        <ChartToggleButton active={showHV} onClick={() => setShowHV((v) => !v)}>
+          HV20
+        </ChartToggleButton>
+        <ChartToggleButton active={showATR} onClick={() => setShowATR((v) => !v)}>
+          ATR14
+        </ChartToggleButton>
+        <span className="chart-series-label" style={{ color: 'var(--color-amber)', marginLeft: 8 }}>
+          — HV20%
+        </span>
+        <span className="chart-series-label" style={{ color: 'var(--color-red)', marginLeft: 8 }}>
+          — ATR14%
+        </span>
       </div>
       <div ref={containerRef} className="chart-container" />
     </div>

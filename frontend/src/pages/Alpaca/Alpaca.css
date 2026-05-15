@@ -123,7 +123,7 @@
   border-color: var(--primary, #3b82f6);
 }
 
-.alpaca-input[placeholder="Ticker"] {
+.alpaca-input[placeholder='Ticker'] {
   width: 80px;
   text-transform: uppercase;
 }

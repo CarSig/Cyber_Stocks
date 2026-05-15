@@ -1,9 +1,9 @@
 function fmt(value) {
-  return value != null ? `$${Number(value).toFixed(2)}` : "—";
+  return value != null ? `$${Number(value).toFixed(2)}` : '—';
 }
 
 function date(value) {
-  return value ? new Date(value).toLocaleDateString() : "—";
+  return value ? new Date(value).toLocaleDateString() : '—';
 }
 
 export default function Analysis({ analysis }) {
@@ -38,7 +38,9 @@ function Row({ label, value, highlight }) {
   return (
     <div className="analysis-row">
       <span className="analysis-row-label">{label}</span>
-      <span className={highlight ? "analysis-row-value analysis-row-value--highlight" : "analysis-row-value"}>{value}</span>
+      <span className={highlight ? 'analysis-row-value analysis-row-value--highlight' : 'analysis-row-value'}>
+        {value}
+      </span>
     </div>
   );
 }

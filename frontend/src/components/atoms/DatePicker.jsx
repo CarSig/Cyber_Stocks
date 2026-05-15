@@ -1,9 +1,9 @@
-import { useRef } from "react";
+import { useRef } from 'react';
 
-export default function DatePicker({ value, min, max, onChange, placeholder = "Pick a date" }) {
+export default function DatePicker({ value, min, max, onChange, placeholder = 'Pick a date' }) {
   const inputRef = useRef(null);
   const display = value
-    ? new Date(value + "T00:00:00").toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
+    ? new Date(value + 'T00:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
     : placeholder;
 
   return (
@@ -11,14 +11,14 @@ export default function DatePicker({ value, min, max, onChange, placeholder = "P
       <button
         type="button"
         onClick={() => inputRef.current?.showPicker()}
-        className={`date-picker-btn${value ? "" : " date-picker-btn--empty"}`}
+        className={`date-picker-btn${value ? '' : ' date-picker-btn--empty'}`}
       >
         📅 {display}
       </button>
       <input
         ref={inputRef}
         type="date"
-        value={value ?? ""}
+        value={value ?? ''}
         min={min}
         max={max}
         onChange={(e) => onChange(e.target.value || null)}

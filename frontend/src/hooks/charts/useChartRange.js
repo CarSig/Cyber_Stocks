@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
-import { daysAgoString, todayString } from "@/components/organisms/charts/utils/dates.js";
-import { useSyncRef } from "./useOverlayRefs.js";
+import { useEffect, useRef } from 'react';
+import { daysAgoString, todayString } from '@/components/organisms/charts/utils/dates.js';
+import { useSyncRef } from './useOverlayRefs.js';
 
 // Syncs the chart's visible time range with the period/visibleRange props.
 // Uses skipRangeRef to suppress the outgoing range-change event during
@@ -41,6 +41,8 @@ export function useChartRange(chartRef, { period, visibleRange, onPeriodChange, 
     } else {
       chartRef.current.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() });
     }
-    setTimeout(() => { skipRangeRef.current = false; }, 150);
+    setTimeout(() => {
+      skipRangeRef.current = false;
+    }, 150);
   }, [period, visibleRange, chartRef]); // eslint-disable-line react-hooks/exhaustive-deps
 }

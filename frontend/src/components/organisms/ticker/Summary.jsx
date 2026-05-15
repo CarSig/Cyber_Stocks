@@ -1,6 +1,6 @@
 function fmt(value) {
-  if (value == null) return "—";
-  if (typeof value === "number") {
+  if (value == null) return '—';
+  if (typeof value === 'number') {
     if (value > 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`;
     if (value > 1_000_000) return `$${(value / 1_000_000).toFixed(2)}M`;
     if (value > 1_000) return value.toLocaleString();
@@ -11,7 +11,7 @@ function fmt(value) {
 }
 
 function pct(value) {
-  if (value == null) return "—";
+  if (value == null) return '—';
   return `${(value * 100).toFixed(2)}%`;
 }
 
@@ -28,9 +28,7 @@ function Card({ title, children }) {
   return (
     <div className="card">
       <h3 className="card-title">{title}</h3>
-      <div className="card-fields">
-        {children}
-      </div>
+      <div className="card-fields">{children}</div>
     </div>
   );
 }
@@ -49,7 +47,9 @@ export default function Summary({ summary }) {
           {p.website && (
             <div className="field field-full">
               <span className="field-label">Website</span>
-              <a href={p.website} target="_blank" rel="noreferrer">{p.website}</a>
+              <a href={p.website} target="_blank" rel="noreferrer">
+                {p.website}
+              </a>
             </div>
           )}
           {p.longBusinessSummary && (

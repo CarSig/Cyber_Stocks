@@ -1,10 +1,15 @@
-import { formatDate } from "@/utils/date.js";
+import { formatDate } from '@/utils/date.js';
 
 export default function OtxPulseRow({ pulse }) {
   return (
     <tr key={pulse.id}>
       <td>
-        <a href={`https://otx.alienvault.com/pulse/${pulse.id}`} target="_blank" rel="noreferrer" className="ti-link ti-pulse-name">
+        <a
+          href={`https://otx.alienvault.com/pulse/${pulse.id}`}
+          target="_blank"
+          rel="noreferrer"
+          className="ti-link ti-pulse-name"
+        >
           {pulse.name}
         </a>
       </td>
@@ -19,9 +24,7 @@ export default function OtxPulseRow({ pulse }) {
       </td>
       <td>{pulse.indicators_count ?? 0}</td>
       <td>
-        <span className={`ti-badge ti-badge--tlp-${pulse.tlp ?? "white"}`}>
-          {pulse.tlp ?? "white"}
-        </span>
+        <span className={`ti-badge ti-badge--tlp-${pulse.tlp ?? 'white'}`}>{pulse.tlp ?? 'white'}</span>
       </td>
       <td className="ti-date">{formatDate(pulse.created)}</td>
     </tr>
