@@ -50,7 +50,7 @@
     "jsonwebtoken": "^9.0.3",
     "natural": "^8.1.1",
     "nestjs-pino": "^4.3.0",
-    "openai": "^4.0.0",
+    "openai": "^6.0.0",
     "pg": "^8.11.0",
     "pino": "^10.3.1",
     "pino-http": "^10.5.0",
