@@ -15,7 +15,11 @@ type QuoteBounds = { from: string; to: string } | null;
 
 type ModalState = { date: string; items: NewsArticle[] };
 
-function aggregateByDay(articles: NewsArticle[] | undefined, analysis: NewsAnalysisMap | undefined, quoteBounds: QuoteBounds) {
+function aggregateByDay(
+  articles: NewsArticle[] | undefined,
+  analysis: NewsAnalysisMap | undefined,
+  quoteBounds: QuoteBounds,
+) {
   const byDay = new Map<string, { sum: number; count: number }>();
   const seen = new Set<string>();
   for (const a of articles ?? []) {
@@ -91,8 +95,12 @@ export default function NewsChart({
   const articlesRef = useSyncRef(articles);
   const analysisRef = useSyncRef(analysis);
 
-  useEffect(() => { periodRef.current = period; }, [period]);
-  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
+  useEffect(() => {
+    periodRef.current = period;
+  }, [period]);
+  useEffect(() => {
+    visibleRangeRef.current = visibleRange;
+  }, [visibleRange]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -110,7 +118,8 @@ export default function NewsChart({
 
     chart.subscribeClick((param) => {
       if (!param.time) return;
-      const date = typeof param.time === 'string' ? param.time : new Date(Number(param.time) * 1000).toISOString().slice(0, 10);
+      const date =
+        typeof param.time === 'string' ? param.time : new Date(Number(param.time) * 1000).toISOString().slice(0, 10);
       const items = (articlesRef.current ?? []).filter((a) => {
         if (!a.providerPublishTime || !a.link) return false;
         const ts = a.providerPublishTime;
@@ -128,7 +137,11 @@ export default function NewsChart({
       skipRangeRef.current = true;
       if (visibleRangeRef.current) {
         try {
-          chart.timeScale().setVisibleRange(visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
+          chart
+            .timeScale()
+            .setVisibleRange(
+              visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0],
+            );
         } catch {
           chart.timeScale().fitContent();
         }
@@ -136,7 +149,11 @@ export default function NewsChart({
         chart.timeScale().fitContent();
       } else {
         try {
-          chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current!), to: todayString() } as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
+          chart
+            .timeScale()
+            .setVisibleRange({ from: daysAgoString(periodRef.current!), to: todayString() } as Parameters<
+              ReturnType<IChartApi['timeScale']>['setVisibleRange']
+            >[0]);
         } catch {
           chart.timeScale().fitContent();
         }

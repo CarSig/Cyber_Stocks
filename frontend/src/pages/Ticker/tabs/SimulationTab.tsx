@@ -10,7 +10,11 @@ type SimulationTabProps = {
 export default function SimulationTab({ ticker, allQuotes, onResult }: SimulationTabProps) {
   return (
     <section>
-      <Simulation ticker={ticker} quotes={allQuotes} onResult={onResult as Parameters<typeof Simulation>[0]['onResult']} />
+      <Simulation
+        ticker={ticker}
+        quotes={allQuotes}
+        onResult={onResult as Parameters<typeof Simulation>[0]['onResult']}
+      />
     </section>
   );
 }

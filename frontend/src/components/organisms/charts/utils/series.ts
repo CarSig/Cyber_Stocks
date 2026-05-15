@@ -20,7 +20,8 @@ function toSorted(quotes: Quote[], ...fields: string[]): ChartPoint[] {
     .filter((q) => !seen.has(q.time) && seen.add(q.time));
 }
 
-export const toSortedOHLC = (quotes: Quote[]): ChartPoint[] => toSorted(quotes, 'open', 'high', 'low', 'close', 'value');
+export const toSortedOHLC = (quotes: Quote[]): ChartPoint[] =>
+  toSorted(quotes, 'open', 'high', 'low', 'close', 'value');
 export const toSortedClose = (quotes: Quote[]): ChartPoint[] => toSorted(quotes, 'value');
 
 export function addCompareOverlay(chart: IChartApi, compareQuotes: Quote[]): void {

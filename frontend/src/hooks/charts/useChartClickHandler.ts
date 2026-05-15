@@ -71,13 +71,13 @@ export function useChartClickHandler(
           showRef: showNvdRef,
           dataRef: nvdVulnsRef as RefObject<unknown[] | undefined>,
           type: 'nvd',
-          filter: (v) => ((v as ThreatIntelItem & { published?: string }).published)?.slice(0, 10) === date,
+          filter: (v) => (v as ThreatIntelItem & { published?: string }).published?.slice(0, 10) === date,
         },
         {
           showRef: showOtxRef,
           dataRef: otxPulsesRef as RefObject<unknown[] | undefined>,
           type: 'otx',
-          filter: (p) => ((p as ThreatIntelItem & { created?: string }).created)?.slice(0, 10) === date,
+          filter: (p) => (p as ThreatIntelItem & { created?: string }).created?.slice(0, 10) === date,
         },
         {
           showRef: showKevRef,

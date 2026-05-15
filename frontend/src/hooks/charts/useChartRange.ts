@@ -41,7 +41,11 @@ export function useChartRange(
     skipRangeRef.current = true;
     if (visibleRangeRef.current) {
       try {
-        chartRef.current.timeScale().setVisibleRange(visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
+        chartRef.current
+          .timeScale()
+          .setVisibleRange(
+            visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0],
+          );
       } catch {
         chartRef.current.timeScale().fitContent();
       }

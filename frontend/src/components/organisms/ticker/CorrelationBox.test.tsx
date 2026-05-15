@@ -148,7 +148,12 @@ describe('CorrelationBox', () => {
       negative: { n: 3, avgChangePct: -1.5 },
       neutral: { n: 0, avgChangePct: null },
     };
-    render(<CorrelationBox correlation={CORRELATION} lagImpact={lagImpact as Parameters<typeof CorrelationBox>[0]['lagImpact']} />);
+    render(
+      <CorrelationBox
+        correlation={CORRELATION}
+        lagImpact={lagImpact as Parameters<typeof CorrelationBox>[0]['lagImpact']}
+      />,
+    );
     expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(2);
   });
 });

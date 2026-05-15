@@ -88,7 +88,10 @@ type SimChartProps = {
   mode: string;
 };
 
-const SimChart = forwardRef<HTMLDivElement, SimChartProps>(function SimChart({ history, transactions, mode }, outerRef) {
+const SimChart = forwardRef<HTMLDivElement, SimChartProps>(function SimChart(
+  { history, transactions, mode },
+  outerRef,
+) {
   const ref = useRef<HTMLDivElement>(null);
   function setRef(el: HTMLDivElement | null) {
     (ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
@@ -211,7 +214,12 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
           .map((item: SimulationPreset) => {
             const num = Number(item.number);
             if (!isFinite(num) || num === 0) return null;
-            return { id: nextId++, date: item.date, type: (num > 0 ? 'buy' : 'sell') as 'buy' | 'sell', value: String(Math.abs(num)) };
+            return {
+              id: nextId++,
+              date: item.date,
+              type: (num > 0 ? 'buy' : 'sell') as 'buy' | 'sell',
+              value: String(Math.abs(num)),
+            };
           })
           .filter((x): x is SimAction => x !== null),
       );
@@ -329,11 +337,20 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
   return (
     <div>
       <div className="sim-editor-toggle">
-        <Select onValueChange={(v: string | null) => { if (v) applyPreset(v); }} disabled={!presets}>
+        <Select
+          onValueChange={(v: string | null) => {
+            if (v) applyPreset(v);
+          }}
+          disabled={!presets}
+        >
           <SelectTrigger className="w-44">
             <SelectValue
               placeholder={
-                presetsError ? `Error: ${(presetsError as Error).message}` : presetsLoading ? 'Loading…' : 'Load preset…'
+                presetsError
+                  ? `Error: ${(presetsError as Error).message}`
+                  : presetsLoading
+                    ? 'Loading…'
+                    : 'Load preset…'
               }
             />
           </SelectTrigger>
@@ -367,7 +384,12 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
                   max={actionMax}
                   onChange={(v) => update(a.id, 'date', v ? snapToWeekday(v) : '')}
                 />
-                <Select value={a.type} onValueChange={(v: string | null) => { if (v) update(a.id, 'type', v); }}>
+                <Select
+                  value={a.type}
+                  onValueChange={(v: string | null) => {
+                    if (v) update(a.id, 'type', v);
+                  }}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>

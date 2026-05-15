@@ -1,6 +1,5 @@
 import type { TickerSummary } from '@/types';
 
-
 type FieldProps = {
   label: string;
   value?: string | number | null;
@@ -63,4 +62,3 @@ export default function Summary({ summary }: SummaryProps) {
     </div>
   );
 }
-

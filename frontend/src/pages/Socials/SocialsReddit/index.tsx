@@ -21,7 +21,11 @@ export default function SocialsReddit() {
   const [search, setSearch] = useState('');
   const [searchField, setSearchField] = useState('');
 
-  const { data: posts, isPending, error } = useQuery<RedditPostWithExtras[]>({
+  const {
+    data: posts,
+    isPending,
+    error,
+  } = useQuery<RedditPostWithExtras[]>({
     queryKey: ['reddit-posts', subreddit],
     queryFn: () => getPosts(subreddit),
   });
@@ -43,7 +47,9 @@ export default function SocialsReddit() {
       <div className="ti-filters" style={{ marginBottom: '1rem' }}>
         <FilterSelect
           value={subreddit}
-          onChange={(v) => { if (v !== null) setSubreddit(v); }}
+          onChange={(v) => {
+            if (v !== null) setSubreddit(v);
+          }}
           placeholder="subreddit"
           options={SUBREDDITS as string[]}
           showAll={false}

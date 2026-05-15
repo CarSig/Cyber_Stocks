@@ -14,7 +14,13 @@ type EntityListRowContentProps = {
   strength: SentimentLabel | null;
 };
 
-function EntityListRowContent({ summary, sentimentInfo, hasCorrelation, corrResult, strength }: EntityListRowContentProps) {
+function EntityListRowContent({
+  summary,
+  sentimentInfo,
+  hasCorrelation,
+  corrResult,
+  strength,
+}: EntityListRowContentProps) {
   return (
     <div className="entity-list-row-content">
       <div className="entity-list-row-section">
@@ -58,7 +64,12 @@ function EntityListRowContent({ summary, sentimentInfo, hasCorrelation, corrResu
           </div>
           <div className="entity-list-row-divider-detail">
             <span>r: {(corrResult as CorrelationResult).r.toFixed(3)}</span>
-            <span>p: {(corrResult as CorrelationResult).pValue < 0.001 ? '< 0.001' : (corrResult as CorrelationResult).pValue.toFixed(3)}</span>
+            <span>
+              p:{' '}
+              {(corrResult as CorrelationResult).pValue < 0.001
+                ? '< 0.001'
+                : (corrResult as CorrelationResult).pValue.toFixed(3)}
+            </span>
           </div>
         </div>
       )}
@@ -75,7 +86,10 @@ type EntityListRowProps = {
 
 export default function EntityListRow({ entity, onClick, signal, correlation }: EntityListRowProps) {
   const { summary } = useEntityIntelligence(entity.entityId, signal);
-  const { corrResult, hasCorrelation, strength, sentimentInfo } = useCorrelationMetrics(correlation, summary.data as { avgSentiment?: number } | undefined);
+  const { corrResult, hasCorrelation, strength, sentimentInfo } = useCorrelationMetrics(
+    correlation,
+    summary.data as { avgSentiment?: number } | undefined,
+  );
 
   return (
     <div
@@ -90,7 +104,11 @@ export default function EntityListRow({ entity, onClick, signal, correlation }: 
         <div className="entity-list-row-loading-message">Loading…</div>
       ) : summary.data ? (
         <EntityListRowContent
-          summary={summary as unknown as { data: { articleCount: number; positiveCount: number; negativeCount: number; avgSentiment: number } }}
+          summary={
+            summary as unknown as {
+              data: { articleCount: number; positiveCount: number; negativeCount: number; avgSentiment: number };
+            }
+          }
           sentimentInfo={sentimentInfo}
           hasCorrelation={hasCorrelation}
           corrResult={corrResult}

@@ -57,10 +57,13 @@ function TickerContent() {
     reset();
   }, [ticker]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { error, isPending, allQuotes, compareQuotes, periodAnalysis, news, summary, companies } = useStock(ticker ?? '', {
-    compareTicker: compareTicker ?? undefined,
-    period,
-  });
+  const { error, isPending, allQuotes, compareQuotes, periodAnalysis, news, summary, companies } = useStock(
+    ticker ?? '',
+    {
+      compareTicker: compareTicker ?? undefined,
+      period,
+    },
+  );
   const quoteBounds = allQuotes?.length
     ? {
         from: [...allQuotes].sort((a, b) => a.date.localeCompare(b.date))[0].date.slice(0, 10),
@@ -164,7 +167,11 @@ function TickerContent() {
           <TickerWatchlist
             ticker={ticker}
             companies={companies}
-            sparklinesData={sparklinesData as Record<string, { changePct?: number | null; latestPrice?: number | null; closes?: number[] }> | undefined}
+            sparklinesData={
+              sparklinesData as
+                | Record<string, { changePct?: number | null; latestPrice?: number | null; closes?: number[] }>
+                | undefined
+            }
             showWatchlist={showWatchlist}
             onToggle={() => setShowWatchlist((v) => !v)}
           />
@@ -217,7 +224,9 @@ function TickerContent() {
 
             {activeTab === 'articles' && <ArticlesTab ticker={ticker ?? ''} newsArticles={newsArticles} />}
 
-            {activeTab === 'info' && <InfoTab summary={summary} research={{ ...research, sections: research.sections ?? undefined }} />}
+            {activeTab === 'info' && (
+              <InfoTab summary={summary} research={{ ...research, sections: research.sections ?? undefined }} />
+            )}
 
             {activeTab === 'day trade' && <DayTradeTab ticker={ticker ?? ''} companies={companies} />}
           </div>

@@ -19,7 +19,12 @@ type QuoteAnalysis = {
 
 type TrumpOverlay = { posts?: TrumpPost[]; show?: boolean; onToggle?: (v: boolean) => void };
 type DataOverlay<T> = { data?: T[]; show?: boolean; onToggle?: (v: boolean) => void };
-type NewsOverlay = { articles?: NewsArticle[]; analysis?: NewsAnalysisMap; show?: boolean; onToggle?: (v: boolean) => void };
+type NewsOverlay = {
+  articles?: NewsArticle[];
+  analysis?: NewsAnalysisMap;
+  show?: boolean;
+  onToggle?: (v: boolean) => void;
+};
 
 type Overlays = {
   trump?: TrumpOverlay;
@@ -61,19 +66,31 @@ function OverlayToggles({ trump, nvd, otx, kev, news, showAnalysis, onAnalysisTo
   const { articles: newsArticles, show: showNews, onToggle: onNewsToggle } = news;
   return (
     <>
-      <ChartToggleButton visible={(trumpPosts?.length ?? 0) > 0} active={showTrump} onClick={() => onTrumpToggle?.(!showTrump)}>
+      <ChartToggleButton
+        visible={(trumpPosts?.length ?? 0) > 0}
+        active={showTrump}
+        onClick={() => onTrumpToggle?.(!showTrump)}
+      >
         Trump
       </ChartToggleButton>
       <ChartToggleButton visible={(nvdVulns?.length ?? 0) > 0} active={showNvd} onClick={() => onNvdToggle?.(!showNvd)}>
         NVD
       </ChartToggleButton>
-      <ChartToggleButton visible={(otxPulses?.length ?? 0) > 0} active={showOtx} onClick={() => onOtxToggle?.(!showOtx)}>
+      <ChartToggleButton
+        visible={(otxPulses?.length ?? 0) > 0}
+        active={showOtx}
+        onClick={() => onOtxToggle?.(!showOtx)}
+      >
         OTX
       </ChartToggleButton>
       <ChartToggleButton visible={(kevItems?.length ?? 0) > 0} active={showKev} onClick={() => onKevToggle?.(!showKev)}>
         KEV
       </ChartToggleButton>
-      <ChartToggleButton visible={(newsArticles?.length ?? 0) > 0} active={showNews} onClick={() => onNewsToggle?.(!showNews)}>
+      <ChartToggleButton
+        visible={(newsArticles?.length ?? 0) > 0}
+        active={showNews}
+        onClick={() => onNewsToggle?.(!showNews)}
+      >
         News
       </ChartToggleButton>
       <ChartToggleButton active={showAnalysis} onClick={onAnalysisToggle}>
@@ -159,7 +176,14 @@ export default function StockChart({
   const [markerModal, setMarkerModal] = useState<MarkerModalState | null>(null);
 
   const overlayRefs = useOverlayRefs({ trump, nvd, otx, kev, news });
-  const chartRef = useChartInstance(containerRef, { quotes, compareQuotes, type, analysis: analysis ?? null, showAnalysis, overlayRefs });
+  const chartRef = useChartInstance(containerRef, {
+    quotes,
+    compareQuotes,
+    type,
+    analysis: analysis ?? null,
+    showAnalysis,
+    overlayRefs,
+  });
   useChartRange(chartRef, { period, visibleRange, onPeriodChange, onRangeChange });
   useChartClickHandler(chartRef, overlayRefs, setMarkerModal);
 

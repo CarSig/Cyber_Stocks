@@ -37,7 +37,9 @@ export function getMisp(opts?: ThreatIntelListOpts): Promise<ThreatIntelListResp
 
 export function getList(source: string, opts: ThreatIntelListOpts = {}): Promise<ThreatIntelListResponse> {
   const { limit = 50, offset = 0, search = '', ransomware = '', severity = '', company = '' } = opts;
-  return apiFetch<ThreatIntelListResponse>(`/threat-intel/list/${source}${qs({ limit, offset, search, ransomware, severity, company })}`);
+  return apiFetch<ThreatIntelListResponse>(
+    `/threat-intel/list/${source}${qs({ limit, offset, search, ransomware, severity, company })}`,
+  );
 }
 
 export function getCorrelation(source: string, ticker: string, lagDays = 1): Promise<ThreatIntelCorrelationResponse> {

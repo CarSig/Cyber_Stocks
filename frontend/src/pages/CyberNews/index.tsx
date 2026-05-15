@@ -22,7 +22,7 @@ export default function CyberNews() {
   const { data: correlations } = useCyberNewsCorrelations(lagDays, selectedTopic ?? undefined);
   const { data: allTopics, isPending: topicsLoading } = useCyberNewsTopics();
 
-  const correlationByTicker = indexBy(correlations as CyberNewsCorrelationEntry[] ?? [], 'ticker');
+  const correlationByTicker = indexBy((correlations as CyberNewsCorrelationEntry[]) ?? [], 'ticker');
 
   return (
     <div className="cyber-news-layout">
@@ -75,7 +75,9 @@ export default function CyberNews() {
                   row={row}
                   onClick={() => setSelected(row)}
                   topic={selectedTopic ?? undefined}
-                  correlation={correlationByTicker[row.ticker] as { result?: CorrelationResult | { error: string } } | undefined}
+                  correlation={
+                    correlationByTicker[row.ticker] as { result?: CorrelationResult | { error: string } } | undefined
+                  }
                 />
               ))}
             </div>
@@ -87,7 +89,9 @@ export default function CyberNews() {
                   row={row}
                   onClick={() => setSelected(row)}
                   topic={selectedTopic ?? undefined}
-                  correlation={correlationByTicker[row.ticker] as { result?: CorrelationResult | { error: string } } | undefined}
+                  correlation={
+                    correlationByTicker[row.ticker] as { result?: CorrelationResult | { error: string } } | undefined
+                  }
                 />
               ))}
             </div>
@@ -104,7 +108,10 @@ export default function CyberNews() {
         </Page>
       </div>
 
-      <TopicsSidebar selectedTopic={selectedTopic} data={allTopics as Array<{ topic: string; count: number }> | undefined} />
+      <TopicsSidebar
+        selectedTopic={selectedTopic}
+        data={allTopics as Array<{ topic: string; count: number }> | undefined}
+      />
     </div>
   );
 }

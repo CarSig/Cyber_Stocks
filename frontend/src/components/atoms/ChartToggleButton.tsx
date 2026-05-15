@@ -8,7 +8,13 @@ type ChartToggleButtonProps = {
   children?: React.ReactNode;
 };
 
-export default function ChartToggleButton({ active, onClick, className = '', visible = true, children }: ChartToggleButtonProps) {
+export default function ChartToggleButton({
+  active,
+  onClick,
+  className = '',
+  visible = true,
+  children,
+}: ChartToggleButtonProps) {
   if (!visible) return null;
   return (
     <button onClick={onClick} className={`btn btn-ghost${active ? ' active' : ''}${className ? ` ${className}` : ''}`}>

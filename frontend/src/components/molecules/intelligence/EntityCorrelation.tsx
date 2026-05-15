@@ -19,27 +19,29 @@ export default function EntityCorrelation({ entityId }: EntityCorrelationProps) 
       <p className="entity-correlation-title">Sentiment ↔ Price Correlation</p>
       {hasError ? (
         <p className="entity-correlation-error">{(res as unknown as { error: string }).error}</p>
-      ) : res && (
-        <div className="entity-correlation-content">
-          <div style={{ display: 'flex', gap: 24 }}>
-            <div>
-              <span className="entity-correlation-value-number" style={{ color: strength?.color }}>
-                {(res as CorrelationResult).r.toFixed(3)}
-              </span>
-              <span className="entity-correlation-value-label">r</span>
+      ) : (
+        res && (
+          <div className="entity-correlation-content">
+            <div style={{ display: 'flex', gap: 24 }}>
+              <div>
+                <span className="entity-correlation-value-number" style={{ color: strength?.color }}>
+                  {(res as CorrelationResult).r.toFixed(3)}
+                </span>
+                <span className="entity-correlation-value-label">r</span>
+              </div>
+              <div>
+                <span className="entity-correlation-value-number">{(res as CorrelationResult).n}</span>
+                <span className="entity-correlation-value-label">points</span>
+              </div>
+              <div>
+                <span style={{ fontSize: 13, fontWeight: 600 }}>
+                  {(res as CorrelationResult).significant ? '✓ significant' : 'not significant'}
+                </span>
+              </div>
             </div>
-            <div>
-              <span className="entity-correlation-value-number">{(res as CorrelationResult).n}</span>
-              <span className="entity-correlation-value-label">points</span>
-            </div>
-            <div>
-              <span style={{ fontSize: 13, fontWeight: 600 }}>
-                {(res as CorrelationResult).significant ? '✓ significant' : 'not significant'}
-              </span>
-            </div>
+            <p className="entity-correlation-interpretation">{(res as CorrelationResult).interpretation}</p>
           </div>
-          <p className="entity-correlation-interpretation">{(res as CorrelationResult).interpretation}</p>
-        </div>
+        )
       )}
     </div>
   );

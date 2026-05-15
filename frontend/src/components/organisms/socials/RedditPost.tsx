@@ -45,7 +45,9 @@ export default function RedditPost({ post, subreddit }: RedditPostProps) {
     <Card>
       <CardHeader className="pb-2 pt-3 px-4">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs text-muted-foreground">{post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ''}</span>
+          <span className="text-xs text-muted-foreground">
+            {post.createdAt ? new Date(post.createdAt).toLocaleDateString() : ''}
+          </span>
           <CountBadge count={post.score} icon="▲" />
           <TagBadge>💬 {post.numComments}</TagBadge>
           <span className="text-xs text-muted-foreground">u/{post.author}</span>

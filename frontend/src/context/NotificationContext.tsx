@@ -42,7 +42,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     es.onmessage = (e: MessageEvent<string>) => {
       const data = JSON.parse(e.data) as Partial<AppNotification> & { type?: string };
       if (data.type === 'connected' || data.type === 'ping') return;
-      const notification: AppNotification = { ...data, id: crypto.randomUUID(), read: false, type: data.type ?? 'info' };
+      const notification: AppNotification = {
+        ...data,
+        id: crypto.randomUUID(),
+        read: false,
+        type: data.type ?? 'info',
+      };
       setNotifications((prev) => {
         const next = [notification, ...prev].slice(0, 50);
         save(next);

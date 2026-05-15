@@ -9,7 +9,14 @@ type StateHandlerProps = {
   children: React.ReactNode;
 };
 
-export default function StateHandler({ isPending, error, empty, emptyMessage, loadingMessage, children }: StateHandlerProps) {
+export default function StateHandler({
+  isPending,
+  error,
+  empty,
+  emptyMessage,
+  loadingMessage,
+  children,
+}: StateHandlerProps) {
   if (isPending) {
     return <p className="ti-loading">{loadingMessage ?? 'Loading…'}</p>;
   }

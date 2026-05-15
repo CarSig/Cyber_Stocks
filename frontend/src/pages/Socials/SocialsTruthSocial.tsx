@@ -78,7 +78,11 @@ export default function SocialsTruthSocial() {
   const [company, setCompany] = useState('');
   const [NOW] = useState(() => Date.now());
 
-  const { data: posts, isPending, error } = useQuery<TrumpPostWithExtras[]>({
+  const {
+    data: posts,
+    isPending,
+    error,
+  } = useQuery<TrumpPostWithExtras[]>({
     queryKey: ['trump-posts'],
     queryFn: getPosts,
   });

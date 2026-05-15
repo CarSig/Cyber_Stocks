@@ -2,7 +2,13 @@ import BaseCard from '@/components/atoms/BaseCard';
 import Stat from '@/components/atoms/Stat';
 import SentimentBar from '@/components/molecules/shared/SentimentBar';
 
-type StatsCardSummary = { articleCount?: number; positiveCount?: number; negativeCount?: number; neutralCount?: number; avgSentiment?: number };
+type StatsCardSummary = {
+  articleCount?: number;
+  positiveCount?: number;
+  negativeCount?: number;
+  neutralCount?: number;
+  avgSentiment?: number;
+};
 type StatsCardProps = { summary: StatsCardSummary };
 
 export default function StatsCard({ summary }: StatsCardProps) {

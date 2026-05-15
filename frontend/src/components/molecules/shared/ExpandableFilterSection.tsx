@@ -9,7 +9,14 @@ type ExpandableFilterSectionProps = {
   children?: React.ReactNode;
 };
 
-export default function ExpandableFilterSection({ title, icon, isExpanded, onToggle, loading, children }: ExpandableFilterSectionProps) {
+export default function ExpandableFilterSection({
+  title,
+  icon,
+  isExpanded,
+  onToggle,
+  loading,
+  children,
+}: ExpandableFilterSectionProps) {
   return (
     <div className="sidebar-section">
       <button onClick={onToggle} className="sidebar-section-button">

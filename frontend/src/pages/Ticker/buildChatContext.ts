@@ -14,7 +14,11 @@ function pct(n: number | null | undefined): string {
   return `${n >= 0 ? '+' : ''}${(n * 100).toFixed(2)}%`;
 }
 
-function corrLine(label: string, corr: AnyRecord | null | undefined, lagImpact: AnyRecord | null | undefined): string | null {
+function corrLine(
+  label: string,
+  corr: AnyRecord | null | undefined,
+  lagImpact: AnyRecord | null | undefined,
+): string | null {
   if (!corr && !lagImpact) return null;
   const parts = [];
   if (corr?.r != null) parts.push(`r=${corr.r.toFixed(3)} (p=${corr.p?.toFixed(3) ?? 'N/A'}, n=${corr.n ?? 'N/A'})`);
@@ -215,7 +219,9 @@ export function buildChatContext({
   }
   if (kevItems.length) {
     lines.push(`\n--- CISA KEV (${kevItems.length}) ---`);
-    kevItems.slice(0, 5).forEach((v: AnyRecord) => lines.push(`${v.dateAdded ?? '?'} ${v.cveID}: ${v.vulnerabilityName}`));
+    kevItems
+      .slice(0, 5)
+      .forEach((v: AnyRecord) => lines.push(`${v.dateAdded ?? '?'} ${v.cveID}: ${v.vulnerabilityName}`));
     const c = corrLine('KEV correlation', threatIntel?.kev?.data?.correlation, threatIntel?.kev?.data?.lagImpact);
     if (c) lines.push(c);
   }

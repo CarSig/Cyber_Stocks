@@ -15,7 +15,11 @@ type QuoteBounds = { from: string; to: string } | null;
 type ArticleWithSentiment = NewsArticle & { _sentiment: number };
 type ModalState = { date: string; items: ArticleWithSentiment[] };
 
-function aggregateByDay(articles: NewsArticle[] | undefined, entityId: string | null | undefined, quoteBounds?: QuoteBounds) {
+function aggregateByDay(
+  articles: NewsArticle[] | undefined,
+  entityId: string | null | undefined,
+  quoteBounds?: QuoteBounds,
+) {
   const byDay = new Map<string, { sum: number; count: number }>();
   const articlesByDay = new Map<string, ArticleWithSentiment[]>();
 
@@ -23,7 +27,9 @@ function aggregateByDay(articles: NewsArticle[] | undefined, entityId: string | 
     if (!a.timestamp) continue;
     const day = new Date(String(a.timestamp)).toISOString().slice(0, 10);
 
-    const entities = (a as Record<string, unknown>)['entities'] as Array<{ entityId: string; sentiment: number }> | undefined;
+    const entities = (a as Record<string, unknown>)['entities'] as
+      | Array<{ entityId: string; sentiment: number }>
+      | undefined;
     const match = entities?.find((e) => e.entityId === entityId);
     const avgSentiment = entities?.length ? entities.reduce((s, e) => s + e.sentiment, 0) / entities.length : 0;
     const sentiment = match?.sentiment ?? avgSentiment;
@@ -94,8 +100,12 @@ export default function IntelligenceChart({
   const articlesRef = useSyncRef(articles);
   const entityIdRef = useSyncRef(entityId);
 
-  useEffect(() => { periodRef.current = period; }, [period]);
-  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
+  useEffect(() => {
+    periodRef.current = period;
+  }, [period]);
+  useEffect(() => {
+    visibleRangeRef.current = visibleRange;
+  }, [visibleRange]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -113,7 +123,8 @@ export default function IntelligenceChart({
 
     chart.subscribeClick((param) => {
       if (!param.time) return;
-      const date = typeof param.time === 'string' ? param.time : new Date(Number(param.time) * 1000).toISOString().slice(0, 10);
+      const date =
+        typeof param.time === 'string' ? param.time : new Date(Number(param.time) * 1000).toISOString().slice(0, 10);
       const { articlesByDay: abd } = aggregateByDay(articlesRef.current, entityIdRef.current);
       const items = abd.get(date) ?? [];
       if (items.length) setModal({ date, items });
@@ -122,7 +133,11 @@ export default function IntelligenceChart({
     skipRangeRef.current = true;
     if (visibleRangeRef.current) {
       try {
-        chart.timeScale().setVisibleRange(visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
+        chart
+          .timeScale()
+          .setVisibleRange(
+            visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0],
+          );
       } catch {
         chart.timeScale().fitContent();
       }
@@ -130,7 +145,11 @@ export default function IntelligenceChart({
       chart.timeScale().fitContent();
     } else {
       try {
-        chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current!), to: todayString() } as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
+        chart
+          .timeScale()
+          .setVisibleRange({ from: daysAgoString(periodRef.current!), to: todayString() } as Parameters<
+            ReturnType<IChartApi['timeScale']>['setVisibleRange']
+          >[0]);
       } catch {
         chart.timeScale().fitContent();
       }

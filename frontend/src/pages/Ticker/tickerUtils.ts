@@ -39,7 +39,8 @@ export function pearsonLag(a: number[], b: number[], lag: number): number | null
   const sa = lag >= 0 ? a.slice(lag) : a.slice(0, a.length + lag);
   const sb = lag >= 0 ? b.slice(0, b.length - lag) : b.slice(-lag);
   const len = Math.min(sa.length, sb.length);
-  const ra: number[] = [], rb: number[] = [];
+  const ra: number[] = [],
+    rb: number[] = [];
   for (let i = 1; i < len; i++) {
     if (sa[i] > 0 && sa[i - 1] > 0) ra.push(Math.log(sa[i] / sa[i - 1]));
     if (sb[i] > 0 && sb[i - 1] > 0) rb.push(Math.log(sb[i] / sb[i - 1]));
@@ -48,7 +49,9 @@ export function pearsonLag(a: number[], b: number[], lag: number): number | null
   if (l < 5) return null;
   const ma = ra.slice(0, l).reduce((s, v) => s + v, 0) / l;
   const mb = rb.slice(0, l).reduce((s, v) => s + v, 0) / l;
-  let num = 0, va = 0, vb = 0;
+  let num = 0,
+    va = 0,
+    vb = 0;
   for (let i = 0; i < l; i++) {
     num += (ra[i] - ma) * (rb[i] - mb);
     va += (ra[i] - ma) ** 2;

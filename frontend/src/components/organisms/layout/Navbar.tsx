@@ -38,12 +38,36 @@ export default function Navbar() {
       )}
 
       <div className={`navbar-nav${menuOpen ? ' navbar-nav--open' : ''}`}>
-        {user && <Link to="/" className="navbar-nav-link" onClick={closeMenu}>Companies</Link>}
-        {user && <Link to="/threat-intel" className="navbar-nav-link" onClick={closeMenu}>Threat Intel</Link>}
-        {user && <Link to="/socials" className="navbar-nav-link" onClick={closeMenu}>Socials</Link>}
-        {user && <Link to="/intelligence" className="navbar-nav-link" onClick={closeMenu}>Intelligence</Link>}
-        {user && <Link to="/cyber-news" className="navbar-nav-link" onClick={closeMenu}>Cyber News</Link>}
-        {user && <Link to="/alpaca" className="navbar-nav-link" onClick={closeMenu}>Intraday</Link>}
+        {user && (
+          <Link to="/" className="navbar-nav-link" onClick={closeMenu}>
+            Companies
+          </Link>
+        )}
+        {user && (
+          <Link to="/threat-intel" className="navbar-nav-link" onClick={closeMenu}>
+            Threat Intel
+          </Link>
+        )}
+        {user && (
+          <Link to="/socials" className="navbar-nav-link" onClick={closeMenu}>
+            Socials
+          </Link>
+        )}
+        {user && (
+          <Link to="/intelligence" className="navbar-nav-link" onClick={closeMenu}>
+            Intelligence
+          </Link>
+        )}
+        {user && (
+          <Link to="/cyber-news" className="navbar-nav-link" onClick={closeMenu}>
+            Cyber News
+          </Link>
+        )}
+        {user && (
+          <Link to="/alpaca" className="navbar-nav-link" onClick={closeMenu}>
+            Intraday
+          </Link>
+        )}
         {user && (
           <a
             href={`http://localhost:3000/api-docs?token=${localStorage.getItem('auth_token') ?? ''}`}
@@ -80,7 +104,9 @@ export default function Navbar() {
           {user.role === 'admin' && (
             <>
               <span className="navbar-role">admin</span>
-              <Link to="/admin" className="navbar-logout">Admin</Link>
+              <Link to="/admin" className="navbar-logout">
+                Admin
+              </Link>
             </>
           )}
           <UserButton />

@@ -68,9 +68,7 @@ export default function TickerWatchlist({
                     )}
                   </div>
                 </div>
-                {(sp?.closes?.length ?? 0) > 1 && (
-                  <WatchlistSparkline closes={sp!.closes!} color={sparkColor} id={t} />
-                )}
+                {(sp?.closes?.length ?? 0) > 1 && <WatchlistSparkline closes={sp!.closes!} color={sparkColor} id={t} />}
               </Link>
             );
           })}

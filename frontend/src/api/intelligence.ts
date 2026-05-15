@@ -1,5 +1,11 @@
 import { apiFetch, qs } from './core';
-import type { IntelligenceArticle, CorrelationResult, IntelligenceEntity, IntelligenceSignal, IntelligenceEntitySummary } from '@/types';
+import type {
+  IntelligenceArticle,
+  CorrelationResult,
+  IntelligenceEntity,
+  IntelligenceSignal,
+  IntelligenceEntitySummary,
+} from '@/types';
 
 type SentimentCorrelationEntry = {
   entityId: string;
@@ -7,11 +13,15 @@ type SentimentCorrelationEntry = {
 };
 
 export function getEntityArticles(entityId: string, signal?: string): Promise<IntelligenceArticle[]> {
-  return apiFetch<IntelligenceArticle[]>(`/intelligence/entities/${encodeURIComponent(entityId)}/articles${qs({ signal })}`);
+  return apiFetch<IntelligenceArticle[]>(
+    `/intelligence/entities/${encodeURIComponent(entityId)}/articles${qs({ signal })}`,
+  );
 }
 
 export function getEntitySummary(entityId: string, signal?: string): Promise<IntelligenceEntitySummary> {
-  return apiFetch<IntelligenceEntitySummary>(`/intelligence/entities/${encodeURIComponent(entityId)}/summary${qs({ signal })}`);
+  return apiFetch<IntelligenceEntitySummary>(
+    `/intelligence/entities/${encodeURIComponent(entityId)}/summary${qs({ signal })}`,
+  );
 }
 
 export function getSignals(): Promise<IntelligenceSignal[]> {

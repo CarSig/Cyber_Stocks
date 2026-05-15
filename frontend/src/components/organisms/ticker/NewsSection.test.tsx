@@ -56,7 +56,9 @@ function makeHook(overrides: Record<string, unknown> = {}) {
 }
 
 beforeEach(() => {
-  vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(makeHook() as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>);
+  vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
+    makeHook() as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
+  );
 });
 
 describe('NewsSection', () => {
@@ -78,7 +80,9 @@ describe('NewsSection', () => {
 
   it('shows Queuing… while mutation is pending', () => {
     vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
-      makeHook({ analyze: { mutate: vi.fn(), isPending: true, data: null } }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
+      makeHook({ analyze: { mutate: vi.fn(), isPending: true, data: null } }) as unknown as ReturnType<
+        typeof useNewsAnalysisModule.useNewsAnalysis
+      >,
     );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     expect(screen.getByRole('button', { name: 'Queuing…' })).toBeDisabled();
@@ -86,7 +90,9 @@ describe('NewsSection', () => {
 
   it('shows Processing… and disables button while polling', () => {
     vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
-      makeHook({ polling: true, analyze: { mutate: vi.fn(), isPending: false, data: null } }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
+      makeHook({ polling: true, analyze: { mutate: vi.fn(), isPending: false, data: null } }) as unknown as ReturnType<
+        typeof useNewsAnalysisModule.useNewsAnalysis
+      >,
     );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     expect(screen.getByRole('button', { name: 'Processing…' })).toBeDisabled();
@@ -94,7 +100,9 @@ describe('NewsSection', () => {
 
   it('shows "All articles already analyzed" when queued is 0', () => {
     vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
-      makeHook({ analyze: { mutate: vi.fn(), isPending: false, data: { queued: 0, total: 5 } } }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
+      makeHook({
+        analyze: { mutate: vi.fn(), isPending: false, data: { queued: 0, total: 5 } },
+      }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
     );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     expect(screen.getByText('All articles already analyzed')).toBeInTheDocument();
@@ -102,7 +110,9 @@ describe('NewsSection', () => {
 
   it('shows queued count when articles were enqueued', () => {
     vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
-      makeHook({ analyze: { mutate: vi.fn(), isPending: false, data: { queued: 12, total: 20 } } }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
+      makeHook({
+        analyze: { mutate: vi.fn(), isPending: false, data: { queued: 12, total: 20 } },
+      }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
     );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     expect(screen.getByText('Queued 12 articles')).toBeInTheDocument();
@@ -111,7 +121,9 @@ describe('NewsSection', () => {
   it('calls analyze.mutate when button is clicked', () => {
     const mutate = vi.fn();
     vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
-      makeHook({ analyze: { mutate, isPending: false, data: null } }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
+      makeHook({ analyze: { mutate, isPending: false, data: null } }) as unknown as ReturnType<
+        typeof useNewsAnalysisModule.useNewsAnalysis
+      >,
     );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     fireEvent.click(screen.getByRole('button', { name: 'Analyze Sentiment' }));
@@ -120,7 +132,9 @@ describe('NewsSection', () => {
 
   it('calls setShowCorrelation when Correlation button is clicked', () => {
     const setShowCorrelation = vi.fn();
-    vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(makeHook({ setShowCorrelation }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>);
+    vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
+      makeHook({ setShowCorrelation }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
+    );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     fireEvent.click(screen.getByRole('button', { name: 'Correlation' }));
     expect(setShowCorrelation).toHaveBeenCalledOnce();
@@ -133,7 +147,10 @@ describe('NewsSection', () => {
 
   it('renders correlation loading state', () => {
     vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
-      makeHook({ showCorrelation: true, correlation: { isPending: true, data: null, error: null } }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
+      makeHook({
+        showCorrelation: true,
+        correlation: { isPending: true, data: null, error: null },
+      }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
     );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     expect(screen.getByText('Loading correlation…')).toBeInTheDocument();
@@ -151,7 +168,11 @@ describe('NewsSection', () => {
   });
 
   it('renders sentiment badges when analysis data is present', () => {
-    vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(makeHook({ analysis: { data: ANALYSIS_DATA } }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>);
+    vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
+      makeHook({ analysis: { data: ANALYSIS_DATA } }) as unknown as ReturnType<
+        typeof useNewsAnalysisModule.useNewsAnalysis
+      >,
+    );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     expect(screen.getByText(/▲▲/)).toBeInTheDocument();
     expect(screen.getByText(/imp 8\/10/)).toBeInTheDocument();
@@ -161,14 +182,22 @@ describe('NewsSection', () => {
   });
 
   it('renders topics and entities for analyzed articles', () => {
-    vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(makeHook({ analysis: { data: ANALYSIS_DATA } }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>);
+    vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
+      makeHook({ analysis: { data: ANALYSIS_DATA } }) as unknown as ReturnType<
+        typeof useNewsAnalysisModule.useNewsAnalysis
+      >,
+    );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     expect(screen.getByText('earnings')).toBeInTheDocument();
     expect(screen.getByText('CrowdStrike')).toBeInTheDocument();
   });
 
   it('renders negative sentiment arrow for negative score', () => {
-    vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(makeHook({ analysis: { data: ANALYSIS_DATA } }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>);
+    vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
+      makeHook({ analysis: { data: ANALYSIS_DATA } }) as unknown as ReturnType<
+        typeof useNewsAnalysisModule.useNewsAnalysis
+      >,
+    );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     expect(screen.getByText(/▼/)).toBeInTheDocument();
   });
@@ -185,14 +214,18 @@ describe('NewsSection', () => {
 
   it('shows analyzed count when analysis data is present', () => {
     vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
-      makeHook({ analysis: { data: ANALYSIS_DATA }, analyzedCount: 2 }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
+      makeHook({ analysis: { data: ANALYSIS_DATA }, analyzedCount: 2 }) as unknown as ReturnType<
+        typeof useNewsAnalysisModule.useNewsAnalysis
+      >,
     );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     expect(screen.getByText(/2\s*\/\s*2\s*analyzed/)).toBeInTheDocument();
   });
 
   it('shows 0 analyzed when no analysis data', () => {
-    vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(makeHook({ analyzedCount: 0 }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>);
+    vi.spyOn(useNewsAnalysisModule, 'useNewsAnalysis').mockReturnValue(
+      makeHook({ analyzedCount: 0 }) as unknown as ReturnType<typeof useNewsAnalysisModule.useNewsAnalysis>,
+    );
     render(<NewsSection ticker="CRWD" news={ARTICLES} />);
     expect(screen.getByText(/0\s*\/\s*2\s*analyzed/)).toBeInTheDocument();
   });

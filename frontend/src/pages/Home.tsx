@@ -19,7 +19,8 @@ type CompanyListProps = {
 function CompanyList({ companies, toggled, onToggle }: CompanyListProps) {
   const toggle = (ticker: string) => {
     const updated = new Set(toggled);
-    if (updated.has(ticker)) updated.delete(ticker); else updated.add(ticker);
+    if (updated.has(ticker)) updated.delete(ticker);
+    else updated.add(ticker);
     onToggle(updated);
   };
 
@@ -83,7 +84,12 @@ export default function Home() {
         <CompanyList companies={companies ?? {}} toggled={toggled} onToggle={setToggled} />
 
         {toggled.size > 0 ? (
-          <MultiChart series={series as Parameters<typeof MultiChart>[0]['series']} rangeFrom={rangeFrom} rangeTo={rangeTo} onRangeChange={handleRangeChange} />
+          <MultiChart
+            series={series as Parameters<typeof MultiChart>[0]['series']}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            onRangeChange={handleRangeChange}
+          />
         ) : (
           <p>Toggle companies to compare them on the chart.</p>
         )}

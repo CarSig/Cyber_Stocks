@@ -26,11 +26,7 @@ export {
   getList as getThreatIntelList,
   getCorrelation as getThreatIntelCorrelation,
 } from './threat-intel';
-export {
-  getAnalysis as getNewsAnalysis,
-  analyze as analyzeNews,
-  getCorrelation as getNewsCorrelation,
-} from './news';
+export { getAnalysis as getNewsAnalysis, analyze as analyzeNews, getCorrelation as getNewsCorrelation } from './news';
 export {
   getEntityArticles as getIntelligenceEntityArticles,
   getEntitySummary as getIntelligenceEntitySummary,

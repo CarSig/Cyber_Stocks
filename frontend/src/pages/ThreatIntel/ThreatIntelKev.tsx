@@ -43,11 +43,7 @@ export default function ThreatIntelKev() {
             onChange={(e) => withReset(setSearch)(e.target.value)}
           />
           <label className="ti-checkbox">
-            <input
-              type="checkbox"
-              checked={ransomware}
-              onChange={(e) => withReset(setRansomware)(e.target.checked)}
-            />
+            <input type="checkbox" checked={ransomware} onChange={(e) => withReset(setRansomware)(e.target.checked)} />
             Ransomware only
           </label>
           {data && <span className="ti-count">{(data as { total: number }).total} results</span>}

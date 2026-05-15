@@ -37,7 +37,9 @@ function calcATR(quotes: OhlcEntry[], window = 14) {
   if (quotes.length < window + 1) return [];
   const trs: number[] = [];
   for (let i = 1; i < quotes.length; i++) {
-    const high = quotes[i].high ?? 0, low = quotes[i].low ?? 0, prevClose = quotes[i - 1].close ?? 0;
+    const high = quotes[i].high ?? 0,
+      low = quotes[i].low ?? 0,
+      prevClose = quotes[i - 1].close ?? 0;
     trs.push(Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose)));
   }
   const result: { time: string; value: number }[] = [];
@@ -58,7 +60,13 @@ type VolatilityChartProps = {
   onRangeChange?: (range: { from: string; to: string }) => void;
 };
 
-export default function VolatilityChart({ quotes, period, onPeriodChange, visibleRange, onRangeChange }: VolatilityChartProps) {
+export default function VolatilityChart({
+  quotes,
+  period,
+  onPeriodChange,
+  visibleRange,
+  onRangeChange,
+}: VolatilityChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const skipRangeRef = useRef(false);
@@ -68,8 +76,12 @@ export default function VolatilityChart({ quotes, period, onPeriodChange, visibl
   const [showHV, setShowHV] = useState(true);
   const [showATR, setShowATR] = useState(true);
 
-  useEffect(() => { periodRef.current = period; }, [period]);
-  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
+  useEffect(() => {
+    periodRef.current = period;
+  }, [period]);
+  useEffect(() => {
+    visibleRangeRef.current = visibleRange;
+  }, [visibleRange]);
 
   useEffect(() => {
     if (!containerRef.current || !quotes?.length) return;
@@ -98,11 +110,19 @@ export default function VolatilityChart({ quotes, period, onPeriodChange, visibl
 
     skipRangeRef.current = true;
     if (visibleRangeRef.current) {
-      chart.timeScale().setVisibleRange(visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
+      chart
+        .timeScale()
+        .setVisibleRange(
+          visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0],
+        );
     } else if (periodRef.current === null) {
       chart.timeScale().fitContent();
     } else {
-      chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current!), to: todayString() } as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
+      chart
+        .timeScale()
+        .setVisibleRange({ from: daysAgoString(periodRef.current!), to: todayString() } as Parameters<
+          ReturnType<IChartApi['timeScale']>['setVisibleRange']
+        >[0]);
     }
 
     const rangeTimer = subscribeRangeChange(chart, skipRangeRef, { onRangeChange, onPeriodChange });
@@ -130,10 +150,18 @@ export default function VolatilityChart({ quotes, period, onPeriodChange, visibl
           </button>
         ))}
         <ChartSep />
-        <ChartToggleButton active={showHV} onClick={() => setShowHV((v) => !v)}>HV20</ChartToggleButton>
-        <ChartToggleButton active={showATR} onClick={() => setShowATR((v) => !v)}>ATR14</ChartToggleButton>
-        <span className="chart-series-label" style={{ color: 'var(--color-amber)', marginLeft: 8 }}>— HV20%</span>
-        <span className="chart-series-label" style={{ color: 'var(--color-red)', marginLeft: 8 }}>— ATR14%</span>
+        <ChartToggleButton active={showHV} onClick={() => setShowHV((v) => !v)}>
+          HV20
+        </ChartToggleButton>
+        <ChartToggleButton active={showATR} onClick={() => setShowATR((v) => !v)}>
+          ATR14
+        </ChartToggleButton>
+        <span className="chart-series-label" style={{ color: 'var(--color-amber)', marginLeft: 8 }}>
+          — HV20%
+        </span>
+        <span className="chart-series-label" style={{ color: 'var(--color-red)', marginLeft: 8 }}>
+          — ATR14%
+        </span>
       </div>
       <div ref={containerRef} className="chart-container" />
     </div>

@@ -7,7 +7,12 @@ type SentimentCorrelationMetricsProps = {
   corrResult?: CorrelationResult | { error: string };
 };
 
-export default function SentimentCorrelationMetrics({ sentimentInfo, hasCorrelation, strength, corrResult }: SentimentCorrelationMetricsProps) {
+export default function SentimentCorrelationMetrics({
+  sentimentInfo,
+  hasCorrelation,
+  strength,
+  corrResult,
+}: SentimentCorrelationMetricsProps) {
   return (
     <div className="card-metrics">
       {sentimentInfo && (
@@ -29,7 +34,12 @@ export default function SentimentCorrelationMetrics({ sentimentInfo, hasCorrelat
               r: <strong>{(corrResult as CorrelationResult).r.toFixed(3)}</strong>
             </span>
             <span>
-              p: <strong>{(corrResult as CorrelationResult).pValue < 0.001 ? '< 0.001' : (corrResult as CorrelationResult).pValue.toFixed(3)}</strong>
+              p:{' '}
+              <strong>
+                {(corrResult as CorrelationResult).pValue < 0.001
+                  ? '< 0.001'
+                  : (corrResult as CorrelationResult).pValue.toFixed(3)}
+              </strong>
             </span>
           </div>
         </div>

@@ -178,7 +178,12 @@ function IntradayChart({ bars, compareBars, timezone, chartType }: IntradayChart
       });
       chart.priceScale(scaleId).applyOptions({ scaleMargins: { top: 0.1, bottom: 0.1 } });
       const cTzOffset = getTzOffsetSeconds(timezone, new Date(cBars[0].t));
-      cSeries.setData(cBars.map((b) => ({ time: toTzTime(b.t, cTzOffset) as unknown as import('lightweight-charts').Time, value: b.c })));
+      cSeries.setData(
+        cBars.map((b) => ({
+          time: toTzTime(b.t, cTzOffset) as unknown as import('lightweight-charts').Time,
+          value: b.c,
+        })),
+      );
       cSeries.applyOptions({ title: cTicker });
       chartWithRefs._seriesRefs!.push(cSeries);
     });

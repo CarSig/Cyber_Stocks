@@ -1,15 +1,35 @@
 import type { UrgencyKey, UrgencyConfig } from '@/types';
 
 const FUTURE_KEYWORDS = [
-  'outlook', 'forecast', 'guidance', 'upcoming', 'scheduled', 'projected',
-  'expected', 'planned', 'will', 'q1', 'q2', 'q3', 'q4',
+  'outlook',
+  'forecast',
+  'guidance',
+  'upcoming',
+  'scheduled',
+  'projected',
+  'expected',
+  'planned',
+  'will',
+  'q1',
+  'q2',
+  'q3',
+  'q4',
 ];
 
 const LONG_TERM_KEYWORDS = ['annual', 'yearly', 'year', 'multi-year', 'long-term', '5-year', 'decade', '2025', '2026'];
 
 const PAST_KEYWORDS = [
-  'reported', 'announced', 'disclosed', 'released', 'posted', 'filed',
-  'completed', 'finished', 'ended', 'breach', 'compromised',
+  'reported',
+  'announced',
+  'disclosed',
+  'released',
+  'posted',
+  'filed',
+  'completed',
+  'finished',
+  'ended',
+  'breach',
+  'compromised',
 ];
 
 const NOW_KEYWORDS = ['breaking', 'alert', 'emergency', 'just', 'now', 'today', 'tonight', 'live'];

@@ -29,7 +29,10 @@ export default function NvdRow({ cve }: NvdRowProps) {
         </a>
       </td>
       <td>
-        <span className="ti-severity" style={{ color: cve.severity ? SEVERITY_COLORS[cve.severity] ?? 'var(--text-muted)' : undefined }}>
+        <span
+          className="ti-severity"
+          style={{ color: cve.severity ? (SEVERITY_COLORS[cve.severity] ?? 'var(--text-muted)') : undefined }}
+        >
           {cve.severity}
         </span>
       </td>

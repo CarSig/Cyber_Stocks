@@ -190,9 +190,39 @@ export function buildNewsMarkers(
     .flatMap(([time, { pos, neg, neu, snapped }]) => {
       const s = snapped ? '*' : '';
       return [
-        ...(pos ? [{ time: time as Time, position: 'aboveBar' as const, color: '#22c55e', shape: 'arrowUp' as const, text: `${pos}${s}` }] : []),
-        ...(neg ? [{ time: time as Time, position: 'belowBar' as const, color: '#ef4444', shape: 'arrowDown' as const, text: `${neg}${s}` }] : []),
-        ...(neu ? [{ time: time as Time, position: neg ? 'aboveBar' as const : 'belowBar' as const, color: '#eab308', shape: 'circle' as const, text: `${neu}${s}` }] : []),
+        ...(pos
+          ? [
+              {
+                time: time as Time,
+                position: 'aboveBar' as const,
+                color: '#22c55e',
+                shape: 'arrowUp' as const,
+                text: `${pos}${s}`,
+              },
+            ]
+          : []),
+        ...(neg
+          ? [
+              {
+                time: time as Time,
+                position: 'belowBar' as const,
+                color: '#ef4444',
+                shape: 'arrowDown' as const,
+                text: `${neg}${s}`,
+              },
+            ]
+          : []),
+        ...(neu
+          ? [
+              {
+                time: time as Time,
+                position: neg ? ('aboveBar' as const) : ('belowBar' as const),
+                color: '#eab308',
+                shape: 'circle' as const,
+                text: `${neu}${s}`,
+              },
+            ]
+          : []),
       ];
     })
     .sort((a, b) => (a.time < b.time ? -1 : 1));

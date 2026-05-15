@@ -32,7 +32,9 @@ export default function CommentNode({ comment, depth = 0 }: CommentNodeProps) {
         )}
         <span className="text-xs font-medium text-(--color-blue)">u/{comment.author}</span>
         <CountBadge count={comment.score} icon="▲" />
-        <span className="text-[10px] text-muted-foreground">{new Date((comment as Record<string, unknown>).createdAt as string).toLocaleDateString()}</span>
+        <span className="text-[10px] text-muted-foreground">
+          {new Date((comment as Record<string, unknown>).createdAt as string).toLocaleDateString()}
+        </span>
       </div>
 
       <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap mt-1 mb-1">{comment.body}</p>

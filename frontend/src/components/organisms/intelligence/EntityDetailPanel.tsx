@@ -37,7 +37,15 @@ export default function EntityDetailPanel({
 
   if (onUrgencyCounts) onUrgencyCounts(counts);
 
-  const urgencyKeys: Array<UrgencyKey | 'all'> = ['all', 'now', 'today', 'recent', 'future_short', 'future_long', 'past'];
+  const urgencyKeys: Array<UrgencyKey | 'all'> = [
+    'all',
+    'now',
+    'today',
+    'recent',
+    'future_short',
+    'future_long',
+    'past',
+  ];
 
   return (
     <DetailPanelOverlay title={entityId} onClose={onClose} className="entity-detail-panel-content">
@@ -73,7 +81,7 @@ export default function EntityDetailPanel({
           const active = activeFilter === key;
           const cfg = key === 'all' ? null : URGENCY_CONFIG[key];
           const color = key === 'all' ? 'var(--border)' : cfg!.color;
-          const count = key === 'all' ? enriched.length : (counts[key] || 0);
+          const count = key === 'all' ? enriched.length : counts[key] || 0;
           return (
             <button
               key={key}
@@ -99,7 +107,11 @@ export default function EntityDetailPanel({
 
       {articles.isPending && <p className="ti-loading">Loading…</p>}
       {filteredArticles.map((a) => (
-        <ArticleDetail key={a.id ?? a.link} article={a as unknown as Parameters<typeof ArticleDetail>[0]['article']} focusEntityId={entityId} />
+        <ArticleDetail
+          key={a.id ?? a.link}
+          article={a as unknown as Parameters<typeof ArticleDetail>[0]['article']}
+          focusEntityId={entityId}
+        />
       ))}
     </DetailPanelOverlay>
   );

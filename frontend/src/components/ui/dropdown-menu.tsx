@@ -205,7 +205,10 @@ function DropdownMenuRadioItem({ className, children, inset, ...props }: Dropdow
   );
 }
 
-function DropdownMenuSeparator({ className, ...props }: React.ComponentPropsWithoutRef<typeof MenuPrimitive.Separator>) {
+function DropdownMenuSeparator({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof MenuPrimitive.Separator>) {
   return (
     <MenuPrimitive.Separator
       data-slot="dropdown-menu-separator"

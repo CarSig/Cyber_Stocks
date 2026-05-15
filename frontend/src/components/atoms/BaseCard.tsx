@@ -11,7 +11,15 @@ type BaseCardProps = {
   [key: string]: unknown;
 };
 
-export default function BaseCard({ variant, disabled, as: Tag = 'div', className = '', style, children, ...props }: BaseCardProps) {
+export default function BaseCard({
+  variant,
+  disabled,
+  as: Tag = 'div',
+  className = '',
+  style,
+  children,
+  ...props
+}: BaseCardProps) {
   const classes = [
     'base-card',
     variant ? `base-card--${variant}` : null,

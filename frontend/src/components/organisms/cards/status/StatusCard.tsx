@@ -3,7 +3,14 @@ import { Link } from 'react-router-dom';
 import BaseCard from '@/components/atoms/BaseCard';
 import CardHeader from '@/components/atoms/CardHeader';
 
-type StatusCardProps = { to?: string; icon?: string; title: string; configured?: boolean; children?: React.ReactNode; syncedAt?: string };
+type StatusCardProps = {
+  to?: string;
+  icon?: string;
+  title: string;
+  configured?: boolean;
+  children?: React.ReactNode;
+  syncedAt?: string;
+};
 
 export default function StatusCard({ to, icon, title, configured = true, children, syncedAt }: StatusCardProps) {
   const linkProps = to ? { to } : {};

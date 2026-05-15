@@ -55,38 +55,44 @@ export default function NotificationBell() {
             >
               <div className="flex w-full items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  {n.type === 'stocks.updated' && (n as Record<string, unknown>).changes && ((n as Record<string, unknown>).changes as Array<{ ticker: string; changePct: number }>).length ? (
+                  {n.type === 'stocks.updated' &&
+                  (n as Record<string, unknown>).changes &&
+                  ((n as Record<string, unknown>).changes as Array<{ ticker: string; changePct: number }>).length ? (
                     <div className="notif-stocks flex flex-wrap gap-x-3 gap-y-0.5">
-                      {((n as Record<string, unknown>).changes as Array<{ ticker: string; changePct: number }>).map(({ ticker, changePct }) => (
-                        <span
-                          key={ticker}
-                          style={{ color: changePct >= 0 ? 'var(--color-green)' : 'var(--color-red)' }}
-                        >
-                          {ticker} {changePct >= 0 ? '+' : ''}
-                          {changePct.toFixed(1)}%
-                        </span>
-                      ))}
+                      {((n as Record<string, unknown>).changes as Array<{ ticker: string; changePct: number }>).map(
+                        ({ ticker, changePct }) => (
+                          <span
+                            key={ticker}
+                            style={{ color: changePct >= 0 ? 'var(--color-green)' : 'var(--color-red)' }}
+                          >
+                            {ticker} {changePct >= 0 ? '+' : ''}
+                            {changePct.toFixed(1)}%
+                          </span>
+                        ),
+                      )}
                     </div>
                   ) : n.type === 'news.analyzed' ? (
                     <div>
-                      <span className="notif-ticker font-semibold">{(n as Record<string, unknown>).ticker as string}</span>
+                      <span className="notif-ticker font-semibold">
+                        {(n as Record<string, unknown>).ticker as string}
+                      </span>
                       <span
                         style={{
                           color:
-                            (n as Record<string, unknown>).sentiment as number >= 0.1
+                            ((n as Record<string, unknown>).sentiment as number) >= 0.1
                               ? 'var(--color-green)'
-                              : (n as Record<string, unknown>).sentiment as number <= -0.1
+                              : ((n as Record<string, unknown>).sentiment as number) <= -0.1
                                 ? 'var(--color-red)'
                                 : 'var(--text-muted)',
                         }}
                       >
-                        {(n as Record<string, unknown>).sentiment as number >= 0.6
+                        {((n as Record<string, unknown>).sentiment as number) >= 0.6
                           ? ' ▲▲ '
-                          : (n as Record<string, unknown>).sentiment as number >= 0.1
+                          : ((n as Record<string, unknown>).sentiment as number) >= 0.1
                             ? ' ▲ '
-                            : (n as Record<string, unknown>).sentiment as number <= -0.6
+                            : ((n as Record<string, unknown>).sentiment as number) <= -0.6
                               ? ' ▼▼ '
-                              : (n as Record<string, unknown>).sentiment as number <= -0.1
+                              : ((n as Record<string, unknown>).sentiment as number) <= -0.1
                                 ? ' ▼ '
                                 : ' ● '}
                       </span>
@@ -95,7 +101,9 @@ export default function NotificationBell() {
                   ) : (
                     <span className="notif-message">{n.message}</span>
                   )}
-                  <span className="notif-time text-xs text-muted-foreground">{formatTime((n as Record<string, unknown>).at as string)}</span>
+                  <span className="notif-time text-xs text-muted-foreground">
+                    {formatTime((n as Record<string, unknown>).at as string)}
+                  </span>
                 </div>
                 <button
                   onClick={(e) => {

@@ -10,12 +10,7 @@ export default function useUrgencyFilter(articles?: NewsArticle[]) {
   const enriched: EnrichedArticle[] = (articles ?? []).map((a) => {
     try {
       const urgency =
-        a.urgency ??
-        classifyUrgency(
-          a.timestamp ?? a.publishedAt ?? 0,
-          a.globalSignals ?? [],
-          a.companySignals ?? [],
-        );
+        a.urgency ?? classifyUrgency(a.timestamp ?? a.publishedAt ?? 0, a.globalSignals ?? [], a.companySignals ?? []);
       return { ...a, _urgency: urgency };
     } catch {
       return { ...a, _urgency: a.urgency ?? 'future_short' };

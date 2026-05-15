@@ -54,8 +54,12 @@ export default function ChartsTab({
     setHideIntelligence,
   } = useTickerContext();
 
-  const newsOverlay = overlays.news as { articles: NewsArticle[]; analysis?: Parameters<typeof NewsChart>[0]['analysis'] } | undefined;
-  const cyberNewsOverlay = overlays.cyberNews as { articles?: NewsArticle[]; analysis?: Parameters<typeof NewsChart>[0]['analysis'] } | undefined;
+  const newsOverlay = overlays.news as
+    | { articles: NewsArticle[]; analysis?: Parameters<typeof NewsChart>[0]['analysis'] }
+    | undefined;
+  const cyberNewsOverlay = overlays.cyberNews as
+    | { articles?: NewsArticle[]; analysis?: Parameters<typeof NewsChart>[0]['analysis'] }
+    | undefined;
 
   return (
     <section>
@@ -106,7 +110,11 @@ export default function ChartsTab({
       </ChartCard>
 
       {(newsOverlay?.articles?.length ?? 0) > 0 && (
-        <ChartCard title="News Sentiment" hidden={hideNewsSentiment} onToggle={() => setHideNewsSentiment(!hideNewsSentiment)}>
+        <ChartCard
+          title="News Sentiment"
+          hidden={hideNewsSentiment}
+          onToggle={() => setHideNewsSentiment(!hideNewsSentiment)}
+        >
           <NewsChart
             articles={newsOverlay!.articles}
             analysis={newsOverlay?.analysis}

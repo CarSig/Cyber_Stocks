@@ -8,7 +8,13 @@ type DetailPanelOverlayProps = {
   className?: string;
 };
 
-export default function DetailPanelOverlay({ title, subtitle, onClose, children, className = '' }: DetailPanelOverlayProps) {
+export default function DetailPanelOverlay({
+  title,
+  subtitle,
+  onClose,
+  children,
+  className = '',
+}: DetailPanelOverlayProps) {
   return (
     <div className="overlay-panel-backdrop" onClick={onClose}>
       <div className={`panel-slide-right ${className}`} onClick={(e) => e.stopPropagation()}>

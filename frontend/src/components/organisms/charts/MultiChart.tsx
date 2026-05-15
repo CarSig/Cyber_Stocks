@@ -13,8 +13,16 @@ import ChartSep from '@/components/atoms/ChartSep';
 import type { Quote } from '@/types';
 
 const COLOR_VARS = [
-  '--series-1', '--series-2', '--series-3', '--series-4', '--series-5',
-  '--series-6', '--series-7', '--series-8', '--series-9', '--series-10',
+  '--series-1',
+  '--series-2',
+  '--series-3',
+  '--series-4',
+  '--series-5',
+  '--series-6',
+  '--series-7',
+  '--series-8',
+  '--series-9',
+  '--series-10',
 ];
 const COLORS = COLOR_VARS.map(cssVar);
 
@@ -43,11 +51,18 @@ export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }
     if (!chartRef.current) return;
     skipRangeRef.current = true;
     if (rangeFrom && rangeTo) {
-      chartRef.current.timeScale().setVisibleRange({ from: rangeFrom as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['from'], to: rangeTo as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['to'] });
+      chartRef.current
+        .timeScale()
+        .setVisibleRange({
+          from: rangeFrom as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['from'],
+          to: rangeTo as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['to'],
+        });
     } else {
       chartRef.current.timeScale().fitContent();
     }
-    setTimeout(() => { skipRangeRef.current = false; }, 150);
+    setTimeout(() => {
+      skipRangeRef.current = false;
+    }, 150);
   }, [rangeFrom, rangeTo]);
 
   useEffect(() => {
@@ -65,7 +80,12 @@ export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }
 
     skipRangeRef.current = true;
     if (rangeFrom && rangeTo) {
-      chart.timeScale().setVisibleRange({ from: rangeFrom as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['from'], to: rangeTo as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['to'] });
+      chart
+        .timeScale()
+        .setVisibleRange({
+          from: rangeFrom as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['from'],
+          to: rangeTo as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['to'],
+        });
     } else {
       chart.timeScale().fitContent();
     }

@@ -31,7 +31,7 @@ export default function Intelligence() {
     ? [...new Map((entities as IntelligenceEntity[]).map((e) => [e.entityId, e])).values()]
     : [];
 
-  const correlationByEntityId = indexBy(correlations as Array<{ entityId: string }> ?? [], 'entityId');
+  const correlationByEntityId = indexBy((correlations as Array<{ entityId: string }>) ?? [], 'entityId');
   const filteredSignals = (allSignals as IntelligenceSignal[] | undefined)?.filter((s) => s.count >= 5) ?? [];
 
   return (
@@ -124,7 +124,9 @@ export default function Intelligence() {
                   entity={e}
                   onClick={() => setSelected(e.entityId)}
                   signal={selectedSignal ?? undefined}
-                  correlation={correlationByEntityId[e.entityId] as { result?: CorrelationResult | { error: string } } | undefined}
+                  correlation={
+                    correlationByEntityId[e.entityId] as { result?: CorrelationResult | { error: string } } | undefined
+                  }
                 />
               ))}
             </div>
@@ -136,7 +138,9 @@ export default function Intelligence() {
                   entity={e}
                   onClick={() => setSelected(e.entityId)}
                   signal={selectedSignal ?? undefined}
-                  correlation={correlationByEntityId[e.entityId] as { result?: CorrelationResult | { error: string } } | undefined}
+                  correlation={
+                    correlationByEntityId[e.entityId] as { result?: CorrelationResult | { error: string } } | undefined
+                  }
                 />
               ))}
             </div>

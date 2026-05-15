@@ -32,7 +32,9 @@ export default function CorrelationMatrix() {
   const isCustom = Boolean(startDate || endDate);
   const params = { lagDays, windowDays, startDate: startDate || undefined, endDate: endDate || undefined };
 
-  const { data, isPending, isFetching, error } = useQuery<CorrelationMatrixData & { startDate?: string; endDate?: string; windowDays?: number }>({
+  const { data, isPending, isFetching, error } = useQuery<
+    CorrelationMatrixData & { startDate?: string; endDate?: string; windowDays?: number }
+  >({
     queryKey: ['correlation-matrix', lagDays, windowDays, startDate, endDate],
     queryFn: () => getCorrelationMatrix(params),
     staleTime: isCustom ? 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000,

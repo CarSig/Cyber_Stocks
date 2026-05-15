@@ -25,7 +25,9 @@ export function subscribeRangeChange(
     chart.timeScale().subscribeVisibleTimeRangeChange((range) => {
       if (skipRangeRef.current || !range) return;
       onRangeChange?.({ from: String(range.from), to: String(range.to) });
-      const days = Math.round((new Date(String(range.to)).getTime() - new Date(String(range.from)).getTime()) / 86400000);
+      const days = Math.round(
+        (new Date(String(range.to)).getTime() - new Date(String(range.from)).getTime()) / 86400000,
+      );
       onPeriodChange?.(days);
     });
   }, 150);
@@ -36,11 +38,17 @@ type ApplyRangeOpts = {
   visibleRange?: { from: string; to: string } | null;
 };
 
-export function applyRange(chart: IChartApi, skipRangeRef: RefObject<boolean>, { period, visibleRange }: ApplyRangeOpts = {}): void {
+export function applyRange(
+  chart: IChartApi,
+  skipRangeRef: RefObject<boolean>,
+  { period, visibleRange }: ApplyRangeOpts = {},
+): void {
   skipRangeRef.current = true;
   if (visibleRange) {
     try {
-      chart.timeScale().setVisibleRange(visibleRange as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
+      chart
+        .timeScale()
+        .setVisibleRange(visibleRange as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
     } catch {
       chart.timeScale().fitContent();
     }
@@ -48,7 +56,11 @@ export function applyRange(chart: IChartApi, skipRangeRef: RefObject<boolean>, {
     chart.timeScale().fitContent();
   } else {
     try {
-      chart.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() } as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
+      chart
+        .timeScale()
+        .setVisibleRange({ from: daysAgoString(period), to: todayString() } as Parameters<
+          ReturnType<IChartApi['timeScale']>['setVisibleRange']
+        >[0]);
     } catch {
       chart.timeScale().fitContent();
     }
