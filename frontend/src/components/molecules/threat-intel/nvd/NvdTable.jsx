@@ -1,25 +1,8 @@
+import TiTable from "../TiTable.jsx";
 import NvdRow from "./NvdRow.jsx";
 
+const HEADERS = ["CVE ID", "Severity", "Score", "Description", "Published", "Status"];
+
 export default function NvdTable({ data }) {
-  return (
-    <div className="ti-table-wrap">
-      <table className="ti-table">
-        <thead>
-          <tr>
-            <th>CVE ID</th>
-            <th>Severity</th>
-            <th>Score</th>
-            <th>Description</th>
-            <th>Published</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data?.items?.map((cve) => (
-            <NvdRow key={cve.id} cve={cve} />
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  return <TiTable headers={HEADERS} items={data?.items} renderRow={(cve) => <NvdRow key={cve.id} cve={cve} />} rowKey={(cve) => cve.id} />;
 }

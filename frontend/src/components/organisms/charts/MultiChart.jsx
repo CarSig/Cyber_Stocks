@@ -2,15 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import "./charts.css";
 import { createChart, LineSeries, createSeriesMarkers } from "lightweight-charts";
 import DatePicker from "@/components/atoms/DatePicker.jsx";
-import { daysAgoString, todayString, toSortedClose } from "./chartUtils.js";
-import { buildMarkers } from "./chartMarkers.js";
+import { cssVar, makeChartOptions } from "./utils/theme.js";
+import { daysAgoString, todayString } from "./utils/dates.js";
+import { toSortedClose } from "./utils/series.js";
+import { buildMarkers } from "./utils/markers.js";
+import { attachResizeObserver } from "./utils/chartSetup.js";
 import PeriodButtons from "@/components/molecules/shared/PeriodButtons.jsx";
 import ChartToggleButton from "@/components/atoms/ChartToggleButton.jsx";
 import ChartSep from "@/components/atoms/ChartSep.jsx";
 
 const COLOR_VARS = ["--series-1","--series-2","--series-3","--series-4","--series-5","--series-6","--series-7","--series-8","--series-9","--series-10"];
-const cv = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const COLORS = COLOR_VARS.map(cv);
+const COLORS = COLOR_VARS.map(cssVar);
 
 
 export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }) {
@@ -35,13 +37,7 @@ export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }
   useEffect(() => {
     if (!series.length) return;
 
-    const chart = createChart(containerRef.current, {
-      width: containerRef.current.clientWidth,
-      height: 400,
-      layout: { background: { color: cv("--surface-0") }, textColor: cv("--text-primary") },
-      grid: { vertLines: { color: cv("--surface-3") }, horzLines: { color: cv("--surface-3") } },
-      timeScale: { timeVisible: true },
-    });
+    const chart = createChart(containerRef.current, makeChartOptions(containerRef.current));
     chartRef.current = chart;
 
     series.forEach(({ quotes, analysis }, i) => {
@@ -67,10 +63,7 @@ export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }
       });
     }, 150);
 
-    const observer = new ResizeObserver(() => {
-      chart.applyOptions({ width: containerRef.current.clientWidth });
-    });
-    observer.observe(containerRef.current);
+    const observer = attachResizeObserver(chart, containerRef);
 
     return () => {
       clearTimeout(rangeTimer);

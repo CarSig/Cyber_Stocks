@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getThreatIntelCorrelation } from "@/api.js";
+import { getCorrelation } from "@/api/threat-intel.js";
 import { useCorrelationQuery } from "./useCorrelationQuery.js";
 
 export function useThreatIntel(ticker) {
@@ -7,17 +7,17 @@ export function useThreatIntel(ticker) {
 
   const nvd = useCorrelationQuery(
     ["threat-intel-correlate", "nvd", ticker, lagDays],
-    () => getThreatIntelCorrelation("nvd", ticker, lagDays),
+    () => getCorrelation("nvd", ticker, lagDays),
     !!ticker,
   );
   const kev = useCorrelationQuery(
     ["threat-intel-correlate", "kev", ticker, lagDays],
-    () => getThreatIntelCorrelation("kev", ticker, lagDays),
+    () => getCorrelation("kev", ticker, lagDays),
     !!ticker,
   );
   const otx = useCorrelationQuery(
     ["threat-intel-correlate", "otx", ticker, lagDays],
-    () => getThreatIntelCorrelation("otx", ticker, lagDays),
+    () => getCorrelation("otx", ticker, lagDays),
     !!ticker,
   );
 

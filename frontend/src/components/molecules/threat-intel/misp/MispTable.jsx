@@ -1,23 +1,15 @@
+import TiTable from "../TiTable.jsx";
 import MispRow from "./MispRow.jsx";
+
+const HEADERS = ["Event", "Org", "Threat Level", "Date"];
 
 export default function MispTable({ data }) {
   return (
-    <div className="ti-table-wrap">
-      <table className="ti-table">
-        <thead>
-          <tr>
-            <th>Event</th>
-            <th>Org</th>
-            <th>Threat Level</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data?.items?.map((item) => (
-            <MispRow key={item.Event?.uuid ?? item.uuid ?? item.id} item={item} />
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <TiTable
+      headers={HEADERS}
+      items={data?.items}
+      renderRow={(item) => <MispRow key={item.Event?.uuid ?? item.uuid ?? item.id} item={item} />}
+      rowKey={(item) => item.Event?.uuid ?? item.uuid ?? item.id}
+    />
   );
 }

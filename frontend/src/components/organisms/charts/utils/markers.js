@@ -1,14 +1,18 @@
-const cv = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+import { cssVar } from "./theme.js";
 
-const SENTIMENT_COLORS = { positive: "#22c55e", negative: "#ef4444", neutral: "#eab308" };
+export const SENTIMENT_COLORS = { positive: "#22c55e", negative: "#ef4444", neutral: "#eab308" };
 const NVD_SEVERITY_PRIORITY = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1, UNKNOWN: 0 };
-const NVD_SEVERITY_COLORS = { CRITICAL: "#ef4444", HIGH: "#f97316", MEDIUM: "#eab308", LOW: "#60a5fa", UNKNOWN: "#6b7280" };
+export const NVD_SEVERITY_COLORS = { CRITICAL: "#ef4444", HIGH: "#f97316", MEDIUM: "#eab308", LOW: "#60a5fa", UNKNOWN: "#6b7280" };
+
+export function dedupeMarkers(markers) {
+  return [...new Map(markers.map((m) => [`${m.time}|${m.position}|${m.color}`, m])).values()];
+}
 
 export function buildMarkers(analysis, color) {
   if (!analysis) return [];
   const { biggestSameDayDiff: same, biggestNextDayDiff: next } = analysis;
-  const amber = color ?? cv("--color-amber");
-  const red   = color ?? cv("--color-red");
+  const amber = color ?? cssVar("--color-amber");
+  const red   = color ?? cssVar("--color-red");
   return [
     same?.date     && { time: new Date(same.date).toISOString().slice(0, 10),     position: "aboveBar", color: amber, shape: "circle",  text: `Swing ${same.difference}` },
     next?.[0]?.date && { time: new Date(next[0].date).toISOString().slice(0, 10), position: "belowBar", color: red,   shape: "arrowUp", text: "Move D1" },
@@ -121,4 +125,16 @@ export function buildNewsMarkers(articles, analysis, quotes) {
       ];
     })
     .sort((a, b) => a.time.localeCompare(b.time));
+}
+
+export function buildOverlayMarkers(overlayRefs, quotes, analysis, showAnalysis) {
+  const { trumpPostsRef, showTrumpRef, nvdVulnsRef, showNvdRef, otxPulsesRef, showOtxRef, kevItemsRef, showKevRef, newsArticlesRef, newsAnalysisRef, showNewsRef } = overlayRefs;
+  return [
+    ...(showAnalysis         ? buildMarkers(analysis) : []),
+    ...(showTrumpRef.current  ? buildTrumpMarkers(trumpPostsRef.current, quotes) : []),
+    ...(showNvdRef.current    ? buildNvdMarkers(nvdVulnsRef.current) : []),
+    ...(showOtxRef.current    ? buildCountMarkers(otxPulsesRef.current, { dateField: "created",   position: "belowBar", color: "#a855f7", shape: "circle",    label: "OTX" }) : []),
+    ...(showKevRef.current    ? buildCountMarkers(kevItemsRef.current,  { dateField: "dateAdded", position: "belowBar", color: "#f97316", shape: "arrowDown", label: "KEV" }) : []),
+    ...(showNewsRef.current   ? buildNewsMarkers(newsArticlesRef.current, newsAnalysisRef.current, quotes) : []),
+  ];
 }

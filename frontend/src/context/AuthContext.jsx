@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { useAuth as useClerkAuth, useUser } from "@clerk/react";
-import { apiClerkAuth } from "@/api.js";
+import { clerkAuth } from "@/api/auth.js";
 
 const AuthContext = createContext(null);
 
@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
         return;
       }
       try {
-        const data = await apiClerkAuth(clerkToken);
+        const data = await clerkAuth(clerkToken);
         persist(data.token, data.user);
       } catch (e) {
         console.error("[clerk exchange failed]", e.message);

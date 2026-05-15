@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getTrumpPostsForTicker, getTrumpCorrelation, getTrumpLagImpact } from "@/api.js";
+import { getPostsForTicker, getCorrelation, getLagImpact } from "@/api/trump.js";
 import { useCorrelationQuery } from "./useCorrelationQuery.js";
 
 export function useTrump(ticker) {
@@ -8,20 +8,20 @@ export function useTrump(ticker) {
 
   const { data: posts } = useQuery({
     queryKey: ["trump-posts", ticker],
-    queryFn: () => getTrumpPostsForTicker(ticker),
+    queryFn: () => getPostsForTicker(ticker),
   });
 
   const hasData = !!posts?.length;
 
   const correlation = useCorrelationQuery(
     ["correlate-trump", ticker, lagDays],
-    () => getTrumpCorrelation(ticker, lagDays),
+    () => getCorrelation(ticker, lagDays),
     hasData,
   );
 
   const { data: lagImpact } = useCorrelationQuery(
     ["trump-lag-impact", ticker, lagDays],
-    () => getTrumpLagImpact(ticker, lagDays),
+    () => getLagImpact(ticker, lagDays),
     hasData,
   );
 

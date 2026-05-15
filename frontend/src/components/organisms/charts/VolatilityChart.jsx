@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import "./charts.css";
 import { createChart, LineSeries, AreaSeries } from "lightweight-charts";
-import { daysAgoString, todayString } from "./chartUtils.js";
+import { cssVar, makeChartOptions } from "./utils/theme.js";
+import { toSortedOHLC } from "./utils/series.js";
+import { daysAgoString, todayString } from "./utils/dates.js";
+import { attachResizeObserver, subscribeRangeChange, applyRange } from "./utils/chartSetup.js";
 import ChartToggleButton from "@/components/atoms/ChartToggleButton.jsx";
 import ChartSep from "@/components/atoms/ChartSep.jsx";
 
@@ -45,15 +48,6 @@ function calcATR(quotes, window = 14) {
   return result;
 }
 
-function toSorted(quotes) {
-  const seen = new Set();
-  return quotes
-    .filter((q) => q.close && q.high && q.low)
-    .map((q) => ({ time: new Date(q.date).toISOString().slice(0, 10), open: q.open, high: q.high, low: q.low, close: q.close }))
-    .sort((a, b) => (a.time < b.time ? -1 : 1))
-    .filter((q) => { if (seen.has(q.time)) return false; seen.add(q.time); return true; });
-}
-
 export default function VolatilityChart({ quotes, period, onPeriodChange, visibleRange, onRangeChange }) {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
@@ -69,24 +63,17 @@ export default function VolatilityChart({ quotes, period, onPeriodChange, visibl
 
   useEffect(() => {
     if (!containerRef.current || !quotes?.length) return;
-    const cv = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
-    const chart = createChart(containerRef.current, {
-      width: containerRef.current.clientWidth,
-      height: 200,
-      layout: { background: { color: cv("--surface-0") }, textColor: cv("--text-primary") },
-      grid: { vertLines: { color: cv("--surface-3") }, horzLines: { color: cv("--surface-3") } },
-      timeScale: { timeVisible: true },
-    });
+    const chart = createChart(containerRef.current, makeChartOptions(containerRef.current, 200));
     chartRef.current = chart;
 
-    const sorted = toSorted(quotes);
+    const sorted = toSortedOHLC(quotes);
     const SeriesType = type === "Area" ? AreaSeries : LineSeries;
 
     if (showHV) {
       const hvData = calcHV(sorted);
       if (hvData.length) {
-        const hvSeries = chart.addSeries(SeriesType, { color: cv("--color-amber"), lineWidth: 2, title: "HV20%" });
+        const hvSeries = chart.addSeries(SeriesType, { color: cssVar("--color-amber"), lineWidth: 2, title: "HV20%" });
         hvSeries.setData(hvData);
       }
     }
@@ -94,7 +81,7 @@ export default function VolatilityChart({ quotes, period, onPeriodChange, visibl
     if (showATR) {
       const atrData = calcATR(sorted);
       if (atrData.length) {
-        const atrSeries = chart.addSeries(SeriesType, { color: cv("--color-red"), lineWidth: 2, title: "ATR14%" });
+        const atrSeries = chart.addSeries(SeriesType, { color: cssVar("--color-red"), lineWidth: 2, title: "ATR14%" });
         atrSeries.setData(atrData);
       }
     }
@@ -108,20 +95,8 @@ export default function VolatilityChart({ quotes, period, onPeriodChange, visibl
       chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() });
     }
 
-    const rangeTimer = setTimeout(() => {
-      skipRangeRef.current = false;
-      chart.timeScale().subscribeVisibleTimeRangeChange((range) => {
-        if (skipRangeRef.current || !range) return;
-        onRangeChange?.({ from: range.from, to: range.to });
-        const days = Math.round((new Date(range.to) - new Date(range.from)) / 86400000);
-        onPeriodChange?.(days);
-      });
-    }, 150);
-
-    const observer = new ResizeObserver(() => {
-      if (containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
-    });
-    observer.observe(containerRef.current);
+    const rangeTimer = subscribeRangeChange(chart, skipRangeRef, { onRangeChange, onPeriodChange });
+    const observer = attachResizeObserver(chart, containerRef);
 
     return () => {
       clearTimeout(rangeTimer);
@@ -129,19 +104,11 @@ export default function VolatilityChart({ quotes, period, onPeriodChange, visibl
       observer.disconnect();
       chart.remove();
     };
-  }, [quotes, type, showHV, showATR]);
+  }, [quotes, type, showHV, showATR]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!chartRef.current) return;
-    skipRangeRef.current = true;
-    if (visibleRange) {
-      chartRef.current.timeScale().setVisibleRange(visibleRange);
-    } else if (period === null) {
-      chartRef.current.timeScale().fitContent();
-    } else {
-      chartRef.current.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() });
-    }
-    setTimeout(() => { skipRangeRef.current = false; }, 150);
+    applyRange(chartRef.current, skipRangeRef, { period, visibleRange });
   }, [period, visibleRange]);
 
   return (

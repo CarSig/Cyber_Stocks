@@ -1,22 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  getIntelligenceEntityArticles,
-  getIntelligenceEntitySummary,
-  getIntelligenceSignals,
-  getIntelligenceEntities,
-  getIntelligenceSentimentCorrelations,
-} from "@/api.js";
+  getEntityArticles,
+  getEntitySummary,
+  getSignals,
+  getEntities,
+  getSentimentCorrelations,
+} from "@/api/intelligence.js";
 
 export function useEntityIntelligence(entityId, signal) {
   const articles = useQuery({
     queryKey: ["intelligence-articles", entityId, signal],
-    queryFn: () => getIntelligenceEntityArticles(entityId, signal),
+    queryFn: () => getEntityArticles(entityId, signal),
     enabled: !!entityId,
   });
 
   const summary = useQuery({
     queryKey: ["intelligence-summary", entityId, signal],
-    queryFn: () => getIntelligenceEntitySummary(entityId, signal),
+    queryFn: () => getEntitySummary(entityId, signal),
     enabled: !!entityId,
     retry: false,
   });
@@ -27,21 +27,21 @@ export function useEntityIntelligence(entityId, signal) {
 export function useGlobalSignals() {
   return useQuery({
     queryKey: ["intelligence-signals"],
-    queryFn: getIntelligenceSignals,
+    queryFn: getSignals,
   });
 }
 
 export function useBackendEntities() {
   return useQuery({
     queryKey: ["intelligence-entities"],
-    queryFn: getIntelligenceEntities,
+    queryFn: getEntities,
   });
 }
 
 export function useAllSentimentCorrelations(lagDays = 1, signal) {
   return useQuery({
     queryKey: ["intelligence-sentiment-correlations", lagDays, signal],
-    queryFn: () => getIntelligenceSentimentCorrelations(lagDays, signal),
+    queryFn: () => getSentimentCorrelations(lagDays, signal),
     retry: false,
   });
 }

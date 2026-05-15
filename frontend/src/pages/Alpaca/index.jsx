@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createChart, CandlestickSeries } from "lightweight-charts";
-import { getAlpacaBars } from "@/api.js";
+import { getBars } from "@/api/alpaca.js";
 import Page from "@/components/atoms/Page.jsx";
 import "./Alpaca.css";
 
@@ -12,7 +12,7 @@ function todayStr() {
 function useAlpacaBars(ticker, date) {
   return useQuery({
     queryKey: ["alpaca-bars", ticker, date],
-    queryFn: () => getAlpacaBars(ticker, date),
+    queryFn: () => getBars(ticker, date),
     enabled: Boolean(ticker && date),
     staleTime: 5 * 60 * 1000,
   });

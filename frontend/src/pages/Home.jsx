@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import StateHandler from "@/components/organisms/shared/StateHandler.jsx";
-import { getCompanies, getTicker } from "@/api.js";
+import { getCompanies, getTicker } from "@/api/stock.js";
 import MultiChart from "@/components/organisms/charts/MultiChart.jsx";
 import CorrelationMatrix from "@/components/organisms/ticker/CorrelationMatrix.jsx";
 import Toggle from "@/components/molecules/shared/Toggle.jsx";

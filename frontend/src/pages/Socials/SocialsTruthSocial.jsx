@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { createChart, HistogramSeries } from "lightweight-charts";
-import { getTrumpPosts, getCompanies } from "@/api.js";
+import { getPosts } from "@/api/trump.js";
+import { getCompanies } from "@/api/stock.js";
 import Page from "@/components/atoms/Page.jsx";
 import FilterSelect from "@/components/molecules/shared/FilterSelect";
 
@@ -60,7 +61,7 @@ export default function Socials() {
 
   const { data: posts, isPending, error } = useQuery({
     queryKey: ["trump-posts"],
-    queryFn: getTrumpPosts,
+    queryFn: getPosts,
   });
   const { data: companies } = useQuery({ queryKey: ["companies"], queryFn: getCompanies });
 

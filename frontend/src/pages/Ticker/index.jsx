@@ -8,7 +8,8 @@ import { useResearch } from "@/hooks/useResearch.js";
 import { useSimulation } from "@/hooks/useSimulation.js";
 import { useThreatIntel } from "@/hooks/useThreatIntel.js";
 import { useCyberNewsArticles } from "@/hooks/useCyberNews.js";
-import { getNewsAnalysis, getSparklines } from "@/api.js";
+import { getAnalysis } from "@/api/news.js";
+import { getSparklines } from "@/api/stock.js";
 import { useCachedQuery } from "@/hooks/useCachedQuery.js";
 import { useTickerThreatData } from "@/hooks/useTickerThreatData.js";
 import { TickerProvider, useTickerContext } from "@/context/TickerContext.jsx";
@@ -78,7 +79,7 @@ function TickerContent() {
   const HOUR = 60 * 60 * 1000;
 
   const { nvdData, otxData, kevData } = useTickerThreatData(companyName);
-  const { data: newsAnalysisData } = useCachedQuery(["news-analysis", ticker], () => getNewsAnalysis(ticker), {
+  const { data: newsAnalysisData } = useCachedQuery(["news-analysis", ticker], () => getAnalysis(ticker), {
     ttl: HOUR,
     enabled: !!ticker,
     cacheKey: `news_analysis_${ticker}`,

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getCorrelationMatrix } from "@/api.js";
+import { getCorrelationMatrix } from "@/api/stock.js";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const WINDOW_OPTS = [

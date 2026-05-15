@@ -1,24 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import "./charts.css";
 import { createChart, HistogramSeries } from "lightweight-charts";
-import { daysAgoString, todayString } from "./chartUtils.js";
+import { makeChartOptions } from "./utils/theme.js";
+import { sentimentScoreStyle } from "./utils/colors.js";
+import { daysAgoString, todayString } from "./utils/dates.js";
+import { sentimentToColor } from "./utils/colors.js";
+import { attachResizeObserver, subscribeRangeChange, applyRange } from "./utils/chartSetup.js";
+import { useSyncRef } from "@/hooks/charts/useOverlayRefs.js";
 import ModalItem from "@/components/atoms/ModalItem.jsx";
 import ChartModal from "./ChartModal.jsx";
-
-// Interpolates red→amber→green across -1..+1
-function sentimentToColor(score) {
-  const clamped = Math.max(-1, Math.min(1, score));
-  const RED   = [239, 68,  68];
-  const AMBER = [234, 179,  8];
-  const GREEN = [ 34, 197, 94];
-  const [from, to, t] = clamped < 0
-    ? [RED,   AMBER, clamped + 1]   // -1..0 → RED..AMBER
-    : [AMBER, GREEN, clamped];       //  0..1 → AMBER..GREEN
-  const r = Math.round(from[0] + (to[0] - from[0]) * t);
-  const g = Math.round(from[1] + (to[1] - from[1]) * t);
-  const b = Math.round(from[2] + (to[2] - from[2]) * t);
-  return `rgb(${r},${g},${b})`;
-}
 
 function aggregateByDay(articles, analysis, quoteBounds) {
   const byDay = new Map();
@@ -63,12 +53,6 @@ function aggregateByDay(articles, analysis, quoteBounds) {
   return countData;
 }
 
-function useSyncRef(value) {
-  const ref = useRef(value);
-  useEffect(() => { ref.current = value; }, [value]);
-  return ref;
-}
-
 export default function NewsChart({ articles, analysis, period, onPeriodChange, visibleRange, onRangeChange, quoteBounds }) {
   const containerRef = useRef(null);
   const chartRef = useRef(null);
@@ -85,15 +69,8 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange, 
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const cv = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
-    const chart = createChart(containerRef.current, {
-      width: containerRef.current.clientWidth,
-      height: 180,
-      layout: { background: { color: cv("--surface-0") }, textColor: cv("--text-primary") },
-      grid: { vertLines: { color: cv("--surface-3") }, horzLines: { color: cv("--surface-3") } },
-      timeScale: { timeVisible: true },
-    });
+    const chart = createChart(containerRef.current, makeChartOptions(containerRef.current, 180));
     chartRef.current = chart;
 
     const countData = aggregateByDay(articles, analysis, quoteBounds);
@@ -118,35 +95,20 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange, 
       if (items.length) setModal({ date, items });
     });
 
-    skipRangeRef.current = true;
-    if (countData.length === 0) {
-      // nothing to do — no data means no time range to set
-    } else if (visibleRangeRef.current) {
-      try { chart.timeScale().setVisibleRange(visibleRangeRef.current); } catch { chart.timeScale().fitContent(); }
-    } else if (periodRef.current === null) {
-      chart.timeScale().fitContent();
-    } else {
-      try {
-        chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() });
-      } catch {
+    // Skip range init when there's no data — nothing to set
+    if (countData.length > 0) {
+      skipRangeRef.current = true;
+      if (visibleRangeRef.current) {
+        try { chart.timeScale().setVisibleRange(visibleRangeRef.current); } catch { chart.timeScale().fitContent(); }
+      } else if (periodRef.current === null) {
         chart.timeScale().fitContent();
+      } else {
+        try { chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current), to: todayString() }); } catch { chart.timeScale().fitContent(); }
       }
     }
 
-    const rangeTimer = setTimeout(() => {
-      skipRangeRef.current = false;
-      chart.timeScale().subscribeVisibleTimeRangeChange((range) => {
-        if (skipRangeRef.current || !range) return;
-        onRangeChange?.({ from: range.from, to: range.to });
-        const days = Math.round((new Date(range.to) - new Date(range.from)) / 86400000);
-        onPeriodChange?.(days);
-      });
-    }, 150);
-
-    const observer = new ResizeObserver(() => {
-      if (containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
-    });
-    observer.observe(containerRef.current);
+    const rangeTimer = subscribeRangeChange(chart, skipRangeRef, { onRangeChange, onPeriodChange });
+    const observer = attachResizeObserver(chart, containerRef);
 
     return () => {
       clearTimeout(rangeTimer);
@@ -154,23 +116,11 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange, 
       observer.disconnect();
       chart.remove();
     };
-  }, [articles, analysis, quoteBounds]);
+  }, [articles, analysis, quoteBounds]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!chartRef.current) return;
-    skipRangeRef.current = true;
-    if (visibleRange) {
-      try { chartRef.current.timeScale().setVisibleRange(visibleRange); } catch { chartRef.current.timeScale().fitContent(); }
-    } else if (period === null) {
-      chartRef.current.timeScale().fitContent();
-    } else {
-      try {
-        chartRef.current.timeScale().setVisibleRange({ from: daysAgoString(period), to: todayString() });
-      } catch {
-        chartRef.current.timeScale().fitContent();
-      }
-    }
-    setTimeout(() => { skipRangeRef.current = false; }, 150);
+    applyRange(chartRef.current, skipRangeRef, { period, visibleRange });
   }, [period, visibleRange]);
 
   return (
@@ -187,8 +137,7 @@ export default function NewsChart({ articles, analysis, period, onPeriodChange, 
         <ChartModal date={modal.date} onClose={() => setModal(null)}>
           {modal.items.map((a) => {
             const score = analysis?.[a.link]?.sentiment ?? null;
-            const color = score === null ? "var(--text-muted)" : score >= 0.1 ? "var(--color-green)" : score <= -0.1 ? "var(--color-red)" : "var(--color-amber)";
-            const icon = score === null ? "?" : score >= 0.1 ? "▲" : score <= -0.1 ? "▼" : "●";
+            const { color, icon } = sentimentScoreStyle(score);
             return <ModalItem key={a.link} href={a.link} icon={icon} iconColor={color} title={a.title} subtitle={a.publisher} />;
           })}
         </ChartModal>

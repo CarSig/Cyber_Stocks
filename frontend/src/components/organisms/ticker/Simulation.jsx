@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect, forwardRef, useMemo } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { runSimulation, getSimulationPresets } from "@/api.js";
+import { runSimulation, getSimulationPresets } from "@/api/stock.js";
 import { createChart, LineSeries, createSeriesMarkers } from "lightweight-charts";
 import DatePicker from "@/components/atoms/DatePicker.jsx";
 import { Button } from "@/components/ui/button";

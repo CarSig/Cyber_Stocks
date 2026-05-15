@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getThreatIntelList, getCompanies } from "@/api.js";
+import { getList } from "@/api/threat-intel.js";
+import { getCompanies } from "@/api/stock.js";
 
 const PAGE_SIZE = 50;
 
@@ -11,7 +12,7 @@ export function usePaginatedThreatIntel(source, filters) {
 
   const { data, isPending, error } = useQuery({
     queryKey: [source, page, ...Object.values(filters)],
-    queryFn: () => getThreatIntelList(source, { limit: PAGE_SIZE, offset: page * PAGE_SIZE, ...filters }),
+    queryFn: () => getList(source, { limit: PAGE_SIZE, offset: page * PAGE_SIZE, ...filters }),
     keepPreviousData: true,
   });
 

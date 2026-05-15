@@ -1,6 +1,5 @@
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import FilterSelect from "@/components/molecules/shared/FilterSelect.jsx";
 import { useTickerContext } from "@/context/TickerContext.jsx";
 import CorrelationBox from "@/components/organisms/ticker/CorrelationBox.jsx";
 import CorrLagTable from "@/pages/Ticker/CorrLagTable.jsx";
@@ -25,18 +24,14 @@ export default function CorrelationsTab({
       )}
 
       <div className="compare-row" style={{ marginTop: "1rem" }}>
-        <Label>Compare with:</Label>
-        <Select value={compareTicker} onValueChange={setCompareTicker}>
-          <SelectTrigger className="w-56">
-            <SelectValue placeholder="None" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="">None</SelectItem>
-            {otherTickers.map(([name, t]) => (
-              <SelectItem key={t} value={t}>{name} ({t})</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <FilterSelect
+          value={compareTicker}
+          onChange={setCompareTicker}
+          placeholder="Compare with"
+          allLabel="None"
+          className="w-56"
+          options={otherTickers.map(([name, t]) => ({ label: `${name} (${t})`, value: t }))}
+        />
       </div>
 
       {compareTicker && (

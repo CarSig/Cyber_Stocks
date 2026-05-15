@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import StateHandler from "@/components/organisms/shared/StateHandler.jsx";
-import { getAuditLog } from "@/api.js";
+import { getAuditLog } from "@/api/admin.js";
 import FilterSelect from "@/components/molecules/shared/FilterSelect.jsx";
 import Pagination from "@/components/molecules/shared/Pagination.jsx";
 import Page from "@/components/atoms/Page.jsx";

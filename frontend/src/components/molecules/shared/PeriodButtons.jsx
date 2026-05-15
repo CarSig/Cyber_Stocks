@@ -1,4 +1,4 @@
-import { PERIODS } from "@/components/organisms/charts/chartUtils.js";
+import { PERIODS } from "@/components/organisms/charts/utils/periods.js";
 
 export default function PeriodButtons({ activeDays, onSelect, showCustomLabel = false }) {
   const isPreset = PERIODS.some((p) => p.days === activeDays);

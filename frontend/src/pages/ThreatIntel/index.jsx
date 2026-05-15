@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import StateHandler from "@/components/organisms/shared/StateHandler.jsx";
-import ThreatIntelCard from "@/components/organisms/cards/ThreatIntelCard.jsx";
-import { getThreatIntelStatus } from "@/api.js";
+import ThreatIntelCard from "@/components/organisms/cards/status/ThreatIntelCard.jsx";
+import { getStatus } from "@/api/threat-intel.js";
 import Page from "@/components/atoms/Page.jsx";
 
 export default function ThreatIntel() {
   const { data, isPending, error } = useQuery({
     queryKey: ["threat-intel-status"],
-    queryFn: getThreatIntelStatus,
+    queryFn: getStatus,
     refetchInterval: 60_000,
   });
 

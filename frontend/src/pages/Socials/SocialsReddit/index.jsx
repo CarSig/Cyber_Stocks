@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import StateHandler from "@/components/organisms/shared/StateHandler.jsx";
 import Page from "@/components/atoms/Page.jsx";
-import { getRedditPosts } from "@/api.js";
+import { getPosts } from "@/api/reddit.js";
 import { Input } from "@/components/ui/input";
 import FilterSelect from "@/components/molecules/shared/FilterSelect.jsx";
 import RedditPost from "@/components/organisms/socials/RedditPost.jsx";
@@ -20,7 +20,7 @@ export default function SocialsReddit() {
     error,
   } = useQuery({
     queryKey: ["reddit-posts", subreddit],
-    queryFn: () => getRedditPosts(subreddit),
+    queryFn: () => getPosts(subreddit),
   });
 
   const filtered = useMemo(() => filterPosts(posts ?? [], search, searchField), [posts, search, searchField]);

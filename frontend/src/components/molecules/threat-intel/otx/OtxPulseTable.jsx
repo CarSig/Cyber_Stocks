@@ -1,24 +1,8 @@
+import TiTable from "../TiTable.jsx";
 import OtxPulseRow from "./OtxPulseRow.jsx";
 
+const HEADERS = ["Pulse", "Tags", "Indicators", "TLP", "Created"];
+
 export default function OtxPulseTable({ data }) {
-  return (
-    <div className="ti-table-wrap">
-      <table className="ti-table">
-        <thead>
-          <tr>
-            <th>Pulse</th>
-            <th>Tags</th>
-            <th>Indicators</th>
-            <th>TLP</th>
-            <th>Created</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data?.items?.map((p) => (
-            <OtxPulseRow key={p.id} pulse={p} />
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+  return <TiTable headers={HEADERS} items={data?.items} renderRow={(p) => <OtxPulseRow key={p.id} pulse={p} />} rowKey={(p) => p.id} />;
 }
