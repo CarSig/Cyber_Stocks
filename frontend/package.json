@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build:shared": "npm run build --prefix ../shared",
-    "codegen": "openapi-typescript http://localhost:3000/api/v1/docs-json -o src/api/schema.d.ts",
+    "codegen": "openapi-typescript http://localhost:3000/api-docs-json -o src/api/schema.d.ts",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",

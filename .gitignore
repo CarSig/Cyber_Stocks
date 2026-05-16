@@ -18,7 +18,6 @@ backend_nest/storage/
 
 # Frontend
 frontend/node_modules/
-frontend/src/api/schema.d.ts
 
 # Shared package build output
 shared/dist/

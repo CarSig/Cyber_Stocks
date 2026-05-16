@@ -1,5 +1,5 @@
 import { applyDecorators } from "@nestjs/common";
-import { ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { ApiExtraModels, ApiOperation, ApiParam, ApiResponse, getSchemaPath } from "@nestjs/swagger";
 import { ArticleSentimentDto } from "./news.dto";
 import { CorrelationWithImpactDto } from "@/modules/stock/stock.dto";
 
@@ -11,7 +11,8 @@ export const AnthropicStatusDoc = () => applyDecorators(
 export const GetAnalysisDoc = () => applyDecorators(
   ApiOperation({ summary: "Get sentiment scores", description: "Returns stored sentiment, importance, and relevance scores for all analysed news articles for the ticker." }),
   ApiParam({ name: "ticker", description: "Ticker symbol" }),
-  ApiResponse({ status: 200, schema: { type: "object", additionalProperties: { $ref: "#/components/schemas/ArticleSentimentDto" }, description: "Map of article URL → ArticleSentimentDto" } }),
+  ApiExtraModels(ArticleSentimentDto),
+  ApiResponse({ status: 200, schema: { type: "object", additionalProperties: { $ref: getSchemaPath(ArticleSentimentDto) }, description: "Map of article URL → ArticleSentimentDto" } }),
   ApiResponse({ status: 404, description: "Unknown ticker" }),
 );
 

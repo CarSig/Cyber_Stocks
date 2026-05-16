@@ -1,6 +1,6 @@
 import { applyDecorators } from "@nestjs/common";
-import { ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
-import { CorrelationResultDto, SimulationResultDto } from "./stock.dto";
+import { ApiExtraModels, ApiOperation, ApiParam, ApiResponse, getSchemaPath } from "@nestjs/swagger";
+import { CorrelationResultDto, QuoteDto, SimulationResultDto, SparklineDto } from "./stock.dto";
 
 export const GetCompaniesDoc = () => applyDecorators(
   ApiOperation({ summary: "List all companies", description: "Returns the full ticker → company name map for all tracked companies." }),
@@ -31,7 +31,8 @@ export const CorrelateDoc = () => applyDecorators(
 
 export const GetSparklinesDoc = () => applyDecorators(
   ApiOperation({ summary: "Sparkline data", description: "Lightweight last-30-day price series for multiple tickers in one request. Cached server-side with a 24h TTL." }),
-  ApiResponse({ status: 200, schema: { type: "object", additionalProperties: { $ref: "#/components/schemas/SparklineDto" }, description: "Map of ticker symbol → SparklineDto" } }),
+  ApiExtraModels(SparklineDto),
+  ApiResponse({ status: 200, schema: { type: "object", additionalProperties: { $ref: getSchemaPath(SparklineDto) }, description: "Map of ticker symbol → SparklineDto" } }),
 );
 
 export const GetPresetsDoc = () => applyDecorators(
@@ -44,8 +45,9 @@ export const GetPresetsDoc = () => applyDecorators(
 export const GetTickerDoc = () => applyDecorators(
   ApiOperation({ summary: "Full ticker data", description: "Returns price history, latest news articles, Yahoo Finance summary, and trend/momentum/volatility analysis for one ticker." }),
   ApiParam({ name: "ticker", description: "Ticker symbol (e.g. CRWD)" }),
+  ApiExtraModels(QuoteDto),
   ApiResponse({ status: 200, schema: { type: "object", properties: {
-    history: { type: "object", properties: { quotes: { type: "array", items: { $ref: "#/components/schemas/QuoteDto" } } } },
+    history: { type: "object", properties: { quotes: { type: "array", items: { $ref: getSchemaPath(QuoteDto) } } } },
     news: { type: "array", items: { type: "object" } },
     summary: { type: "object", description: "Yahoo Finance summary data" },
     analysis: { type: "object", properties: {
