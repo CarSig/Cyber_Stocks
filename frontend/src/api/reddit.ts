@@ -6,7 +6,5 @@ export function getPosts(subreddit: string): Promise<RedditPost[]> {
 }
 
 export function getComments(subreddit: string, id: string): Promise<RedditComment[]> {
-  return apiFetch<RedditComment[]>(
-    `/reddit/comments/${encodeURIComponent(subreddit)}/${encodeURIComponent(id)}`,
-  );
+  return apiFetch<RedditComment[]>(`/reddit/comments/${encodeURIComponent(subreddit)}/${encodeURIComponent(id)}`);
 }

@@ -51,12 +51,10 @@ export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }
     if (!chartRef.current) return;
     skipRangeRef.current = true;
     if (rangeFrom && rangeTo) {
-      chartRef.current
-        .timeScale()
-        .setVisibleRange({
-          from: rangeFrom as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['from'],
-          to: rangeTo as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['to'],
-        });
+      chartRef.current.timeScale().setVisibleRange({
+        from: rangeFrom as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['from'],
+        to: rangeTo as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['to'],
+      });
     } else {
       chartRef.current.timeScale().fitContent();
     }
@@ -80,12 +78,10 @@ export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }
 
     skipRangeRef.current = true;
     if (rangeFrom && rangeTo) {
-      chart
-        .timeScale()
-        .setVisibleRange({
-          from: rangeFrom as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['from'],
-          to: rangeTo as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['to'],
-        });
+      chart.timeScale().setVisibleRange({
+        from: rangeFrom as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['from'],
+        to: rangeTo as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]['to'],
+      });
     } else {
       chart.timeScale().fitContent();
     }
