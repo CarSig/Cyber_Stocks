@@ -1,4 +1,4 @@
-import { IsEnum, IsString, MinLength, IsArray, ValidateNested, IsOptional } from "class-validator";
+import { IsEnum, IsString, MinLength, MaxLength, IsArray, ValidateNested, IsOptional } from "class-validator";
 import { Type } from "class-transformer";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import type { ChatMessage } from "@algo/shared";
@@ -21,8 +21,9 @@ export class ChatBodyDto {
   @Type(() => ChatMessageDto)
   messages: ChatMessageDto[];
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ maxLength: 8000 })
   @IsOptional()
   @IsString()
+  @MaxLength(8000)
   context?: string;
 }

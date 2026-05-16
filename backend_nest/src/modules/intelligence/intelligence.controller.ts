@@ -4,7 +4,7 @@ import { ContentAnalysisService } from "@/modules/content-analysis/content-analy
 import { AppError } from "@/shared/errors";
 import { SignalQueryDto, LagDaysSignalQueryDto } from "@/shared/dto";
 import companies from "@/data/companies";
-import type { BackendArticleInput } from "@/modules/content-analysis/content-analysis.types";
+import { BackendArticleInputDto } from "./intelligence.dto";
 
 @ApiTags("Intelligence")
 @ApiBearerAuth("bearer")
@@ -15,7 +15,7 @@ export class IntelligenceController {
   @Post("articles/process")
   @ApiOperation({ summary: "Process backend article", description: "Runs backend content analysis pipeline on a submitted article." })
   @ApiResponse({ status: 201, description: "Processed article result" })
-  async processBackendArticle(@Body() body: BackendArticleInput) {
+  async processBackendArticle(@Body() body: BackendArticleInputDto) {
     return this.contentAnalysis.processBackendArticle(body);
   }
 
