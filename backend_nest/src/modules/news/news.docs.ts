@@ -1,6 +1,7 @@
 import { applyDecorators } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
-import { ArticleSentimentDto, CorrelationWithImpactDto } from "@/shared/dto";
+import { ArticleSentimentDto } from "./news.dto";
+import { CorrelationWithImpactDto } from "@/modules/stock/stock.dto";
 
 export const AnthropicStatusDoc = () => applyDecorators(
   ApiOperation({ summary: "Anthropic status", description: "Checks whether the Anthropic API key is configured and returns the active model name." }),

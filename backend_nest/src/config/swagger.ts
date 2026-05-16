@@ -6,7 +6,6 @@ export function setupSwagger(app: INestApplication) {
     .setTitle("Cyber Stock Intelligence API")
     .setDescription("REST + SSE API for cyber-security stock intelligence. All protected routes require a Bearer JWT. SSE routes accept `?token=` instead of the Authorization header.")
     .setVersion("1.0")
-    .addServer("/api/v1", "v1")
     .addBearerAuth({ type: "http", scheme: "bearer", bearerFormat: "JWT" }, "bearer")
     .addTag("Auth", "Registration, login, and current-user lookup")
     .addTag("Stock", "Price history, sparklines, correlation matrix, and backtesting")
@@ -19,7 +18,7 @@ export function setupSwagger(app: INestApplication) {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup("api/v1/docs", app, document, {
+  SwaggerModule.setup("api-docs", app, document, {
     customCss: `
       body { background: #0d0d0f; color: #e2e8f0; }
       .swagger-ui { background: #0d0d0f; color: #e2e8f0; }

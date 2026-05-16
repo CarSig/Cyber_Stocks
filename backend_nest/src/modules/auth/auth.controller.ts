@@ -2,7 +2,7 @@ import { Controller, Post, Get, Body, HttpCode } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { AuditService } from "@/modules/audit/audit.service";
-import { ClerkAuthDto } from "@/shared/dto";
+import { ClerkAuthDto } from "./auth.dto";
 import { Public } from "@/common/decorators/public.decorator";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { ClerkAuthDoc, MeDoc } from "./auth.docs";

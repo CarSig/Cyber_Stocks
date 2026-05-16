@@ -5,7 +5,9 @@ import type { NvdThreatIntelService } from "./NvdThreatIntelService";
 import type { OtxThreatIntelService } from "./OtxThreatIntelService";
 import type { MispThreatIntelService } from "./MispThreatIntelService";
 import { resolveTicker } from "@/shared/ticker.utils";
-import { LagDaysDto, PaginationDto, ThreatIntelStatusResponseDto, CorrelationWithImpactDto } from "@/shared/dto";
+import { LagDaysDto, PaginationDto } from "@/shared/dto";
+import { ThreatIntelStatusResponseDto } from "./threat-intel.dto";
+import { CorrelationWithImpactDto } from "@/modules/stock/stock.dto";
 import { AppError } from "@/shared/errors";
 
 type ListQuery = Record<string, string | undefined>;

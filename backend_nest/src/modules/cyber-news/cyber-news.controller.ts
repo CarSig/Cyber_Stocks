@@ -1,7 +1,8 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from "@nestjs/swagger";
 import { CyberNewsService } from "./cyber-news.service";
 import { AppError } from "@/shared/errors";
+import { CyberNewsLagQueryDto, CyberNewsLimitQueryDto, TopicQueryDto } from "@/shared/dto";
 
 @ApiTags("Cyber News")
 @ApiBearerAuth("bearer")
@@ -11,18 +12,16 @@ export class CyberNewsController {
 
   @Get("tickers")
   @ApiOperation({ summary: "All tickers with cyber news" })
-  @ApiQuery({ name: "topic", required: false, type: String })
   @ApiResponse({ status: 200 })
-  getTickers(@Query("topic") topic?: string) {
+  getTickers(@Query() { topic }: TopicQueryDto) {
     return this.service.getTickers(topic);
   }
 
   @Get("recent")
   @ApiOperation({ summary: "Recent articles across all companies" })
-  @ApiQuery({ name: "limit", required: false, type: Number })
   @ApiResponse({ status: 200 })
-  getRecent(@Query("limit") limit?: string) {
-    return this.service.getRecentArticles(limit ? Number(limit) : 50);
+  getRecent(@Query() { limit = 50 }: CyberNewsLimitQueryDto) {
+    return this.service.getRecentArticles(limit);
   }
 
   @Get("topics")
@@ -35,10 +34,9 @@ export class CyberNewsController {
   @Get(":ticker/summary")
   @ApiOperation({ summary: "Sentiment summary for a ticker" })
   @ApiParam({ name: "ticker" })
-  @ApiQuery({ name: "topic", required: false, type: String })
   @ApiResponse({ status: 200 })
   @ApiResponse({ status: 404 })
-  async getSummary(@Param("ticker") ticker: string, @Query("topic") topic?: string) {
+  async getSummary(@Param("ticker") ticker: string, @Query() { topic }: TopicQueryDto) {
     const data = await this.service.getSummary(ticker.toUpperCase(), topic);
     if (!data) throw new AppError(`No cyber news for ${ticker}`, 404);
     return data;
@@ -47,18 +45,15 @@ export class CyberNewsController {
   @Get(":ticker/articles")
   @ApiOperation({ summary: "Articles for a ticker" })
   @ApiParam({ name: "ticker" })
-  @ApiQuery({ name: "topic", required: false, type: String })
   @ApiResponse({ status: 200 })
-  getArticles(@Param("ticker") ticker: string, @Query("topic") topic?: string) {
+  getArticles(@Param("ticker") ticker: string, @Query() { topic }: TopicQueryDto) {
     return this.service.getArticles(ticker.toUpperCase(), topic);
   }
 
   @Get("correlations")
   @ApiOperation({ summary: "Sentiment ↔ price correlation across all tickers" })
-  @ApiQuery({ name: "lagDays", required: false, type: Number })
-  @ApiQuery({ name: "topic", required: false, type: String })
   @ApiResponse({ status: 200 })
-  getCorrelations(@Query("lagDays") lagDays?: string, @Query("topic") topic?: string) {
-    return this.service.getCorrelations(lagDays ? Number(lagDays) : 1, topic);
+  getCorrelations(@Query() { lagDays = 1, topic }: CyberNewsLagQueryDto) {
+    return this.service.getCorrelations(lagDays, topic);
   }
 }

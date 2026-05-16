@@ -1,6 +1,6 @@
 import { applyDecorators } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
-import { CorrelationResultDto, SimulationResultDto } from "@/shared/dto";
+import { CorrelationResultDto, SimulationResultDto } from "./stock.dto";
 
 export const GetCompaniesDoc = () => applyDecorators(
   ApiOperation({ summary: "List all companies", description: "Returns the full ticker → company name map for all tracked companies." }),

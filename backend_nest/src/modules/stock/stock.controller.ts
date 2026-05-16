@@ -6,7 +6,8 @@ import { SimulationService } from "./simulation.service";
 import { AuditService } from "@/modules/audit/audit.service";
 import { resolveTicker, tickerToName } from "@/shared/ticker.utils";
 import { AppError } from "@/shared/errors";
-import { CorrelationQueryDto, CorrelationMatrixQueryDto, SimulateBodyDto } from "@/shared/dto";
+import { CorrelationQueryDto, CorrelationMatrixQueryDto, SparklinesQueryDto } from "@/shared/dto";
+import { SimulateBodyDto } from "./stock.dto";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import { GetCompaniesDoc, CorrelationMatrixDoc, CorrelateDoc, GetSparklinesDoc, GetPresetsDoc, GetTickerDoc, SimulateDoc } from "./stock.docs";
 import type { User } from "@/types/index";
@@ -60,7 +61,7 @@ export class StockController {
 
   @Get("sparklines")
   @GetSparklinesDoc()
-  async getSparklines(@Query("tickers") tickers: string) {
+  async getSparklines(@Query() { tickers }: SparklinesQueryDto) {
     if (!tickers) return {};
     const tickerList = tickers.split(",").map((t) => t.trim().toUpperCase()).filter(Boolean);
     const result: Record<string, unknown> = {};

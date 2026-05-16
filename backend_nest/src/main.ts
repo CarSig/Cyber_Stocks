@@ -49,7 +49,7 @@ async function bootstrap() {
   console.log(`Starting server on port ${port}...`);
   await app.listen(port);
   console.log(`Server running on http://localhost:${port}`);
-  console.log(`API docs at http://localhost:${port}/api/v1/docs`);
+  console.log(`API docs at http://localhost:${port}/api-docs`);
 }
 
 bootstrap().catch((err: unknown) => {

@@ -1,6 +1,6 @@
 import { applyDecorators } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiBearerAuth } from "@nestjs/swagger";
-import { AuthResponseDto, UserDto } from "@/shared/dto";
+import { AuthResponseDto, UserDto } from "./auth.dto";
 
 export const ClerkAuthDoc = () => applyDecorators(
   ApiOperation({ summary: "Authenticate via Clerk", description: "Verifies a Clerk session token. Creates the user on first login and returns a JWT + user object." }),

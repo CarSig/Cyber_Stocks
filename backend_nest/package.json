@@ -16,9 +16,9 @@
     "ingest:archive": "tsx src/workers/archiveIngester.ts | npx pino-pretty",
     "ingest:reanalyze": "tsx src/workers/archiveIngester.ts --reanalyze | npx pino-pretty",
     "ingest:parse-dry-run": "tsx src/workers/archiveDryRun.ts | npx pino-pretty",
-    "test": "jest",
+    "test": "jest --forceExit",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage --forceExit"
   },
   "dependencies": {
     "@algo/shared": "file:../shared",
@@ -113,6 +113,9 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "setupFiles": [
+      "<rootDir>/test/setup-env.ts"
+    ]
   }
 }

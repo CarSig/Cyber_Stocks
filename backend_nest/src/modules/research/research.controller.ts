@@ -7,7 +7,7 @@ import type { Response } from "express";
 import { ResearchService } from "./research.service";
 import { AuditService } from "@/modules/audit/audit.service";
 import { resolveTicker } from "@/shared/ticker.utils";
-import { ChatBodyDto } from "@/shared/dto";
+import { ChatBodyDto } from "./research.dto";
 import { AppError } from "@/shared/errors";
 import { AllowQueryToken } from "@/common/decorators/allow-query-token.decorator";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";

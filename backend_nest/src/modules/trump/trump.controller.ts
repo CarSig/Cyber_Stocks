@@ -3,7 +3,9 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from "@ne
 import { TrumpService } from "./trump.service";
 import { AuditService } from "@/modules/audit/audit.service";
 import { resolveTicker } from "@/shared/ticker.utils";
-import { LagDaysDto, TrumpPostDto, CorrelationWithImpactDto, LagImpactResultDto } from "@/shared/dto";
+import { LagDaysDto } from "@/shared/dto";
+import { TrumpPostDto } from "./trump.dto";
+import { CorrelationWithImpactDto, LagImpactResultDto } from "@/modules/stock/stock.dto";
 import { CurrentUser } from "@/common/decorators/current-user.decorator";
 import type { User } from "@/types/index";
 

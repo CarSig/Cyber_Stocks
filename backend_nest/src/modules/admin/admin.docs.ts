@@ -1,6 +1,6 @@
 import { applyDecorators } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
-import { PaginatedAuditDto } from "@/shared/dto";
+import { PaginatedAuditDto } from "./admin.dto";
 
 export const GetAuditDoc = () => applyDecorators(
   ApiOperation({ summary: "Audit log", description: "Paginated audit log of all user actions, newest first. Filterable by userId and action type. Admin only." }),
