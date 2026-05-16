@@ -1,10 +1,5 @@
 import { apiFetch, qs } from './core';
-import type { AuditLogEntry } from '@/types';
-
-type AuditLogResponse = {
-  entries: AuditLogEntry[];
-  total: number;
-};
+import type { PaginatedAudit } from '@algo/shared';
 
 type AuditLogOpts = {
   limit?: number;
@@ -13,11 +8,11 @@ type AuditLogOpts = {
   action?: string;
 };
 
-export function triggerJob(job: string): Promise<{ ok: boolean }> {
-  return apiFetch<{ ok: boolean }>(`/admin/trigger/${job}`, { method: 'POST' });
+export function triggerJob(job: string): Promise<{ triggered: string; at: string }> {
+  return apiFetch<{ triggered: string; at: string }>(`/admin/trigger/${job}`, { method: 'POST' });
 }
 
-export function getAuditLog(opts: AuditLogOpts = {}): Promise<AuditLogResponse> {
+export function getAuditLog(opts: AuditLogOpts = {}): Promise<PaginatedAudit> {
   const { limit = 100, offset = 0, userId, action } = opts;
-  return apiFetch<AuditLogResponse>(`/admin/audit${qs({ limit, offset, userId, action })}`);
+  return apiFetch<PaginatedAudit>(`/admin/audit${qs({ limit, offset, userId, action })}`);
 }

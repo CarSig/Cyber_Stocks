@@ -9,7 +9,7 @@ type StatusCardProps = {
   title: string;
   configured?: boolean;
   children?: React.ReactNode;
-  syncedAt?: string;
+  syncedAt?: string | null;
 };
 
 export default function StatusCard({ to, icon, title, configured = true, children, syncedAt }: StatusCardProps) {

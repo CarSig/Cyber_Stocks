@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { CorrelationResult, LagImpact } from '@/types';
+import type { CorrelationResult, LagImpactResult as LagImpact } from '@algo/shared';
 
 const GROUPED_COLORS: Record<string, string> = {
   positive: 'var(--color-green)',

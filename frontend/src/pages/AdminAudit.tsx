@@ -5,7 +5,7 @@ import { getAuditLog } from '@/api/admin';
 import FilterSelect from '@/components/molecules/shared/FilterSelect';
 import Pagination from '@/components/molecules/shared/Pagination';
 import Page from '@/components/atoms/Page';
-import type { AuditLogEntry } from '@/types';
+import type { AuditEntry as AuditLogEntry } from '@algo/shared';
 
 const ACTION_LABELS: Record<string, string> = {
   login: 'Login',

@@ -1,9 +1,9 @@
 import { apiFetch, qs } from './core';
-import type { ThreatIntelListResponse, ThreatIntelStatus, CorrelationResult, LagImpact } from '@/types';
+import type { ThreatIntelListResponse, ThreatIntelStatus, CorrelationResult, LagImpactResult } from '@algo/shared';
 
 type ThreatIntelCorrelationResponse = {
   correlation?: CorrelationResult;
-  lagImpact?: LagImpact;
+  lagImpact?: LagImpactResult;
 };
 
 type ThreatIntelListOpts = {

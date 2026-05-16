@@ -116,7 +116,7 @@ function MarkerModalItems({ type, items, newsAnalysis }: MarkerModalItemsProps) 
       });
     case 'trump':
       return (items as TrumpPost[]).map((p, i) => {
-        const s = (p.analysis as { sentiment?: string } | undefined)?.sentiment ?? 'neutral';
+        const s = p.sentiment ?? 'neutral';
         return (
           <ModalItem
             key={i}

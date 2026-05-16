@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "build:shared": "npm run build --prefix ../shared",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
@@ -12,9 +13,11 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@algo/shared": "file:../shared",
     "@base-ui/react": "^1.4.1",
     "@clerk/react": "^6.4.5",
     "@fontsource-variable/geist": "^5.2.8",
@@ -36,6 +39,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.60.0",
     "@rolldown/plugin-babel": "^0.2.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

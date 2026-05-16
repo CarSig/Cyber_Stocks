@@ -341,5 +341,5 @@ export class AuditEntryDto {
 export class PaginatedAuditDto {
   total: number;
   @Type(() => AuditEntryDto)
-  items: AuditEntryDto[];
+  entries: AuditEntryDto[];
 }

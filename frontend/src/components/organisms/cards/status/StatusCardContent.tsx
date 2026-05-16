@@ -1,9 +1,9 @@
 import Stat from '@/components/atoms/Stat';
 
-type KevData = { count?: number; recentCount?: number; ransomwareCount?: number };
+type KevData = { count?: number | null; recentCount?: number; ransomwareCount?: number };
 type NvdData = { fetched?: number; criticalCount?: number; highCount?: number };
-type OtxData = { configured?: boolean; count?: number };
-type MispData = { configured?: boolean; count?: number };
+type OtxData = { configured?: boolean; count?: number | null };
+type MispData = { configured?: boolean; count?: number | null };
 type StatusCardContentData = KevData & NvdData & OtxData & MispData;
 
 type StatusCardContentProps = { data?: StatusCardContentData; type: string };

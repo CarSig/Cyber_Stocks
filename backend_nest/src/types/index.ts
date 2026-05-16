@@ -1,44 +1,54 @@
-export type User = {
-  id: string;
-  username: string;
-  role: "user" | "admin";
-  email?: string;
-  googleId?: string;
-}
+// Canonical API contract types — defined once in @algo/shared, used by both sides.
+export type {
+  User,
+  AuthResponse,
+  Quote,
+  SparklineEntry,
+  SparklineMap,
+  CorrelationMatrixData,
+  RollingCorrelation,
+  CorrelationResult,
+  LagBucket,
+  LagImpactResult,
+  CorrelationWithImpact,
+  SimulationAction,
+  SimulationPresetEntry,
+  SimulationPresets,
+  SimulationTransaction,
+  PortfolioDataPoint,
+  SimulationResult,
+  SentimentAnalysis,
+  NewsAnalysisMap,
+  UrgencyKey,
+  NewsArticle,
+  TrumpPost,
+  ThreatIntelItem,
+  ThreatIntelListResponse,
+  KevStatus,
+  NvdStatus,
+  OtxStatus,
+  ThreatIntelStatus,
+  AuditEntry,
+  PaginatedAudit,
+  IntelligenceArticle,
+  IntelligenceEntity,
+  IntelligenceSignal,
+  IntelligenceEntitySummary,
+  CyberNewsTicker,
+  CyberNewsSummary,
+  CyberNewsTopic,
+  RedditPost,
+  RedditComment,
+  AlpacaBar,
+  AlpacaBarsResponse,
+  ResearchSection,
+  ChatMessage,
+  AppNotification,
+} from '@algo/shared';
 
-export type Quote = {
-  date: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  adjclose?: number;
-  volume?: number;
-}
-
+// Backend-only type extensions (not needed by frontend)
 export type History = {
   quotes: Quote[];
-}
+};
 
-export type CorrelationResult = {
-  r: number;
-  pValue: number;
-  significant: boolean;
-  ci: [number, number];
-  n: number;
-  lagDays: number;
-  source: string;
-  interpretation: string;
-}
-
-export type LagBucket = {
-  n: number;
-  avgChangePct: number | null;
-}
-
-export type LagImpactResult = {
-  windowDays: number;
-  positive: LagBucket;
-  negative: LagBucket;
-  neutral: LagBucket;
-}
+import type { Quote } from '@algo/shared';

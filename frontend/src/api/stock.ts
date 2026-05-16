@@ -1,14 +1,13 @@
 import { apiFetch, postJson, qs } from './core';
 import type {
   TickerData,
-  Quote,
   CorrelationResult,
   SimulationAction,
   SimulationResult,
-  SimulationPreset,
-  SparklineData,
+  SimulationPresets,
+  SparklineMap,
   CorrelationMatrixData,
-} from '@/types';
+} from '@algo/shared';
 
 export function getCompanies(): Promise<Record<string, string>> {
   return apiFetch<Record<string, string>>('/stocks');
@@ -18,17 +17,17 @@ export function getTicker(ticker: string): Promise<TickerData> {
   return apiFetch<TickerData>(`/stocks/${ticker}`);
 }
 
-export function getSparklines(tickers: string[]): Promise<SparklineData> {
+export function getSparklines(tickers: string[]): Promise<SparklineMap> {
   if (!tickers?.length) return Promise.resolve({});
-  return apiFetch<SparklineData>(`/stocks/sparklines?tickers=${tickers.join(',')}`);
+  return apiFetch<SparklineMap>(`/stocks/sparklines?tickers=${tickers.join(',')}`);
 }
 
 export function runSimulation(ticker: string, actions: SimulationAction[]): Promise<SimulationResult> {
   return postJson<SimulationResult>(`/stocks/simulate/${ticker}`, { actions });
 }
 
-export function getSimulationPresets(ticker: string): Promise<SimulationPreset[]> {
-  return apiFetch<SimulationPreset[]>(`/stocks/simulation-presets/${ticker}`);
+export function getSimulationPresets(ticker: string): Promise<SimulationPresets> {
+  return apiFetch<SimulationPresets>(`/stocks/simulation-presets/${ticker}`);
 }
 
 export function getCorrelationMatrix(

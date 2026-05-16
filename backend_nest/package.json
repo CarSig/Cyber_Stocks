@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "build:shared": "npm run build --prefix ../shared",
     "build": "nest build",
     "start": "node dist/main",
     "start:dev": "nest start --watch",
@@ -20,6 +21,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@algo/shared": "file:../shared",
     "@anthropic-ai/sdk": "^0.90.0",
     "@arizeai/openinference-instrumentation-anthropic": "^0.1.10",
     "@clerk/backend": "^3.4.1",

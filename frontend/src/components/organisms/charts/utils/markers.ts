@@ -25,9 +25,11 @@ export function dedupeMarkers(markers: Marker[]): Marker[] {
   return [...new Map(markers.map((m) => [`${m.time}|${m.position}|${m.color}`, m])).values()];
 }
 
+type MiniQuote = { open: number; close: number; date: string };
+
 type QuoteAnalysis = {
-  biggestSameDayDiff: Quote & { difference: string };
-  biggestNextDayDiff: [Quote, Quote, string];
+  biggestSameDayDiff: MiniQuote & { difference: string };
+  biggestNextDayDiff: [MiniQuote, MiniQuote, string];
 };
 
 export function buildMarkers(analysis: QuoteAnalysis | null | undefined, color?: string): Marker[] {
@@ -123,7 +125,7 @@ export function buildTrumpMarkers(posts: TrumpPost[] | null | undefined, quotes:
   for (const post of posts) {
     const time = post.created_at?.slice(0, 10);
     if (!time || time < earliest) continue;
-    if (!seen.has(time)) seen.set(time, post.analysis?.sentiment ?? 'neutral');
+    if (!seen.has(time)) seen.set(time, post.sentiment ?? 'neutral');
   }
   return [...seen.entries()]
     .map(([time, s]) => ({

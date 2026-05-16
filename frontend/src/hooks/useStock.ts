@@ -4,9 +4,11 @@ import { getTicker, getCompanies, getCorrelation } from '@/api/stock';
 import { withLsCache } from '@/utils/lsCache';
 import type { Quote, TickerData, CorrelationResult } from '@/types';
 
+type MiniQuote = { open: number; close: number; date: string };
+
 type QuoteAnalysis = {
-  biggestSameDayDiff: Quote & { difference: string };
-  biggestNextDayDiff: [Quote, Quote, string];
+  biggestSameDayDiff: MiniQuote & { difference: string };
+  biggestNextDayDiff: [MiniQuote, MiniQuote, string];
 } | null;
 
 function percentageDiff(a: number, b: number): string {
@@ -14,7 +16,7 @@ function percentageDiff(a: number, b: number): string {
 }
 
 function analyzeQuotes(quotes: Quote[]): QuoteAnalysis {
-  const parsed = quotes
+  const parsed: MiniQuote[] = quotes
     .filter((q) => q.open != null && q.close != null)
     .map((q) => ({ open: q.open, close: q.close, date: q.date }));
   if (parsed.length < 2) return null;

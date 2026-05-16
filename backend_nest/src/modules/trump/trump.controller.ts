@@ -23,7 +23,7 @@ export class TrumpController {
     return this.trumpService.getAllPosts();
   }
 
-  @Get("trump-posts/:ticker")
+  @Get("posts/:ticker")
   @ApiOperation({ summary: "Posts mentioning a ticker", description: "Returns only the Trump posts whose AI analysis identified a mention of the given ticker." })
   @ApiParam({ name: "ticker", description: "Ticker symbol" })
   @ApiResponse({ status: 200, type: [TrumpPostDto] })

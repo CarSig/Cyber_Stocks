@@ -2,8 +2,8 @@ import StatusCard from './StatusCard';
 import StatusCardContent from './StatusCardContent';
 
 type ThreatIntelData = {
-  syncedAt?: string;
-  count?: number;
+  syncedAt?: string | null;
+  count?: number | null;
   recentCount?: number;
   ransomwareCount?: number;
   fetched?: number;
