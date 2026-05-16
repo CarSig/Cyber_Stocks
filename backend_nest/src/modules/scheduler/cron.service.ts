@@ -11,6 +11,7 @@ import { CybersecurityConsumer } from "@/shared/clients/YahooCompanyClient";
 import { fetchTrump } from "@/shared/socials/trump";
 import { CoreDbService } from "@/shared/core-db.service";
 import { logger } from "@/shared/logger";
+import { cronJobDuration, cronJobRunsTotal, threatIntelNewEntriesTotal } from "@/shared/metrics";
 import companies from "@/data/companies";
 import type { Quote } from "@/types/index";
 
@@ -33,7 +34,16 @@ export class CronService {
   @Cron("0 23 * * *")
   async runPopulate(): Promise<void> {
     logger.info("cron: running populateAll");
-    await this.dataSyncService.populateAll().catch((e: unknown) => logger.error({ err: e }, "cron: populateAll failed"));
+    const end = cronJobDuration.startTimer({ job: "populate" });
+    try {
+      await this.dataSyncService.populateAll();
+      cronJobRunsTotal.inc({ job: "populate", status: "success" });
+    } catch (e: unknown) {
+      logger.error({ err: e }, "cron: populateAll failed");
+      cronJobRunsTotal.inc({ job: "populate", status: "failure" });
+    } finally {
+      end();
+    }
     logger.info("cron: populateAll done");
 
     const changes: { ticker: string; changePct: number }[] = [];
@@ -57,7 +67,16 @@ export class CronService {
   @Cron("0 * * * *")
   async runNews(): Promise<void> {
     logger.info("cron: running populateAllNews");
-    await this.dataSyncService.populateAllNews().catch((e: unknown) => logger.error({ err: e }, "cron: populateAllNews failed"));
+    const end = cronJobDuration.startTimer({ job: "news" });
+    try {
+      await this.dataSyncService.populateAllNews();
+      cronJobRunsTotal.inc({ job: "news", status: "success" });
+    } catch (e: unknown) {
+      logger.error({ err: e }, "cron: populateAllNews failed");
+      cronJobRunsTotal.inc({ job: "news", status: "failure" });
+    } finally {
+      end();
+    }
     logger.info("cron: populateAllNews done");
     this.emitter.emit("news.updated", { at: new Date().toISOString() });
   }
@@ -65,7 +84,16 @@ export class CronService {
   @Cron("0 * * * *")
   async runFetchTrump(): Promise<void> {
     logger.info("cron: running fetchTrump");
-    await fetchTrump(this.coreDb.pool).catch((e: unknown) => logger.error({ err: e }, "cron: fetchTrump failed"));
+    const end = cronJobDuration.startTimer({ job: "trump" });
+    try {
+      await fetchTrump(this.coreDb.pool);
+      cronJobRunsTotal.inc({ job: "trump", status: "success" });
+    } catch (e: unknown) {
+      logger.error({ err: e }, "cron: fetchTrump failed");
+      cronJobRunsTotal.inc({ job: "trump", status: "failure" });
+    } finally {
+      end();
+    }
     logger.info("cron: fetchTrump done");
     this.emitter.emit("trump.updated", { at: new Date().toISOString() });
   }
@@ -73,13 +101,23 @@ export class CronService {
   @Cron("0 * * * *")
   async runFetchReddit(): Promise<void> {
     logger.info("cron: running fetchReddit");
-    await this.redditService.syncAll().catch((e: unknown) => logger.error({ err: e }, "cron: fetchReddit failed"));
+    const end = cronJobDuration.startTimer({ job: "reddit" });
+    try {
+      await this.redditService.syncAll();
+      cronJobRunsTotal.inc({ job: "reddit", status: "success" });
+    } catch (e: unknown) {
+      logger.error({ err: e }, "cron: fetchReddit failed");
+      cronJobRunsTotal.inc({ job: "reddit", status: "failure" });
+    } finally {
+      end();
+    }
     logger.info("cron: fetchReddit done");
   }
 
   @Cron("0 6 * * *")
   async runThreatIntelSync(): Promise<void> {
     logger.info("cron: running threat intel sync");
+    const end = cronJobDuration.startTimer({ job: "threatintel" });
     const result = { newKev: 0, criticalNvd: 0, newOtx: 0 };
 
     const prevKev = this.kevClient.read();
@@ -111,6 +149,11 @@ export class CronService {
       await this.mispClient.sync().catch((e: unknown) => logger.error({ err: e }, "cron: MISP sync failed"));
     }
 
+    end();
+    cronJobRunsTotal.inc({ job: "threatintel", status: "success" });
+    if (result.newKev > 0) threatIntelNewEntriesTotal.inc({ source: "kev" }, result.newKev);
+    if (result.criticalNvd > 0) threatIntelNewEntriesTotal.inc({ source: "nvd" }, result.criticalNvd);
+    if (result.newOtx > 0) threatIntelNewEntriesTotal.inc({ source: "otx" }, result.newOtx);
     logger.info({ ...result }, "cron: threat intel sync done");
     this.emitter.emit("threatintel.updated", { at: new Date().toISOString(), ...result });
   }

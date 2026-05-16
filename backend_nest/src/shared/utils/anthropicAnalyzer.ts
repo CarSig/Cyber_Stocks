@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { logger } from "../logger";
+import { llmTokensTotal, llmRequestDuration } from "../metrics";
 
 const MODEL = process.env.ANTHROPIC_NEWS_MODEL ?? "claude-haiku-4-5-20251001";
 
@@ -30,12 +31,16 @@ ${text}`;
 
 export async function analyzeArticleWithAnthropic(text: string, companyName: string) {
   const anthropic = new Anthropic();
+  const endTimer = llmRequestDuration.startTimer({ model: MODEL });
   const msg = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 512,
     messages: [{ role: "user", content: PROMPT(text, companyName) }],
   });
+  endTimer();
 
+  llmTokensTotal.inc({ model: msg.model, type: "input" }, msg.usage.input_tokens);
+  llmTokensTotal.inc({ model: msg.model, type: "output" }, msg.usage.output_tokens);
   const raw = msg.content.find((b) => b.type === "text")?.text ?? "{}";
   logger.debug({ model: msg.model, input: msg.usage.input_tokens, output: msg.usage.output_tokens }, "anthropic response");
 

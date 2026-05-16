@@ -8,6 +8,7 @@ import { Pool } from 'pg';
 import { logger } from '@/shared/logger';
 import { analyzeArticleWithAnthropic } from '@/shared/utils/anthropicAnalyzer';
 import { NEWS_ANALYZED_QUEUE, MAX_RETRIES } from '@/shared/mq/connection';
+import { newsArticlesProcessedTotal, rabbitmqDlxMessagesTotal } from '@/shared/metrics';
 
 const AMQP_URL = process.env.AMQP_URL ?? 'amqp://localhost';
 const QUEUE = 'news.articles';
@@ -35,6 +36,7 @@ async function processMessage(msg: ConsumeMessage, ch: Channel): Promise<void> {
         { ticker, link: article.link },
         'already analyzed, skipping',
       );
+      newsArticlesProcessedTotal.inc({ status: 'skipped' });
       ch.ack(msg);
       return;
     }
@@ -71,6 +73,7 @@ async function processMessage(msg: ConsumeMessage, ch: Channel): Promise<void> {
     );
   }
 
+  newsArticlesProcessedTotal.inc({ status: 'success' });
   logger.info(
     {
       ticker,
@@ -127,6 +130,8 @@ async function start(): Promise<void> {
       const deaths = (msg.properties.headers?.["x-death"] as Array<{ count: number }> | undefined)?.[0]?.count ?? 0;
       const requeue = deaths < MAX_RETRIES;
       logger.error({ err, deaths, requeue }, 'failed to process message');
+      newsArticlesProcessedTotal.inc({ status: 'failed' });
+      if (!requeue) rabbitmqDlxMessagesTotal.inc({ queue: 'news.articles' });
       ch.nack(msg, false, requeue);
     }
   });

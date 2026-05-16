@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Subject, Observable, merge, interval } from "rxjs";
 import { map, finalize } from "rxjs/operators";
 import type { MessageEvent } from "@nestjs/common";
+import { sseEventsEmittedTotal } from "@/shared/metrics";
 
 type Notification = {
   type: string;
@@ -16,6 +17,7 @@ export class NotificationsService {
   private readonly progressMap = new Map<string, ProgressState>();
 
   broadcast(notification: Notification): void {
+    sseEventsEmittedTotal.inc({ event_type: notification.type });
     this.subject.next({ data: notification });
   }
 
@@ -36,6 +38,7 @@ export class NotificationsService {
     const state = this.progressMap.get(ticker);
     if (!state) return;
     state.current++;
+    sseEventsEmittedTotal.inc({ event_type: "progress" });
     state.subject.next({ data: { type: "progress", ticker, title, sentiment, current: state.current, total: state.total } });
     if (state.current >= state.total) {
       state.subject.complete();

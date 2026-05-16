@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { CybersecurityClient } from "@/shared/clients/YahooCompanyClient";
 import companies from "@/data/companies";
 import { logger } from "@/shared/logger";
+import { newsArticlesQueuedTotal } from "@/shared/metrics";
 
 @Injectable()
 export class DataSyncService {
@@ -25,8 +26,17 @@ export class DataSyncService {
     const breakdown: Record<string, number> = {};
     let total = 0;
     results.forEach((r, i) => {
-      if (r.status === "fulfilled") { breakdown[names[i]] = r.value; total += r.value; }
-      else { logger.error({ err: r.reason }, `failed to fetch news ${names[i]}`); breakdown[names[i]] = 0; }
+      if (r.status === "fulfilled") {
+        breakdown[names[i]] = r.value;
+        total += r.value;
+        if (r.value > 0) {
+          const ticker = Object.values(companies)[i] as string;
+          newsArticlesQueuedTotal.inc({ ticker }, r.value);
+        }
+      } else {
+        logger.error({ err: r.reason }, `failed to fetch news ${names[i]}`);
+        breakdown[names[i]] = 0;
+      }
     });
     logger.info({ total, breakdown }, "news fetch complete");
   }
