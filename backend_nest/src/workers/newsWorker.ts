@@ -11,6 +11,7 @@ import { NEWS_ANALYZED_QUEUE, MAX_RETRIES } from '@/shared/mq/connection';
 
 const AMQP_URL = process.env.AMQP_URL ?? 'amqp://localhost';
 const QUEUE = 'news.articles';
+const NEWS_DLX = 'news.articles.dlx';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
@@ -106,7 +107,8 @@ async function connect(retries = 10, delayMs = 3000) {
 async function start(): Promise<void> {
   const conn = await connect();
   const ch = await conn.createChannel();
-  await ch.assertQueue(QUEUE, { durable: true });
+  await ch.assertExchange(NEWS_DLX, 'direct', { durable: true });
+  await ch.assertQueue(QUEUE, { durable: true, arguments: { 'x-dead-letter-exchange': NEWS_DLX, 'x-dead-letter-routing-key': QUEUE } });
   ch.prefetch(1);
 
   logger.info(

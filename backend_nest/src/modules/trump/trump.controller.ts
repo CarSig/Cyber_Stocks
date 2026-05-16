@@ -16,7 +16,7 @@ export class TrumpController {
     private readonly auditService: AuditService,
   ) {}
 
-  @Get("trump-posts")
+  @Get("posts")
   @ApiOperation({ summary: "All Truth Social posts", description: "Returns all stored Trump Truth Social posts with their AI-generated ticker mention analysis." })
   @ApiResponse({ status: 200, type: [TrumpPostDto] })
   getAllPosts() {
@@ -33,7 +33,7 @@ export class TrumpController {
     return this.trumpService.getPostsForTicker(r.ticker);
   }
 
-  @Get("correlate-trump/:ticker")
+  @Get("correlate/:ticker")
   @ApiOperation({ summary: "Trump post–price correlation", description: "Correlates dates of Trump posts mentioning the ticker with subsequent stock price movements." })
   @ApiParam({ name: "ticker", description: "Ticker symbol" })
   @ApiResponse({ status: 200, type: CorrelationWithImpactDto })
@@ -48,7 +48,7 @@ export class TrumpController {
     return this.trumpService.getCorrelation(r.name, r.ticker, lagDays ?? 1);
   }
 
-  @Get("trump-lag-impact/:ticker")
+  @Get("lag-impact/:ticker")
   @ApiOperation({ summary: "Trump post lag impact", description: "Returns lag-bucketed average stock price changes in the days following positive, negative, and neutral Trump post sentiment." })
   @ApiParam({ name: "ticker", description: "Ticker symbol" })
   @ApiResponse({ status: 200, type: LagImpactResultDto })

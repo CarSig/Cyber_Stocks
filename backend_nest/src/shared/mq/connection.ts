@@ -16,15 +16,22 @@ let channel: Channel | null = null;
 export async function getChannel(): Promise<Channel> {
   if (channel) return channel;
   try {
-    connection = await amqplib.connect(AMQP_URL);
+    console.log(`[RabbitMQ] Connecting to ${AMQP_URL}...`);
+    const connectTimeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("connection timed out after 5s")), 5000)
+    );
+    connection = await Promise.race([amqplib.connect(AMQP_URL), connectTimeout]) as ChannelModel;
+    console.log("[RabbitMQ] Connected, setting up queues...");
     const ch = await connection.createChannel();
-    // Dead-letter exchange + dead queue (poison messages land here after MAX_RETRIES)
     await ch.assertExchange(NEWS_DLX, "direct", { durable: true });
+    console.log(`[RabbitMQ] Exchange ${NEWS_DLX} ready`);
     await ch.assertQueue(NEWS_DEAD_QUEUE, { durable: true });
     await ch.bindQueue(NEWS_DEAD_QUEUE, NEWS_DLX, NEWS_QUEUE);
-    // Main queue routes failed messages to DLX
+    console.log(`[RabbitMQ] Dead queue ${NEWS_DEAD_QUEUE} ready`);
     await ch.assertQueue(NEWS_QUEUE, { durable: true, arguments: { "x-dead-letter-exchange": NEWS_DLX, "x-dead-letter-routing-key": NEWS_QUEUE } });
+    console.log(`[RabbitMQ] Main queue ${NEWS_QUEUE} ready`);
     await ch.assertQueue(NEWS_ANALYZED_QUEUE, { durable: false });
+    console.log(`[RabbitMQ] Analyzed queue ${NEWS_ANALYZED_QUEUE} ready`);
     channel = ch;
     logger.info({ url: AMQP_URL }, "RabbitMQ connected");
     connection.on("error", (err: Error) => {
@@ -40,6 +47,7 @@ export async function getChannel(): Promise<Channel> {
   } catch (err) {
     connection = null;
     channel = null;
+    console.error(`[RabbitMQ] Failed to connect: ${(err as Error).message}`);
     throw unavailable(`RabbitMQ unavailable: ${(err as Error).message}`);
   }
 }

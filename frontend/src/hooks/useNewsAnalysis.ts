@@ -27,7 +27,7 @@ export function useNewsAnalysis(ticker: string) {
   function connectProgress() {
     if (esRef.current) esRef.current.close();
     const token = localStorage.getItem('auth_token') ?? '';
-    const es = new EventSource(`${BASE}/news-analyze/${ticker}/progress?token=${encodeURIComponent(token)}`);
+    const es = new EventSource(`${BASE}/news/analyze/${ticker}/progress?token=${encodeURIComponent(token)}`);
     esRef.current = es;
     setPolling(true);
 

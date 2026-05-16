@@ -1,3 +1,4 @@
+console.log("[startup] main.ts loaded");
 import "./tracing";
 import "reflect-metadata";
 import { EventEmitter } from "events";
@@ -24,7 +25,9 @@ import { AppModule } from "./app.module";
 import { setupSwagger } from "./config/swagger";
 
 async function bootstrap() {
+  console.log("Bootstrapping NestJS app...");
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  console.log("App module initialized, attaching logger...");
   app.useLogger(app.get(Logger));
   app.use(compression());
   app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
@@ -43,6 +46,7 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   const port = Number(process.env.PORT ?? 3000);
+  console.log(`Starting server on port ${port}...`);
   await app.listen(port);
   console.log(`Server running on http://localhost:${port}`);
   console.log(`API docs at http://localhost:${port}/api/v1/docs`);

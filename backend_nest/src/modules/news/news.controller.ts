@@ -30,14 +30,14 @@ export class NewsController {
     return checkAnthropic();
   }
 
-  @Get("news-analysis/:ticker")
+  @Get("analysis/:ticker")
   @GetAnalysisDoc()
   async getAnalysis(@Param("ticker") ticker: string) {
     const r = resolveTicker(ticker);
     return this.newsAnalysisService.readAnalysis(r.name);
   }
 
-  @Post("news-analyze/:ticker")
+  @Post("analyze/:ticker")
   @Throttle({ strict: { ttl: 60_000, limit: 10 } })
   @AnalyzeDoc()
   async analyze(@Param("ticker") ticker: string, @CurrentUser() user: User) {
@@ -48,7 +48,7 @@ export class NewsController {
     return result;
   }
 
-  @Sse("news-analyze/:ticker/progress")
+  @Sse("analyze/:ticker/progress")
   @AllowQueryToken()
   @ProgressDoc()
   progress(@Param("ticker") ticker: string): Observable<MessageEvent> {
@@ -58,7 +58,7 @@ export class NewsController {
     );
   }
 
-  @Get("news-correlation/:ticker")
+  @Get("correlation/:ticker")
   @NewsCorrelationDoc()
   async correlation(@Param("ticker") ticker: string, @Query() { lagDays }: LagDaysDto) {
     const r = resolveTicker(ticker);

@@ -10,7 +10,7 @@ export class MqService implements OnModuleInit, OnModuleDestroy {
     try {
       this.channel = await getChannel();
     } catch (err) {
-      // Connection is retried inside getChannel; log and continue
+      console.error(`[MqService] RabbitMQ unavailable on startup: ${(err as Error).message}`);
     }
   }
 

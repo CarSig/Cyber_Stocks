@@ -12,14 +12,14 @@ import type { BackendArticleInput } from "@/modules/content-analysis/content-ana
 export class IntelligenceController {
   constructor(private readonly contentAnalysis: ContentAnalysisService) {}
 
-  @Post("intelligence/articles/process")
+  @Post("articles/process")
   @ApiOperation({ summary: "Process backend article", description: "Runs backend content analysis pipeline on a submitted article." })
   @ApiResponse({ status: 201, description: "Processed article result" })
   async processBackendArticle(@Body() body: BackendArticleInput) {
     return this.contentAnalysis.processBackendArticle(body);
   }
 
-  @Get("intelligence/entities")
+  @Get("entities")
   @ApiOperation({ summary: "Get entities", description: "Returns all entities that match tracked companies." })
   @ApiResponse({ status: 200, description: "Filtered entity list" })
   async getBackendEntities() {
@@ -28,7 +28,7 @@ export class IntelligenceController {
     return all.filter((e) => companyNames.has(e.name.toLowerCase()));
   }
 
-  @Get("intelligence/entities/:entityId/articles")
+  @Get("entities/:entityId/articles")
   @ApiOperation({ summary: "Get entity articles", description: "Returns all articles associated with an entity." })
   @ApiParam({ name: "entityId", description: "Entity ID" })
   @ApiResponse({ status: 200, description: "Article list" })
@@ -36,7 +36,7 @@ export class IntelligenceController {
     return this.contentAnalysis.getBackendArticlesByEntity(entityId, signal);
   }
 
-  @Get("intelligence/entities/:entityId/summary")
+  @Get("entities/:entityId/summary")
   @ApiOperation({ summary: "Get entity summary", description: "Returns the aggregated intelligence summary for an entity." })
   @ApiParam({ name: "entityId", description: "Entity ID" })
   @ApiResponse({ status: 200, description: "Entity summary" })
@@ -47,14 +47,14 @@ export class IntelligenceController {
     return summary;
   }
 
-  @Get("intelligence/signals")
+  @Get("signals")
   @ApiOperation({ summary: "Global signals", description: "Returns aggregated intelligence signals across all entities." })
   @ApiResponse({ status: 200, description: "Global signals" })
   async getBackendGlobalSignals() {
     return this.contentAnalysis.getBackendGlobalSignals();
   }
 
-  @Get("intelligence/sentiment-correlations")
+  @Get("sentiment-correlations")
   @ApiOperation({ summary: "Sentiment correlations", description: "Correlates entity sentiment scores with stock price movements for all tracked companies." })
   @ApiResponse({ status: 200, description: "Array of { entity, ticker, correlation, lagImpact }" })
   async getAllSentimentCorrelations(@Query() { lagDays }: LagDaysDto, @Query("signal") signal?: string) {

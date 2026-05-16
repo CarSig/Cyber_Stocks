@@ -6,7 +6,7 @@ import { AppError } from "@/shared/errors";
 export class RedditController {
   constructor(private readonly redditService: RedditService) {}
 
-  @Get("reddit-posts")
+  @Get("posts")
   getPosts(@Query("subreddit") subreddit: string) {
     const sub = (subreddit ?? "ExperiencedDevs") as Subreddit;
     if (!SUBREDDITS.includes(sub)) {
@@ -15,7 +15,7 @@ export class RedditController {
     return this.redditService.getPosts(sub);
   }
 
-  @Get("reddit-comments/:subreddit/:id")
+  @Get("comments/:subreddit/:id")
   async getComments(@Param("subreddit") subreddit: string, @Param("id") id: string) {
     if (!subreddit || !id) throw new AppError("Missing subreddit or id", 400);
     return this.redditService.getComments(subreddit, id);

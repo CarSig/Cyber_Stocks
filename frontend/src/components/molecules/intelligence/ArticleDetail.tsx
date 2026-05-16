@@ -104,12 +104,12 @@ export default function ArticleDetail({ article, focusEntityId }: ArticleDetailP
 
       {((article.companySignals?.length ?? 0) > 0 || (article.globalSignals?.length ?? 0) > 0) && (
         <div className="article-detail-signals">
-          {article.companySignals?.map((s) => (
+          {[...new Set(article.companySignals)].map((s) => (
             <TagBadge key={`c-${s}`} color="#fb923c">
               {s}
             </TagBadge>
           ))}
-          {article.globalSignals?.map((s) => (
+          {[...new Set(article.globalSignals)].map((s) => (
             <TagBadge key={`g-${s}`} color="#60a5fa">
               {s}
             </TagBadge>
