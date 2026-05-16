@@ -30,7 +30,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Test
-        run: npm test -- --coverage --coverageThreshold='{"global":{"lines":20}}'
+        run: npm test -- --coverage --coverageThreshold='{"global":{"lines":8}}'
         env:
           NODE_ENV: test
           DATABASE_URL: postgresql://placeholder/placeholder

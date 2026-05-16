@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication } from "@nestjs/common";
+import { INestApplication, ValidationPipe } from "@nestjs/common";
 import request from "supertest";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
@@ -39,6 +39,7 @@ async function buildApp(): Promise<INestApplication> {
 
   const app = module.createNestApplication();
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   await app.init();
   return app;
 }
