@@ -14,6 +14,21 @@ jobs:
       run:
         working-directory: backend_nest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -33,9 +48,10 @@ jobs:
         run: npm test -- --coverage --coverageThreshold='{"global":{"lines":8}}'
         env:
           NODE_ENV: test
-          DATABASE_URL: postgresql://placeholder/placeholder
+          DATABASE_URL: "postgresql://test:test@localhost:5432/testdb?sslmode=disable&options=-c%20search_path%3Dtest"
           JWT_SECRET: test-secret-must-be-at-least-32-chars!!
           CLERK_SECRET_KEY: sk_test_placeholder
+          ALLOWED_ORIGIN: http://localhost:5173
 
   frontend:
     name: Frontend (React + Vite)
