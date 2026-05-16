@@ -16,6 +16,7 @@ export default function BaseCard({
   disabled,
   as: Tag = 'div',
   className = '',
+
   style,
   children,
   ...props
