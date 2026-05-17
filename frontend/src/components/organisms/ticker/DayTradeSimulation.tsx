@@ -40,7 +40,7 @@ const DAYTRADE_PRESETS: Record<string, { time: string; side: 'buy' | 'sell'; val
 };
 
 import type { Side, Action, Transaction, SimResult } from '@/utils/sim';
-import { simResultToExportArgs } from '@/utils/sim';
+import { runShortSimulation, simResultToExportArgs } from '@/utils/sim';
 
 function runSimulation(bars: AlpacaBar[], actions: Action[], startShares = 0): SimResult {
   const sorted = [...actions].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
@@ -97,14 +97,17 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
   const [manualTime, setManualTime] = useState('');
   const [textMode, setTextMode] = useState(false);
   const [chartType, setChartType] = useState<'line' | 'area' | 'candlestick'>('line');
+  const [tradeMode, setTradeMode] = useState<'long' | 'short'>('long');
 
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ChartRef>(null);
   const portfolioChartRef = useRef<HTMLDivElement>(null);
   const nextSideRef = useRef<Side>(nextSide);
   const valueRef = useRef<string>(value);
+  const tradeModeRef = useRef<'long' | 'short'>(tradeMode);
   useEffect(() => { nextSideRef.current = nextSide; }, [nextSide]);
   useEffect(() => { valueRef.current = value; }, [value]);
+  useEffect(() => { tradeModeRef.current = tradeMode; }, [tradeMode]);
 
   const { textValue, setTextValue, handleTextChange, actionsToText } = useSimTextSync<Action>({
     actions,
@@ -144,8 +147,9 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
 
   const result = useMemo<SimResult | null>(() => {
     if (!bars.length || !actions.length) return null;
+    if (tradeMode === 'short') return runShortSimulation(bars, actions, DateUtils.fmtTime);
     return runSimulation(bars, actions, Math.max(0, Number(startShares) || 0));
-  }, [bars, actions, startShares]);
+  }, [bars, actions, startShares, tradeMode]);
 
   // Build price chart
   useEffect(() => {
@@ -187,7 +191,8 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       if (!param.time) return;
       const iso = new Date((param.time as unknown as number) * 1000).toISOString();
       const val = Math.max(0.01, Number(valueRef.current) || 100);
-      setActions((prev) => [...prev, { id: nextActionId++, timestamp: iso, time: DateUtils.fmtTime(iso), side: 'buy', value: val }]);
+      const side: Side = tradeModeRef.current === 'short' ? 'short' : 'buy';
+      setActions((prev) => [...prev, { id: nextActionId++, timestamp: iso, time: DateUtils.fmtTime(iso), side, value: val }]);
     });
 
     const el = containerRef.current!;
@@ -195,7 +200,8 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       e.preventDefault();
       if (!lastHoveredBar) return;
       const val = Math.min(100, Math.max(0.01, Number(valueRef.current) || 50));
-      setActions((prev) => [...prev, { id: nextActionId++, timestamp: lastHoveredBar!.iso, time: DateUtils.fmtTime(lastHoveredBar!.iso), side: 'sell', value: val }]);
+      const side: Side = tradeModeRef.current === 'short' ? 'cover' : 'sell';
+      setActions((prev) => [...prev, { id: nextActionId++, timestamp: lastHoveredBar!.iso, time: DateUtils.fmtTime(lastHoveredBar!.iso), side, value: val }]);
     }
     el.addEventListener('contextmenu', onContextMenu);
     chartRef.current = { chart, candleSeries };
@@ -219,23 +225,27 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
     const ref = chartRef.current;
     if (!ref) return;
     createSeriesMarkers(ref.candleSeries, actions
-      .map((a) => ({
-        time: Math.floor(new Date(a.timestamp).getTime() / 1000) as unknown as import('lightweight-charts').Time,
-        position: a.side === 'buy' ? ('belowBar' as const) : ('aboveBar' as const),
-        color: a.side === 'buy' ? '#22c55e' : '#ef4444',
-        shape: a.side === 'buy' ? ('arrowUp' as const) : ('arrowDown' as const),
-        text: a.side === 'buy' ? `B $${a.value}` : `S ${a.value}%`,
-      }))
+      .map((a) => {
+        const isEntry = a.side === 'buy' || a.side === 'short';
+        return {
+          time: Math.floor(new Date(a.timestamp).getTime() / 1000) as unknown as import('lightweight-charts').Time,
+          position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
+          color: a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#a78bfa',
+          shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
+          text: a.side === 'buy' ? `B $${a.value}` : a.side === 'sell' ? `S ${a.value}%` : a.side === 'short' ? `Sh $${a.value}` : `C ${a.value}%`,
+        };
+      })
       .sort((a, b) => (a.time < b.time ? -1 : 1)));
   }, [actions]);
 
   const addManualAction = useCallback(() => {
     if (!manualTime) return;
-    const val = Math.max(0.01, Number(value) || (nextSide === 'buy' ? 100 : 50));
+    const isExit = nextSide === 'sell' || nextSide === 'cover';
+    const val = Math.max(0.01, Number(value) || (isExit ? 50 : 100));
     const iso = DateUtils.timeToIso(manualTime, query.date);
     const newAction: Action = { id: nextActionId++, timestamp: iso, time: manualTime, side: nextSide, value: val };
     setActions((prev) => [...prev, newAction]);
-    setTextValue((prev) => prev ? prev + `\n${manualTime}, ${nextSide === 'sell' ? -val : val}` : `${manualTime}, ${nextSide === 'sell' ? -val : val}`);
+    setTextValue((prev) => prev ? prev + `\n${manualTime}, ${isExit ? -val : val}` : `${manualTime}, ${isExit ? -val : val}`);
     setManualTime('');
   }, [manualTime, nextSide, value, query.date, setTextValue]);
 
@@ -243,13 +253,14 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
   const updateAction = useCallback((id: number, field: 'side' | 'value', val: string) => {
     setActions((prev) => prev.map((a) => {
       if (a.id !== id) return a;
-      if (field === 'value') return { ...a, value: a.side === 'sell' ? Math.min(100, Number(val)) : Number(val) };
+      const isExit = (s: Side) => s === 'sell' || s === 'cover';
+      if (field === 'value') return { ...a, value: isExit(a.side) ? Math.min(100, Number(val)) : Number(val) };
       const newSide = val as Side;
-      return { ...a, side: newSide, value: newSide === 'sell' ? Math.min(100, a.value) : a.value };
+      return { ...a, side: newSide, value: isExit(newSide) ? Math.min(100, a.value) : a.value };
     }));
   }, []);
 
-  const clear = useCallback(() => { setActions([]); setTextValue(''); setNextSide('buy'); }, [setTextValue]);
+  const clear = useCallback(() => { setActions([]); setTextValue(''); setNextSide(tradeMode === 'short' ? 'short' : 'buy'); }, [setTextValue, tradeMode]);
 
   const handleExportPdf = useCallback(() => {
     if (!result) return;
@@ -277,17 +288,40 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       <form className="dtrade-order-controls" onSubmit={(e) => { e.preventDefault(); const d = DateUtils.lastWeekday(date); setDate(d); setQuery({ date: d, timeframe }); setActions([]); setTextValue(''); }}>
         {bars.length > 0 && (<>
           <div className="dtrade-next-side">
-            <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Left click = Buy ($)</span>
-            <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Right click = Sell (%)</span>
+            <button
+              className={`sim-chart-btn${tradeMode === 'long' ? ' active' : ''}`}
+              onClick={() => { setTradeMode('long'); setActions([]); setNextSide('buy'); }}
+              type="button"
+            >Long</button>
+            <button
+              className={`sim-chart-btn${tradeMode === 'short' ? ' active' : ''}`}
+              onClick={() => { setTradeMode('short'); setActions([]); setNextSide('short'); }}
+              type="button"
+              style={tradeMode === 'short' ? { borderColor: '#f97316', color: '#f97316' } : undefined}
+            >Short</button>
+            <span style={{ width: '0.5rem' }} />
+            {tradeMode === 'long' ? (
+              <>
+                <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Left click = Buy ($)</span>
+                <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Right click = Sell (%)</span>
+              </>
+            ) : (
+              <>
+                <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Left click = Short ($)</span>
+                <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Right click = Cover (%)</span>
+              </>
+            )}
           </div>
-          <div className="dtrade-shares">
-            <span className="dtrade-label">Start shares:</span>
-            <Input type="number" min="0" step="any" value={startShares} onChange={(e) => setStartShares(e.target.value)} className="dtrade-shares-input" />
-          </div>
+          {tradeMode === 'long' && (
+            <div className="dtrade-shares">
+              <span className="dtrade-label">Start shares:</span>
+              <Input type="number" min="0" step="any" value={startShares} onChange={(e) => setStartShares(e.target.value)} className="dtrade-shares-input" />
+            </div>
+          )}
           <div className="dtrade-shares">
             <span className="dtrade-label">Value:</span>
             <Input type="number" min="0" step="any" value={value} onChange={(e) => setValue(e.target.value)} className="dtrade-shares-input" />
-            <span className="dtrade-label">$ buy / % sell</span>
+            <span className="dtrade-label">{tradeMode === 'long' ? '$ buy / % sell' : '$ short / % cover'}</span>
           </div>
         </>)}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -308,7 +342,11 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
               </button>
             ))}
           </div>
-          <div className="dtrade-chart-hint">Left click to buy ${value} · Right click to sell {value}%</div>
+          <div className="dtrade-chart-hint">
+            {tradeMode === 'long'
+              ? `Left click to buy $${value} · Right click to sell ${value}%`
+              : `Left click to short $${value} · Right click to cover ${value}%`}
+          </div>
           <div ref={containerRef} className="alpaca-chart-container" />
 
           <SimToolbar
@@ -327,7 +365,10 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
 
           <SimManualEntry
             side={nextSide}
-            onSideChange={setNextSide}
+            onSideChange={(s) => setNextSide(s as Side)}
+            sideOptions={tradeMode === 'long'
+              ? [{ value: 'buy', label: 'Buy ($)' }, { value: 'sell', label: 'Sell (%)' }]
+              : [{ value: 'short', label: 'Short ($)' }, { value: 'cover', label: 'Cover (%)' }]}
             value={value}
             onValueChange={setValue}
             onAdd={addManualAction}
@@ -359,13 +400,22 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
                       <td>{a.time}</td>
                       <td>
                         <select className="dtrade-inline-select" value={a.side} onChange={(e) => updateAction(a.id, 'side', e.target.value)}>
-                          <option value="buy">BUY</option>
-                          <option value="sell">SELL</option>
+                          {tradeMode === 'long' ? (
+                            <>
+                              <option value="buy">BUY</option>
+                              <option value="sell">SELL</option>
+                            </>
+                          ) : (
+                            <>
+                              <option value="short">SHORT</option>
+                              <option value="cover">COVER</option>
+                            </>
+                          )}
                         </select>
                       </td>
                       <td>
-                        <input className="dtrade-inline-input" type="number" min="0" max={a.side === 'sell' ? 100 : undefined} step="any" value={a.value} onChange={(e) => updateAction(a.id, 'value', e.target.value)} />
-                        <span className="dtrade-unit">{a.side === 'buy' ? '$' : '%'}</span>
+                        <input className="dtrade-inline-input" type="number" min="0" max={a.side === 'sell' || a.side === 'cover' ? 100 : undefined} step="any" value={a.value} onChange={(e) => updateAction(a.id, 'value', e.target.value)} />
+                        <span className="dtrade-unit">{a.side === 'buy' || a.side === 'short' ? '$' : '%'}</span>
                       </td>
                       <td><button className="dtrade-remove" onClick={() => removeAction(a.id)}>✕</button></td>
                     </tr>
@@ -378,11 +428,18 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
           {result && result.transactions.length > 0 && (
             <SimResults
               ref={portfolioChartRef}
-              stats={[
+              stats={tradeMode === 'long' ? [
                 { label: 'Total invested', value: PriceUtils.fmt(result.totalInvested) },
                 { label: 'Shares held', value: result.finalShares.toFixed(4) },
                 { label: 'Shares value', value: PriceUtils.fmt(result.sharesValue) },
                 { label: 'Cash withdrawn', value: PriceUtils.fmt(result.cashWithdrawn) },
+                { label: 'Profit', value: (result.profit >= 0 ? '+' : '') + PriceUtils.fmt(result.profit), color: profitColor },
+                { label: 'Profit %', value: (result.profitPct >= 0 ? '+' : '') + result.profitPct.toFixed(2) + '%', color: profitColor },
+              ] : [
+                { label: 'Cash received', value: PriceUtils.fmt(result.totalInvested) },
+                { label: 'Shares short', value: Math.abs(result.finalShares).toFixed(4) },
+                { label: 'Remaining liability', value: PriceUtils.fmt(Math.abs(result.sharesValue)) },
+                { label: 'Cover cost', value: PriceUtils.fmt(result.cashWithdrawn) },
                 { label: 'Profit', value: (result.profit >= 0 ? '+' : '') + PriceUtils.fmt(result.profit), color: profitColor },
                 { label: 'Profit %', value: (result.profitPct >= 0 ? '+' : '') + result.profitPct.toFixed(2) + '%', color: profitColor },
               ]}

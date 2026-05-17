@@ -64,8 +64,8 @@ export default function Navbar() {
           </Link>
         )}
         {user && (
-          <Link to="/alpaca" className="navbar-nav-link" onClick={closeMenu}>
-            Intraday
+          <Link to="/events" className="navbar-nav-link" onClick={closeMenu}>
+            Events
           </Link>
         )}
         {user && (

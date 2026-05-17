@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Simulation from '@/components/organisms/ticker/Simulation';
 import DayTradeSimulation from '@/components/organisms/ticker/DayTradeSimulation';
-import IntradaySimulation from '@/components/organisms/ticker/IntradaySimulation';
 import type { Quote, SimulationResult } from '@/types';
 
 type SimulationTabProps = {
@@ -12,7 +11,7 @@ type SimulationTabProps = {
 };
 
 export default function SimulationTab({ ticker, allQuotes, onResult }: SimulationTabProps) {
-  const [subtab, setSubtab] = useState<'longterm' | 'daytrade' | 'intraday'>('longterm');
+  const [subtab, setSubtab] = useState<'longterm' | 'daytrade'>('longterm');
 
   return (
     <section>
@@ -31,13 +30,6 @@ export default function SimulationTab({ ticker, allQuotes, onResult }: Simulatio
         >
           Day trade
         </button>
-        <button
-          className={`sim-subtab${subtab === 'intraday' ? ' sim-subtab--active' : ''}`}
-          onClick={() => setSubtab('intraday')}
-          type="button"
-        >
-          Intraday
-        </button>
       </div>
 
       {subtab === 'longterm' && (
@@ -50,10 +42,6 @@ export default function SimulationTab({ ticker, allQuotes, onResult }: Simulatio
 
       {subtab === 'daytrade' && (
         <DayTradeSimulation ticker={ticker} />
-      )}
-
-      {subtab === 'intraday' && (
-        <IntradaySimulation />
       )}
     </section>
   );

@@ -1,10 +1,9 @@
 import { Button } from '@/components/ui/button';
 
-type Side = 'buy' | 'sell';
-
 type SimManualEntryProps = {
-  side: Side;
-  onSideChange: (s: Side) => void;
+  side: string;
+  onSideChange: (s: string) => void;
+  sideOptions?: { value: string; label: string }[];
   value: string;
   onValueChange: (v: string) => void;
   onAdd: () => void;
@@ -12,22 +11,27 @@ type SimManualEntryProps = {
   inputSlot: React.ReactNode;
 };
 
-export default function SimManualEntry({ side, onSideChange, value, onValueChange, onAdd, inputSlot }: SimManualEntryProps) {
+const DEFAULT_OPTIONS: { value: string; label: string }[] = [
+  { value: 'buy', label: 'Buy ($)' },
+  { value: 'sell', label: 'Sell (%)' },
+];
+
+export default function SimManualEntry({ side, onSideChange, sideOptions = DEFAULT_OPTIONS, value, onValueChange, onAdd, inputSlot }: SimManualEntryProps) {
+  const isExit = side === 'sell' || side === 'cover';
   return (
     <div className="dtrade-manual">
       <span className="dtrade-label">Manual:</span>
       {inputSlot}
-      <select className="dtrade-inline-select" value={side} onChange={(e) => onSideChange(e.target.value as Side)}>
-        <option value="buy">Buy ($)</option>
-        <option value="sell">Sell (%)</option>
+      <select className="dtrade-inline-select" value={side} onChange={(e) => onSideChange(e.target.value)}>
+        {sideOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
       <input
         type="number"
         className="dtrade-price-input"
         min="0"
-        max={side === 'sell' ? 100 : undefined}
+        max={isExit ? 100 : undefined}
         step="any"
-        placeholder={side === 'buy' ? 'Amount ($)' : 'Percent (0–100)'}
+        placeholder={isExit ? 'Percent (0–100)' : 'Amount ($)'}
         value={value}
         onChange={(e) => onValueChange(e.target.value)}
       />

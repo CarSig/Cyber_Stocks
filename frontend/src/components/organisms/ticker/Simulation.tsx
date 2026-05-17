@@ -369,7 +369,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
 
       <SimManualEntry
         side={manualType}
-        onSideChange={setManualType}
+        onSideChange={(s) => setManualType(s as 'buy' | 'sell')}
         value={manualValue}
         onValueChange={setManualValue}
         onAdd={() => {

@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-
-type Side = 'buy' | 'sell';
+import type { Side } from '@/utils/sim';
 
 type TextAction = {
   // The label shown in text (date string or HH:MM)
@@ -30,7 +29,7 @@ export function useSimTextSync<TAction>({
     acts
       .map((a) => {
         const { label, side, value } = toTextAction(a);
-        const n = side === 'sell' ? -Math.abs(value) : Math.abs(value);
+        const n = (side === 'sell' || side === 'cover') ? -Math.abs(value) : Math.abs(value);
         return `${label}, ${n}`;
       })
       .join('\n'),

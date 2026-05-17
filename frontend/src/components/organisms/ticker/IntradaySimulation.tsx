@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, createSeriesMarkers } from 'lightweight-charts';
 import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
 import { getBars, getIntradayEvents } from '@/api/alpaca';
@@ -35,7 +35,7 @@ const INTRADAY_SIM_PRESETS: Record<string, { time: string; side: 'buy' | 'sell';
 };
 
 import type { Side, Action, Transaction, SimResult } from '@/utils/sim';
-import { simResultToExportArgs } from '@/utils/sim';
+import { runShortSimulation, simResultToExportArgs } from '@/utils/sim';
 
 function runSimulation(bars: AlpacaBar[], actions: Action[], startShares = 0): SimResult {
   const sorted = [...actions].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
@@ -156,13 +156,16 @@ function syncMarkers(
 ) {
   const t = (iso: string) => DateUtils.toEtChartTime(iso, offset);
 
-  const actionMarkers = actions.map((a) => ({
-    time: t(a.timestamp),
-    position: a.side === 'buy' ? ('belowBar' as const) : ('aboveBar' as const),
-    color: a.side === 'buy' ? '#22c55e' : '#ef4444',
-    shape: a.side === 'buy' ? ('arrowUp' as const) : ('arrowDown' as const),
-    text: a.side === 'buy' ? `B $${a.value}` : `S ${a.value}%`,
-  }));
+  const actionMarkers = actions.map((a) => {
+    const isEntry = a.side === 'buy' || a.side === 'short';
+    return {
+      time: t(a.timestamp),
+      position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
+      color: a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#a78bfa',
+      shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
+      text: a.side === 'buy' ? `B $${a.value}` : a.side === 'sell' ? `S ${a.value}%` : a.side === 'short' ? `Sh $${a.value}` : `C ${a.value}%`,
+    };
+  });
 
   const eventMarkers: {
     time: import('lightweight-charts').Time;
@@ -219,18 +222,20 @@ export default function IntradaySimulation() {
   const [textMode, setTextMode] = useState(false);
   const [textValue, setTextValue] = useState(() => DateUtils.lastWeekday(DateUtils.todayStr()));
   const [chartType, setChartType] = useState<'line' | 'area' | 'candlestick'>('area');
+  const [tradeMode, setTradeMode] = useState<'long' | 'short'>('long');
   const [selectedEvent, setSelectedEvent] = useState<IntradayEvent | null>(null);
   const [showPeers, setShowPeers] = useState(false);
   const [extraDates, setExtraDates] = useState<string[]>([]);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const dayLinesRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ChartRef>(null);
   const portfolioChartRef = useRef<HTMLDivElement>(null);
   const valueRef = useRef<string>(value);
+  const tradeModeRef = useRef<'long' | 'short'>(tradeMode);
   const tzOffsetRef = useRef<number>(0);
-  useEffect(() => {
-    valueRef.current = value;
-  }, [value]);
+  useEffect(() => { valueRef.current = value; }, [value]);
+  useEffect(() => { tradeModeRef.current = tradeMode; }, [tradeMode]);
 
   const { data: companiesData } = useQuery<Record<string, string>>({
     queryKey: ['companies'],
@@ -256,33 +261,31 @@ export default function IntradaySimulation() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const prevDate = useMemo(() => DateUtils.prevWeekday(query.date), [query.date]);
-  const nextDate = useMemo(() => DateUtils.nextWeekday(query.date), [query.date]);
-  const hasPrev = extraDates.includes(prevDate);
-  const hasNext = extraDates.includes(nextDate);
+  const allDates = useMemo(() => {
+    const set = new Set([query.date, ...extraDates]);
+    return Array.from(set).sort();
+  }, [query.date, extraDates]);
+  const earliestDate = allDates[0] ?? query.date;
+  const latestDate = allDates[allDates.length - 1] ?? query.date;
+  const prevDate = useMemo(() => DateUtils.prevWeekday(earliestDate), [earliestDate]);
+  const nextDate = useMemo(() => DateUtils.nextWeekday(latestDate), [latestDate]);
 
-  const { data: prevData } = useQuery<{ symbol: string; bars: AlpacaBar[] }>({
-    queryKey: ['alpaca-bars', query.ticker, prevDate, query.timeframe],
-    queryFn: () => getBars(query.ticker, prevDate, query.timeframe),
-    enabled: hasPrev,
-    staleTime: 5 * 60 * 1000,
-  });
-
-  const { data: nextData } = useQuery<{ symbol: string; bars: AlpacaBar[] }>({
-    queryKey: ['alpaca-bars', query.ticker, nextDate, query.timeframe],
-    queryFn: () => getBars(query.ticker, nextDate, query.timeframe),
-    enabled: hasNext,
-    staleTime: 5 * 60 * 1000,
+  const extraQueries = useQueries({
+    queries: extraDates.map((d) => ({
+      queryKey: ['alpaca-bars', query.ticker, d, query.timeframe] as const,
+      queryFn: () => getBars(query.ticker, d, query.timeframe),
+      enabled: Boolean(query.ticker && d),
+      staleTime: 5 * 60 * 1000,
+    })),
   });
 
   const bars = useMemo(() => {
     const all = [
-      ...(hasPrev ? (prevData?.bars ?? []) : []),
+      ...extraQueries.flatMap((q) => q.data?.bars ?? []),
       ...(data?.bars ?? []),
-      ...(hasNext ? (nextData?.bars ?? []) : []),
     ];
     return all.sort((a, b) => a.t.localeCompare(b.t));
-  }, [data, prevData, nextData, hasPrev, hasNext]);
+  }, [data, extraQueries]);
 
   const peerTickers = useMemo(
     () => (showPeers && selectedEvent ? selectedEvent.peers.slice(0, 4) : []),
@@ -326,8 +329,9 @@ export default function IntradaySimulation() {
 
   const result = useMemo<SimResult | null>(() => {
     if (!bars.length || !actions.length) return null;
+    if (tradeMode === 'short') return runShortSimulation(bars, actions, DateUtils.fmtTime);
     return runSimulation(bars, actions, Math.max(0, Number(startShares) || 0));
-  }, [bars, actions, startShares]);
+  }, [bars, actions, startShares, tradeMode]);
 
   const syncTextDate = useCallback((newDate: string) => {
     setTextValue((prev) => {
@@ -408,7 +412,25 @@ export default function IntradaySimulation() {
       height: 200,
       layout: { background: { color: 'transparent' }, textColor: cv('--text-primary') || '#e5e7eb' },
       grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
-      timeScale: { timeVisible: true, secondsVisible: false, borderColor: 'rgba(255,255,255,0.1)', fixLeftEdge: false, fixRightEdge: false },
+      timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+        borderColor: 'rgba(255,255,255,0.1)',
+        fixLeftEdge: false,
+        fixRightEdge: false,
+        tickMarkFormatter: (time: number, tickMarkType: number) => {
+          const d = new Date(time * 1000);
+          const hh = String(d.getUTCHours()).padStart(2, '0');
+          const mm = String(d.getUTCMinutes()).padStart(2, '0');
+          // tickMarkType: 0=Year, 1=Month, 2=DayOfMonth, 3=Time, 4=TimeWithSeconds
+          if (tickMarkType <= 2) {
+            const day = d.getUTCDate();
+            const mon = d.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+            return `${day} ${mon} ${hh}:${mm}`;
+          }
+          return `${hh}:${mm}`;
+        },
+      },
       rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
       crosshair: { mode: 1 },
       handleScroll: true,
@@ -466,7 +488,7 @@ export default function IntradaySimulation() {
       if (!param.time) return;
       const iso = chartTimeToIso(param.time as unknown as number);
       const val = Math.max(0.01, Number(valueRef.current) || 100);
-      const newAction: Action = { id: nextActionId++, timestamp: iso, time: DateUtils.fmtTime(iso), side: 'buy', value: val };
+      const newAction: Action = { id: nextActionId++, timestamp: iso, time: DateUtils.fmtTime(iso), side: tradeModeRef.current === 'short' ? 'short' : 'buy', value: val };
       setActions((prev) => {
         const next = [...prev, newAction];
         setTextValue(actionsToText(query.date, next));
@@ -480,7 +502,7 @@ export default function IntradaySimulation() {
       if (!lastHoveredBar) return;
       const val = Math.min(100, Math.max(0.01, Number(valueRef.current) || 50));
       const iso = lastHoveredBar.iso;
-      const newAction: Action = { id: nextActionId++, timestamp: iso, time: DateUtils.fmtTime(iso), side: 'sell', value: val };
+      const newAction: Action = { id: nextActionId++, timestamp: iso, time: DateUtils.fmtTime(iso), side: tradeModeRef.current === 'short' ? 'cover' : 'sell', value: val };
       setActions((prev) => {
         const next = [...prev, newAction];
         setTextValue(actionsToText(query.date, next));
@@ -491,16 +513,51 @@ export default function IntradaySimulation() {
     chartRef.current = { chart, series };
     syncMarkers(series, actions, selectedEvent, query.date, offset);
 
+    // Day boundaries: vertical line at the first bar of each new ET day; weekend gaps get a thicker yellow line.
+    const overlayEl = dayLinesRef.current;
+    const boundaries: { time: number; weekend: boolean }[] = [];
+    let prevEtDate: string | null = null;
+    for (const b of bars) {
+      const etDate = DateUtils.fmtDateEt(b.t);
+      if (prevEtDate !== null && etDate !== prevEtDate) {
+        const prevD = new Date(prevEtDate + 'T12:00:00Z');
+        const curD = new Date(etDate + 'T12:00:00Z');
+        const dayDiff = Math.round((curD.getTime() - prevD.getTime()) / 86_400_000);
+        boundaries.push({
+          time: Math.floor(new Date(b.t).getTime() / 1000) + offset,
+          weekend: dayDiff > 1,
+        });
+      }
+      prevEtDate = etDate;
+    }
+    const drawDayLines = () => {
+      if (!overlayEl) return;
+      const ts = chart.timeScale();
+      const html: string[] = [];
+      for (const b of boundaries) {
+        const x = ts.timeToCoordinate(b.time as unknown as import('lightweight-charts').Time);
+        if (x == null) continue;
+        html.push(`<span class="${b.weekend ? 'weekend' : ''}" style="left:${x}px"></span>`);
+      }
+      overlayEl.innerHTML = html.join('');
+    };
+    drawDayLines();
+    const ts = chart.timeScale();
+    ts.subscribeVisibleTimeRangeChange(drawDayLines);
+
     const ro = new ResizeObserver(() => {
       if (containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
+      drawDayLines();
     });
     ro.observe(el);
 
     return () => {
       el.removeEventListener('contextmenu', onContextMenu);
+      ts.unsubscribeVisibleTimeRangeChange(drawDayLines);
       ro.disconnect();
       chart.remove();
       chartRef.current = null;
+      if (overlayEl) overlayEl.innerHTML = '';
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bars, chartType, peerBars]);
@@ -541,9 +598,10 @@ export default function IntradaySimulation() {
       setActions((prev) => {
         const next = prev.map((a) => {
           if (a.id !== id) return a;
-          if (field === 'value') return { ...a, value: a.side === 'sell' ? Math.min(100, Number(val)) : Number(val) };
+          const isExit = (s: Side) => s === 'sell' || s === 'cover';
+          if (field === 'value') return { ...a, value: isExit(a.side) ? Math.min(100, Number(val)) : Number(val) };
           const newSide = val as Side;
-          return { ...a, side: newSide, value: newSide === 'sell' ? Math.min(100, a.value) : a.value };
+          return { ...a, side: newSide, value: isExit(newSide) ? Math.min(100, a.value) : a.value };
         });
         setTextValue(actionsToText(query.date, next));
         return next;
@@ -555,8 +613,8 @@ export default function IntradaySimulation() {
   const clear = useCallback(() => {
     setActions([]);
     setTextValue(query.date);
-    setNextSide('buy');
-  }, [query.date]);
+    setNextSide(tradeMode === 'short' ? 'short' : 'buy');
+  }, [query.date, tradeMode]);
 
   const handleExportPdf = useCallback(() => {
     if (!result) return;
@@ -590,8 +648,29 @@ export default function IntradaySimulation() {
         {bars.length > 0 && (
           <>
             <div className="dtrade-next-side">
-              <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Left click = Buy ($)</span>
-              <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Right click = Sell (%)</span>
+              <button
+                className={`sim-chart-btn${tradeMode === 'long' ? ' active' : ''}`}
+                onClick={() => { setTradeMode('long'); setActions([]); setNextSide('buy'); }}
+                type="button"
+              >Long</button>
+              <button
+                className={`sim-chart-btn${tradeMode === 'short' ? ' active' : ''}`}
+                onClick={() => { setTradeMode('short'); setActions([]); setNextSide('short'); }}
+                type="button"
+                style={tradeMode === 'short' ? { borderColor: '#f97316', color: '#f97316' } : undefined}
+              >Short</button>
+              <span style={{ width: '0.5rem' }} />
+              {tradeMode === 'long' ? (
+                <>
+                  <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Left click = Buy ($)</span>
+                  <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Right click = Sell (%)</span>
+                </>
+              ) : (
+                <>
+                  <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Left click = Short ($)</span>
+                  <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Right click = Cover (%)</span>
+                </>
+              )}
             </div>
             <div className="dtrade-shares">
               <span className="dtrade-label">Start shares:</span>
@@ -699,24 +778,33 @@ export default function IntradaySimulation() {
               </button>
             )}
             <button
-              className={`sim-chart-btn${hasPrev ? ' active' : ''}`}
+              className="sim-chart-btn"
               onClick={() => setExtraDates((prev) => [...new Set([...prev, prevDate])])}
               type="button"
-              disabled={hasPrev}
             >
-              + Day before
+              + Day before ({prevDate})
             </button>
             <button
-              className={`sim-chart-btn${hasNext ? ' active' : ''}`}
+              className="sim-chart-btn"
               onClick={() => setExtraDates((prev) => [...new Set([...prev, nextDate])])}
               type="button"
-              disabled={hasNext}
             >
-              + Day after
+              + Day after ({nextDate})
             </button>
+            {extraDates.length > 0 && (
+              <button
+                className="sim-chart-btn"
+                onClick={() => setExtraDates([])}
+                type="button"
+              >
+                Reset days
+              </button>
+            )}
           </div>
           <div className="dtrade-chart-hint">
-            Left click to buy ${value} · Right click to sell {value}%
+            {tradeMode === 'long'
+              ? `Left click to buy $${value} · Right click to sell ${value}%`
+              : `Left click to short $${value} · Right click to cover ${value}%`}
             {showPeers && peerTickers.length > 0 && (
               <span style={{ marginLeft: 8 }}>
                 {peerTickers.map((t, i) => (
@@ -725,7 +813,9 @@ export default function IntradaySimulation() {
               </span>
             )}
           </div>
-          <div ref={containerRef} className="alpaca-chart-container" />
+          <div ref={containerRef} className="alpaca-chart-container">
+            <div ref={dayLinesRef} className="alpaca-chart-daylines" />
+          </div>
 
           <SimToolbar
             presets={INTRADAY_SIM_PRESETS}
@@ -753,7 +843,10 @@ export default function IntradaySimulation() {
 
           <SimManualEntry
             side={nextSide}
-            onSideChange={setNextSide}
+            onSideChange={(s) => setNextSide(s as Side)}
+            sideOptions={tradeMode === 'long'
+              ? [{ value: 'buy', label: 'Buy ($)' }, { value: 'sell', label: 'Sell (%)' }]
+              : [{ value: 'short', label: 'Short ($)' }, { value: 'cover', label: 'Cover (%)' }]}
             value={value}
             onValueChange={setValue}
             onAdd={addManualAction}
@@ -790,8 +883,17 @@ export default function IntradaySimulation() {
                             value={a.side}
                             onChange={(e) => updateAction(a.id, 'side', e.target.value)}
                           >
-                            <option value="buy">BUY</option>
-                            <option value="sell">SELL</option>
+                            {tradeMode === 'long' ? (
+                              <>
+                                <option value="buy">BUY</option>
+                                <option value="sell">SELL</option>
+                              </>
+                            ) : (
+                              <>
+                                <option value="short">SHORT</option>
+                                <option value="cover">COVER</option>
+                              </>
+                            )}
                           </select>
                         </td>
                         <td>
@@ -799,12 +901,12 @@ export default function IntradaySimulation() {
                             className="dtrade-inline-input"
                             type="number"
                             min="0"
-                            max={a.side === 'sell' ? 100 : undefined}
+                            max={a.side === 'sell' || a.side === 'cover' ? 100 : undefined}
                             step="any"
                             value={a.value}
                             onChange={(e) => updateAction(a.id, 'value', e.target.value)}
                           />
-                          <span className="dtrade-unit">{a.side === 'buy' ? '$' : '%'}</span>
+                          <span className="dtrade-unit">{a.side === 'buy' || a.side === 'short' ? '$' : '%'}</span>
                         </td>
                         <td>
                           <Button variant="ghost" onClick={() => removeAction(a.id)} className="dtrade-remove">
@@ -821,21 +923,20 @@ export default function IntradaySimulation() {
           {result && result.transactions.length > 0 && (
             <SimResults
               ref={portfolioChartRef}
-              stats={[
+              stats={tradeMode === 'long' ? [
                 { label: 'Total invested', value: PriceUtils.fmt(result.totalInvested) },
                 { label: 'Shares held', value: result.finalShares.toFixed(4) },
                 { label: 'Shares value', value: PriceUtils.fmt(result.sharesValue) },
                 { label: 'Cash withdrawn', value: PriceUtils.fmt(result.cashWithdrawn) },
-                {
-                  label: 'Profit',
-                  value: (result.profit >= 0 ? '+' : '') + PriceUtils.fmt(result.profit),
-                  color: profitColor,
-                },
-                {
-                  label: 'Profit %',
-                  value: (result.profitPct >= 0 ? '+' : '') + result.profitPct.toFixed(2) + '%',
-                  color: profitColor,
-                },
+                { label: 'Profit', value: (result.profit >= 0 ? '+' : '') + PriceUtils.fmt(result.profit), color: profitColor },
+                { label: 'Profit %', value: (result.profitPct >= 0 ? '+' : '') + result.profitPct.toFixed(2) + '%', color: profitColor },
+              ] : [
+                { label: 'Cash received', value: PriceUtils.fmt(result.totalInvested) },
+                { label: 'Shares short', value: Math.abs(result.finalShares).toFixed(4) },
+                { label: 'Remaining liability', value: PriceUtils.fmt(Math.abs(result.sharesValue)) },
+                { label: 'Cover cost', value: PriceUtils.fmt(result.cashWithdrawn) },
+                { label: 'Profit', value: (result.profit >= 0 ? '+' : '') + PriceUtils.fmt(result.profit), color: profitColor },
+                { label: 'Profit %', value: (result.profitPct >= 0 ? '+' : '') + result.profitPct.toFixed(2) + '%', color: profitColor },
               ]}
               history={result.portfolioHistory}
               markers={portfolioMarkers}

@@ -27,6 +27,17 @@ export const DateUtils = {
     return d.toISOString().slice(0, 10);
   },
 
+  /** Format an ISO UTC timestamp as YYYY-MM-DD in US Eastern time. */
+  fmtDateEt(isoUtc: string): string {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+    }).formatToParts(new Date(isoUtc));
+    const y = parts.find((p) => p.type === 'year')?.value;
+    const m = parts.find((p) => p.type === 'month')?.value;
+    const d = parts.find((p) => p.type === 'day')?.value;
+    return `${y}-${m}-${d}`;
+  },
+
   /** Format an ISO UTC timestamp as HH:MM in US Eastern time. */
   fmtTime(isoUtc: string): string {
     return new Date(isoUtc).toLocaleTimeString('en-US', {
