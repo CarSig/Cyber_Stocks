@@ -1,5 +1,14 @@
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+
+const aiButtonStyle: React.CSSProperties = {
+  background: 'var(--accent-bg)',
+  border: '1px solid var(--accent-border)',
+  color: 'var(--accent-color)',
+  fontWeight: 600,
+  transition: 'background 0.15s, box-shadow 0.15s',
+};
 
 type SimToolbarProps = {
   presets: Record<string, unknown> | undefined;
@@ -12,6 +21,11 @@ type SimToolbarProps = {
   onExportPdf: () => void;
   hasActions: boolean;
   onClear: () => void;
+  onAiSim?: () => void;
+  aiSimDisabled?: boolean;
+  onSimulateAll?: () => void;
+  aiDelay?: number;
+  onAiDelayChange?: (v: number) => void;
 };
 
 export default function SimToolbar({
@@ -25,28 +39,71 @@ export default function SimToolbar({
   onExportPdf,
   hasActions,
   onClear,
+  onAiSim,
+  aiSimDisabled,
+  onSimulateAll,
+  aiDelay,
+  onAiDelayChange,
 }: SimToolbarProps) {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.5rem' }}>
       <Select onValueChange={(v: string | null) => v && onPreset(v)} disabled={!presets}>
         <SelectTrigger className="w-44">
           <SelectValue
-            placeholder={
-              presetsError ? `Error: ${presetsError.message}` : presetsLoading ? 'Loading…' : 'Load preset…'
-            }
+            placeholder={presetsError ? `Error: ${presetsError.message}` : presetsLoading ? 'Loading…' : 'Load preset…'}
           />
         </SelectTrigger>
         <SelectContent>
-          {presets && Object.keys(presets).map((name) => (
-            <SelectItem key={name} value={name}>{name}</SelectItem>
-          ))}
+          {presets &&
+            Object.keys(presets).map((name) => (
+              <SelectItem key={name} value={name}>
+                {name}
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
       <Button variant="ghost" onClick={onTextModeToggle}>
         {textMode ? 'Visual editor' : 'Text editor'}
       </Button>
-      {hasResult && <Button variant="ghost" onClick={onExportPdf}>Export PDF</Button>}
-      {hasActions && <Button variant="ghost" onClick={onClear}>Clear</Button>}
+      {(onAiSim !== undefined || aiDelay !== undefined) && (
+        <>
+          <Button
+            variant="ghost"
+            onClick={onAiSim}
+            disabled={aiSimDisabled}
+            style={aiSimDisabled ? undefined : aiButtonStyle}
+          >
+            ✦ AI Simulation
+          </Button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <Input
+              type="number"
+              min={0}
+              max={60}
+              value={aiDelay ?? 1}
+              onChange={(e) => onAiDelayChange?.(Math.max(0, Number(e.target.value)))}
+              style={{ width: 82, textAlign: 'center' }}
+              className="dtrade-shares-input"
+            />
+            <span style={{ fontSize: 12, color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>min delay</span>
+          </div>
+        </>
+      )}
+      {onSimulateAll && (
+        <Button variant="ghost" onClick={onSimulateAll} style={aiButtonStyle}>
+          ✦ Simulate All
+        </Button>
+      )}
+      {hasResult && (
+        <Button variant="ghost" onClick={onExportPdf}>
+          Export PDF
+        </Button>
+      )}
+      {hasActions && (
+        <Button variant="ghost" onClick={onClear}>
+          Clear
+        </Button>
+      )}
     </div>
   );
 }

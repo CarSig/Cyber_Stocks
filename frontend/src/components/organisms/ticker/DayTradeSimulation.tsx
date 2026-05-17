@@ -61,17 +61,17 @@ function runSimulation(bars: AlpacaBar[], actions: Action[], startShares = 0): S
         const bought = act.value / price;
         shares += bought;
         totalInvested += act.value;
-        transactions.push({ time: DateUtils.fmtTime(act.timestamp), side: 'buy', price, shares: bought, value: act.value, sharesAfter: shares, portfolioValue: shares * price });
+        transactions.push({ time: DateUtils.fmtTime(act.timestamp), timestamp: act.timestamp, side: 'buy', price, shares: bought, value: act.value, sharesAfter: shares, portfolioValue: shares * price });
       } else {
         const pct = Math.min(act.value, 100) / 100;
         const sold = shares * pct;
         const proceeds = sold * price;
         shares -= sold;
         cashWithdrawn += proceeds;
-        transactions.push({ time: DateUtils.fmtTime(act.timestamp), side: 'sell', price, shares: sold, value: proceeds, sharesAfter: shares, portfolioValue: shares * price });
+        transactions.push({ time: DateUtils.fmtTime(act.timestamp), timestamp: act.timestamp, side: 'sell', price, shares: sold, value: proceeds, sharesAfter: shares, portfolioValue: shares * price });
       }
     }
-    portfolioHistory.push({ time: DateUtils.fmtTime(barTime), value: shares * price });
+    portfolioHistory.push({ time: barTime, value: shares * price });
   }
 
   const lastPrice = bars.at(-1)?.c ?? 0;

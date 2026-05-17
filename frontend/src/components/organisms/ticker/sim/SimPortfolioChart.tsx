@@ -18,16 +18,25 @@ type SimPortfolioChartProps = {
   intraday?: boolean;
 };
 
-// Convert HH:MM string to unix seconds using a fixed UTC base date.
-// Using 1970-01-05 (Monday) as anchor so times are always positive and ascending.
-function hmToUnix(hhmm: string): number {
-  const [h, m] = hhmm.split(':').map(Number);
-  return (4 * 86400) + h * 3600 + m * 60; // Jan 5 1970 00:00 UTC + HH:MM
+function etOffset(isoUtc: string): number {
+  const ref = new Date(isoUtc);
+  const fmt = (tz: string) =>
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+    }).format(ref);
+  const parse = (s: string) => {
+    const [date, time] = s.split(', ');
+    const [y, mo, d] = date.split('-');
+    const [h, mi, se] = time.split(':');
+    return new Date(Date.UTC(+y, +mo - 1, +d, +h, +mi, +se));
+  };
+  return (parse(fmt('America/New_York')).getTime() - parse(fmt('UTC')).getTime()) / 1000;
 }
 
-function toTime(timeStr: string, intraday: boolean): Time {
+function toTime(timeStr: string, intraday: boolean, offset: number): Time {
   if (!intraday) return timeStr as `${number}-${number}-${number}`;
-  return hmToUnix(timeStr) as unknown as Time;
+  return (Math.floor(new Date(timeStr).getTime() / 1000) + offset) as unknown as Time;
 }
 
 function fmtVal(v: number) {
@@ -56,23 +65,24 @@ const SimPortfolioChart = forwardRef<HTMLDivElement, SimPortfolioChartProps>(
         localization: intraday
           ? {
               timeFormatter: (t: number) => {
-                // t is unix seconds with fixed anchor; extract HH:MM
-                const totalSeconds = t % 86400;
-                const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-                const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-                return `${h}:${m}`;
+                // t is real unix seconds shifted to ET; format as HH:MM ET
+                return new Date(t * 1000).toLocaleTimeString('en-US', {
+                  hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'UTC',
+                });
               },
             }
           : {},
       });
 
+      const offset = intraday && history.length ? etOffset(history[0].time) : 0;
+
       const series = chart.addSeries(LineSeries, { color: '#3b82f6', lineWidth: 2 });
-      series.setData(history.map((p) => ({ time: toTime(p.time, intraday), value: p.value })));
+      series.setData(history.map((p) => ({ time: toTime(p.time, intraday, offset), value: p.value })));
 
       if (markers.length) {
         const ms = markers
           .map((m) => ({
-            time: toTime(m.time, intraday),
+            time: toTime(m.time, intraday, offset),
             position: m.side === 'buy' ? ('belowBar' as const) : ('aboveBar' as const),
             color: m.side === 'buy' ? '#22c55e' : '#ef4444',
             shape: m.side === 'buy' ? ('arrowUp' as const) : ('arrowDown' as const),

@@ -10,6 +10,7 @@ export type Action = {
 
 export type Transaction = {
   time: string;
+  timestamp: string;
   side: Side;
   price: number;
   shares: number;
@@ -57,7 +58,7 @@ export function runShortSimulation(
         sharesShort += shorted;
         cashReceived += act.value;
         transactions.push({
-          time: fmtTime(act.timestamp), side: 'short', price,
+          time: fmtTime(act.timestamp), timestamp: act.timestamp, side: 'short', price,
           shares: shorted, value: act.value,
           sharesAfter: -sharesShort, portfolioValue: -sharesShort * price,
         });
@@ -68,14 +69,14 @@ export function runShortSimulation(
         sharesShort -= covered;
         coverCost += cost;
         transactions.push({
-          time: fmtTime(act.timestamp), side: 'cover', price,
+          time: fmtTime(act.timestamp), timestamp: act.timestamp, side: 'cover', price,
           shares: covered, value: cost,
           sharesAfter: -sharesShort, portfolioValue: -sharesShort * price,
         });
       }
     }
     // Portfolio value for short: cash received minus current liability
-    portfolioHistory.push({ time: fmtTime(barTime), value: cashReceived - coverCost - sharesShort * price });
+    portfolioHistory.push({ time: barTime, value: cashReceived - coverCost - sharesShort * price });
   }
 
   const lastPrice = bars.at(-1)?.c ?? 0;
