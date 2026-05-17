@@ -49,7 +49,7 @@ function filterByPeriod(quotes: Quote[], days: number | null | undefined): Quote
   return quotes.filter((q) => new Date(q.date) >= cutoff);
 }
 
-const TICKER_TTL = 60 * 60 * 1000;
+const TICKER_TTL = 6 * 60 * 60 * 1000;
 
 type UseStockOpts = {
   compareTicker?: string;

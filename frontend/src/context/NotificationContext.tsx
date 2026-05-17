@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './AuthContext';
 import { BASE } from '@/api/core';
 import type { AppNotification } from '@/types';
@@ -29,6 +30,7 @@ function save(notifications: AppNotification[]): void {
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [notifications, setNotifications] = useState<AppNotification[]>(load);
   const [unread, setUnread] = useState(() => load().filter((n) => !n.read).length);
   const esRef = useRef<EventSource | null>(null);
@@ -40,8 +42,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     esRef.current = es;
 
     es.onmessage = (e: MessageEvent<string>) => {
-      const data = JSON.parse(e.data) as Partial<AppNotification> & { type?: string };
+      const data = JSON.parse(e.data) as Partial<AppNotification> & { type?: string; ticker?: string };
       if (data.type === 'connected' || data.type === 'ping') return;
+      if (data.type === 'stocks.updated' && data.ticker) {
+        queryClient.invalidateQueries({ queryKey: ['ticker', data.ticker] });
+      }
       const notification: AppNotification = {
         ...data,
         id: crypto.randomUUID(),
