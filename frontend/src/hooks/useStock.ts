@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { getTicker, getCompanies, getCorrelation } from '@/api/stock';
 import { withLsCache } from '@/utils/lsCache';
-import type { Quote, TickerData, CorrelationResult } from '@/types';
+import type { Quote, TickerData, CorrelationResult, NewsArticle } from '@/types';
 
 type MiniQuote = { open: number; close: number; date: string };
 
@@ -90,7 +90,7 @@ export function useStock(ticker: string, { compareTicker, period }: UseStockOpts
     allQuotes,
     compareQuotes,
     periodAnalysis,
-    news: data?.news,
+    news: (Array.isArray(data?.news) ? data.news : (data?.news as { news?: NewsArticle[] } | undefined)?.news ?? []) as NewsArticle[],
     summary: data?.summary,
     companies,
   };

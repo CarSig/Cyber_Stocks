@@ -41,15 +41,14 @@ export class StockService {
     return this.cache.getOrSet(`ticker:${name}`, 600, async () => {
       const consumer = new CybersecurityConsumer(name, this.db.pool);
       const history = await consumer.history();
-      const newsData = await consumer.news() as { news?: { relatedTickers?: string[] }[] } & Record<string, unknown>;
+      const { news } = await consumer.news();
       const ticker = companies[name];
-      newsData.news = (newsData.news ?? []).filter(
-        (a) => (a.relatedTickers ?? []).includes(ticker),
+      const filteredNews = (news ?? []).filter(
+        (a) => ((a as { relatedTickers?: string[] }).relatedTickers ?? []).includes(ticker),
       );
       return {
         history,
-        news: newsData,
-        summary: await consumer.summary(),
+        news: filteredNews,
         analysis: analyzeHistory(history),
       };
     });

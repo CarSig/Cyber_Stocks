@@ -183,7 +183,7 @@ function TickerContent() {
               {['charts', 'simulation', 'correlations', 'articles', 'info', 'day trade'].map((tab) => (
                 <button
                   key={tab}
-                  className={`ticker-tab${activeTab === tab ? ' ticker-tab--active' : ''}`}
+                  className={`ticker-tab${activeTab === tab ? ' ticker-tab--active' : ''}${tab === 'simulation' ? ' ticker-tab--accent' : ''}`}
                   onClick={() => setActiveTab(tab)}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -206,7 +206,7 @@ function TickerContent() {
             )}
 
             {activeTab === 'simulation' && (
-              <SimulationTab ticker={ticker ?? ''} allQuotes={allQuotes} onResult={simulation.onResult} />
+              <SimulationTab ticker={ticker ?? ''} allQuotes={allQuotes} onResult={simulation.onResult} companies={companies} />
             )}
 
             {activeTab === 'correlations' && (

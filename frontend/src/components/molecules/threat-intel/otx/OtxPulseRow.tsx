@@ -1,4 +1,4 @@
-import { formatDate } from '@/utils/date';
+import { DateUtils } from '@/utils/date';
 
 type OtxPulse = {
   id: string;
@@ -39,7 +39,7 @@ export default function OtxPulseRow({ pulse }: OtxPulseRowProps) {
       <td>
         <span className={`ti-badge ti-badge--tlp-${pulse.tlp ?? 'white'}`}>{pulse.tlp ?? 'white'}</span>
       </td>
-      <td className="ti-date">{formatDate(pulse.created)}</td>
+      <td className="ti-date">{DateUtils.formatDate(pulse.created)}</td>
     </tr>
   );
 }

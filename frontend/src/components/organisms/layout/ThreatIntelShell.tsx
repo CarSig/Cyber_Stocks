@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { formatDateTime } from '@/utils/date';
+import { DateUtils } from '@/utils/date';
 import Pagination from '@/components/molecules/shared/Pagination';
 import type { ThreatIntelListResponse } from '@/types';
 
@@ -34,7 +34,7 @@ export default function ThreatIntelShell({
           ← Threat Intel
         </Link>
         <h1>{title}</h1>
-        {data?.syncedAt && <span className="ti-synced">Synced {formatDateTime(data.syncedAt)}</span>}
+        {data?.syncedAt && <span className="ti-synced">Synced {DateUtils.formatDateTime(data.syncedAt)}</span>}
       </div>
 
       {filters && <div className="ti-filters">{filters}</div>}

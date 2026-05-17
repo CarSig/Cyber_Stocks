@@ -208,7 +208,7 @@
 
 .alpaca-chart-container {
   width: 100%;
-  height: 500px;
+  height: 200px;
   border: 1px solid var(--border, #2d3348);
   border-radius: 8px;
   overflow: hidden;

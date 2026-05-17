@@ -7,7 +7,7 @@
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t9n1wz/ask_experienced_devs_weekly_thread_a_weekly/",
     "author": "AutoModerator",
     "score": 14,
-    "numComments": 70,
+    "numComments": 72,
     "createdAt": "2026-05-11T00:00:20.000Z"
   },
   {
@@ -17,9 +17,20 @@
     "text": "A thread for Developers and IT folks with less experience to ask more experienced souls questions about the industry.\n\n&amp;#x200B;\n\nPlease keep top level comments limited to Inexperienced Devs. Most rules do not apply, but keep it civil. Being a jerk will not be tolerated.\n\n&amp;#x200B;\n\n**Inexperienced Devs should refrain from answering other Inexperienced Devs' questions.**",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t31p39/ask_experienced_devs_weekly_thread_a_weekly/",
     "author": "AutoModerator",
-    "score": 15,
+    "score": 12,
     "numComments": 51,
     "createdAt": "2026-05-04T00:00:18.000Z"
+  },
+  {
+    "id": "1teyql0",
+    "subreddit": "ExperiencedDevs",
+    "title": "What we can learn from the Atlassian layoff video",
+    "text": "*No tokens generated during the composition of this post*\n\nFor those who have not seen the video, a former atlassian engineer recently posted a video going over his time at atlassian. The title is clickbait, this is basically a system design video about building a load balancer controller at scale:\n\nhttps://www.youtube.com/watch?v=55pTFVoclvE\n\nNow, few things to address because I've seen the other comments section of people who clearly didn't watch the video.\n\nNothing he said in this video is likely to be proprietary. It's high level system design. He probably doesn't have to worried about getting sued, it all seems like fair use. But IANAL.\n\nHere is what we can learn:\n\n1. Talented engineers get laid off. I know most people should know this, a lot of time layoffs target experienced engineers as they have higher salaries. But this individual seems like he knows his craft and I don't doubt he won't have trouble finding work. \n\n2. You need to be considering new opportunities more often than every 8 years. This is not your father's career anymore. Once you hit that 5 year mark, YMMV, but you should really be dipping your feet into that market. \n\n3. This showcases what SWE really is. It's not banging out code on your keyboard. It's not always building the main product, but something ancillary to the main product. Something that facilitates productivity on the team. \n\nThere is more here, but I have to cut this short. ",
+    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1teyql0/what_we_can_learn_from_the_atlassian_layoff_video/",
+    "author": "ninetofivedev",
+    "score": 478,
+    "numComments": 128,
+    "createdAt": "2026-05-16T16:42:25.000Z"
   },
   {
     "id": "1tesidz",
@@ -28,9 +39,42 @@
     "text": "I work at a company that is an extremely heavy user of Github copilot. All employees are mandated to use it daily, if you dont, you are put on a PIP. Theres a leaderboard for who is prompting the most without context, and every demo and presentation is offshore people trying to demonstrate LLM capability and failing. Horrific accuracy problems or latencies always surface and they pivot to a pre recorded video or say crap like \"this is the worst it will ever be!\"  \n\nAlmost all my time is spent reviewing slop PRs from offshore that are 1000s of lines and filled with emojis, and management not so subtly tells me to stop being a blocker and approve the slop.  But then when prod breaks im on the hook, not them.\n\nWell as many of you know, a new change is being rolled out to Github copilot starting June1. Previously, we  had unlimited access to some models, and a set allocation of tokens for \"premium requests\" on frontier models, all for a static price.\n\nNow, every request is billed simply based on the number of tokens consumed and which model you used. No more static pricing . I looked at the financial implications from my companies POV (MSFT provides a tool to project this) and they are massive. I have a feeling this is going to force the AI pilled C suites around the country to do some explaining to the board.\n\nWhen the token based billing hits my company in June, Github Copilot is projected to cost more than **all cloud subscriptions combined** and be the **number one line item on the IT budget**. Previously it was like #7 or #6.  Its a **15x price increase**.\n\nWonder if we are gonna be told to use AI to write emails, summarize meetings, and sling slop all day once a Copilot seat costs the same amount as 2 senior engineers.\n\nHas anyone seen their leadership have to reckon with this situation yet? I know Claude Code already has done something similar and Uber/Servicenow blew through their annual budget in 4 months, but the Copilot increases are on a whole other level.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tesidz/token_based_billing_changes_june_1/",
     "author": "chickadee-guy",
-    "score": 173,
-    "numComments": 130,
+    "score": 594,
+    "numComments": 319,
     "createdAt": "2026-05-16T12:36:24.000Z"
+  },
+  {
+    "id": "1tf5jq1",
+    "subreddit": "ExperiencedDevs",
+    "title": "Is the norm now that PRs are basically rubber stamps",
+    "text": "I started a new job at a startup about four months ago where the whole process is now \"ai-first\" approach being pushed on us that we should just vibe-code all of the requirements and the apps. The startup is self-sustainable, it's cash-flow positive and is looking to go get some funding in a few months for expansion but holy shit it's bad.\n\nThe startup had two developer founders that left it; their code is a mess, and I mean a complete mess but I understand it from the point of view because they needed to get the customer and had to do shortcuts and just a typical startup fashion.\n\nThen a CTO joined and he pushed for a complete rewrite which happened after about a year and now we are going for the third rewrite (hurray!) The principle engineer is coding, the CTO is coding...? seniors get to code but they don't get to design anything and they must ask for implementation details from the CTO?  \n  \nAnyways, the PR review is basically just LGTMing claude generated code, I don't understand if this is the norm now or are we just gone insane and we have claude write the code, codex review it, human rubber stamps it or runs it through gemini to appear smart and raise some issues and then claude writes the tests and it's just merged? Is this the norm now? Is it a one/two-men show and developers are just orchestrating agents, is that what it is now?",
+    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tf5jq1/is_the_norm_now_that_prs_are_basically_rubber/",
+    "author": "Sea_Cap_2320",
+    "score": 125,
+    "numComments": 91,
+    "createdAt": "2026-05-16T21:05:11.000Z"
+  },
+  {
+    "id": "1tfh4bo",
+    "subreddit": "ExperiencedDevs",
+    "title": "Off meta discussions in r/ExperiencedDevs, and current moderation patterns",
+    "text": "I was pretty disappointed when the below thread was deleted by the mods recently: \n\nhttps://www.reddit.com/r/ExperiencedDevs/comments/1tdq7dk/removed_by_moderator/?utm_source=share&amp;utm_medium=web3x&amp;utm_name=web3xcss&amp;utm_term=1&amp;utm_content=share_button\n\nFrom recollection it was (paraphrasing) something like:\n\n* What do you do or listen to when in deep focus, or what do you do or listen to when ramping up to deep work/focus?\n\nIt felt sincere, in good faith and likely written by wetware/a meatsack like yours truly here. But my AI radar is significantly worse than some so... don't know!  \n\nIn a world where Stack Overflow existed and is actively dying because of behaviour from mods that supressed what I would describe as culture positive questions and/or posts. And in a world where AI exists so discourse is actively worsening. IMO, an off meta question that's asked in good will, and from what I could tell didn't use AI, has sincere and positive engagement from the community. We should keep. And encourage! \n\nThere's only so many ways to word \"Hey my soft skills suck can I make up for this, by writing better code?\" in techno bro speak with appropriately vapid responses this place can take. I want r/ExperiencedDevs to be a place of high value, respect and trust. And some times non-career, off meta posts like the one I linked and was deleted build a positive culture. We need more of that human touch now, more than ever. Please, please help us build it. ",
+    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tfh4bo/off_meta_discussions_in_rexperienceddevs_and/",
+    "author": "hangerofmonkeys",
+    "score": 24,
+    "numComments": 52,
+    "createdAt": "2026-05-17T06:11:12.000Z"
+  },
+  {
+    "id": "1tfnvme",
+    "subreddit": "ExperiencedDevs",
+    "title": "SPA address bar jank on mobile Chrome",
+    "text": "If the address bar has been scrolled away and then you navigate to a new page on a MPA/traditional server rendered website, then the address bar will immediately reappear.\n\nIf you do the same thing on a SPA/client rendered website, then the address will not immediately reappear, only once the user interacts with the page, which is typically to start scrolling so the address bar jankily reappears whilst simultaneously being scrolling away.\n\nAs far as I can tell there is no avoiding this. Both react.dev and svelte.dev exhibit this behaviour.\n\nI'm amazed this is the behaviour of so many websites (and AFAIAK has been for at least a decade) and I've never heard anyone mention it. I can't even find any reference to it with a web search. I suspect part of the reason is the web devs strongly prefer desktop over mobile, and are more likely to have iPhones (which don't have this problem) than the general population.\n\nIf anybody has any info or insight I would be very interested to hear. This single thing is probably going to be the decider on whether I go ahead with a SPA or switch to MPA.",
+    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tfnvme/spa_address_bar_jank_on_mobile_chrome/",
+    "author": "maximeridius",
+    "score": 0,
+    "numComments": 0,
+    "createdAt": "2026-05-17T12:15:05.000Z"
   },
   {
     "id": "1tegwrc",
@@ -39,8 +83,8 @@
     "text": "Senior/staff level depending on company size, usually startups. I've been interviewing recently, and a brand new question is out there:\n\n\"Tell me about your agentic coding setup.\"\n\n5 for 5, every company has asked me this. I haven't managed to find a good answer for it yet, because quite frankly, I can't tell if they're trying to disqualify people for using them, or disqualify people for using them too much. One company asked me why I thought \\~BIG AI COMPANY\\~ had a superior coding agent / sdk. \n\nI almost miss the leetcode questions. ",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tegwrc/fun_new_interview_question_im_seeing/",
     "author": "Packeselt",
-    "score": 292,
-    "numComments": 147,
+    "score": 388,
+    "numComments": 211,
     "createdAt": "2026-05-16T02:35:52.000Z"
   },
   {
@@ -50,9 +94,20 @@
     "text": "I lost my 170k euro/year remote gig couple of months ago. I worked with this client for a total of 3 years. Both me and my client were based in Europe.\n\nI'm having trouble with the crushing IT job market right now + AI hype + Hybrid first trend and not remote + ageism (I'm 41).\n\nAnyone else can relate? Any advice on how to cope?. I feel like my self worth and identity went to 0 overnight. Now I can't even get an interview for a employee, hybrid position that pays less than half of what I was making.\n\nEdit: Not worth, self worth",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tendop/anyone_else_lost_their_freelancing_gig_recently/",
     "author": "bluebanana987",
-    "score": 88,
-    "numComments": 73,
+    "score": 131,
+    "numComments": 87,
     "createdAt": "2026-05-16T08:07:47.000Z"
+  },
+  {
+    "id": "1teyr0q",
+    "subreddit": "ExperiencedDevs",
+    "title": "Having a hard time as a “junior” Staff Eng after reorg",
+    "text": "Recently got promoted to Staff Engineer at the same company where I grew from junior engineer to tech leadership over close to a decade.\n\nNot long after the promotion, we went through a pretty significant reorg:  \n\\- leadership changes  \n\\- layoffs  \n\\- a new direction pushing for faster execution, less bureaucracy, simpler flows, more predictable delivery\n\nAt the same time, new IC leadership joined the area to help drive that transformation.\n\nThe technical context is roughly this:  \nwe have a critical business flow sitting on top of an architecture that evolved organically over the years. A lot of operational intelligence ended up spread across tools, pipelines and services, and now we’re starting to hit consistency and ownership problems. On top of that, there are multiple parallel initiatives trying to solve overlapping parts of the same space.\n\nI’ve been advocating for a more structured approach to centralize some of that logic and reduce fragmentation over time.\n\nOther technical leaders seem to prefer a much more incremental approach:  \nsolve the immediate operational need first, avoid building platforms too early, optimize for delivery speed.\n\nTBH I can see the logic in both perspectives.\n\nWhat’s been harder for me is navigating the organizational side of it all.\n\nI spent many years helping build context in this area, and now I’m trying to figure out what my role is in a much different environment with new leadership and a different set of priorities. Sometimes I genuinely can’t tell whether I’m exercising good technical judgment or just reacting emotionally to losing familiarity/influence in a fast-changing org.\n\nI’m also temporarily without a close manager after the reorg, so a lot of my reputation is now being rebuilt laterally with people who joined recently.\n\nFor people who have been through similar transitions as Staff / Principal / tech leadership:  \n\\- how do you build trust with new leadership without becoming someone who just agrees with everything?  \n\\- how do you avoid turning technical disagreements into something personal or political in your own head?",
+    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1teyr0q/having_a_hard_time_as_a_junior_staff_eng_after/",
+    "author": "physical_nft",
+    "score": 14,
+    "numComments": 13,
+    "createdAt": "2026-05-16T16:42:52.000Z"
   },
   {
     "id": "1tebrv7",
@@ -61,9 +116,31 @@
     "text": "this is probably a meta post. i've had a long day. we had a release today, we found issues last minute. lots of last minute fixes and coordination.\n\nwhat i found / have always known is keeping your calm and being good to one another is what always matters. focus on working together and figuring out how to fix the issue, as opposed to dissecting how it got there in the first place ( that can be done later ).\n\ni found that just knowing that you have people to lean-on and someone reliable to bank on, that will help you get through it counts more than someone who will disappear in the day and come up with the magic fix. i much prefer the co-worker who will let me know every 1 or 2 hours or so how things are progressing and knowing that i have someone to work with through this. AI won't replace it, neither will a lonewolf rockstar dev.\n\ni think an underrated aspect of our job is how often we rely on the goodwill of others to help us get through the day. friendly, supportive communication. just be good to one another. i know a lot of people just treat a job as a job and log off or forget about their job after 5p, but i think it helps to garner strong relationships when the environment isn't naturally conducive to 5p log offs. if someone has to stick around to finish the job - that's not good. i definitely don't treat my job like that - and i know it comes at my personal cost, but i'm not willing to let an organisations poor culture tarnish my personal camaraderie. i will work to find a way that no one has to stay past the regular hours, but as long as someone has to - i'll try my best to be available if they need me to be.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tebrv7/be_good_people/",
     "author": "just10bps",
-    "score": 205,
-    "numComments": 25,
+    "score": 246,
+    "numComments": 27,
     "createdAt": "2026-05-15T22:47:51.000Z"
+  },
+  {
+    "id": "1tezz8t",
+    "subreddit": "ExperiencedDevs",
+    "title": "Preparing for technical round interviews in 2026",
+    "text": "Hi, I am a dev with about 5 years experience on the job and have been working in Government primarily as a frontend dev (React) but more full stack over the past 2 years working on a rails microservice backend. I feel like I have gained some solid experience over the past few years and would love to explore new opportunities. I came in to the industry and the peak of the bootcamp wave where everybody was hiring new devs and I am aware that things have changed dramatically.   \n  \nHowever I want to at least try to interview for jobs as my current role has become quite stagnant and organizational changes have made the job quite frustrating in recent times. Also, I live in NYC and my current salary just doesn't cut the high cost of living here. My monthly expenses were significantly lower 5 years and life has changed a lot. \n\nI have never been good at leetcode and pretty much avoided it when looking for a job 5 years ago. I was fortunate that there were enough companies that didn't do algo type interviews and focused on those companies that did React focused interviews our other take home assignments.  \n  \nI have no idea what the currently landscape is like for interviews and how to prepare. I am sure that I would bomb most technical round interviews if I were to interview tomorrow as I have not prepared for this stuff in a long time. So I am wondering if anybody can shed any light on how to approach preparing for interviews in 2026 from roles that align with my experience as a developer. I honestly don't really know where to start. Can anybody please offer any advise? I appreciate any feedback you might have.\n\n  \nThanks!!",
+    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tezz8t/preparing_for_technical_round_interviews_in_2026/",
+    "author": "Massive-Survey2495",
+    "score": 5,
+    "numComments": 15,
+    "createdAt": "2026-05-16T17:28:13.000Z"
+  },
+  {
+    "id": "1teyrok",
+    "subreddit": "ExperiencedDevs",
+    "title": "help needed with next steps",
+    "text": "I work at a small company that recently went through a reorganization. As part of it, one person was promoted into a manager role. I struggle to work with him, his emotional intelligence seems low, his leadership skills are weak, and he doesn't treat the team as peers. His main focus appears to be his own visibility rather than the team's success.\n\nHe is well-established with upper management, and they seem to see potential in him that the rest of us don't.\n\nIs there any way to address this situation constructively, or is leaving the only realistic option?",
+    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1teyrok/help_needed_with_next_steps/",
+    "author": "Great_Tourist_xxxx",
+    "score": 3,
+    "numComments": 19,
+    "createdAt": "2026-05-16T16:43:32.000Z"
   },
   {
     "id": "1temmnv",
@@ -72,8 +149,8 @@
     "text": "Hey everyone, I'm a mid-level engineer (8.5 years experience) working towards senior. For a while the feedback was simple: take ownership, see features through, go beyond just writing code. I've been doing that - on our last release I was making product and design decisions myself, not just engineering ones.\n\nBut I feel like the goalposts are moving faster than I can run. Giant PR's - 20k LOC are becoming *normal*? Full architectural paradigms are shifting under my feet, and the systems and product I need to deeply understand are changing so much faster, with people churning out AI generated architectural documents regularly. \n\nI've always learned on the go, thats ok its part of the job, part of what keeps me engaged. But recently, I feel like I will never learn enough to get to senior and stay on top of things at all. I have been hovering over linkedin job ads, even though I don't actually want to change job. I just think at some point they will fire me for being incompetent. \n\nI have always had imposter syndrome, and it was getting better at this company until all of this AI push onto us. \n\nHow do experienced engineers build a learning and staying-current habit when the pace is this fast? Is there a structured approach you use?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1temmnv/tips_for_keeping_up_with_product_at_work/",
     "author": "bottomlesscoffeecup",
-    "score": 13,
-    "numComments": 7,
+    "score": 22,
+    "numComments": 11,
     "createdAt": "2026-05-16T07:25:34.000Z"
   },
   {
@@ -83,8 +160,8 @@
     "text": "*No tokens generated during composition of this post*\n\nFirst off, I don't mean it's awful from a design perspective. I'm biased, but I think the team did a good job and it was actually a pretty fun project to work on.\n\nNo, I mean it's awful because of how it's going to be used.\n\nThe easiest way to describe what this platform does is that any system you can possibly imagine that you might interact with on a daily basis, we get event data from.\n\nWe get event data from all issues tracker (Jira, Linear, ADO).\nWe get event data from all the VCS platforms (Github, Gitlab, ADO).\nWe get event data from all the CI platforms (GHA, Gitlab, ADO, CCI, Jenkins).\nWe get event data from Zoom, Slack, Teams.\nWe get event data from Claude, Codex, Copilot.\nWe get event data from AWS, GCP, Azure.\nWe get event data from our SIEM, which has when your computer was active and when it was idle.\n\nWe aggregate all that data and index it based on the user. \n\nBased on this data, I can build a summary of what any engineer did on any given day, down to the meetings you attended, the conversations you had, the PRs you created, the issues you touched. I can guess when you went and got lunch. And I can do that for any timescale.\n\nWhen you look at the project itself, it was fun to build. A lot of different integrations. A lot of different constraints. We built \"productivity dashboards\" which basically just take a stab at \"Was this engineer productive today\" and then we built derivatives of metrics off of that.\n\nIt's kind of fun.\n\nBut it's awful. It falls for the trap that outputs correlate to impact. I tried to explain to our executive team that it's about like looking at CPU usage and assuming 100% cpu usage means my computer is being useful.\n\nThey didn't care. They didn't appreciate the analogy. They love the tool. And now I dread having built it.\n\nAt the end of the day, we were all simply doing our job. And people will find out how to game the metrics, and those probably won't be our best engineers.\n\nI don't know where this sudden urge to track every little thing every engineer does originated. It feels a bit like a social contagion. I feel like there used to be more common sense in this space, and suddenly that has all gone out the window and we're back to tracking LoC.\n\nI thought I would share this story and maybe get insight into what others are finding at their place of work around this subject.\n\n----\n\nUpdate: Some of you will be pleased to know that a few different teams got together and each individual submitted PRs with 10k commits as well as taking other measures to game the system. And I'm here for it.\n\nAlso some of you are acting like building a tool using company data is akin to the 1930s-1940s Germans who quite literally tortured and murdered their fellow man. For those of you that think this is even remotely comparable, kindly go outside and touch some grass.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tdwa14/my_team_built_a_developer_productivity_platform/",
     "author": "ninetofivedev",
-    "score": 371,
-    "numComments": 221,
+    "score": 393,
+    "numComments": 227,
     "createdAt": "2026-05-15T13:23:53.000Z"
   },
   {
@@ -94,8 +171,8 @@
     "text": "I was told at work today my team can't use open source software, including editors unless it is approved through some process that takes months and dozens of hours of meetings.\n\nThis is my first time in a larger enterprise and I am flabbergasted. I can't use vim because it isn't an approved editor? that is crazy!\n\nIs this common in enterprise/fortune 100 enterprises?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tedzah/does_your_workplace_limit_toolsidesopen_source/",
     "author": "inter_fectum",
-    "score": 42,
-    "numComments": 65,
+    "score": 48,
+    "numComments": 70,
     "createdAt": "2026-05-16T00:20:59.000Z"
   },
   {
@@ -105,20 +182,9 @@
     "text": "Just wrapped up a hiring round. 8yoe mostly in backend/data in finance. One thing I noticed vs previous job hunt rounds is that my hit rate for recruiter screens was actually much HIGHER than usual. But I would consistently hit a brick wall at the technical resume review or system design round.\n\nCompanies were asking more open ended questions and less trivia or hard technical stuff than in years past. I get the feeling companies are now prioritizing for a very specific background or personality type, not just skill. I’m not sure exactly what background they want, just that I seem to not have it. I’m starting to worry the industry has just passed me by.\n\nI ended up taking a public sector job and hoping to pivot to cleared contracting in the future. But this round has made me worried that I am becoming unemployable in the private sector. Has anyone else experienced this? Can any hiring managers comment from the other side?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1te30nt/anyone_notice_senior_interviews_are_getting_more/",
     "author": "SpicyFlygon",
-    "score": 128,
-    "numComments": 37,
+    "score": 140,
+    "numComments": 40,
     "createdAt": "2026-05-15T17:24:50.000Z"
-  },
-  {
-    "id": "1te5y37",
-    "subreddit": "ExperiencedDevs",
-    "title": "I'm at a loss for how to manage my interns",
-    "text": "We've just got our interns for the summer, from a local program where the university pays the students' wages and places them with local startups to get work experience. Last summer we also participated in this program with great results. We got a really smart student who was able to take on free-form projects, back up her choices with details about why she made the choices, and generally made a good standalone feature for our software over the course of the summer. We had just started dipping our toes into using LLMs beyond just code completion at that point... I know she used it, we paid for it, but I didn't notice an impact on her work or a deference to the LLM. I hardly had to mange... I just gave her a task, we discussed it a bit, she discussed with stakeholders, and it got done to our satisfaction.\n\nThis summer is a whole different situation. At this point we're completely using LLMs in our daily routine. And so far, I'm seeing that at least one of the students is deferring to it to an uncomfortable degree. I'll ask \"why did you make this choice?\" and the answer is basically \"I don't know, I'll ask my chatbot\". How are other people managing around this? I'm not sure how to *make* them take ownership for the choices that are being made, and actually think about tradeoffs. Do I need to spend more time being involved, and more hands-on, maybe some pair programming sessions?\n\nIt feels a bit hypocritical for me to push back on \"but why did it say that\" or \"how did the two of you come to that conclusion\" when I'm frequently relying on it to the same degree. The only caveat is that when I'm discussing or guiding the LLM, its from a place of knowing the stack by heart and having all the tech debt and tradeoffs in my head.\n\nI guess the root of what I'm asking is basically, how are other people shepherding interns or green juniors in this weird new world?",
-    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1te5y37/im_at_a_loss_for_how_to_manage_my_interns/",
-    "author": "AlaskanX",
-    "score": 74,
-    "numComments": 36,
-    "createdAt": "2026-05-15T19:07:40.000Z"
   },
   {
     "id": "1ten4yg",
@@ -127,20 +193,20 @@
     "text": "What's your view on using more that 1-3 agent sessions at the same time?\n\nI've been the solo dev for my company for about 10 years now, for bigger projects (still tiny in the grand scheme of things) I would work with external devs but I admit that in the last 2 years I do everything on my own with Claude code - I honestly feel sorry for those devs but the time I spend briefing they about the codebase or the business needs they don't know about (mainly because it's a totally alien industry to all of them) it takes less time for me to do everything, and much faster.\n\nNow everyone is pushing to use 10x agents, harness engineering, etc, and I'm sick of it to be honest.\n\nI have the claude code max 5x plan and I think I only reached the 5 hour limit once due to updating graphify - but otherwise I reach 50% max.\n\nI spent most of the time thinking about architecture, designing the plan, reviewing, reading and reading... so to me having more than 2 agents running for planning, review etc it's pointless. But then I see all these devs in YT bragging about having 10x agents implementing features and delivering 100 PRs per day...\n\nI get anxious if I deliver a commit I don't fully understand - granted I don't read every single line of code, but for sure I have the mental model and I make the decisions, so I am myself the limit.\n\nHow do you feel about this? \n\nI've done some personal projects (to me personal and work projects are totally different) that are only for private use where I never reviewed the code, but still I wouldn't have there 10x agents implementing features at the same time, I still need to validate they work as expected etc. ",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1ten4yg/how_do_you_cope_with_multi_agent_workflows/",
     "author": "daviddgz",
-    "score": 6,
-    "numComments": 39,
+    "score": 8,
+    "numComments": 68,
     "createdAt": "2026-05-16T07:54:24.000Z"
   },
   {
-    "id": "1te9w7p",
+    "id": "1te5y37",
     "subreddit": "ExperiencedDevs",
-    "title": "Help me navigate manager who excessively micro manages",
-    "text": "Used AI for phrasing it well.\n\nHi everyone,\n\nI’m a Senior Technical Lead with 10 years of experience (YOE). I was recently moved to a brand-new team to serve as the Tech Lead, reporting to an another Senior Manager. He has been here for 14mo.\n\nSince joining, I’ve noticed a massive barrage of red flags regarding his management style, mostly centered around extreme micromanagement. I’m looking for advice on how to navigate this situation.\n\n**The Context &amp; Red Flags:**  \n• **Slack Surveillance:** He constantly DMs me and tags me in threads, expecting immediate responses. It has escalated to him questioning why my Slack status isn't showing as \"Online\" (even though I am actively working). If I step out for a few minutes in the evening, he demands I update my Slack status to \"Away/Unavailable.\"\n\n• **The \"Eyes\" Emoji Compromise:** To give him peace of mind, I started reacting with the 👀 emoji to his messages just to acknowledge I saw them, but the micromanagement has only intensified.\n\n• **Vague/Weaponized Feedback:** Despite the team executing incredibly well and delivering beyond expectations in our first month, my 1:1s with him are exhausting. He constantly tells me to \"be mindful of how and where I speak.\"\n\n• **The Real Issue:** In an ad-hoc huddle, he finally let the real reason slip: he told me that my communication style **\"makes senior leadership feel unprepared.\"** (In other words, it feels like I am exposing gaps or answering technical questions too transparently, which makes him look bad).\n\n• **Communication Chaos:** He insists on conducting almost all critical conversations in private Slack channels or MPDMs (Multi-Person DMs), making it an absolute nightmare to track decisions and maintain transparency.\n\n**Backstory from Peers:**  \nWe recently went through a round of layoffs, and I managed to connect with some of his former reports (including an engineering manager who used to report to him). They all independently warned me about his severe micromanagement.\n\n**My Question:**  \nThe team is delivering great results, but managing up is becoming a full-time, exhausting job. The anxiety of constantly needing to look \"active\" on Slack is draining.\n\nHow do I navigate a manager who is threatened by direct technical communication and obsessed with presence over output? He diverts on any direct growth conversation in 1:1 and repackages the comm in public forums as feedback. ",
-    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1te9w7p/help_me_navigate_manager_who_excessively_micro/",
-    "author": "FactorResponsible609",
-    "score": 26,
-    "numComments": 17,
-    "createdAt": "2026-05-15T21:32:28.000Z"
+    "title": "I'm at a loss for how to manage my interns",
+    "text": "We've just got our interns for the summer, from a local program where the university pays the students' wages and places them with local startups to get work experience. Last summer we also participated in this program with great results. We got a really smart student who was able to take on free-form projects, back up her choices with details about why she made the choices, and generally made a good standalone feature for our software over the course of the summer. We had just started dipping our toes into using LLMs beyond just code completion at that point... I know she used it, we paid for it, but I didn't notice an impact on her work or a deference to the LLM. I hardly had to mange... I just gave her a task, we discussed it a bit, she discussed with stakeholders, and it got done to our satisfaction.\n\nThis summer is a whole different situation. At this point we're completely using LLMs in our daily routine. And so far, I'm seeing that at least one of the students is deferring to it to an uncomfortable degree. I'll ask \"why did you make this choice?\" and the answer is basically \"I don't know, I'll ask my chatbot\". How are other people managing around this? I'm not sure how to *make* them take ownership for the choices that are being made, and actually think about tradeoffs. Do I need to spend more time being involved, and more hands-on, maybe some pair programming sessions?\n\nIt feels a bit hypocritical for me to push back on \"but why did it say that\" or \"how did the two of you come to that conclusion\" when I'm frequently relying on it to the same degree. The only caveat is that when I'm discussing or guiding the LLM, its from a place of knowing the stack by heart and having all the tech debt and tradeoffs in my head.\n\nI guess the root of what I'm asking is basically, how are other people shepherding interns or green juniors in this weird new world?",
+    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1te5y37/im_at_a_loss_for_how_to_manage_my_interns/",
+    "author": "AlaskanX",
+    "score": 81,
+    "numComments": 42,
+    "createdAt": "2026-05-15T19:07:40.000Z"
   },
   {
     "id": "1teko04",
@@ -149,9 +215,31 @@
     "text": "I work with a product manager who really drags their feet when it comes to writing PRDs (product requirements document). I find them valuable so I can feel assured we're building the right thing before investing engineering capacity. I think they disagree and see it as unnecessary process.\n\nDo you use PRDs at your company? What is their purpose? How do they get written and at what stage of the development process does that happen? If you don't use PRDs, how do you know enough thought has been put into the product before beginning execution?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1teko04/what_is_the_purpose_of_a_prd_in_your_org/",
     "author": "miianah",
-    "score": 5,
-    "numComments": 19,
+    "score": 10,
+    "numComments": 27,
     "createdAt": "2026-05-16T05:41:09.000Z"
+  },
+  {
+    "id": "1te9w7p",
+    "subreddit": "ExperiencedDevs",
+    "title": "Help me navigate manager who excessively micro manages",
+    "text": "Used AI for phrasing it well.\n\nHi everyone,\n\nI’m a Senior Technical Lead with 10 years of experience (YOE). I was recently moved to a brand-new team to serve as the Tech Lead, reporting to an another Senior Manager. He has been here for 14mo.\n\nSince joining, I’ve noticed a massive barrage of red flags regarding his management style, mostly centered around extreme micromanagement. I’m looking for advice on how to navigate this situation.\n\n**The Context &amp; Red Flags:**  \n• **Slack Surveillance:** He constantly DMs me and tags me in threads, expecting immediate responses. It has escalated to him questioning why my Slack status isn't showing as \"Online\" (even though I am actively working). If I step out for a few minutes in the evening, he demands I update my Slack status to \"Away/Unavailable.\"\n\n• **The \"Eyes\" Emoji Compromise:** To give him peace of mind, I started reacting with the 👀 emoji to his messages just to acknowledge I saw them, but the micromanagement has only intensified.\n\n• **Vague/Weaponized Feedback:** Despite the team executing incredibly well and delivering beyond expectations in our first month, my 1:1s with him are exhausting. He constantly tells me to \"be mindful of how and where I speak.\"\n\n• **The Real Issue:** In an ad-hoc huddle, he finally let the real reason slip: he told me that my communication style **\"makes senior leadership feel unprepared.\"** (In other words, it feels like I am exposing gaps or answering technical questions too transparently, which makes him look bad).\n\n• **Communication Chaos:** He insists on conducting almost all critical conversations in private Slack channels or MPDMs (Multi-Person DMs), making it an absolute nightmare to track decisions and maintain transparency.\n\n**Backstory from Peers:**  \nWe recently went through a round of layoffs, and I managed to connect with some of his former reports (including an engineering manager who used to report to him). They all independently warned me about his severe micromanagement.\n\n**My Question:**  \nThe team is delivering great results, but managing up is becoming a full-time, exhausting job. The anxiety of constantly needing to look \"active\" on Slack is draining.\n\nHow do I navigate a manager who is threatened by direct technical communication and obsessed with presence over output? He diverts on any direct growth conversation in 1:1 and repackages the comm in public forums as feedback. ",
+    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1te9w7p/help_me_navigate_manager_who_excessively_micro/",
+    "author": "FactorResponsible609",
+    "score": 28,
+    "numComments": 25,
+    "createdAt": "2026-05-15T21:32:28.000Z"
+  },
+  {
+    "id": "1tfagv0",
+    "subreddit": "ExperiencedDevs",
+    "title": "What is it like to have 20+ years of dev experience working at companies average people have never heard of?",
+    "text": "I’ve recently came across this talk on YouTube about AI coding from mapocock (first time hearing this person and his work). It reminds me of all the tutorial-ish videos I’ve watched before from someone with presumably good experience and knowledge but lesser shiny resume. They have amazing ideas and imo much more mature understanding of software as if they are treating it as a craft.\n\nSo I kept wondering what was that like to work on smaller scale company (I am assuming that it wouldn’t be a lesser known company if traffic scale is global), not as a product/marketing/ceo but a full time software engineer for decades? Did you choose this life because it gave you the opportunity to write good complete software or you have other priorities in life that FAANG rat race is just not attractive?",
+    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tfagv0/what_is_it_like_to_have_20_years_of_dev/",
+    "author": "0kyou1",
+    "score": 0,
+    "numComments": 70,
+    "createdAt": "2026-05-17T00:40:08.000Z"
   },
   {
     "id": "1te6lh3",
@@ -161,30 +249,8 @@
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1te6lh3/is_this_too_pushy/",
     "author": "Moosey97",
     "score": 17,
-    "numComments": 18,
+    "numComments": 20,
     "createdAt": "2026-05-15T19:30:51.000Z"
-  },
-  {
-    "id": "1telohh",
-    "subreddit": "ExperiencedDevs",
-    "title": "Higher expectations at new level",
-    "text": "I was a SWE II at my previous company but at my new company I am a SWE III. I recently just joined 2 months ago. In addition to one SWE II and engineer manager who joined at the same time; more or less. Our skipped recently assigned us to write up reports on SEV 3 incidents and do a read out. I felt like I definitely had higher expectations and was grilled way more.\n\nThe sev 3 incident I covered was about a sister team's API that went down. It was due to a vendor changing a new business rule. It now can return a null object which our database did not like. The meeting was schedule for just one hour. I felt like there was more expectations on me. Co-workers started to grill me for a full 50 minutes. My engineering manager follow soon. After I was done with my read out the SWE II did their presentation within 20 minutes; very little grilling.\n\nAfter the meeting I had one co-worker who is at my same level send me a Slack message. In it he expressed how it's a little unfair how our skip threw a sev 3 incident report at me even though I was so new. Nevertheless, he mentioned how I should give more context such as how our domain was using our sister domain's API. That way people could follow the root cause easier. During my 1:1 with my engineering manager he expressed very similar views. Though one thing I will comment is that I think he's too new to have any genuine opinions of his own and he's piggybacking on the opinions of others to fulfill his part of engineering management. My engineering manager expressed that this whole requirement of sev 3 reports for new ICs felt rushed. Nevertheless, I should have came more prepare with better explanation of root cause, timeline of the incident, and action items so incidents like this will not happen again. He expressed that they eventually want me to grow where I can take on sev 2 or sev 1 incidents when I am on call.\n\nAt my previous company I was a SWE II and things felt easier. I never took on the role of incident management, writing up documentations or public speaking. After this week, the things I am going to start doing is to join the org wide incident read out so I can see the expectations of a read out and start to explore more of my team's systems. It's tough.",
-    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1telohh/higher_expectations_at_new_level/",
-    "author": "qrcode23",
-    "score": 1,
-    "numComments": 2,
-    "createdAt": "2026-05-16T06:35:09.000Z"
-  },
-  {
-    "id": "1teet4v",
-    "subreddit": "ExperiencedDevs",
-    "title": "Data Engineer vs Backend vs Full Stack ?",
-    "text": "Hello Experienced Devs,\n\nI have a Master's in a data leaning stream (graduated 5 years ago) . At the time in college..I enjoyed Front End Dev...and everyone was telling Software development would have more prospects and better pay, so I went down that path instead of being a data engineer.. like most folks in my class did.\n  \n\nFast Forward Today, things have gone 180.. I am now upskilling towards backend (Spring Boot)  since frontend roles have dropped drastically thanks to AI and SDE is not seen as what it once was, and we all know why.  I am enjoying learning backend but it has a lot to cover in terms of depth and tooling . I love real time systems the whole picture and how everything connects during System Design..However my pace of learning is slow. I have lot to cover,  I  sometimes feel I should drop Full Stack Dev and pivot to Data Engineering. although I will have to start from zero including re-learning python.\n  \nBut a part of me still feels , Full Stack and Backend Roles are hard to automate 100% and be handled by agents. I am mean you need a human in charge to handle critical stuff like Payments, authentication, security. Yes an agent can help you build those, but they can't be trusted to act autonomously.. Yes the head counts of teams have dropped but that is for all roles in the tech industry right now.\n  \nSenior devs, please share your thoughts on this , and are my reasons valid to stay in Development valid",
-    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1teet4v/data_engineer_vs_backend_vs_full_stack/",
-    "author": "WittySophisticate",
-    "score": 2,
-    "numComments": 10,
-    "createdAt": "2026-05-16T00:58:25.000Z"
   },
   {
     "id": "1tdx705",
@@ -193,8 +259,8 @@
     "text": "Hi all, software engineer with ~10YoE primarily with the same team. Currently in a senior/lead developer role for my application team.\n\nWe have a very large Angular application and quite a few Spring microservices (current count is about 20), and we've started to have an issue with defects not being caught during the testing process. The application has no integration or end to end testing of any kind, only unit tests, and we are wholly reliant on manual business testing. This has always been an issue as business is not always available for quick testing turnaround, but as management has pushed us to move faster in order to meet some long term deadlines, and as CVEs pop up that are prod deployment blockers for our quality gates, defects have slipped past, especially when there's no defined way for us to handle, say, a Spring Boot dependency having a critical CVE and having to resolve it for 20 services in a 30 day business SLA. We've even had cases of our business team giving approval after testing but defects are found in production because business was not aware what pages in the application are dependent on which microservices.\n\nI've been given the task of trying to add integration testing for our microservices and end to end testing for our application. The problem is I can't even fathom how to start tackling it. Testing has never been my strength, but I am familiar with some tools/frameworks we can use. I've gotten Playwright stood up for our UI but business requirements of each page are not well defined, and I'm not sure how keen business is in trying to move to BDD in order to define Cucumber tests. \n\nHas anyone else had to add more robust testing to a large scale application?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tdx705/how_to_tackle_adding_integration_and_end_to_end/",
     "author": "abl4k",
-    "score": 11,
-    "numComments": 11,
+    "score": 15,
+    "numComments": 12,
     "createdAt": "2026-05-15T13:58:44.000Z"
   },
   {
@@ -204,7 +270,7 @@
     "text": "I’m revising my software engineering resume and trying to decide where to compress older experience.\n\nI have 20+ years of experience. Right now my detailed “main” experience section includes (in order most recent to least recent):\n\n\\* Blue Origin (3 years)\n\n\\* Amazon (3 years)\n\n\\* Two contract positions (2 years)\n\n\\* Microsoft (2 years)\n\nThen I have an “Additional Experience” section for older roles.\n\nI’m considering moving the two contract roles into “Additional Experience” as well, so the detailed section focuses mainly on:\n\n\\* Blue Origin\n\n\\* Amazon\n\n\\* Microsoft\n\nThe goal is to tighten the narrative and reduce resume length without hiding relevant experience.\n\nDoes this seem like the right tradeoff?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1te5n6a/resume_editing_edit_out_less_relevant_experience/",
     "author": "PseudonymousDev",
-    "score": 4,
+    "score": 5,
     "numComments": 6,
     "createdAt": "2026-05-15T18:57:03.000Z"
   },
@@ -216,30 +282,8 @@
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tdk8n1/pushing_back_on_design/",
     "author": "yobuddyy899",
     "score": 41,
-    "numComments": 19,
+    "numComments": 23,
     "createdAt": "2026-05-15T03:23:22.000Z"
-  },
-  {
-    "id": "1tepnyt",
-    "subreddit": "ExperiencedDevs",
-    "title": "How to avoid AI-coding burnout",
-    "text": "Hello everyone,\n\nAs many of you, for one reason or another, I am using AI for coding (*willingly or unwillingly is another discussion*). The goal placed on the developers is \"being faster\" or \"being more productive\" and everything that comes with this wave of \"AI is magic\" (*true or not*).\n\nI noticed that I use AI in two ways, and one of them has massive implications in my mental health, nervousness and sense of dread. Let me start from this one, as it is treacherous.\n\nThis is a deep-dive on how I personally (*big emphasis here*) cope with the added stress of handling two group of children: managers with expectation of grandeur from one side and AI from the other. I hope you find it interesting and/or useful.\n\n# Too many parallel tasks, too big, all at once\n\nI found that this is the fastest path to burnout, and I can split it in a couple of ways\n\n* multiple projects at the same time\n* multiple agents per project\n* big changes per agent\n\nThese three things are all cause of problems that lead to one of the symptoms of me going completely crazy, and in the end making me slower instead of faster.\n\nWhen you juggle **multiple projects** at the same time, my challenge is the context switching. I ask my brain to move from one logic to another, from one context to another, constantly back and forth. This is mentally taxing and if I do it for too long, I end up in the evening with my brain fried. Every time I move between an app for lawyers to an ERP and maybe a personal TTRPG planner, every step requires re-focussing my attention.\n\nThen there is handling **multiple agents for the same project**. This is a different type of context switching, a bit easier to manage but requires different steps. When I edit multiple parts of the same project, I generally use git worktrees to ensure I work in isolation. This either means running multiple instances of my project at the same time or stopping one worktree and starting the other. The number of times I got frustrated because a fix was not working, just to realise I was testing the wrong worktree is non-zero 😄\n\nLast, but not least, it is asking an agent to create something **too big** or that goes outside my sphere of knowledge. This is what brings up my sense of dread, which is the worst state of mind I can find myself in. I have a lot of experience, with almost 30 years of technology/development under my belt, but \"*I know I don't know*\" and there are things I have to implement that are simply not in my bag of expertise. AI coding \"*can*\" be great for it, because it helps me learn a lot and a lot quicker than before; however, allowing the AI to propose a large chunk of code that includes things outside my knowledge makes my anxiety spike. I fear what will be generated will take a long time to understand, verify, and debug. And when things go south (*and if the feature is too big it often does*) I tend to reach the end of the day willing to throw my computer out of the window screaming.\n\nNot all is doom and gloom, though, on the contrary. I can leverage my experience to spin agents that do what I need, faster than I would, maintaining the logic of my code. There are a few things I do that help me making the most out of expertise and AI-assisted coding I want to share with you, and I would be thrilled to see if you do things differently, so to try your approach. Please bear in mind that all these work for me, and YMMV.\n\n# How do I survive AI coding without burning out and being faster?\n\nThere are a couple of things I employ to ensure AI is an advantage and not a burden\n\n**1. Targeted tasks**\n\nThis one is simple. I treat LLM as junior developers. I don't tell them to create an entire application. Hey, I don't even ask them to create an entire feature. What they do is like a small PR. This ease the spec creation, validation, lowers implementation time, limits the possible places in which AI can hallucinate and makes my validation faster.\n\n**2. Specs before everything else**\n\nWithout specs, I don't do anything, no matter how easy a task may be. I use Claude Code and the Superpowers plugin. I found it incredibly helpful for many reasons. First of all it asks a lot of questions, and usually those questions surfaces things I didn't think about. Then I read the specs to ensure my requirements are correctly captured (and yes, I do read them as the more work upfront, the less debug and swearing). Lastly it creates an implementation plan I can verify, and this gives me the possibility to spot logical/code issue before they are written and allows me to learn when I implement things I am not familiar with.\n\n**3. Limit parallel working**\n\nEither one agent per 2 projects or 2 agents per one project at the same time. From time to time I push to 3. This allows me to select which context switching I can handle: different projects or different tasks for the same project. I find it easier this way.\n\n**4. Staggered analysis/implementation/debugging**\n\nAs I focus on specs a lot, and the mental load for specs, implementation, debug is different, I try to avoid doing two specs at the same time, or two debugging at the same time. This allows me to ease the context switching, as different types of tasks are easier for my brain to handle than multiple tasks of the same time where I find asking myself \"*Was this the implementation of the new relationship or the one about the new langgraph?*\"\n\n**5. No git commits until I validate**\n\nThis is very personal and I noticed many people disagree with me. I instruct my agents not to commit to git until I can test it. The reason for this is simple: uncommitted changes are easier to spot and to understand. It's like having to validate a PR: easy to see what was changed, easy to spot mistakes, easy to fix. Once I can look at the changes and test them, I commit. Please consider this works well with #1, as nobody wants to merge a PR with 50 edited files, thousands of lines of code changed and so on...\n\n**6. Strong boundaries on my architecture and style**\n\nLast but not least, I have a specific architecture in my projects. It is clear and precise, and I need the generated code to respect it. The more the AI respects it, the easier it is for me to validate everything quicker, and also easier for the AI to write less code and reuse what's already available. Alas, making sure the AI respects the architecture is still a WIP, but I am getting there.\n\n# Our role is changing, adapting to the incoming wave is critical\n\nIn my view, there is no future in which we won't have to use AI to create code. Our role is changing fast, and it is moving us from being developers to being more architects and orchestrator. I don't think we can accept any different future, also because some clients (*or employers*) are riding the AI-wave so furiously that they believe in unicorns (*I don't*).\n\nWhat we MUST do is to protect our sanity to avoid a bout of madness, because trying to do 20 in the same time we did 10 a year ago is a pressure nobody can cope with. I hope me vomiting out the mechanisms I use is going to help others in my position.\n\nCiao",
-    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tepnyt/how_to_avoid_aicoding_burnout/",
-    "author": "nicoracarlo",
-    "score": 0,
-    "numComments": 4,
-    "createdAt": "2026-05-16T10:16:38.000Z"
-  },
-  {
-    "id": "1temzoq",
-    "subreddit": "ExperiencedDevs",
-    "title": "I built a structured pattern for agentic development after getting burned enough times. Curious if this resonates.",
-    "text": "Been using AI agents as senior dev daily on a 245-project legacy codebase. After enough times watching an agent research, plan, and implement all in one uncontrolled flow (that become wrong fast) I wrote down how I actually want to work with them after months of context and prompt engineering studies.\n\nIt’s called RPSD: Research, Plan, Spike, Develop.  \nThe idea: split agentic work into isolated phases (and so chats), produce a durable artifact at each step, and keep humans as gatekeepers between phases. The agent proposes. The human approves. Then and only then does the next phase start.\n\nA few things upfront since they always come up:  \n\\- Yes, the individual concepts aren’t new. What’s new is the specific assembly for agentic workflows where the failure mode is an LLM collapsing all phases into one hallucination-fueled stream.  \n\\- No, this isn’t designed for small fixes or simple tasks (ofc)  \n\\- Claude helped me translate from Italian and polish the writing. The pattern came from three tries and two refinement iterations tested in production.  \n\\- Not formally measured yet: but I can watch where context drifts, and the before/after on plan quality is visible enough to keep using it daily. Using 15% max of sonnet context on copilot for each step.\n\nInterestingly a funded team in the space (Bitloops) commented that they independently landed on a similar split: 80% Research/Plan, 20% review. Different implementation, same conclusion. That kind of convergence makes me think the problem is real even if this specific solution isn’t the only one.\n\nGitHub: [https://github.com/matteo-tinta/RPSD-manifesto/blob/main/README.md](https://github.com/matteo-tinta/RPSD-manifesto/blob/main/README.md)\n\nTwo kinds of feedback I’m looking for:  \n\\- Production experience: where does this pattern actually or may break?  \n\\- Philosophy: does the model hold up under scrutiny or are there fundamental gaps in how I’m thinking about phases, gates, or human involvement?",
-    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1temzoq/i_built_a_structured_pattern_for_agentic/",
-    "author": "Ok_Lab_1974",
-    "score": 0,
-    "numComments": 4,
-    "createdAt": "2026-05-16T07:46:06.000Z"
   },
   {
     "id": "1te7131",
@@ -249,7 +293,7 @@
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1te7131/staff_full_stack_lean_frontend_ai_how/",
     "author": "no-bs-silver",
     "score": 0,
-    "numComments": 4,
+    "numComments": 6,
     "createdAt": "2026-05-15T19:46:33.000Z"
   },
   {
@@ -259,8 +303,8 @@
     "text": "Hi I'm a 5 YOE software engineer. I've noticed before the past year or two if I mentioned what my job is, people were impressed or wanted to know the tech stack. Now it's more along the lines of \"what kind of software\" with a look and \"not the bad kind right\". \n\nI don't know how to respond to this. Idk what they mean by the bad kind. AI? Government shit? Idk.  I just kind of go with \"Backend Linux servers\" because that's the truth, but then people don't know what that means. \n\nAnyone else had similar experiences?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tcxpc8/has_anyone_else_noticed_a_change_in_perception/",
     "author": "druidgaymer",
-    "score": 244,
-    "numComments": 240,
+    "score": 260,
+    "numComments": 248,
     "createdAt": "2026-05-14T13:08:35.000Z"
   },
   {
@@ -271,7 +315,7 @@
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1td99e9/passed_up_for_lead_promotion/",
     "author": "daze2turnt",
     "score": 41,
-    "numComments": 81,
+    "numComments": 82,
     "createdAt": "2026-05-14T19:52:45.000Z"
   },
   {
@@ -281,20 +325,9 @@
     "text": "Just got a job offer with a software consulting company, but with AI at everyone's disposal, what's the future of these companies that come into a company with a team and charge $200-300 an hour for writing code or setting up AWS?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tdcokh/future_of_software_consulting_companies/",
     "author": "macrohead",
-    "score": 27,
-    "numComments": 44,
+    "score": 28,
+    "numComments": 45,
     "createdAt": "2026-05-14T21:58:38.000Z"
-  },
-  {
-    "id": "1te6ppw",
-    "subreddit": "ExperiencedDevs",
-    "title": "Sanity check on learning capability",
-    "text": "For the context: I am a tech lead with 9 YOE. I started as a backend dev in Java, did a year there but pivoted to the frontend after, where I focused on React and Next. I consider myself an expert in those fields and FE in general. In the meanwhile I was doing some backend, but not something that I'd call *sophisticated.* It was mostly Node with nest, sometimes express. I also leveraged the next.js capabilities for some BFF patterns with simple dbs like Prisma. \n\nCurrently I am leading two teams across three projects, where we have react + backend on AWS - lambdas + various aws goodies. This backend is more of a BFF, nothing I'd consider anything sophisticated. We also maintain a private npm registry with various shareable (within our org) modules. \n\nNow, to the point: I feel like I am missing something. I see a hard push for fullstack roles on the market, being a proficient FE dev isn't a valuable option. Yet I don't think I have enough backend experience to call myself a true fullstack (although my LinkedIn say so). So while I understand the application layer of the backend app I do not the data layer and the system layer. So these are my learning priorities now: distributed systems, AWS solutions architect certification and databases. I read DDIA by Kleppman (what was *hard*) and couple of system design books. I want to go through some postgres bible and then go for Cantrill Solutions architect associate course. \n\nAnd I have two questions: \n\nI am not sure if I will be able to call myself an architect. I had a really hard time reading Kleppman - my reading pace was 5-10 pages per hour as I needed to constantly Google, ask Claude and draw these concepts. They were foreign to me. Now when I see a fraction of challenges that distributed systems comes up with, I doubt I will be able to handle them specifically without a backend experience. FE had it's own challenges, performance issues etc, but it wasn't anywhere near the replicated, partitioned databases. So the question - any advice on this? Will the theory of that be sufficient, do I need to step back to be a backend engineer? \n\nThe second one, is about the learning capability perhaps? I am pushing very hard for learning 1-2 hours per day. My job is taking me 6-10h, I'm learning before the job. Since when I started learning the quality of my work dropped since I often can't keep working 8h and am finishing after 6h. I am starting to have sharp motivation drops.  Honestly, I feel like I have a nail in my head after finishing such marathon. I have literally zero cognitive capacity for doing anything even remotely requiring using brain. I have trouble remembering the grocery list. So the second question - is there something wrong with me? Someone was in a similar situation and can advise something? \n\nThanks!\n\n ",
-    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1te6ppw/sanity_check_on_learning_capability/",
-    "author": "UnusualFall1155",
-    "score": 0,
-    "numComments": 2,
-    "createdAt": "2026-05-15T19:35:04.000Z"
   },
   {
     "id": "1tdn56n",
@@ -303,8 +336,8 @@
     "text": "I’m trying to avoid both:\n\n* giant monolith spaghetti\n* and premature microservices\n\nSo I ended up designing something that’s basically a feature-oriented modular monolith inside a monorepo.\n\nOperationally it’s still:\n\n* one app\n* one deployment\n* one runtime\n* one shared DB\n\nBut internally, everything is split into isolated full-stack feature modules/plugins like:\n\n* auth\n* file-manager\n* payments\n* templates\n\nEach module owns its own:\n\n* DB tables/migrations\n* routes/API\n* services/business logic\n* permissions\n* SDK/client\n* React providers/hooks\n* UI components\n\nExample:\n\n    &lt;FileManagerProvider&gt;\n      &lt;FileBrowser /&gt;\n      &lt;FileUploadDialog /&gt;\n    &lt;/FileManagerProvider&gt;\n\nWhere:\n\n* FileBrowser and FileUploadDialog belong to the file-manager module\n* they internally use file-manager hooks/providers/state\n* they may call fileManagerSdk.listFiles()\n* which talks to file-manager backend routes/services\n* which own the actual file tables/storage/permissions\n\nSo the frontend/backend are owned together as one vertical feature slice instead of everything becoming shared global state and shared service spaghetti.\n\nThe main app mostly just composes modules together:\n\n    const auth = createAuth(...)\n    const fileManager = createFileManager(...)\n    app.use('/auth', auth.router)\n    app.use('/files', fileManager.router)\n\nCross-module DB references are allowed because it’s still one DB/app.\n\nExample:\n\n    foods.image_id REFERENCES files.id\n\nBut business behavior still stays inside the owning module.\n\nSo another module can reference [`files.id`](http://files.id) but file permissions still go through file-manager services.\n\nA major goal of this architecture is feature reusability.\n\nI want modules/plugins to be installable across multiple apps/projects with minimal coupling.\n\nFor example:\n\n* reuse the same auth module in multiple apps(including ready-made auth templates/components for sign in, sign up, forgot password, reset password, etc)\n* reuse the same file-manager in admin/customer/internal apps\n* reuse the same React components/hooks/providers together with the backend handling they belong to\n\nSo instead of reusing only “dumb UI components”, the goal is reusing entire full-stack capabilities/features.\n\nThis feels cleaner/scalable to me than both:\n\n* giant shared monoliths\n* and early microservices\n\nBut I’m wondering if this is one of those architectures that sounds elegant and later becomes painful.\n\nHas anyone here built systems like this long-term?\n\nWhere does this architecture usually fail?\n\n",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tdn56n/is_this_modular_monolith_architecture_good_or_a/",
     "author": "UnderWolf1",
-    "score": 6,
-    "numComments": 39,
+    "score": 5,
+    "numComments": 40,
     "createdAt": "2026-05-15T05:46:41.000Z"
   },
   {
@@ -317,6 +350,17 @@
     "score": 0,
     "numComments": 35,
     "createdAt": "2026-05-16T00:49:17.000Z"
+  },
+  {
+    "id": "1te6ppw",
+    "subreddit": "ExperiencedDevs",
+    "title": "Sanity check on learning capability",
+    "text": "For the context: I am a tech lead with 9 YOE. I started as a backend dev in Java, did a year there but pivoted to the frontend after, where I focused on React and Next. I consider myself an expert in those fields and FE in general. In the meanwhile I was doing some backend, but not something that I'd call *sophisticated.* It was mostly Node with nest, sometimes express. I also leveraged the next.js capabilities for some BFF patterns with simple dbs like Prisma. \n\nCurrently I am leading two teams across three projects, where we have react + backend on AWS - lambdas + various aws goodies. This backend is more of a BFF, nothing I'd consider anything sophisticated. We also maintain a private npm registry with various shareable (within our org) modules. \n\nNow, to the point: I feel like I am missing something. I see a hard push for fullstack roles on the market, being a proficient FE dev isn't a valuable option. Yet I don't think I have enough backend experience to call myself a true fullstack (although my LinkedIn say so). So while I understand the application layer of the backend app I do not the data layer and the system layer. So these are my learning priorities now: distributed systems, AWS solutions architect certification and databases. I read DDIA by Kleppman (what was *hard*) and couple of system design books. I want to go through some postgres bible and then go for Cantrill Solutions architect associate course. \n\nAnd I have two questions: \n\nI am not sure if I will be able to call myself an architect. I had a really hard time reading Kleppman - my reading pace was 5-10 pages per hour as I needed to constantly Google, ask Claude and draw these concepts. They were foreign to me. Now when I see a fraction of challenges that distributed systems comes up with, I doubt I will be able to handle them specifically without a backend experience. FE had it's own challenges, performance issues etc, but it wasn't anywhere near the replicated, partitioned databases. So the question - any advice on this? Will the theory of that be sufficient, do I need to step back to be a backend engineer? \n\nThe second one, is about the learning capability perhaps? I am pushing very hard for learning 1-2 hours per day. My job is taking me 6-10h, I'm learning before the job. Since when I started learning the quality of my work dropped since I often can't keep working 8h and am finishing after 6h. I am starting to have sharp motivation drops.  Honestly, I feel like I have a nail in my head after finishing such marathon. I have literally zero cognitive capacity for doing anything even remotely requiring using brain. I have trouble remembering the grocery list. So the second question - is there something wrong with me? Someone was in a similar situation and can advise something? \n\nThanks!\n\n ",
+    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1te6ppw/sanity_check_on_learning_capability/",
+    "author": "UnusualFall1155",
+    "score": 0,
+    "numComments": 3,
+    "createdAt": "2026-05-15T19:35:04.000Z"
   },
   {
     "id": "1tdjn47",
@@ -336,20 +380,9 @@
     "text": "My company started to track metrics a while back and now its brought up on my 1:1  where m being compared to the rest of the team (like how fast I close tickets in x period). What were your experiences with these? Is it a form of implicit stack ranking?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tdlfg5/metrics_is_used_to_measure_performance_with_other/",
     "author": "badboyzpwns",
-    "score": 4,
-    "numComments": 35,
+    "score": 2,
+    "numComments": 40,
     "createdAt": "2026-05-15T04:18:50.000Z"
-  },
-  {
-    "id": "1tecgvx",
-    "subreddit": "ExperiencedDevs",
-    "title": "We had to change how we validate HMI code after AI started writing most of our code",
-    "text": "Wanted to document our case and share this with fellow peers here.  \n  \nOur team started using AI-assisted development seriously about 18 months ago. Claude code for the bulk of the implementation work, engineers reviewing and directing rather than writing line by line. velocity went up significantly. That part worked.\n\nWhat broke was everything downstream.\n\nOur validation stack was built for human-written code. Meaning defined inputs, predictable structure, test cases written alongside the implementation. AI-generated code doesn't work that way. It produces implementations we wouldn't have written ourselves, edge cases we didn't anticipate, and UI behaviors that look correct in simulation and fail on the actual hardware cluster.\n\nThree things we changed to tackle this:\n\nTest generation had to move earlier. We used to write tests after implementation. With AI-generated code that's too late, by the time you're writing tests you're already rationalizing what the code does rather than what it should do. specs now drive generation, tests get written before the AI touches anything.\n\nSimulation coverage stopped being the benchmark. We were measuring coverage against a software environment that didn't match the physical HMI unit. Green sim results meant nothing for on-device behavior. We added a hardware-in-the-loop stage WITH Askui for on-device UI interaction and Robot Framework for orchestration.\n\nDocumentation became a pipeline artifact. ISO 26262 compliance docs were being produced manually after the fact. That doesn't scale when AI is generating code faster than a technical writer can document it. DocGen handles traceability now, tied directly to the test outputs.\n\nWe concluded that AI made the writing fast and the validation expensive. The teams that are struggling right now are the ones who upgraded their development tooling without upgrading the feedback loop around it.\n\nAnyone else navigating this? What does the validation stack look like at other teams dealing with the same shift? let’s compare notes!",
-    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tecgvx/we_had_to_change_how_we_validate_hmi_code_after/",
-    "author": "nevesincscH",
-    "score": 0,
-    "numComments": 21,
-    "createdAt": "2026-05-15T23:16:21.000Z"
   },
   {
     "id": "1tczgsi",
@@ -358,7 +391,7 @@
     "text": "20 YOE. Every place I've worked was smaller isolated teams with our own tech sandbox. We had complete control over our system. Even within huge orgs I operated like this. If everyone was required to use AWS we still had control over our little area.\n\nMy new org prefers a monolith approach where everyone uses a giant system managed by a centralized team. That means every request (new user, new access request, expired password, new connector, job crashing, etc) is a ticket. These tickets can sit in queue for 2-14 days depending on the ask and who is on PTO. Tasks that used to take me less than 24 hours now takes days. Tasks that used to take me 2 weeks now takes 3-6 months. It's impossible to get anything done.\n\nI'll give one recent example. We have a new user. At my previous jobs I would add user then grant needed permissions myself. A 20 minute task. Now I have to submit a \"add user\" ticket to team A and wait 2-4 days. Then I submit a \"grant permissions\" ticket to team B and wait another 2-4 days. These must be done back to back because you can't add permissions to a user which doesn't exist.\n\nAny advice on how to navigate this? Do I just accept that everything will be delayed. Everyone else seems fine with the pace so I don't want to be the asshole.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tczgsi/need_help_navigating_my_new_orgs_bureaucracy/",
     "author": "Trick-Interaction396",
-    "score": 17,
+    "score": 15,
     "numComments": 18,
     "createdAt": "2026-05-14T14:13:44.000Z"
   },
@@ -369,8 +402,8 @@
     "text": "*Obligatory No Tokens were used during the composition of this post*\n\nSo over the years, there are a number things I noticed, when working with other devs, that I just seem to do well. Things I took a lot of pride in. \n\n- My ability to scan a codebase and find what I'm looking for quickly. \n- Grep/Git-foo and finding the root cause quickly. \n- I get around in a terminal better than most and have years of muscle memory built up.\n- I can read faster than your average person.\n\nSomething that is a bit of a hard pill for me to swallow is that AI just does these things better.\n\nIt'll kick off parallel grep commands, include it's own regex string for multiple search strings and for specifics, like casting a wide net just looking for breadcrumbs.\n\nYou give it a pretty high level concept and it'll scour the codebase looking for any and all places it might be referenced and develop an understanding.\n\nYou want it to generate a first pass at a code review? It'll put together a high level summary with actual severity ranges. This specific functionality, I still think I do a better job, but it's getting close.\n\nFinally, my agent doesn't get distracted. I get pulled into a meeting or a slack thread, it just keeps chugging along.\n\nI was a certified AI non-believer. I didn't think the technology was anywhere near capable of being more than a better google.\n\nI was wrong and I have completely flipped my stance. So much so that I've barely written a line of code in the last 6 months.\n\nWhat things do you notice that AI does better than you?\n\n*(No people, this isn't AI just because I include a call to action at the end of my posts. This is something everyone has done for years... hence why AI often does it).*",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tbz4jc/things_i_used_to_be_proud_of_doing_well_modern_ai/",
     "author": "ninetofivedev",
-    "score": 587,
-    "numComments": 297,
+    "score": 608,
+    "numComments": 299,
     "createdAt": "2026-05-13T13:06:54.000Z"
   },
   {
@@ -380,8 +413,8 @@
     "text": "I joined a company 8 months back and while the team is very smart and capable, they love pushing out monstrous pull requests \n\nThe team is fond of AI and I give credit that I think they use it fairly well. The code is good quality, and while they lean heavily onto AI, it's clear that everyone here has a strong programming ability \n\nThe situation I face is they're pumping out these monster pull requests. It's usually at least 100 file changes, but 200-300 is normal\n\nThey implement entire features, full vertical slices. They'll perform adhoc renames and refractors, so in a 300 file PR, maybe 100 are actual new code, and the others are just tweaks. It is a mono repo too so it's all there.\n\nThe team bangs on about delivering smaller units of work, but it's seemingly just talk. One guy, credit to him, will do multiple PRs into an intermediary branch so it's more digestible, so you can review one piece at a time. But otherwise it's just these crazy sized ones\n\nI'm struggling to figure out how to deal with this. If I review them manually it takes a long time, and I'm doubtful of my ability to effectively review after seeing so much code in one go. I have tried to leverage AI to help me distill the PR into something readable... but that gives me a bad taste, getting AI to review AI code.\n\nI'm imagining this is a growing problem now we have AI tools. I don't blame the AI here, it's obviously the developers getting overzealous and wanting to pump out a feature per pull request.\n\nIt feels like there's little point raising this to them, because they all acknowledge it's a bad practice to move away from, but none of them actually are... and as a relatively new hire I don't have the social capital to try do anything about it\n\nFeels like my options are either to manually review, to use the AI to help me review, to rubberstamp, or to not engage (not ideal)\n\nCan't imagine I'm the only one facing this. Anyone got any tips?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tc4ufa/dealing_with_huge_pr_culture/",
     "author": "semaphoreslimshady42",
-    "score": 145,
-    "numComments": 133,
+    "score": 144,
+    "numComments": 134,
     "createdAt": "2026-05-13T16:29:50.000Z"
   },
   {
@@ -413,7 +446,7 @@
     "text": "For the last couple of years I have been writing a yearly post talking about my experience as a small company CTO. You can check them [here](https://www.reddit.com/r/ExperiencedDevs/comments/1l1e815/2_years_as_a_cto_a_follow_up/). As last time, I got some very interesting comments, some thoughtful DMs and some nasty responses. I said it last time and will say it again, if you don't find these posts interesting, downvote and move on, no need to be an asshole. You never know what others are going through.\n\nSo let's get to it. Long story short: first year was shitty, second year was less shity, third year has been slightly shitty. First year was a constant struggle with the former head of product and an outsourced team, eventually having panic attacks and wanting to quit. I fired the outsourced team and the head of productdecided to leave on his own. Second year was better, hired some great devs I can fully rely on and tried to create a healthier organization.\n\nThis third year has had it's highs and lows. The goal of this year was to build a new MVP for a new product we want our current clients to adopt. The development team has proven to be more than capable of achieving this goal, but we have been constantly slowed down by our new product team. This new product team is the result of hiring a new Product Owner that's very good at his job but keeping as Head of Product a boomer that's been on the sales team for years and wanted a promotion. This guy convinced the CEO he wanted the product leadership role without any other experience than being a sales rep for 20+ years . The result hasn ot been great and has caused lots of friction between him and my team, but also between him and the new PO. As a sales rep, his role has consisted in constantly pushing the team to deliver while not providing any kind of priorities nor making decisions about the product. At the same time he has prevented the new PO from making any important decissions and has systematically dropped most ofhis ideas. He is the kind of guy that does not want to make any decissions just in case anything goes south. In parallel, he does not rely on anyone else making decisions. \n\nWe were given a year to build this new MVP and for the first 9 months we barely did anything. I pushed this guy to make decissions, bypassed him and made those decissions with the other PO, argued constantly about how I was doing his job and suddenly it all stopped. He started being defensive and putting spokes in our own wheels. SOme of our devs started to speak up against him during meetings. Sprint plannings were miserable as the priorities where non-existent. \n\nOne of the greates examples was the decission to build a chatbot within our product (yes, again) that connects to ChatGPT and answers questions for our users. That would make sense if at that point we had had anything to answer questions about. It was a greenfield and almost no business logic had been developed at the time. When I confronted him about this decision his answer revealed what I already thought: he is a sales guy. He said \"this will help us sell the product because everyone wants AI\". First, I doubt that. Second, at these early stages the goal is to prove your product works and solves a problem, not selling.\n\nWhile all of these was happening I was requiring the CEO to get this guy back to sales, where he should have always stayed. We've been discussing for severalm months that the product team should not be under his chair but mine. Our CEO does not have previous experience developing software so his POV is really far from reality. \n\nIn any case, the team kept somehow delivering and the feedback we have gotten so far has been quite positive although no sales yet. In any case, my team has decided to bypass the head of product and work closer to the other PO, who's been great so far. I also work close to this PO, and he is scared his boss is not happy about it, but I am working to protect the guy. \n\nOne of the toughest struggles this year has been the Claude Code hype, and I am already echausted. I don't want to sound like AI is the worst. I don't want to sound like I believe in software craftmanship. For me, software development has always been a job and any tool that makes it easier will be welcome. But, there are some problems that come with these tools.\n\n* I do believe Claude Code makes developers faster. It has it's problems, but overall, it's working fine. My main concern with this tool is how it's being pushed as a KPI. The more tokens we use, the better. It reminds me of how, when I was very junior dev, a very old-school company I worked at measured our performance based on lines of code. The result was all of us changed our coding style and started adding empty lines and brackets in new lines and all kind of stuff that made the code worse. It's the same with tokens. \n* Development speed has increased so the cost of development has shifted. It's not a matter of adding more, but prioritising according to the actual value users and clients will see. We can now prototype faster than ever to prove if a solution will work. The cost of delay has shifted from delivering slowly to delivering anything. A good Product Owner needs to know what to prioritise and that means dropping other things. When speed is no longer an issue, direction is. For the first time in my career my development team delivers faster than the Product team can define new features. This has taken us to develop low priority items that were there in the backlog. Add that to an incompetent head of product that boycots anything we try to work on. Not great. \n* Collaboration is a must and devs need to be part of the cycle from the very early stages. AI is also isolating team members. Instead of asking for a second opinion we tend to ask Claude and asume it is right. As the cost of prototyping has decreased, one thing that's working wonders for us is meeting with the PO and our designer and discussing a feature on paper (or a digital whiteboard) and then spend a couple of hours building a prototype to show it in action. We then show the prototype to our designer and PO and either they approve or suggest changes. Once everything's clear, evertyhing's written down on a ticket and worked on from scratch and in a couple of days most it will be developed.\n\nI don't want to sound like I know what I'm doing and others don't. I also messed up big time during this past year.\n\nI had to let go the first developer I hired when I joined. He is a great guy, capable of the very best, but was struggling delivering. I tried talking to him and bring him back on track during almost six months but at some point other team members were tired of his performance and had to fire him. I still question myself about it. Not about firing him, but if it took me too long. Another one of the devs is very picky about how we structure our code and can be very strict when approving PRs to the point of rewriting features from scratch to prove a point. I had to sit down with him and ask him to stop because most of the times he was making a fuss over minor details. This did not  really work and now he is being passive aggresive against his coleagues, which is not great andI'm afraid I'll have to seriously talk to him about it. \n\nThe biggest failure over this past year was not achieving the main goal. We were given a year to deliver an MVP and it's taken us almost 2 extra quarters to deliver it. I was explaining the CEO just the other day that the main issue was trying to goldplate everything. An MVP is an MVP and both, product and development teams, did not want to release because it was not ready. Looking back, we could have delivered and granted access to our existingclients forfree and most of the feedback we arenowgetting we would have gotten earlier. There are many things we developed assuming our clients needed that are now being rolled back.\n\nAnother big fuckup took place almost a year ago. We wanted to implement a workflow manager to allow users to program automations within the product without the need to code. Think of tools like make or zapier. It is quite a complex task and we did not know where to start at. I suggested we took two days and make teams of one frontender and one backender to prototype a solution. They competed, each team had a different approach and at theend of the day our Head of Product did not understand why the feature was not in prod yet. I was clear (or at least I thought I was) this was a prototype and anythig done during those two days would be discarded and started over, but of course they wanted it to get to production. In the end it took us a few weeks to have a first, very poor version of it, but truth be told, it's really easy to add new \"boxes\" to it, so new developments take a couple of hours (maybe a day or two if the inner logic is complex). This might sound like a win, but at that time it caused frustration and confrontation between product and development to the point we have forbidden the use of the word \"hackathon\".\n\nAs usual, some pieces of advice and some things I regret:\n\n* Technical leadership is people leadership. We usually think a technical guy willnot manage people, but at theend ofthe day it all comes to agreements between developers. Managing egos (including our own) is a skill.\n* When something's not working, act fast. Letting people go when it's right will be seen as strong leadership. Waiting until things are all fucked up will only cause more damage.\n* Fail fast is a state of the mind. AI allows to prototype fast, but it comes with a new skill to learn, which is explaining those prototypes are not deliverables. \n\nAnyway, interesting year. Better than the previous one, but also more exhausting. I really hope this helps anyone that's in a similar place. I'll read you in the comments. Be nice.\n\nTLDR: Third year has had it's struggles, I have developed a love-hate relationship with Claude Code, but overall it's been better. Still learning though and I wish I was rich and did not have to work.\n\n",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tc0ktj/3_years_as_a_cto_another_follow_up/",
     "author": "HornyMaryPoppins",
-    "score": 108,
+    "score": 105,
     "numComments": 40,
     "createdAt": "2026-05-13T14:01:38.000Z"
   },
@@ -424,7 +457,7 @@
     "text": "Hey ! sorry for the clickbaity title...  \nI'm a software engineer with 8yoe.  \n3 months ago I changed my job to a sustainability startup.\n\nI'm starting to wonder if it was a good choice, and even if my skills are relevant anymore or will be in the futur.  \nI always considered that my edges were software architecture, being a \"clean architecture\"/DDD advocate of some kind and being always the guy that try to make tidy and understandable changes so that everyone can review, understand the code in the futur, even in the architecture standpoint. Also trying to model the business in the code in the most relevant way, trying to understand the business and model it so that it's easy for everyone etc.\n\nBut right now things are starting to melt. CEO push to being \"AI first\" and there is one guy in the team that does anything with AI etc...  \nThe code produced is kinda shitty, doesn't respect conventions and yeah, I'm not sure a human could understand the code as easy as mine etc. But I can't say it doesn't work, I can see that he is faster than everyone and I see that upper management is quite happy with that.\n\nAlso, I tried agents and stuffs and I can't say it doesn't work, even if the code is shitty, and that it's kinda impossible to make it exactly the way I would have written, but I feel like nobody care...\n\nI'm quite afraid for my job and for the futur right know, I don't really now what to do. I talked a little bit with my manager and other colleagues and I don't really know if It helped me. Like I feel like everyone is lost right know. Obviously everything I read on the internet doesn't help either I feel like everybody is dooming and that I'm stuck in a bad dream that  I can't wake up from.\n\nMy family told me that yeah in the worst case I could just move to another industry (I already done that so yep I'm \"able to\") but it sucks.\n\nTbh I feel like I also have a bad case of anxiety so I took a appointment to a councelor.\n\nBut yeah, my question is just, how do you all cope with all this ? I feel like I can't...",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tbtodt/metldown_at_a_new_job/",
     "author": "MrCallicles",
-    "score": 107,
+    "score": 106,
     "numComments": 131,
     "createdAt": "2026-05-13T08:40:59.000Z"
   },
@@ -457,8 +490,8 @@
     "text": "I have approximately five years and four months worth of experience. The five years were in one job. The four months have been in my second. I have never been more stressed or miserable than in this second job. I was really excited at first because it came with a *huge* salary bump from my old job (where I was comfortable, but way, way below what people typically expect when it comes to software engineer salaries), but it quickly became apparent that it's not an environment I care for at all. The stacked rankings and performance assessments are just terrifying, and it just doesn't feel conducive to a healthy working environment. Just being here is doing awful things to my anxiety.\n\nEven though it's only been a few months and leaving would mean paying back the signing bonus, I've started looking for other jobs. My fear is that having a stint of just a few months will be considered a big red flag. I've heard that people are only concerned if there's a broader pattern, but I was hoping to get some thoughts on how long other people have typically spent at a job and when they knew it was time to jump ship in a job they weren't happy with.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tbd0pw/what_is_the_shortest_amount_of_time_youve_ever/",
     "author": "JumpySpecial9834",
-    "score": 182,
-    "numComments": 219,
+    "score": 183,
+    "numComments": 222,
     "createdAt": "2026-05-12T20:03:37.000Z"
   },
   {
@@ -468,8 +501,8 @@
     "text": "I was laid off in 2024 and had been with my company for 9 years. In that time, I rarely interviewed and never seriously sought leaving. I started immediately throwing out applications and realized how awful I was at interviewing. I spent a lot of time practicing, and got a surprising amount of bites, and ultimately it only took me about 3 months to find something. Now, I'm looking for something new for reasons that are kind of irrelevant. I'm getting bites fairly regularly, usually juggling around 3 companies at a time which in and of itself, seems like a miracle in this market. But I have kids, my wife also has a full time job, and I'm going 4, 5, 6+ rounds with all these companies. It seems like I'm pretty much making it to the end with almost all of them, but just can't land anything. I even had one fly me out and stick me in a hotel before rejecting me, and the position is still posted 4 months later.\n\nI know I should be thankful I'm even getting this far with the way things are for most people right now, but it's really shaking my confidence. I _know_ I have things to work on, and I'm trying to do just that, but something about actually getting to know these people and companies and teams, before being ultimately rejected is just starting to feel devastating. I only had one where I felt like I was truly out of my depth (I'm senior and this was for a lead-level position so... wasn't surprised on this one). Most I feel like go solidly, but then of course no one gives you feedback. I'm in a weird place where I've worked remote for most of these years and for only two companies, so I don't have a ton of close dev friends I can chat to about things and what I may or may not be doing well. I'm in general not incredibly confident in my answers but I try to shake that off in an interview setting as best I can. I think my live coding is solid enough, and can discuss the tradeoffs of tech decisions well. I really don't know what exactly I'm doing wrong, and with the opaqueness of the industry, how do you figure out areas of improvement? I'm pretty ambitious and I'm always trying to improve my skills so obviously I'll keep that up, but like it just doesn't seem to be translating to the interviews themselves. \n\nI have one that's 4 hours long next week and I genuinely don't know what I'm going to do if I don't move on, I can't keep devoting this much time to this. Especially when I just saw the same position get reposted today 🙃 I'm tired, as a lot of us are. I hope this post at least leads to some good discussion, I definitely needed a place to vent but welcome any feedback I can get at this point.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tbe8ka/making_it_to_the_end_of_every_interview_cycle_but/",
     "author": "Fun-ghoul",
-    "score": 113,
-    "numComments": 81,
+    "score": 112,
+    "numComments": 82,
     "createdAt": "2026-05-12T20:47:13.000Z"
   },
   {
@@ -501,8 +534,8 @@
     "text": "Hello guys,\n\n32M and 12+ yoe here.\n\nI've been experiencing JS fatigue for a while (couldn't put a name on it until last year, but been feeling it for at least the last 5 years), trying to keep up with frameworks, concepts, endless updates, and now AI and AI workflows, System Design, side projects... it never stops.\n\nI used to like (not love) doing what i do, even if it resulted in both excitement but extreme frustration sometimes, it was manageable.\n\nLately though, i've been mostly feeling frustration and a deep sense of losing control. \n\nAI was very exciting at first, it felt like the frustration part was mostly gone (excepted when the \"fix bug\" loop didn't do the job). But now it's like everything i do is reading code and test the app.\n\nI don't know if i can keep up, yet dev is the only marketable skill i've ever had.\n\nI feel deeply disconnected from myself and from the world, from the industry too, i have constant FOMO and i have lost the sparkle for a while.\n\nHave you guys been experiencing the same kind of issue? How did you get out of it? Or if you are still in it, how are you coping?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tarbcf/i_cant_take_software_development_anymore/",
     "author": "whinze",
-    "score": 564,
-    "numComments": 185,
+    "score": 565,
+    "numComments": 186,
     "createdAt": "2026-05-12T04:50:37.000Z"
   },
   {
@@ -512,7 +545,7 @@
     "text": "Portfolios are generally considered a “thing for junior developers”: simple projects to show that you’ve learned the basics.\n\nBut what about a senior engineer? I’m thinking of focusing on more complex and advanced problems. Since I’m more front-end oriented, I’d focus on d3, Wasm, real-time rendering, video/image processing, WebGL 3D, heavy animations, SEO optimization, etc.\n\nConsidering how often I’ve read complaints from hiring managers about the flood of AI-generated resumes and how difficult it has become to filter out good candidates because of this, is it time for experienced developers to start creating portfolios?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tbco9n/im_thinking_about_creating_a_portfolio/",
     "author": "Erehybog",
-    "score": 17,
+    "score": 18,
     "numComments": 14,
     "createdAt": "2026-05-12T19:51:31.000Z"
   },
@@ -545,8 +578,8 @@
     "text": "What are your thoughts on employees who make sure systems and processes run smoothly even when they are on leave — through proper documentation, automation, and knowledge sharing — versus people who intentionally keep critical knowledge to themselves?\n\nSome engineers ensure the team can function independently without them. Others avoid proper documentation, keep key details in their head, and make sure work becomes difficult in their absence.\n\nI’ve especially noticed this in some contractor and service-based company environments where people try to create long-term dependency to secure their position.\n\nDo you think this comes from job insecurity, company culture, survival strategy, or something else?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tasfe3/why_do_some_employees_intentionally_create/",
     "author": "Ecstatic_Jicama_1482",
-    "score": 109,
-    "numComments": 138,
+    "score": 107,
+    "numComments": 137,
     "createdAt": "2026-05-12T05:48:04.000Z"
   },
   {
@@ -556,7 +589,7 @@
     "text": "So a bit of background — I've been in Android development for 8 years. Built multiple apps from scratch, shipped them to Play Store, spent way too much time deep in SDK issues, compatibility hell, the usual Android life. Early in my career I also contributed to some open source stuff but stopped during covid\n\nThe thing is, I've also done some backend work — Express, Node.js — but always feature-level stuff, never anything \"senior.\" Never really got the opportunity to go deeper with it, and now those opportunities have pretty much dried up in my current role.\n\nRight now my day looks like: Team lead (Android) + PR reviews + feature discussions + release. More like a feature factory deadlines specific coding with Claude. Which is fine, but not where I want to be heading.\n\nWhere I actually want to go is backend — system design, complex architecture stuff, leading that side of things rather than just being the Android guy. I'm comfortable with TypeScript and Node.js but I'm very aware I haven't done anything at a senior/lead level on the backend side.\n\nWould really appreciate any honest advice here. What should my next career path look like?\n\nI reformatted my post using claude for better readability.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tb1g6p/feeling_stuck_8_years_lead_android_developer/",
     "author": "suneetsri",
-    "score": 18,
+    "score": 20,
     "numComments": 8,
     "createdAt": "2026-05-12T13:19:45.000Z"
   },
@@ -567,7 +600,7 @@
     "text": "I have made multiple contributions to an open source project and multiple times the repo creator made their own commit with changes I made to add features which ultimately removed my name from the commits. They requested some changes to my commit which I did make so from that perspective I get it but it kind of sucks that I implemented all those features and they made some slight changes and the only trace of me in those is my pr that they closed. I have not done much open source is that normal?\n\nUpdate: I asked them to add me as a co author on that commit and they did. I wouldn’t have asked if it wasn’t for the replies here. Thanks for the advice.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tant1d/is_a_repo_owner_making_their_own_commit_with_my/",
     "author": "TopCitySoftware",
-    "score": 155,
+    "score": 159,
     "numComments": 58,
     "createdAt": "2026-05-12T02:06:04.000Z"
   },
@@ -589,7 +622,7 @@
     "text": "In 2013, I started out as a backend dev writing frameworks, libraries, CRUD APIs and a lot of behind-the-scenes stuff. I moved very quickly into QA automation and quality engineering because it involved writing a lot of frameworks and digestible libraries for other projects to use, and mostly because I found I was very good at breaking software and showing the failure points and gaps in implementations, systems, even people and process. I genuinely enjoy QA so much and I do it as a hobby in video games, finding exploits, reproducing them, and reporting them. In short I was the dev writing tests for other people's work because it wasn't sufficient enough to cover all the bases. Even as QA, I occasionally contributed to backend development needs.\n\nI have 12 yoe doing QA automation and QA people management. I think I'm very good at what I do, and am usually the first QA hire at startups. However, since the AI boom most companies have de-invested from quality, and that's why I got laid off 9 months ago. There is an argument to be made that companies will re-invest back into quality eventually but ... bills need to be paid and I don't like not having an income stream for such a long time. There really aren't that many new QA jobs that get posted.\n\nI'm having a really difficult time applying to anything that's not \"QA Manager\" or \"QA Lead\" or \"Senior/Staff QA Automation Engineer / SDET\" and getting interviews. I could do project management, technical program management, engineering management, and I'd place solidly as a mid-level backend dev - I'm sure I'm really a senior in that respect but I'd like to work up from a mid instead to ensure I get all my bearings.\n\nThe problem seems to be a wide variety:\n\n* I supply a resume where all of my titles and impact looks like backend engineering instead of all QA. This feels like a white lie, and they can just go to my Linkedin profile to see that I was actually working in a QA capacity.\n* If I overhaul my Linkedin profile, I can no longer apply to QA centric positions, because of the same issue in above point.\n* If I do none of the above points and supply a backend engineer resume without deleting the QA footprint, I am 100% sure the resume always makes it's way to the trash bin because non-junior X engineering positions overwhelmingly want you to already be working as a X engineer instead of pivoting.\n* I'm a programming polyglot, so I can learn any language in 1-2 weeks, but this isn't sustainable when it comes to applying to *any* backend job: I don't know what language or tech stack to go all in on. I almost got a C# backend dev job but lost it because I didn't have enough frontend experience (???), even though I learned it in 2 weeks and wasn't told it was really a fullstack position until the final round.\n* Even if I wanted to \"start over\" and try for junior backend positions... there are none, presumably blamed on AI for breaking the junior -&gt; mid pipeline.\n* This is a bonus, but I'm deaf, can hear via a cochlear implant and talk just fine, but I have a very heavy deaf accent. Honestly, listening to myself, I would even assume I'm mentally deficient, so I'm not sure how to fix that either. In-person interviews used to help with this but over remote calls it's really bad. I'm thinking about just adding a statement or two addressing my accent at the beginning of calls.\n\nTo be honest, my heart still remains in QA, but I feel I have to pivot to get a job now. But I shudder at overhauling literally everything and deleting the QA footprint and history, because the work I did previously should matter, right?\n\nAll of the LLMs and other dev forums I frequent (hacker news, SA, etc) repeatedly state that \"prior quality engineers are very desirable in backend eng, release eng, data eng, or SRE positions\" but I have not seen this to be the case when applying. It appears that I need to already be a backend eng to apply to backend eng positions, release eng to apply to release eng positions, data eng to apply to data eng positions, SRE to apply to SRE positions - what's the solution to this chicken and egg problem?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tb7wv3/how_to_test_the_waters_with_a_career_pivot/",
     "author": "deafgamer_",
-    "score": 7,
+    "score": 6,
     "numComments": 12,
     "createdAt": "2026-05-12T17:08:31.000Z"
   },
@@ -601,7 +634,7 @@
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tc6vwb/has_vibe_coding_culture_done_more_good_than_bad/",
     "author": "Look_for_some_stuff",
     "score": 0,
-    "numComments": 44,
+    "numComments": 45,
     "createdAt": "2026-05-13T17:38:24.000Z"
   },
   {
@@ -611,7 +644,7 @@
     "text": "Yeah, some people throw in blockers here and there but it’s really just people talking about how productive they were the day before. Makes the standup so long, but the managers get googly eyes I guess because they think people are rockstars\n\nMaybe this is the game you have to play though for promotions? Not sure\n\nTBH stand ups should just be revised to “is there anything stopping you from during your work that the entire team needs to know”",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1ta9ici/are_daily_stand_ups_at_your_company_just_list_out/",
     "author": "QuitTypical3210",
-    "score": 456,
+    "score": 455,
     "numComments": 228,
     "createdAt": "2026-05-11T17:06:13.000Z"
   },
@@ -688,7 +721,7 @@
     "text": "Sigh. I saw this coming. Context: I'm an engineering lead for a tiny software development team. I don't want to identify my org too much, but I'll say it's public sector.\n\nA few months ago we got a new board level senior leader. He made a great early impression, but it's gone downhill across the department since he's pretty much not talking to any of us, at all, and bringing in a whole new layer of leaders from his previous organisation. Today we were told he's hired an external consulting firm we know he likes to do an 'audit' or 'review' of my team's structure, roles, workload, prioritisation and processes (NB: the review will also cover project managers etc as well as us). For one week we'll be shadowed and interviewed and by the end of the week, the boss will have a document summarising their findings and making recommendations.\n\nI know this screams redundancy at the top of its lungs, that's what I've always heard this means. I've got another job opportunity lined up, so if it did mean redundancy I'd probably be fine. But if I try to be realistic, I think this guy has no concept that in his \\~150 staff, we're just a few developers upon whose back rests almost all his strategic objectives for the next few years. I don't know how he *can* make us redundant. But still, people can surprise you *(edit: this phrase used to be less polite)*, and it's entirely possible he's eyeing up complete outsourcing, possibly to the very firm that's going to 'independently' assess us. \n\nAnyway, I want to at least give a good shot at my team coming out of this smelling like roses, even if it's more for my team than myself. Has anyone gone through this before, and have any tips on what to expect and if there's any way to influence the narrative?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1tad7al/external_review_by_consulting_firm/",
     "author": "DarkHorizonSF",
-    "score": 46,
+    "score": 44,
     "numComments": 37,
     "createdAt": "2026-05-11T19:10:50.000Z"
   },
@@ -721,7 +754,7 @@
     "text": "Got to senior last year and I feel like I need to put in 3x the mental energy to get stuff done compared to my peers. I feel so mentally drained after logging off every day that I just sit on my couch and doom scroll for the rest of the day. I don't even make dinner sometimes. I have high career goals, but sometimes I feel like I have hit my limit because of mental illness. My experience with medication has been underwhelming and the side effects typically kick my ass almost as hard as the adhd, anxiety, and depression itself.\n\nEdit: thanks everybody for sharing your experiences! I truly want to reply to everyone, but I lack productive things to say other than \"thank you for sharing\" or \"I totally empathize with that\" or \"this doesn't apply to me but I'm glad it works out for you\". Nonetheless, it's good to know I'm not alone in feeling the way I feel. Also thanks to those of you who offered advice with dealing with ADHD symptoms. I will definitely start incorporating the tips in my daily life.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t9beef/senior_engineers_with_adhdanxietydepression_do/",
     "author": "mudskips",
-    "score": 493,
+    "score": 494,
     "numComments": 211,
     "createdAt": "2026-05-10T16:22:09.000Z"
   },
@@ -732,7 +765,7 @@
     "text": "Our existing process was a take home assignment that we would evaluate and get the candidate to walk through etc. But now they can pretty much one shot it in AI, we've switched up the test a few times but can tell each time it's all done with mostly AI. Which is to be expected in current times.\n\nMy question is how have you switched up your hiring process or evaluation criteria when hiring and looking for good devs.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t9m4cq/how_are_you_effectively_interviewing_devs_now/",
     "author": "dankthreads",
-    "score": 114,
+    "score": 109,
     "numComments": 104,
     "createdAt": "2026-05-10T23:19:06.000Z"
   },
@@ -743,7 +776,7 @@
     "text": "Hey everyone,\n\nI’ve been with the same company for about 4 years, but 8 months ago I got moved to a new project and it was a massive reality check.\n\nI came from a team with a very slow pace and, without even realizing it, my brain was starting to rot. I was just an apathetic \"ticket closer.\" Now that I’m in a high-performance team with a much faster pace, I feel like my brain finally woke up (lol).\n\nThe big lesson I wanted to share with anyone feeling stagnant is that legacy code is no excuse for apathy. We often use the \"it's just old code\" excuse to do the bare minimum, but there’s so much you can learn there. I started actually reading the scripts I was running instead of just hitting Enter, and I began looking at existing CI/CD pipelines to figure out how I’d write them from scratch or how to optimize them.\n\nI stopped waiting for tasks to fall into my lap and started proposing automations and improvements myself. The funny thing is, since I flipped this switch and stopped being inert, my mental health has improved immensely. Feeling like you’re actually evolving and understanding the \"why\" behind things is what keeps you sane in this industry.\n\nI’m writing this because I see a lot of posts on Reddit from people who seem to be on autopilot. If you feel like you’re stagnating, try changing your approach, even if the project itself isn't motivating. Changing your mindset is possible, and sometimes the problem isn't just the project, it's how we choose to look at it.\n",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t9cqvn/being_stuck_in_slow_projects_was_rotting_my_brain/",
     "author": "Huge-Leek844",
-    "score": 173,
+    "score": 174,
     "numComments": 52,
     "createdAt": "2026-05-10T17:12:57.000Z"
   },
@@ -754,8 +787,8 @@
     "text": "Asking from Japan — curious about your actual info diet.    \nMost Japanese devs I know rely on Qiita / Zenn / Hatena Bookmark, which are great but pretty self-contained. I recently started reading Hacker News to get out of that bubble, but I’m not sure if HN is still the default for English-speaking devs or if the center of gravity has moved elsewhere.    \nWhat’s actually in your rotation? Newsletters, RSS, subs, Discords, podcasts — whatever you genuinely read. Honest answers welcome, including “I’ve stopped reading tech news entirely.”",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t95fxi/asking_from_japan_is_hacker_news_still_the_default/",
     "author": "Responsible-Bike3317",
-    "score": 399,
-    "numComments": 152,
+    "score": 397,
+    "numComments": 151,
     "createdAt": "2026-05-10T12:19:30.000Z"
   },
   {
@@ -766,7 +799,7 @@
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t9ny2f/struggling_to_be_convinced_as_a_mid_level_engineer/",
     "author": "hkisthebest",
     "score": 41,
-    "numComments": 33,
+    "numComments": 34,
     "createdAt": "2026-05-11T00:40:54.000Z"
   },
   {
@@ -776,7 +809,7 @@
     "text": "I’m wondering if I should go back to IC to build quicker technical decision-making ability, or if can I develop that on the job as a manager.\n\nI’ve been a tech lead/manager with 10 direct reports for about 6 months. Long term I see myself in management, but I’m not very confident at making sound architecture or implementation trade-off decisions in the time I have.\n\nAdditional Context: I have 10+ years of programming experience (mostly in academic research) but I only spent 2.5 years as an industry software engineer before landing in management when my boss left. I believe I performed well at the senior IC level because I had time to dig into topics, but as a manager I have much less time to do that. I understand the reasoning behind good design decisions and I utilize my team’s expertise, but I don’t have the fast judgment built from years of industry experience that great managers have.\n\nTL;DR:  \n\t•\tCan technical judgment/intuition realistically be developed on the job as a manager?  \n\t•\tIf you or someone you know switched back to IC and returned to management later, was it beneficial?\n\nThanks in advance!",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t9p9lx/has_anyone_gone_back_to_ic_to_help_you_become_a/",
     "author": "Avrelin4",
-    "score": 30,
+    "score": 29,
     "numComments": 23,
     "createdAt": "2026-05-11T01:41:21.000Z"
   },
@@ -787,7 +820,7 @@
     "text": "Mid level engineer on a tiny team, least senior engineer. I feel comfortably mid level, I'm not ready for senior, but I want to take things up a notch. \n\nWhat are things that you did, genetically or specifically, that made you more valuable to your team? Or if you're a staff+ with a mid level, what would you want to see from them that would feel like more of a value add/ make you appreciate them? ",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t9el9k/how_to_step_it_up_as_mid_level/",
     "author": "bobbinssobbin",
-    "score": 38,
+    "score": 39,
     "numComments": 33,
     "createdAt": "2026-05-10T18:21:24.000Z"
   },
@@ -798,7 +831,7 @@
     "text": "Dumb question but when I was in school but my favorite things to learn about were ways to reduce size or speed up programming. The Quake inverse square law example was just so cool to learn about.\n\n  \nIve been a platform engineer for 3 years now, mostly TF, python, and bash. I haven’t used anything like that since college. \n\nDo you use any more memory efficient techniques? Just curious!",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t9axtq/does_anyone_here_use_bit_manipulation_in_modern/",
     "author": "Emotional_Papaya3282",
-    "score": 37,
+    "score": 40,
     "numComments": 89,
     "createdAt": "2026-05-10T16:04:38.000Z"
   },
@@ -809,7 +842,7 @@
     "text": "Many reasons are usually given to explain the current state of the software job market: covid  overhiring, high interest rates, AI hype, etc. But neither these factors individually nor all of them combined fully explain the current bloodbath.\n\nIn 2019, as a junior developer, I had 8 interviews within two months and got hired on 9nth. Now, as a senior developer with six years of experience, I can barely get a single interview per month.\n\nMy local job board is still full of software openings: front-end, .NET, Java, PHP, Node.js, the same things  that existed before. Yet I mostly receive automated rejections or dead silence. They don't even want to see if I'm maybe a genius or ready to work for pennies. Or maybe I want to work for free 7 days a week.  \nAnd some of them even reopen the same postings after several weeks!\n\nEvery manager I have worked with complained about how difficult it is to find decent developers. In 2023, my CEO had to hire engineers from Latin America because he could not find enough people locally. Even in 2024, he had to hire a .NET dev even though our stack was Laravel/PHP and he had no other choice. \n\nOn Linkedin, I constantly see job postings and recruiters complaining that they cannot find good developers, while many experienced engineers remain unemployed.\n\nI am also trying to connect to IT recruiters on LinkedIn. Around 80% never accept the connection request, and most of those don't even read messages. How are you an IT recruiter and yet don't read incoming messages from devs? Maybe I'm a perfect candidate for some of your roles.\n\nI refuse to believe the world changed so much in such a short period of time. It feels like we are missing something. Something is waaay off.  \n\n\nI'm located in Tbilisi, Georgia and my stack is Laravel/PHP.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t839op/something_is_way_off_with_the_current_job_market/",
     "author": "davidbasil",
-    "score": 626,
+    "score": 630,
     "numComments": 397,
     "createdAt": "2026-05-09T12:10:15.000Z"
   },
@@ -820,7 +853,7 @@
     "text": "Hi, I’m a software engineer (4 YOE). I joined a new team \\~8 months ago working in a legacy system, mostly customer issue handling / firefighting.\n\nThe expectation from management is pretty straightforward: analyze issues, debug, run existing scripts and quickly report findings. Basically very execution-focused.\n\nBut I’ve been trying to go deeper, understanding the scripts, data flow, and why certain failure modes happen.\n\nThe problem is time pressure. If I spend extra time properly understanding the system or digging into script internals, I naturally take longer on tickets. My manager has already shown frustration with turnaround time, since from their perspective the job is just to diagnose and move on.\n\nHas anyone dealt with this in legacy/firefighting-heavy environments? How do you balance learning deeply with the need to close tickets quickly?\n\nThank you",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t86u2w/how_do_you_balance_deep_understanding_vs_fast/",
     "author": "bruno_pinto90",
-    "score": 49,
+    "score": 53,
     "numComments": 43,
     "createdAt": "2026-05-09T14:41:41.000Z"
   },
@@ -842,7 +875,7 @@
     "text": "we were running about 3 weeks behind on a release last month so management's solution was to move 3 more devs onto the project. i tried to say my piece in the meeting about how this was probably going to make things worse before it made things better, got the polite nod, and we moved on\n\nnow we're 5 weeks behind. and not because the new people are bad, theyre fine. its because the original 4 of us are spending probably half our time answering questions, walking through how the auth system works, explaining why we made a weird choice 8 months ago that now looks dumb but had a real reason at the time, reviewing PRs that need 3 rounds because the new folks dont have the codebase context yet. we use coderаbbit so at least the surface stuff gets caught, but no tool knows why the auth layer is structured the way it is. that still has to come from a personall of which is the right thing to do, but its also the thing that wasnt happening when we were just heads-down shipping\n\nit always remind me the book brooks wrote the mythical man-month in 1975. fifty years ago. \"adding manpower to a late software project makes it later\" is one of the most-quoted sentences in software management, every PM has either read it or heard about it(idk about nowadays..). and managers still do this exact thing constantly. i think because the alternative (telling the business \"we're going to be late and theres nothing we can do\") feels worse politically than doing the wrong thing that at least looks like you tried\n\nand to be fair, sometimes adding people is the right call, if the project is going to take 6 more months, you absolutely want more people on it now even if the first 2 months are a wash. but for a project that's 3 weeks behind on a 4 month timeline, the math just doesnt work. by the time the new folks are net positive contributors, the deadline is already past\n\ni think the deeper thing is communication overhead scales worse than people expect. 4 devs is 6 communication channels. 7 devs is 21. its not a linear cost, every new person added makes coordination harder for everyone who was already there\n\nnext time im in a meeting like this i should probably print out a copy of brooks and slide it across the table. probably wont work. nothing else has",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t7fgep/the_fastest_way_to_slow_down_a_project_is_to_add/",
     "author": "minimal-salt",
-    "score": 741,
+    "score": 740,
     "numComments": 141,
     "createdAt": "2026-05-08T17:55:39.000Z"
   },
@@ -853,7 +886,7 @@
     "text": "In recent years, it really felt like we finally got to a fun, good place with software development.\n\n- Java got good\n- C# is great\n- Bun and Zig popped up\n- Svelte and Solid did interesting things, and pushed the other frameworks to adapt\n- Rust got a bunch of adoption\n- Testing, linting etc\n\nQuality felt higher!\n\nMaybe this is just fond nostalgia.\n\nMy experience so far with the AI trend, for as cool as it is, is as follows.\n\nSee new cool technique that would be considered a baseline for using AI in any serious capacity - (sandboxing, agent harnesses, integration, governance)\n\nAttempt to try it out\n\n- agent harness install failures\n- OS compatibility problems\n- rogue commands burning tokens\n- local models crashing or failing to reliably call tools\n- subscription limits hit\n- IDE plugins full of bugs\n\nHow long until we get some form of baseline quality with any of the tooling or implementations?!\n\nOn the day my employer instructed ~1200 staff to embrace AI more, and that it was smarter than Anthropic engineers - the Claude Code source got leaked.\n\nWhat are we doing?!\n\nWe skipped the boring infrastructure maturity phase and jumped to production stupidity.\n\nMy day job, I'm creating/reviewing/working on higher level agentic stuff with a team of others.  It's a space I feel like I'm familiar and comfortable with.\n\nI can see the potential, but damn it's annoying right now.\n\nAt least I'll be able to get a job fixing this stuff for the foreseeable future, until AI can do it itself.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t7pz22/the_alphaquality_state_of_ai_tooling_is_hard_to/",
     "author": "softgripper",
-    "score": 204,
+    "score": 206,
     "numComments": 111,
     "createdAt": "2026-05-09T00:45:39.000Z"
   },
@@ -864,7 +897,7 @@
     "text": "we've got a new engineer starting in our team soon. the codebase is challenging and it normally takes at least a year to become capable of working independently. I've been here 3 years and there are parts I still don't understand. historically the onboarding process has been pairing on increasingly complex tasks.\n\nhowever, my team now find ourselves not pairing with each other. each of us is just pairing with AI. the juniors are feeling a bit despondent because they're not truly learning.\n\ni'm wondering how on earth someone can get up to speed when they aren't physically writing the code themselves. do we impose a moratorium on ai assistance for the first 6 months?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t7j7xz/onboarding_a_new_engineer_in_todays_landscape/",
     "author": "bamfg",
-    "score": 77,
+    "score": 78,
     "numComments": 56,
     "createdAt": "2026-05-08T20:11:41.000Z"
   },
@@ -875,7 +908,7 @@
     "text": "I thought this would be the perfect place to ask since its filled with SWEs. Even though its unrelated to the subreddit itself, I still want to see what the thoughts are.\n\n  \nI bet some of you guys have hopped city to city or just stayed in one this whole time... lets share why and what makes it so great for you.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t7lty8/what_has_been_your_fav_city_to_live_in_or_want_to/",
     "author": "WhackyWhale1",
-    "score": 32,
+    "score": 30,
     "numComments": 45,
     "createdAt": "2026-05-08T21:50:00.000Z"
   },
@@ -897,7 +930,7 @@
     "text": "I'm not sure what I was listening to that prompted this thought.\n\nMost of what I've done has either been creative/developer tools or libraries (like Realm and my own OODBMS). It's *possible* someone's life might be threatened by one of my bugs, but only as a result of someone else's software that embedded it.\n\nHowever, back in 2010, I got a job at a company that was the *Microsoft of Mining Software*, working on a specialist 3D CAD product.\n\nThink open-cut mines, tunnels, pretty much any aspect of mineral mining. \n\nStuff I worked on included road design for 150T trucks, spiraling down the side of the mine, and blasting patterns for explosives. We had world-class QA (NASA class?) but I always felt more weight of responsibility than any other job.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t73mq6/have_peoples_lives_ever_been_directly_at_stake/",
     "author": "AndyDentPerth",
-    "score": 150,
+    "score": 148,
     "numComments": 189,
     "createdAt": "2026-05-08T10:10:47.000Z"
   },
@@ -941,7 +974,7 @@
     "text": "my last job, i was working with  large volumes  of data in a distributed system but i was not dealing with significant amounts of users since we were typically dealing with the asynchronous stuff (pipelines, message queues, warehouse/lake) but I’m worried that at my new position I’ll need to think way more about concurrency and the issues that come with that.\n\nmy old job, we were able to avoid  most concurrency issues by not sharing state, being idempotent and using things like outbox pattern/2pc for message queues but with a large number of users  I’m worried that I’ll have to worry about  dealing with shared resources  with something as simple as a like counter. i do have  a basic understanding of things like atomic operations, locks and other stuff but  have not built an entire system that thinks about it every step of the way\n\nI start in a month so i figured I’d take that time to  build a couple projects on the cloud. is there a good way to get a head start on getting some practical experience? i am a mid level engineer so there’s going to be an expectation of building/designing things and i  don’t want to be more clueless than the juniors",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t6ygqy/im_a_mid_level_developer_who_got_hired_at_a_big/",
     "author": "RubOk1972",
-    "score": 41,
+    "score": 44,
     "numComments": 28,
     "createdAt": "2026-05-08T05:22:16.000Z"
   },
@@ -963,7 +996,7 @@
     "text": "I’ve been on the market about a month and have had around four interviews. One I got rejected after the second round (DSA shit), one I made it to the final round and did well but they paused hiring, and two are still in progress waiting to be scheduled. All of them have been 3 to 4 rounds with a mix of behavioral and technical.\n\nI had a random interview today from a recruiter who reached out earlier this week. It was a full stack TypeScript role with React and Node, which is right in my wheelhouse since I lean frontend and have used React since the class component days. They sent me a Coderbyte assessment earlier this week with both React and Node. I passed it with time to spare.\n\nThe interview itself was 30 minutes and pretty rough. While I was trying to walk through my experience, one interviewer kept interrupting and drilling into deeper questions before I could even finish a thought. It is already tough to condense 8 years into 30 minutes, and even harder when you cannot get past anything without being nerd sniped to death. I focused mostly on my last 4 years and tried to explain my work and impact, but he kept trying to catch me with deep React and Node questions. I can answer most of those, so whatever, hit me with em. It's relevant to the role at least. \n\nThen near the end he mentioned they have some microservices in Ruby on Rails and started asking me RoR questions. I have zero experience with Ruby or Rails and it is not anywhere on my resume. I have worked with Spring Boot and Node, but never touched RoR, so I could not go into specifics.\n\nWhat stands out to me the most was they asked me about AI, which I actually know well. I talked about agentic workflows, how I prep a codebase using a policy first approach, and even walked through a RAG feature I worked on, including the specifics of the chunking strategy and overall flow of how it worked. No follow ups at all, just a quick “sounds interesting” and they moved on. Meanwhile everything else they pushed super deep on, so it felt like they asked about AI without really understanding it themselves.\n\nBy the end they definitely got me on the RoR stuff. I was annoyed but closed it out by saying I do not know Rails, but I could ramp up quickly if needed. I also asked if the job description was accurate since it never mentioned RoR, and he just said yes. Then we wrapped it up with some niceties. \n\nI really don't understand the interview process at all in 2026. Early on in my career I always thought that if I could just get some decent experience under my belt, interviews would become more focused on that experience and the impact I had. Instead they are technical gauntlets where they are just trying to weed you out, instead of actually finding a good fit for the role. It feels like playing the lottery in these interviews now. It's so exhausting and makes me hate this industry. My wife is totally dumbfounded by how much interview prep I need to do as someone with experience. I know I can't be the only one here that is thinking this. And it makes me wonder if at some point, there needs to be a massive reevaluation of how software jobs are interviewed for, even more so now considering AI. ",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t6ggvf/is_it_me_or_have_interviews_gotten_way_more/",
     "author": "skidmark_zuckerberg",
-    "score": 180,
+    "score": 181,
     "numComments": 206,
     "createdAt": "2026-05-07T16:58:54.000Z"
   },
@@ -996,7 +1029,7 @@
     "text": "Hi,\n\nI currently have a junior dev on the team who has some behavioral issues that need to be addressed.\n\nFor context, I’m a Senior Engineer in Platform Engineering who has recently joined a mid sized company after spending a few years in academia. I’m still in probation.\n\nThe junior used to work in Solutions Engineering and transitioned to Software Engineering roughly one year ago. He has been promoted recently and has used his ops knowledge to do very good work. However, he lacks in regular SDE tasks and his interviews skipped some of the SDE tasks to give him a chance.\n\nIssues:\n\n1. Racism. For context, him and I have the same ethnic background. The difference, he was born in the country I immigrated to. Recently, at a work outing, he called me a &lt;my ethnicity&gt; c\\*nt saying he meant it in an endearing way. This was very disrespectful. There have been other incidents, he casually drops racial stereotypes making me feel uncomfortable.  \n2. He’s very loud. In the sense, he imposes his opinions on others and isn’t trying to initiate discussions where everyone can present their thoughts and opinions. Him being loud puts others on the defensive and the only way to be heard is to be louder than him. This makes the place very hostile.\n\n3. Given his background, he was multiple times called the company sh\\*t because he gets to be a developer here. This diminishes the contributions and efforts of many capable developers in the company. And I’m deeply offended by his statements.\n\nAs a senior, I see an opportunity to mentor a junior while defining the culture in the team. However, I also feel that for some of the things I should get my manager involved.\n\nI’m not looking to get him into trouble so asking for advice here.\n\nWhat would you do in my place?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t6aj1u/dealing_with_a_difficult_junior/",
     "author": "dhaliman",
-    "score": 187,
+    "score": 193,
     "numComments": 155,
     "createdAt": "2026-05-07T13:26:28.000Z"
   },
@@ -1007,7 +1040,7 @@
     "text": "What does daily engineering work in Big Tech actually look like nowadays? Besides meetings, planning, architecture discussions, alignment, and internal politics, are engineers still coding themselves or has most of the work shifted toward agentic AI tools generating the implementation?",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t6ehjr/how_does_a_developers_daily_work_look_in_big_tech/",
     "author": "tolkinski",
-    "score": 112,
+    "score": 113,
     "numComments": 159,
     "createdAt": "2026-05-07T15:49:22.000Z"
   },
@@ -1018,7 +1051,7 @@
     "text": "Like many of you I've been forced to use Microslop my entire career and while it was never good, it always worked reliably for the most part.\n\nNow I am stuck in a Kafkaesque nightmare with all this tooling and *especially* with Microsoft's MFA system and its multiple retrofitted integrations. Examples include : \n\n* Having to go through the entire MFA process upwards to 10 times per day on web clients (as soon as I don't look at it for more than 20 minutes, I'm logged out) when the tenant is configured to allow sessions for up to 10 hours\n* Having to go through the same process on my phone, which is absurd considering the entire basis for trust is placed in my smartphone to begin with (in other words, this protects me against *nothing*)\n* Being *categorically unable to access the Outlook web app* with Firefox on any of my devices. As soon as I finish the login process, I am *immediately* redirected to the OIDC logout page, and this even after wiping every possible piece of state in my browser pertaining to Microsoft\n* Generally being unable to follow hyperlinks across the company intranet. It always breaks. Always. \n\nI couldn't possibly begin to list every inconvenience and frustration. It's become very difficult for me to communicate and exchange information with my teams.  \n\nI have gone over our tenant policies and they seem fine. Furthermore I'm the only one in my team affected by these problems, but I am also the only one using Linux and Firefox. \n\nThere's still a chance that the problem is on my end (I block ads and my home network is pretty locked down) but I don't have any problems with any other SaaS vendors.\n\nedit: We all know that Microsoft has always been ass and I 100% empathize with the sentiment but I really need to know if this is just a *me* problem.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t6d4z8/is_anyone_else_experiencing_major_service/",
     "author": "Manic5PA",
-    "score": 119,
+    "score": 117,
     "numComments": 47,
     "createdAt": "2026-05-07T15:02:03.000Z"
   },
@@ -1040,7 +1073,7 @@
     "text": "I am a worse developer today than I was 2 years ago. That's not because of AI either, I didn't start using it regularly until this year. My previous job was quite high level and I got to design architectures and had a large amount of responsibility taking charge of a significant portion of new implementations on the project I was working on. I changed that job in 2024 for something that was higher paid, and at the time I thought the company I was joining trusted its developers and gave them leeway similarly to how my previous employer did. Boy was I wrong.\n\nI've not had to do any significant system design work in 2 years. I've also not really had the opportunity to do any kind of work similar to what I used to do at my previous place. My current employer talks about the company being \"product-driven, not engineering-led\", which is to mean that engineering seems to be viewed as a cost center and us developers aren't really trusted to do much outside our strictly defined responsibility borders, aka \"do what product wants\". I hate it here, and I've been sending out resumes for the last 6 months, but I've noticed the market is dogshit in that most job ads are for places that I can identify red flags directly in the job ad, or as a result of looking up reviews on indeed. The rest of the ads are likely ones I've applied to, and barely gotten any interviews for. And of the interviews I've gotten, I'd find red flags during the interview process. I suspect it's even harder for me because I barely have anything noteworthy to put on my resume for the last 2 years at this shit show of a company. \n\nBut forgetting about my job seeking struggles, I've become quite burnt out. Leaving my job is not something I want to do because I don't see it being any easier to find a job with months worth of a gap to explain. Yet I also need to find a way to recoup some of the know-how I've lost to atrophy over the last couple of years spent at this dead-end job. The burnout isn't making it any easier because at the end of the day I sometimes have to restrain myself from tossing the company laptop out a window, and I have no desire at all to spend any amount of time on my own PC doing anything at all. I actually stopped doing activities I used to enjoy, like gaming, because I associate my desk at home with work and outside of work hours I'd rather shoot myself than spend any amount of time in front of a computer.\n\nI don't know how common a situation this is for other developers, but if you can relate, I'd love to hear how you were able to power through burnout and get some motivation back. Especially if it was recent, in this job market.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t6amyc/how_to_you_handle_skill_and_knowledge_atrophy/",
     "author": "opakvostana",
-    "score": 73,
+    "score": 67,
     "numComments": 37,
     "createdAt": "2026-05-07T13:30:45.000Z"
   },
@@ -1051,7 +1084,7 @@
     "text": "I spent yesterday breaking my head over some failing automated tests, The code was perfect and the tests worked in the DEV environment but were failing in TST.\n\n I did everything possible to debug, additional logging statements, deploying to a different environment and rerunning the tests, I also used up a lot of my tokens asking Claude as a last resort to check my code and it kept going in a loop of hallucinations because it couldn't find out what was wrong.\n\nTurns out my api gateway was configured with the DEV application gateway url instead of TST and all the tests were looking for data in dev and couldn't find them, some of the other apis were configured with TST and their tests worked so I never thought of this.\n\nI see this pattern of my biggest headaches being some very simple things I've overlooked, is this a common thing or is it only me? I'm trying to fix this pattern and would like to know how others dealt with this.",
     "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t6e35y/how_often_do_you_break_your_head_over_a_problem/",
     "author": "MadrasBoy",
-    "score": 40,
+    "score": 42,
     "numComments": 27,
     "createdAt": "2026-05-07T15:35:24.000Z"
   },
@@ -1065,38 +1098,5 @@
     "score": 0,
     "numComments": 20,
     "createdAt": "2026-05-08T15:14:15.000Z"
-  },
-  {
-    "id": "1t6qlh0",
-    "subreddit": "ExperiencedDevs",
-    "title": "How do good engineering teams actually stay so aligned (especially now with AI)",
-    "text": "I've been in a engineering team with 10-14ish headcount  (Original push had all hands on deck. Split off into QA/Testers and then eventually teams split on domains) for a couple years,  but the degradation and misalignment has been painful, especially as we moved to migrating our monolith into microservices\n\n\\- Team members with dev systems out of date or spending hours \"fixing\" because they didnt read mattermost announcements\n\n\\- Meetings and resolutions being agreed upon by a small sub-section of the team but never persisted so everyone is operating out of the loop (not to mention the \"confluence\" docs that were rotted from the get go)\n\n\\- Engineers with seniority having differing decision about system design, spending weeks or months rebuilding and redesigning because services ended up incompatible\n\n\\- Constant confusion with stakeholders about what were intended interaction with the systems and what were bugs. So fixes were pushed top prio but reverted wasting weeks\n\nI was wondering if this was common ground across other engineering teams (ive only really been here so I haven't had the chance to see other operations).\n\nEspecially now that AI is proclaiming \"10x speed\". But also means 10xing the velocity in which systems and teams diverge. What practices or systems have teams been using to keep everyone cohesive with team designs and system standards.\n\nAlso has any time been able to successfully utilise AI based second brains in their team? They all feel so generic and corporate, relying more on engineering discipline to ingest relevant data and knowledge, succumbing it to the same eventually fate as confluence or notion docs",
-    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t6qlh0/how_do_good_engineering_teams_actually_stay_so/",
-    "author": "Dawad_T",
-    "score": 9,
-    "numComments": 25,
-    "createdAt": "2026-05-07T23:09:22.000Z"
-  },
-  {
-    "id": "1t636m2",
-    "subreddit": "ExperiencedDevs",
-    "title": "Is the premise for a hackathon that product managers are setting wrong priorities?",
-    "text": "If product managers were doing their job correctly then developers should be already working on the tasks that deliver the most value to the business. So why do we need a hackathon? It only makes sense if you assume that developers are able to make better decisions than the product manager about what would bring value to the business. ",
-    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t636m2/is_the_premise_for_a_hackathon_that_product/",
-    "author": "fortyeightD",
-    "score": 70,
-    "numComments": 70,
-    "createdAt": "2026-05-07T07:16:28.000Z"
-  },
-  {
-    "id": "1t5xrzz",
-    "subreddit": "ExperiencedDevs",
-    "title": "Developers who worked before GitHub and modern DevOps tooling — how different was day-to-day development back then?",
-    "text": "We used tools like Subversion/Tortoise SVN and managing branches, merges, builds, and deployments used to feel much more complex and manual. Build and deployment processes often required a lot of coordination and operational effort.\n\nNow with GitHub, automated CI/CD pipelines, cloud platforms, containers, and infrastructure automation, a lot of deployment work has become streamlined. It feels like developers can spend more time focusing on actual business logic and product development instead of handling repetitive release processes.\n\nWhat were the biggest pain points earlier, and what modern tools changed developer productivity the most in your opinion?",
-    "url": "https://www.reddit.com/r/ExperiencedDevs/comments/1t5xrzz/developers_who_worked_before_github_and_modern/",
-    "author": "Majestic-Taro-6903",
-    "score": 102,
-    "numComments": 251,
-    "createdAt": "2026-05-07T02:35:59.000Z"
   }
 ]

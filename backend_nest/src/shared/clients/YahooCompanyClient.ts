@@ -9,6 +9,16 @@ type HistoryResult = { meta: Record<string, unknown>; quotes: Quote[] };
 const historyCache = new Map<string, { data: HistoryResult; expiresAt: number }>();
 const HISTORY_TTL_MS = 24 * 60 * 60 * 1000;
 
+type AlpacaBar = {
+  t: string;
+  o: number;
+  h: number;
+  l: number;
+  c: number;
+  v: number;
+  vw: number;
+};
+
 type NewsArticle = {
   uuid?: string;
   title?: string;
@@ -21,10 +31,19 @@ type NewsArticle = {
   [key: string]: unknown;
 };
 
+const ALPACA_BASE = "https://data.alpaca.markets/v2";
+
+function alpacaHeaders() {
+  return {
+    "APCA-API-KEY-ID": process.env.ALPACA_API_KEY ?? "",
+    "APCA-API-SECRET-KEY": process.env.ALPACA_SECRET_KEY ?? "",
+  };
+}
+
 class CybersecurityClient {
   companyName: string;
   ticker: string;
-  private client: InstanceType<typeof YahooFinance>;
+  private yahooClient: InstanceType<typeof YahooFinance>;
   private pool: Pool;
 
   constructor(companyName: string, pool: Pool) {
@@ -33,34 +52,48 @@ class CybersecurityClient {
     }
     this.companyName = companyName;
     this.ticker = companies[companyName];
-    this.client = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
+    this.yahooClient = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
     this.pool = pool;
   }
 
-  async getHistory({ start = "2024-01-01", end = new Date().toISOString().slice(0, 10), interval = "1d" as const } = {}) {
-    return this.client.chart(this.ticker, { period1: start, period2: end, interval });
-  }
-
   async search() {
-    return this.client.search(this.companyName);
-  }
-
-  async getQuote() {
-    return this.client.quote(this.ticker);
-  }
-
-  async getSummary() {
-    return this.client.quoteSummary(this.ticker, {
-      modules: ["summaryProfile", "financialData", "defaultKeyStatistics"],
-    });
+    return this.yahooClient.search(this.companyName);
   }
 
   toString(): string {
     return `CybersecurityClient(${this.companyName} → ${this.ticker})`;
   }
 
+  async #fetchAlpacaDailyBars(start: string, end: string): Promise<AlpacaBar[]> {
+    const url = new URL(`${ALPACA_BASE}/stocks/${encodeURIComponent(this.ticker)}/bars`);
+    url.searchParams.set("timeframe", "1Day");
+    url.searchParams.set("start", start);
+    url.searchParams.set("end", end);
+    url.searchParams.set("adjustment", "all");
+    url.searchParams.set("feed", "sip");
+    url.searchParams.set("limit", "10000");
+
+    const bars: AlpacaBar[] = [];
+    let nextPageToken: string | null = null;
+
+    do {
+      if (nextPageToken) url.searchParams.set("page_token", nextPageToken);
+      else url.searchParams.delete("page_token");
+
+      const res = await fetch(url.toString(), { headers: alpacaHeaders() });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as Record<string, string>;
+        throw new Error(`Alpaca daily bars error ${res.status}: ${body.message ?? "unknown"}`);
+      }
+      const data = await res.json() as { bars: AlpacaBar[] | null; next_page_token: string | null };
+      if (data.bars) bars.push(...data.bars);
+      nextPageToken = data.next_page_token ?? null;
+    } while (nextPageToken);
+
+    return bars;
+  }
+
   async populate(): Promise<void> {
-    // Determine start date from DB max date
     const { rows: maxRows } = await this.pool.query<{ max: string | null }>(
       `SELECT MAX(date)::text AS max FROM stock_quotes WHERE ticker = $1`,
       [this.ticker],
@@ -68,33 +101,22 @@ class CybersecurityClient {
     const maxDate = maxRows[0]?.max ?? null;
     const historyStart = maxDate
       ? (() => { const d = new Date(maxDate); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })()
-      : undefined;
+      : "2024-01-01";
 
     const today = new Date().toISOString().slice(0, 10);
-    const historyUpToDate = historyStart != null && historyStart >= today;
+    const historyUpToDate = historyStart >= today;
 
-    const [history, search, summary] = await Promise.all([
-      historyUpToDate ? null : this.getHistory(historyStart ? { start: historyStart } : undefined),
+    const [bars, search] = await Promise.all([
+      historyUpToDate ? Promise.resolve([]) : this.#fetchAlpacaDailyBars(historyStart, today),
       this.search(),
-      this.getSummary(),
     ]);
 
-    // history → DB
     let newQuoteCount = 0;
-    if (history) {
-      newQuoteCount = await this.#upsertHistory(history as unknown as Record<string, unknown>);
+    if (bars.length > 0) {
+      newQuoteCount = await this.#upsertBars(bars);
     }
 
-    // news → DB
     const newNews = await this.#upsertNews((search as { news?: NewsArticle[] }).news ?? []);
-
-    // summary → DB
-    await this.pool.query(
-      `INSERT INTO company_summary (ticker, company_name, data, updated_at)
-       VALUES ($1, $2, $3, now())
-       ON CONFLICT (ticker) DO UPDATE SET data = EXCLUDED.data, updated_at = now()`,
-      [this.ticker, this.companyName, JSON.stringify(summary)],
-    );
 
     if (newQuoteCount > 0) historyCache.delete(this.companyName);
 
@@ -110,7 +132,21 @@ class CybersecurityClient {
     return newArticles.length;
   }
 
-  // Returns only newly inserted articles
+  async #upsertBars(bars: AlpacaBar[]): Promise<number> {
+    let inserted = 0;
+    for (const b of bars) {
+      const date = b.t.slice(0, 10);
+      const result = await this.pool.query(
+        `INSERT INTO stock_quotes (ticker, date, open, high, low, close, adjclose, volume)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         ON CONFLICT (ticker, date) DO NOTHING`,
+        [this.ticker, date, b.o, b.h, b.l, b.c, b.c, b.v],
+      );
+      if ((result.rowCount ?? 0) > 0) inserted++;
+    }
+    return inserted;
+  }
+
   async #upsertNews(articles: NewsArticle[]): Promise<NewsArticle[]> {
     if (!articles.length) return [];
     const newOnes: NewsArticle[] = [];
@@ -138,39 +174,6 @@ class CybersecurityClient {
     }
     return newOnes;
   }
-
-  async #upsertHistory(newData: Record<string, unknown>): Promise<number> {
-    const meta = newData as Record<string, unknown>;
-    const quotes = (newData["quotes"] ?? []) as Record<string, unknown>[];
-
-    // Upsert meta (everything except quotes)
-    const metaOnly = Object.fromEntries(Object.entries(meta).filter(([k]) => k !== "quotes"));
-    await this.pool.query(
-      `INSERT INTO stock_meta (ticker, company_name, data, updated_at)
-       VALUES ($1, $2, $3, now())
-       ON CONFLICT (ticker) DO UPDATE SET data = EXCLUDED.data, updated_at = now()`,
-      [this.ticker, this.companyName, JSON.stringify(metaOnly)],
-    );
-
-    // Batch upsert quotes
-    let inserted = 0;
-    for (const q of quotes) {
-      const raw = q["date"];
-      if (!raw) continue;
-      const parsed = raw instanceof Date ? raw : new Date(raw as string);
-      if (Number.isNaN(parsed.getTime())) continue;
-      const date = parsed.toISOString().slice(0, 10);
-      const result = await this.pool.query(
-        `INSERT INTO stock_quotes (ticker, date, open, high, low, close, adjclose, volume)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-         ON CONFLICT (ticker, date) DO NOTHING`,
-        [this.ticker, date, q["open"] ?? null, q["high"] ?? null, q["low"] ?? null,
-         q["close"] ?? null, q["adjclose"] ?? null, q["volume"] ?? null],
-      );
-      if ((result.rowCount ?? 0) > 0) inserted++;
-    }
-    return inserted;
-  }
 }
 
 class CybersecurityConsumer {
@@ -191,19 +194,15 @@ class CybersecurityConsumer {
     const cached = historyCache.get(this.companyName);
     if (cached && cached.expiresAt > Date.now()) return cached.data;
 
-    const [metaRes, quotesRes] = await Promise.all([
-      this.pool.query<{ data: Record<string, unknown> }>(
-        `SELECT data FROM stock_meta WHERE ticker = $1`,
-        [this.ticker],
-      ),
-      this.pool.query<{ date: string; open: number | null; high: number | null; low: number | null; close: number | null; adjclose: number | null; volume: number | null }>(
-        `SELECT date::text, open, high, low, close, adjclose, volume FROM stock_quotes WHERE ticker = $1 ORDER BY date ASC`,
-        [this.ticker],
-      ),
-    ]);
+    const { rows } = await this.pool.query<{
+      date: string; open: number | null; high: number | null; low: number | null;
+      close: number | null; adjclose: number | null; volume: number | null;
+    }>(
+      `SELECT date::text, open, high, low, close, adjclose, volume FROM stock_quotes WHERE ticker = $1 ORDER BY date ASC`,
+      [this.ticker],
+    );
 
-    const meta = metaRes.rows[0]?.data ?? {};
-    const quotes: Quote[] = quotesRes.rows.map((r) => ({
+    const quotes: Quote[] = rows.map((r) => ({
       date: r.date,
       open: r.open ?? 0,
       high: r.high ?? 0,
@@ -213,7 +212,7 @@ class CybersecurityConsumer {
       volume: r.volume ?? undefined,
     }));
 
-    const data: HistoryResult = { meta, quotes };
+    const data: HistoryResult = { meta: {}, quotes };
     historyCache.set(this.companyName, { data, expiresAt: Date.now() + HISTORY_TTL_MS });
     return data;
   }
@@ -228,12 +227,7 @@ class CybersecurityConsumer {
   }
 
   async summary(): Promise<Record<string, unknown>> {
-    const { rows } = await this.pool.query<{ data: Record<string, unknown> }>(
-      `SELECT data FROM company_summary WHERE ticker = $1`,
-      [this.ticker],
-    );
-    if (!rows[0]) throw new Error(`No summary for ${this.companyName}. Run populate() first.`);
-    return rows[0].data;
+    return {};
   }
 }
 

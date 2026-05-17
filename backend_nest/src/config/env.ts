@@ -7,6 +7,9 @@ const envSchema = z.object({
   JWT_SECRET:      z.string().min(32),
   CLERK_SECRET_KEY: z.string().min(1),
   ALLOWED_ORIGIN:  z.string().default("http://localhost:5173"),
+  // Alpaca Markets — https://alpaca.markets
+  ALPACA_API_KEY:      z.string().min(1),
+  ALPACA_SECRET_KEY:   z.string().min(1),
   // Optional — absence is fine, features degrade gracefully
   REDIS_URL:           z.string().optional(),
   AMQP_URL:            z.string().optional(),

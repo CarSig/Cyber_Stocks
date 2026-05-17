@@ -4,7 +4,7 @@ import FilterSelect from '@/components/molecules/shared/FilterSelect';
 import ThreatIntelShell from '@/components/organisms/layout/ThreatIntelShell';
 import { usePaginatedThreatIntel } from '@/hooks/usePaginatedThreatIntel';
 import useFilterWithPageReset from '@/hooks/useFilterWithPageReset';
-import { formatDate } from '@/utils/date';
+import { DateUtils } from '@/utils/date';
 
 export default function ThreatIntelKev() {
   const [search, setSearch] = useState('');
@@ -79,8 +79,8 @@ export default function ThreatIntelKev() {
                 <td>{v.vendorProject as string}</td>
                 <td>{v.product as string}</td>
                 <td className="ti-name">{v.vulnerabilityName as string}</td>
-                <td className="ti-date">{formatDate(v.dateAdded as string)}</td>
-                <td className="ti-date">{formatDate(v.dueDate as string)}</td>
+                <td className="ti-date">{DateUtils.formatDate(v.dateAdded as string)}</td>
+                <td className="ti-date">{DateUtils.formatDate(v.dueDate as string)}</td>
                 <td>
                   {v.knownRansomwareCampaignUse === 'Known' ? (
                     <span className="ti-badge ti-badge--danger">Known</span>

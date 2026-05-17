@@ -1,4 +1,4 @@
-import { formatDate } from '@/utils/date';
+import { DateUtils } from '@/utils/date';
 
 const SEVERITY_COLORS: Record<string, string> = {
   CRITICAL: 'var(--color-red)',
@@ -38,7 +38,7 @@ export default function NvdRow({ cve }: NvdRowProps) {
       </td>
       <td className="ti-score">{cve.score ?? '—'}</td>
       <td className="ti-desc">{cve.description}</td>
-      <td className="ti-date">{formatDate(cve.published)}</td>
+      <td className="ti-date">{DateUtils.formatDate(cve.published)}</td>
       <td className="ti-muted">{cve.status}</td>
     </tr>
   );
