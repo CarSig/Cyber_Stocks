@@ -234,10 +234,12 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
 
   const result = useMemo<SimResult | null>(() => {
     if (!quotes.length || !actions.some((a) => a.date && a.value)) return null;
-    const res = runLongTermSim(quotes, actions, Math.max(0, Number(startShares) || 0));
-    onResult?.(res);
-    return res;
+    return runLongTermSim(quotes, actions, Math.max(0, Number(startShares) || 0));
   }, [actions, quotes, startShares]);
+
+  useEffect(() => {
+    if (result) onResult?.(result);
+  }, [result, onResult]);
 
   const remove = useCallback((id: number) => setActions((prev) => prev.filter((a) => a.id !== id)), []);
   const update = useCallback((id: number, field: keyof SimAction, val: string) => {
