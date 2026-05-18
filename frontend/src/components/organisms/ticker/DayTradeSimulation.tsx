@@ -118,7 +118,7 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
     staleTime: 5 * 60 * 1000,
   });
 
-  const bars = data?.bars ?? [];
+  const bars = useMemo(() => data?.bars ?? [], [data]);
 
   const result = useMemo<SimResult | null>(() => {
     if (!bars.length || !actions.length) return null;
@@ -220,7 +220,6 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       chart.remove();
       chartRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bars, chartType]);
 
   // Sync action markers onto chart

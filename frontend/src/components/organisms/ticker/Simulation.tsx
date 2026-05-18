@@ -26,12 +26,6 @@ function parseYMD(dateStr: string): Date {
   return new Date(y, m - 1, day);
 }
 
-function addDays(dateStr: string, n: number): string {
-  const d = parseYMD(dateStr);
-  d.setDate(d.getDate() + n);
-  return isNaN(d.getTime()) ? '' : localDateStr(d);
-}
-
 function safeOffsetDate(dateStr: string | undefined, ms: number): string | null {
   if (!dateStr) return null;
   const t = new Date(dateStr).getTime();
@@ -46,12 +40,6 @@ function snapToWeekday(dateStr: string): string {
   return localDateStr(d);
 }
 
-function snapToNextWeekday(dateStr: string): string {
-  const d = parseYMD(dateStr);
-  if (d.getDay() === 6) d.setDate(d.getDate() + 2);
-  if (d.getDay() === 0) d.setDate(d.getDate() + 1);
-  return localDateStr(d);
-}
 
 type SimAction = { id: number; date: string; type: 'buy' | 'sell'; value: string };
 
@@ -249,7 +237,6 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     const res = runLongTermSim(quotes, actions, Math.max(0, Number(startShares) || 0));
     onResult?.(res);
     return res;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actions, quotes, startShares]);
 
   const remove = useCallback((id: number) => setActions((prev) => prev.filter((a) => a.id !== id)), []);
@@ -353,7 +340,6 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       chart.remove();
       interactiveRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quotes, chartType]);
 
   // Sync action markers onto interactive chart

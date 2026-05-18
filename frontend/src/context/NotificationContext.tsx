@@ -67,7 +67,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       es.close();
       esRef.current = null;
     };
-  }, [user]);
+  }, [user, queryClient]);
 
   function markAllRead(): void {
     setNotifications((prev) => {
