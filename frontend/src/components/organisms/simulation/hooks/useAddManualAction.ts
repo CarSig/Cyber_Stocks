@@ -14,7 +14,7 @@ export function useAddManualAction<A extends { id: number }>(
   onAdded?: () => void,
 ): () => void {
   return useCallback(() => {
-    const action = strategy.createAction(nextId.current, label, side, rawValue);
+    const action = strategy.createAction(nextId.current, label, side, rawValue, date);
     if (!action) return;
     nextId.current++;
     dispatch({ type: 'ADD_ACTION', action, date });

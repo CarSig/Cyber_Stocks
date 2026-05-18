@@ -5,14 +5,9 @@ import type { SimulationPreset } from '@/types';
 import { createChart, LineSeries, AreaSeries, CandlestickSeries, createSeriesMarkers } from 'lightweight-charts';
 import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
 import DatePicker from '@/components/atoms/DatePicker';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import type { Quote } from '@/types';
-import Toolbar from './components/Toolbar';
-import ManualEntry from './components/ManualEntry';
-import Results from './components/Results';
+import SimEntryPanel from './components/SimEntryPanel';
 import { exportSimPdf } from './utils/exportPdf';
 import { longTermReducer, initialLongTermState } from './reducers/longTermReducer';
 import type { LongTermAction } from './reducers/longTermReducer';
@@ -25,7 +20,7 @@ const { snapToWeekday } = DateUtils;
 
 type SimTransaction = {
   date: string;
-  type: 'buy' | 'sell';
+  type: 'buy' | 'sell' | 'short' | 'cover';
   value: number;
   shares: number;
   price: number;
@@ -46,6 +41,95 @@ type SimResult = {
   portfolioHistory: SimHistoryPoint[];
   priceHistory: SimHistoryPoint[];
 };
+
+function runLongTermShortSim(quotes: Quote[], actions: LongTermAction[]): SimResult {
+  const quoteMap = new Map<string, number>();
+  for (const q of quotes) {
+    const d = q.date.slice(0, 10);
+    if (q.close != null) quoteMap.set(d, q.adjclose ?? q.close);
+  }
+
+  const sorted = [...actions]
+    .filter((a) => a.date && a.value)
+    .map((a) => ({ date: a.date, type: a.type, value: Number(a.value) }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const dates = [...quoteMap.keys()].sort();
+  let shortShares = 0;
+  let cashReceived = 0;
+  let coverCost = 0;
+  const transactions: SimTransaction[] = [];
+  const portfolioHistory: SimHistoryPoint[] = [];
+  const priceHistory: SimHistoryPoint[] = [];
+
+  const actionsByDate = new Map<string, typeof sorted>();
+  for (const a of sorted) {
+    if (!actionsByDate.has(a.date)) actionsByDate.set(a.date, []);
+    actionsByDate.get(a.date)!.push(a);
+  }
+
+  for (const d of dates) {
+    const price = quoteMap.get(d)!;
+    priceHistory.push({ date: d, value: price });
+    for (const act of actionsByDate.get(d) ?? []) {
+      if (act.type === 'short') {
+        const borrowed = act.value / price;
+        shortShares += borrowed;
+        cashReceived += act.value;
+        transactions.push({
+          date: d,
+          type: 'short',
+          value: act.value,
+          shares: borrowed,
+          price,
+          sharesAfter: -shortShares,
+          portfolioValue: cashReceived - shortShares * price,
+        });
+      } else {
+        const pct = Math.min(act.value, 100) / 100;
+        const covered = shortShares * pct;
+        const cost = covered * price;
+        shortShares -= covered;
+        coverCost += cost;
+        transactions.push({
+          date: d,
+          type: 'cover',
+          value: cost,
+          shares: covered,
+          price,
+          sharesAfter: -shortShares,
+          portfolioValue: cashReceived - coverCost - shortShares * price,
+        });
+      }
+    }
+    portfolioHistory.push({ date: d, value: cashReceived - coverCost - shortShares * price });
+  }
+
+  const lastPrice = quoteMap.get(dates.at(-1) ?? '') ?? 0;
+  const remainingLiability = shortShares * lastPrice;
+  const profit = cashReceived - coverCost - remainingLiability;
+  const totalInvested = cashReceived;
+  const profitPct = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
+
+  const trimHistory = (h: SimHistoryPoint[]) => {
+    if (!transactions.length) return h;
+    const from = transactions[0].date;
+    const to = transactions.at(-1)!.date;
+    return h.filter((p) => p.date >= from && p.date <= to);
+  };
+
+  return {
+    totalInvested,
+    finalShares: -shortShares,
+    sharesValue: -remainingLiability,
+    cashWithdrawn: coverCost,
+    profit,
+    profitPct,
+    transactions,
+    portfolioHistory: trimHistory(portfolioHistory),
+    priceHistory: trimHistory(priceHistory),
+  };
+}
 
 function runLongTermSim(quotes: Quote[], actions: LongTermAction[], startShares = 0): SimResult {
   const quoteMap = new Map<string, number>();
@@ -152,18 +236,21 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
   const maxDate = dates.at(-1) ?? '';
 
   const [s, dispatch] = useReducer(longTermReducer, undefined, initialLongTermState);
-  const { actions, startShares, textMode, textValue, chartType, value: clickValue } = s;
+  const { actions, startShares, textMode, textValue, chartType, value: clickValue, tradeMode, nextSide } = s;
 
   const portfolioChartRef = useRef<HTMLDivElement>(null);
   const interactiveChartRef = useRef<HTMLDivElement>(null);
   const interactiveRef = useRef<{ chart: IChartApi; series: ISeriesApi<SeriesType> } | null>(null);
   const clickValueRef = useRef(clickValue);
+  const tradeModeRef = useRef(tradeMode);
   useEffect(() => {
     clickValueRef.current = clickValue;
   }, [clickValue]);
+  useEffect(() => {
+    tradeModeRef.current = tradeMode;
+  }, [tradeMode]);
 
   const [manualDate, setManualDate] = useState('');
-  const [manualType, setManualType] = useState<'buy' | 'sell'>('buy');
   const [manualValue, setManualValue] = useState('100');
 
   type PresetsMap = Record<string, SimulationPreset[]>;
@@ -188,7 +275,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
           return {
             id: nextId.current++,
             date: item.date,
-            type: (num > 0 ? 'buy' : 'sell') as 'buy' | 'sell',
+            type: (num > 0 ? 'buy' : 'sell') as LongTermAction['type'],
             value: String(Math.abs(num)),
           };
         })
@@ -201,7 +288,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
   const addManualAction = useAddManualAction(
     longTermStrategy,
     manualDate,
-    manualType,
+    nextSide,
     manualValue,
     '',
     dispatch,
@@ -211,8 +298,9 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
 
   const result = useMemo<SimResult | null>(() => {
     if (!quotes.length || !actions.some((a) => a.date && a.value)) return null;
+    if (tradeMode === 'short') return runLongTermShortSim(quotes, actions);
     return runLongTermSim(quotes, actions, Math.max(0, Number(startShares) || 0));
-  }, [actions, quotes, startShares]);
+  }, [actions, quotes, startShares, tradeMode]);
 
   useEffect(() => {
     if (result) onResult?.(result);
@@ -223,15 +311,6 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     if (field === 'id') return;
     dispatch({ type: 'UPDATE_ACTION', id, field: field === 'type' ? 'side' : 'value', val, date: '' });
   }, []);
-  const insertBefore = useCallback(
-    (id: number) => {
-      const idx = actions.findIndex((a) => a.id === id);
-      const next = [...actions];
-      next.splice(idx, 0, { id: nextId.current++, date: '', type: 'buy', value: '100' });
-      dispatch({ type: 'SET_ACTIONS', actions: next, textValue: longTermStrategy.toText('', next) });
-    },
-    [actions],
-  );
   const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS', date: '' }), []);
 
   // Interactive price chart
@@ -297,9 +376,10 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       if (!param.time) return;
       const date = snapToWeekday(param.time as string);
       const val = Math.max(0.01, Number(clickValueRef.current) || 100);
+      const type = tradeModeRef.current === 'short' ? 'short' : 'buy';
       dispatch({
         type: 'ADD_ACTION',
-        action: { id: nextId.current++, date, type: 'buy', value: String(val) },
+        action: { id: nextId.current++, date, type, value: String(val) },
         date: '',
       });
     });
@@ -310,9 +390,10 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       const date = lastHoveredDate ? snapToWeekday(lastHoveredDate) : '';
       if (!date) return;
       const val = Math.min(100, Math.max(0.01, Number(clickValueRef.current) || 50));
+      const type = tradeModeRef.current === 'short' ? 'cover' : 'sell';
       dispatch({
         type: 'ADD_ACTION',
-        action: { id: nextId.current++, date, type: 'sell', value: String(val) },
+        action: { id: nextId.current++, date, type, value: String(val) },
         date: '',
       });
     }
@@ -336,13 +417,18 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       ref.series,
       actions
         .filter((a) => a.date)
-        .map((a) => ({
-          time: a.date as `${number}-${number}-${number}`,
-          position: a.type === 'buy' ? ('belowBar' as const) : ('aboveBar' as const),
-          color: a.type === 'buy' ? '#22c55e' : '#ef4444',
-          shape: a.type === 'buy' ? ('arrowUp' as const) : ('arrowDown' as const),
-          text: a.type === 'buy' ? `B $${a.value}` : `S ${a.value}%`,
-        }))
+        .map((a) => {
+          const isEntry = a.type === 'buy' || a.type === 'short';
+          const color = a.type === 'buy' ? '#22c55e' : a.type === 'sell' ? '#ef4444' : a.type === 'short' ? '#f97316' : '#3b82f6';
+          const prefix = a.type === 'buy' ? 'B' : a.type === 'sell' ? 'S' : a.type === 'short' ? 'SH' : 'C';
+          return {
+            time: a.date as `${number}-${number}-${number}`,
+            position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
+            color,
+            shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
+            text: isEntry ? `${prefix} $${a.value}` : `${prefix} ${a.value}%`,
+          };
+        })
         .sort((a, b) => (a.time < b.time ? -1 : 1)),
     );
   }, [actions]);
@@ -397,21 +483,48 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       {quotes.length > 0 && (
         <div className="sim-interactive-chart">
           <div className="dtrade-order-controls" style={{ marginBottom: '0.5rem' }}>
+            <div className="dtrade-mode-toggle">
+              <button
+                className={`dtrade-mode-btn${tradeMode === 'long' ? ' active' : ''}`}
+                onClick={() => dispatch({ type: 'SET_TRADE_MODE', mode: 'long', date: '' })}
+                type="button"
+              >
+                Long
+              </button>
+              <button
+                className={`dtrade-mode-btn${tradeMode === 'short' ? ' active' : ''}`}
+                onClick={() => dispatch({ type: 'SET_TRADE_MODE', mode: 'short', date: '' })}
+                type="button"
+              >
+                Short
+              </button>
+            </div>
             <div className="dtrade-next-side">
-              <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Left click = Buy ($)</span>
-              <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Right click = Sell (%)</span>
+              {tradeMode === 'long' ? (
+                <>
+                  <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Left click = Buy ($)</span>
+                  <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Right click = Sell (%)</span>
+                </>
+              ) : (
+                <>
+                  <span className="dtrade-side-btn dtrade-side-btn--short">▲ Left click = Short ($)</span>
+                  <span className="dtrade-side-btn dtrade-side-btn--cover">▼ Right click = Cover (%)</span>
+                </>
+              )}
             </div>
-            <div className="dtrade-shares">
-              <span className="dtrade-label">Start shares:</span>
-              <Input
-                type="number"
-                min="0"
-                step="any"
-                value={startShares}
-                onChange={(e) => dispatch({ type: 'SET_START_SHARES', startShares: e.target.value })}
-                className="dtrade-shares-input"
-              />
-            </div>
+            {tradeMode === 'long' && (
+              <div className="dtrade-shares">
+                <span className="dtrade-label">Start shares:</span>
+                <Input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={startShares}
+                  onChange={(e) => dispatch({ type: 'SET_START_SHARES', startShares: e.target.value })}
+                  className="dtrade-shares-input"
+                />
+              </div>
+            )}
             <div className="dtrade-shares">
               <span className="dtrade-label">Value:</span>
               <Input
@@ -422,7 +535,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
                 onChange={(e) => dispatch({ type: 'SET_VALUE', value: e.target.value })}
                 className="dtrade-shares-input"
               />
-              <span className="dtrade-label">$ buy / % sell</span>
+              <span className="dtrade-label">{tradeMode === 'short' ? '$ short / % cover' : '$ buy / % sell'}</span>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem' }}>
@@ -442,7 +555,8 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
         </div>
       )}
 
-      <Toolbar
+      <SimEntryPanel
+        tradeMode={tradeMode}
         presets={presets}
         presetsLoading={presetsLoading}
         presetsError={presetsError as Error | null}
@@ -453,15 +567,12 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
         onExportPdf={handleExportPdf}
         hasActions={actions.length > 0}
         onClear={clear}
-      />
-
-      <ManualEntry
-        side={manualType}
-        onSideChange={(s) => setManualType(s as 'buy' | 'sell')}
-        value={manualValue}
-        onValueChange={setManualValue}
-        onAdd={addManualAction}
-        inputSlot={
+        nextSide={nextSide}
+        onNextSideChange={(s) => dispatch({ type: 'SET_NEXT_SIDE', side: s })}
+        manualValue={manualValue}
+        onManualValueChange={setManualValue}
+        onAddManual={addManualAction}
+        manualInputSlot={
           <DatePicker
             value={manualDate}
             min={minDate}
@@ -469,81 +580,27 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
             onChange={(v) => setManualDate(v ? snapToWeekday(v) : '')}
           />
         }
+        textValue={textValue}
+        onTextChange={handleTextChange}
+        textPlaceholder={'2025-01-15, 100\n2025-06-01, -50'}
+        textRows={Math.max(3, actions.length + 1)}
+        actions={actions.map((a) => ({ ...a, side: a.type }))}
+        actionLabelSlot={(a, i) => (
+          <DatePicker
+            value={a.date}
+            min={safeOffsetDate(actions[i - 1]?.date, 86400000) ?? minDate}
+            max={safeOffsetDate(actions[i + 1]?.date, -86400000) ?? maxDate}
+            onChange={(v) => update(a.id, 'date', v ? snapToWeekday(v) : '')}
+          />
+        )}
+        onUpdateAction={(id, field, val) => update(id, field === 'side' ? 'type' : 'value', val)}
+        onRemoveAction={remove}
+        resultStats={result ? simStatsToExportRows(result) : null}
+        resultHistory={result?.portfolioHistory.map((p) => ({ time: p.date, value: p.value })) ?? []}
+        resultMarkers={portfolioMarkers}
+        resultTransactions={result?.transactions ?? null}
+        portfolioChartRef={portfolioChartRef}
       />
-
-      {textMode && (
-        <Textarea
-          value={textValue}
-          onChange={handleTextChange}
-          placeholder={'2025-01-15, 100\n2025-06-01, -50'}
-          rows={Math.max(3, actions.length + 1)}
-          className="sim-textarea"
-        />
-      )}
-
-      {!textMode && actions.length > 0 && (
-        <div className="dtrade-orders">
-          <div className="dtrade-section-title">Actions</div>
-          <div className="sim-actions">
-            {actions.map((a, i) => {
-              const prevDate = actions[i - 1]?.date;
-              const actionMin = safeOffsetDate(prevDate, 86400000) ?? minDate;
-              const nextDate = actions[i + 1]?.date;
-              const actionMax = safeOffsetDate(nextDate, -86400000) ?? maxDate;
-              return (
-                <div key={a.id} className="sim-action-row">
-                  <DatePicker
-                    value={a.date}
-                    min={actionMin}
-                    max={actionMax}
-                    onChange={(v) => update(a.id, 'date', v ? snapToWeekday(v) : '')}
-                  />
-                  <Select
-                    value={a.type}
-                    onValueChange={(v: string | null) => {
-                      if (v) update(a.id, 'type', v);
-                    }}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="buy">Buy ($)</SelectItem>
-                      <SelectItem value="sell">Sell (%)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Input
-                    type="number"
-                    min="0"
-                    max={a.type === 'sell' ? 100 : undefined}
-                    step="any"
-                    placeholder={a.type === 'buy' ? 'Amount ($)' : 'Percent (0–100)'}
-                    value={a.value}
-                    onChange={(e) => update(a.id, 'value', e.target.value)}
-                    className="form-input--number"
-                  />
-                  <Button variant="ghost" onClick={() => insertBefore(a.id)}>
-                    + before
-                  </Button>
-                  <Button variant="ghost" onClick={() => remove(a.id)}>
-                    ✕
-                  </Button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {result && (
-        <Results
-          ref={portfolioChartRef}
-          stats={simStatsToExportRows(result)}
-          history={result.portfolioHistory.map((p) => ({ time: p.date, value: p.value }))}
-          markers={portfolioMarkers}
-          transactions={result.transactions}
-        />
-      )}
     </div>
   );
 }

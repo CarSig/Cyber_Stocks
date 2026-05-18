@@ -17,7 +17,6 @@ import type { Quote } from "@/types/index";
 
 @Injectable()
 export class CronService {
-  private dataSyncService!: DataSyncService;
   private readonly kevClient = new KevClient();
   private readonly nvdClient = new NvdClient();
   private readonly otxClient = new OtxClient();
@@ -27,8 +26,10 @@ export class CronService {
     private readonly redditService: RedditService,
     private readonly emitter: EventEmitter2,
     private readonly coreDb: CoreDbService,
-  ) {
-    this.dataSyncService = new DataSyncService(coreDb.pool);
+  ) {}
+
+  private get dataSyncService() {
+    return new DataSyncService(this.coreDb.pool);
   }
 
   @Cron("0 23 * * *")

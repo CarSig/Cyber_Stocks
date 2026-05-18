@@ -7,12 +7,8 @@ import { setupDayLines } from '@/components/organisms/charts/utils/dayLines';
 import { getBars, getIntradayEvents } from '@/api/alpaca';
 import type { AlpacaBar } from '@/types';
 import type { IntradayEvent } from '@/api/alpaca';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import FilterSelect from '@/components/molecules/shared/FilterSelect';
-import Toolbar from './components/Toolbar';
-import ManualEntry from './components/ManualEntry';
-import Results from './components/Results';
+import SimEntryPanel from './components/SimEntryPanel';
 import IntradayEventCard from './components/IntradayEventCard';
 import OrderControls from './components/OrderControls';
 import AllDialog from './components/AllDialog';
@@ -82,8 +78,6 @@ function parseIntradayText(raw: string, date: string): { parsedDate: string | nu
   return { parsedDate, actions };
 }
 
-const nextActionId = { current: 1 };
-
 type ChartRef = { chart: IChartApi; series: ISeriesApi<SeriesType> } | null;
 
 export default function IntradaySimulation() {
@@ -110,6 +104,8 @@ export default function IntradaySimulation() {
   } = s;
 
   const queryClient = useQueryClient();
+
+  const nextActionId = useRef(Math.max(0, ...s.actions.map((a) => a.id)) + 1);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const dayLinesRef = useRef<HTMLDivElement>(null);
@@ -561,192 +557,114 @@ export default function IntradaySimulation() {
       {selectedEvent && <IntradayEventCard event={selectedEvent} />}
 
       {bars.length > 0 && (
-        <>
-          <div
-            style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem', alignItems: 'center', flexWrap: 'wrap' }}
-          >
-            {(['line', 'area', 'candlestick'] as const).map((t) => (
-              <button
-                key={t}
-                className={`sim-chart-btn${chartType === t ? ' active' : ''}`}
-                onClick={() => dispatch({ type: 'SET_CHART_TYPE', chartType: t })}
-                type="button"
+        <SimEntryPanel
+          topSlot={
+            <>
+              <div
+                style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem', alignItems: 'center', flexWrap: 'wrap' }}
               >
-                {t.charAt(0).toUpperCase() + t.slice(1)}
-              </button>
-            ))}
-            {selectedEvent && selectedEvent.peers.length > 0 && (
-              <button
-                className={`sim-chart-btn${showPeers ? ' active' : ''}`}
-                onClick={() => dispatch({ type: 'TOGGLE_PEERS' })}
-                type="button"
-                style={showPeers ? { borderColor: '#f59e0b', color: '#f59e0b' } : undefined}
-              >
-                Peers ({selectedEvent.peers.slice(0, 4).join(', ')})
-              </button>
-            )}
-            <button
-              className="sim-chart-btn"
-              onClick={() => dispatch({ type: 'ADD_EXTRA_DATE', date: prevDate })}
-              type="button"
-            >
-              + Day before ({prevDate})
-            </button>
-            <button
-              className="sim-chart-btn"
-              onClick={() => dispatch({ type: 'ADD_EXTRA_DATE', date: nextDate })}
-              type="button"
-            >
-              + Day after ({nextDate})
-            </button>
-            {extraDates.length > 0 && (
-              <button className="sim-chart-btn" onClick={() => dispatch({ type: 'RESET_EXTRA_DATES' })} type="button">
-                Reset days
-              </button>
-            )}
-          </div>
-          <div className="dtrade-chart-hint">
-            {tradeMode === 'long'
-              ? `Left click to buy $${value} · Right click to sell ${value}%`
-              : `Left click to short $${value} · Right click to cover ${value}%`}
-            {showPeers && peerTickers.length > 0 && (
-              <span style={{ marginLeft: 8 }}>
-                {peerTickers.map((t, i) => (
-                  <span key={t} style={{ color: PEER_COLORS[i], marginLeft: 6 }}>
-                    ■ {t}
-                  </span>
+                {(['line', 'area', 'candlestick'] as const).map((t) => (
+                  <button
+                    key={t}
+                    className={`sim-chart-btn${chartType === t ? ' active' : ''}`}
+                    onClick={() => dispatch({ type: 'SET_CHART_TYPE', chartType: t })}
+                    type="button"
+                  >
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </button>
                 ))}
-              </span>
-            )}
-          </div>
-          <div ref={containerRef} className="alpaca-chart-container">
-            <div ref={dayLinesRef} className="alpaca-chart-daylines" />
-          </div>
-
-          <Toolbar
-            presets={INTRADAY_SIM_PRESETS}
-            onPreset={applyPreset}
-            textMode={textMode}
-            onTextModeToggle={() => dispatch({ type: 'TOGGLE_TEXT_MODE', date: query.date })}
-            hasResult={!!result}
-            onExportPdf={handleExportPdf}
-            hasActions={actions.length > 0}
-            onClear={clear}
-            onAiSim={handleAiSim}
-            aiSimDisabled={!selectedEvent}
-            onSimulateAll={eventsData?.length ? handleSimulateAll : undefined}
-            aiDelay={aiDelay}
-            onAiDelayChange={(d) => dispatch({ type: 'SET_AI_DELAY', delay: d })}
-          />
-
-          {textMode && (
-            <Textarea
-              value={textValue}
-              onChange={handleTextChange}
-              placeholder={'2025-01-27\n09:30, 100\n10:15, -50'}
-              rows={Math.max(4, actions.length + 2)}
-              className="sim-textarea"
-            />
-          )}
-
-          <ManualEntry
-            side={nextSide}
-            onSideChange={(s) => dispatch({ type: 'SET_NEXT_SIDE', side: s as Side })}
-            sideOptions={
-              tradeMode === 'long'
-                ? [
-                    { value: 'buy', label: 'Buy ($)' },
-                    { value: 'sell', label: 'Sell (%)' },
-                  ]
-                : [
-                    { value: 'short', label: 'Short ($)' },
-                    { value: 'cover', label: 'Cover (%)' },
-                  ]
-            }
-            value={value}
-            onValueChange={(v) => dispatch({ type: 'SET_VALUE', value: v })}
-            onAdd={addManualAction}
-            inputSlot={
-              <input
-                className="alpaca-input"
-                type="time"
-                value={manualTime}
-                onChange={(e) => dispatch({ type: 'SET_MANUAL_TIME', time: e.target.value })}
-              />
-            }
-          />
-
-          {!textMode && actions.length > 0 && (
-            <div className="dtrade-orders">
-              <div className="dtrade-section-title">Actions</div>
-              <table className="sim-table">
-                <thead>
-                  <tr>
-                    {['Time (ET)', 'Side', 'Value', ''].map((h) => (
-                      <th key={h}>{h}</th>
+                {selectedEvent && selectedEvent.peers.length > 0 && (
+                  <button
+                    className={`sim-chart-btn${showPeers ? ' active' : ''}`}
+                    onClick={() => dispatch({ type: 'TOGGLE_PEERS' })}
+                    type="button"
+                    style={showPeers ? { borderColor: '#f59e0b', color: '#f59e0b' } : undefined}
+                  >
+                    Peers ({selectedEvent.peers.slice(0, 4).join(', ')})
+                  </button>
+                )}
+                <button
+                  className="sim-chart-btn"
+                  onClick={() => dispatch({ type: 'ADD_EXTRA_DATE', date: prevDate })}
+                  type="button"
+                >
+                  + Day before ({prevDate})
+                </button>
+                <button
+                  className="sim-chart-btn"
+                  onClick={() => dispatch({ type: 'ADD_EXTRA_DATE', date: nextDate })}
+                  type="button"
+                >
+                  + Day after ({nextDate})
+                </button>
+                {extraDates.length > 0 && (
+                  <button className="sim-chart-btn" onClick={() => dispatch({ type: 'RESET_EXTRA_DATES' })} type="button">
+                    Reset days
+                  </button>
+                )}
+              </div>
+              <div className="dtrade-chart-hint">
+                {tradeMode === 'long'
+                  ? `Left click to buy $${value} · Right click to sell ${value}%`
+                  : `Left click to short $${value} · Right click to cover ${value}%`}
+                {showPeers && peerTickers.length > 0 && (
+                  <span style={{ marginLeft: 8 }}>
+                    {peerTickers.map((t, i) => (
+                      <span key={t} style={{ color: PEER_COLORS[i], marginLeft: 6 }}>
+                        ■ {t}
+                      </span>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...actions]
-                    .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
-                    .map((a) => (
-                      <tr key={a.id}>
-                        <td>{a.time}</td>
-                        <td>
-                          <select
-                            className="dtrade-inline-select"
-                            value={a.side}
-                            onChange={(e) => updateAction(a.id, 'side', e.target.value)}
-                          >
-                            {tradeMode === 'long' ? (
-                              <>
-                                <option value="buy">BUY</option>
-                                <option value="sell">SELL</option>
-                              </>
-                            ) : (
-                              <>
-                                <option value="short">SHORT</option>
-                                <option value="cover">COVER</option>
-                              </>
-                            )}
-                          </select>
-                        </td>
-                        <td>
-                          <input
-                            className="dtrade-inline-input"
-                            type="number"
-                            min="0"
-                            max={a.side === 'sell' || a.side === 'cover' ? 100 : undefined}
-                            step="any"
-                            value={a.value}
-                            onChange={(e) => updateAction(a.id, 'value', e.target.value)}
-                          />
-                          <span className="dtrade-unit">{a.side === 'buy' || a.side === 'short' ? '$' : '%'}</span>
-                        </td>
-                        <td>
-                          <Button variant="ghost" onClick={() => removeAction(a.id)} className="dtrade-remove">
-                            ✕
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {result && result.transactions.length > 0 && (
-            <Results
-              ref={portfolioChartRef}
-              stats={buildSimStats(result, tradeMode, PriceUtils.fmt)}
-              history={result.portfolioHistory}
-              markers={portfolioMarkers}
-              transactions={result.transactions}
-              intraday
+                  </span>
+                )}
+              </div>
+              <div ref={containerRef} className="alpaca-chart-container">
+                <div ref={dayLinesRef} className="alpaca-chart-daylines" />
+              </div>
+            </>
+          }
+          tradeMode={tradeMode}
+          presets={INTRADAY_SIM_PRESETS}
+          onPreset={applyPreset}
+          textMode={textMode}
+          onTextModeToggle={() => dispatch({ type: 'TOGGLE_TEXT_MODE', date: query.date })}
+          hasResult={!!result}
+          onExportPdf={handleExportPdf}
+          hasActions={actions.length > 0}
+          onClear={clear}
+          onAiSim={handleAiSim}
+          aiSimDisabled={!selectedEvent}
+          onSimulateAll={eventsData?.length ? handleSimulateAll : undefined}
+          aiDelay={aiDelay}
+          onAiDelayChange={(d: number) => dispatch({ type: 'SET_AI_DELAY', delay: d })}
+          nextSide={nextSide}
+          onNextSideChange={(s) => dispatch({ type: 'SET_NEXT_SIDE', side: s as Side })}
+          manualValue={value}
+          onManualValueChange={(v) => dispatch({ type: 'SET_VALUE', value: v })}
+          onAddManual={addManualAction}
+          manualInputSlot={
+            <input
+              className="alpaca-input"
+              type="time"
+              value={manualTime}
+              onChange={(e) => dispatch({ type: 'SET_MANUAL_TIME', time: e.target.value })}
             />
-          )}
-        </>
+          }
+          textValue={textValue}
+          onTextChange={handleTextChange}
+          textPlaceholder={'2025-01-27\n09:30, 100\n10:15, -50'}
+          textRows={Math.max(4, actions.length + 2)}
+          actions={actions}
+          actionLabelSlot={(a) => a.time}
+          actionSortKey={(a) => a.timestamp}
+          onUpdateAction={updateAction}
+          onRemoveAction={removeAction}
+          resultStats={result ? buildSimStats(result, tradeMode, PriceUtils.fmt) : null}
+          resultHistory={result?.portfolioHistory ?? []}
+          resultMarkers={portfolioMarkers}
+          resultTransactions={result?.transactions ?? null}
+          portfolioChartRef={portfolioChartRef}
+          intraday
+        />
       )}
 
       <AllDialog

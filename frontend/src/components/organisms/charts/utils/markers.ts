@@ -298,16 +298,18 @@ export function syncIntradayMarkers(
 ) {
   const t = (iso: string) => DateUtils.toEtChartTime(iso, offset);
 
-  const actionMarkers = actions.map((a) => {
-    const isEntry = a.side === 'buy' || a.side === 'short';
-    return {
-      time: t(a.timestamp),
-      position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
-      color: a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#60a5fa',
-      shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
-      text: fmtMarkerText(a.side, a.value),
-    };
-  });
+  const actionMarkers = actions
+    .filter((a) => a.timestamp && !isNaN(new Date(a.timestamp).getTime()))
+    .map((a) => {
+      const isEntry = a.side === 'buy' || a.side === 'short';
+      return {
+        time: t(a.timestamp),
+        position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
+        color: a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#60a5fa',
+        shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
+        text: fmtMarkerText(a.side, a.value),
+      };
+    });
 
   const eventMarkers: {
     time: Time;

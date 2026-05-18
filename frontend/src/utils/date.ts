@@ -74,8 +74,9 @@ export const DateUtils = {
     });
   },
 
-  /** Convert a HH:MM ET time string + YYYY-MM-DD date to an ISO UTC string. */
+  /** Convert a HH:MM ET time string + YYYY-MM-DD date to an ISO UTC string. Returns empty string if date is missing. */
   timeToIso(time: string, date: string): string {
+    if (!date) return '';
     const [h, m] = time.split(':').map(Number);
     return new Date(`${date}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00-05:00`).toISOString();
   },

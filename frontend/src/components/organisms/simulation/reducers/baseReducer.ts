@@ -1,4 +1,4 @@
-import type { SimStrategy } from './simStrategy';
+import type { SimStrategy } from './baseStrategy';
 
 export type BaseSimState<A> = {
   actions: A[];

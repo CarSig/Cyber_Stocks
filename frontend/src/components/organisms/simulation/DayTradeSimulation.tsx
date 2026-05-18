@@ -5,10 +5,7 @@ import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
 import { getBars } from '@/api/alpaca';
 import type { AlpacaBar } from '@/types';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import Toolbar from './components/Toolbar';
-import ManualEntry from './components/ManualEntry';
-import Results from './components/Results';
+import SimEntryPanel from './components/SimEntryPanel';
 import { exportSimPdf } from './utils/exportPdf';
 import { dayTradeReducer, initialDayTradeState } from './reducers/dayTradeReducer';
 import { intradayStrategy } from './reducers/baseStrategy';
@@ -51,8 +48,6 @@ import {
   simResultToExportArgs,
 } from '@/utils/sim';
 
-const nextActionId = { current: 1 };
-
 type ChartRef = { chart: IChartApi; candleSeries: ISeriesApi<SeriesType> } | null;
 
 export default function DayTradeSimulation({ ticker }: { ticker: string }) {
@@ -71,6 +66,8 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
     chartType,
     tradeMode,
   } = s;
+
+  const nextActionId = useRef(Math.max(0, ...s.actions.map((a) => a.id)) + 1);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ChartRef>(null);
@@ -223,6 +220,7 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
     createSeriesMarkers(
       ref.candleSeries,
       actions
+        .filter((a) => a.timestamp && !isNaN(new Date(a.timestamp).getTime()))
         .map((a) => {
           const isEntry = a.side === 'buy' || a.side === 'short';
           return {
@@ -417,145 +415,67 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       </form>
 
       {bars.length > 0 && (
-        <>
-          <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem' }}>
-            {(['line', 'area', 'candlestick'] as const).map((t) => (
-              <button
-                key={t}
-                className={`sim-chart-btn${chartType === t ? ' active' : ''}`}
-                onClick={() => dispatch({ type: 'SET_CHART_TYPE', chartType: t })}
-                type="button"
-              >
-                {t.charAt(0).toUpperCase() + t.slice(1)}
-              </button>
-            ))}
-          </div>
-          <div className="dtrade-chart-hint">
-            {tradeMode === 'long'
-              ? `Left click to buy $${value} · Right click to sell ${value}%`
-              : `Left click to short $${value} · Right click to cover ${value}%`}
-          </div>
-          <div ref={containerRef} className="alpaca-chart-container" />
-
-          <Toolbar
-            presets={DAYTRADE_PRESETS}
-            onPreset={applyPreset}
-            textMode={textMode}
-            onTextModeToggle={() => dispatch({ type: 'TOGGLE_TEXT_MODE', date: query.date })}
-            hasResult={!!result}
-            onExportPdf={handleExportPdf}
-            hasActions={actions.length > 0}
-            onClear={clear}
-          />
-
-          <ManualEntry
-            side={nextSide}
-            onSideChange={(s) => dispatch({ type: 'SET_NEXT_SIDE', side: s })}
-            sideOptions={
-              tradeMode === 'long'
-                ? [
-                    { value: 'buy', label: 'Buy ($)' },
-                    { value: 'sell', label: 'Sell (%)' },
-                  ]
-                : [
-                    { value: 'short', label: 'Short ($)' },
-                    { value: 'cover', label: 'Cover (%)' },
-                  ]
-            }
-            value={value}
-            onValueChange={(v) => dispatch({ type: 'SET_VALUE', value: v })}
-            onAdd={addManualAction}
-            inputSlot={
-              <input
-                className="alpaca-input"
-                type="time"
-                value={manualTime}
-                onChange={(e) => dispatch({ type: 'SET_MANUAL_TIME', time: e.target.value })}
-              />
-            }
-          />
-
-          {textMode && (
-            <Textarea
-              value={textValue}
-              onChange={handleTextChange}
-              placeholder={'09:30, 100\n10:15, -50'}
-              rows={Math.max(3, actions.length + 1)}
-              className="sim-textarea"
+        <SimEntryPanel
+          topSlot={
+            <>
+              <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem' }}>
+                {(['line', 'area', 'candlestick'] as const).map((t) => (
+                  <button
+                    key={t}
+                    className={`sim-chart-btn${chartType === t ? ' active' : ''}`}
+                    onClick={() => dispatch({ type: 'SET_CHART_TYPE', chartType: t })}
+                    type="button"
+                  >
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </button>
+                ))}
+              </div>
+              <div className="dtrade-chart-hint">
+                {tradeMode === 'long'
+                  ? `Left click to buy $${value} · Right click to sell ${value}%`
+                  : `Left click to short $${value} · Right click to cover ${value}%`}
+              </div>
+              <div ref={containerRef} className="alpaca-chart-container" />
+            </>
+          }
+          tradeMode={tradeMode}
+          presets={DAYTRADE_PRESETS}
+          onPreset={applyPreset}
+          textMode={textMode}
+          onTextModeToggle={() => dispatch({ type: 'TOGGLE_TEXT_MODE', date: query.date })}
+          hasResult={!!result}
+          onExportPdf={handleExportPdf}
+          hasActions={actions.length > 0}
+          onClear={clear}
+          nextSide={nextSide}
+          onNextSideChange={(s) => dispatch({ type: 'SET_NEXT_SIDE', side: s })}
+          manualValue={value}
+          onManualValueChange={(v) => dispatch({ type: 'SET_VALUE', value: v })}
+          onAddManual={addManualAction}
+          manualInputSlot={
+            <input
+              className="alpaca-input"
+              type="time"
+              value={manualTime}
+              onChange={(e) => dispatch({ type: 'SET_MANUAL_TIME', time: e.target.value })}
             />
-          )}
-
-          {!textMode && actions.length > 0 && (
-            <div className="dtrade-orders">
-              <div className="dtrade-section-title">Actions</div>
-              <table className="sim-table">
-                <thead>
-                  <tr>
-                    {['Time (ET)', 'Side', 'Value', ''].map((h) => (
-                      <th key={h}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {[...actions]
-                    .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
-                    .map((a) => (
-                      <tr key={a.id}>
-                        <td>{a.time}</td>
-                        <td>
-                          <select
-                            className="dtrade-inline-select"
-                            value={a.side}
-                            onChange={(e) => updateAction(a.id, 'side', e.target.value)}
-                          >
-                            {tradeMode === 'long' ? (
-                              <>
-                                <option value="buy">BUY</option>
-                                <option value="sell">SELL</option>
-                              </>
-                            ) : (
-                              <>
-                                <option value="short">SHORT</option>
-                                <option value="cover">COVER</option>
-                              </>
-                            )}
-                          </select>
-                        </td>
-                        <td>
-                          <input
-                            className="dtrade-inline-input"
-                            type="number"
-                            min="0"
-                            max={a.side === 'sell' || a.side === 'cover' ? 100 : undefined}
-                            step="any"
-                            value={a.value}
-                            onChange={(e) => updateAction(a.id, 'value', e.target.value)}
-                          />
-                          <span className="dtrade-unit">{a.side === 'buy' || a.side === 'short' ? '$' : '%'}</span>
-                        </td>
-                        <td>
-                          <button className="dtrade-remove" onClick={() => removeAction(a.id)}>
-                            ✕
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {result && result.transactions.length > 0 && (
-            <Results
-              ref={portfolioChartRef}
-              stats={buildSimStats(result, tradeMode, PriceUtils.fmt)}
-              history={result.portfolioHistory}
-              markers={portfolioMarkers}
-              transactions={result.transactions}
-              intraday
-            />
-          )}
-        </>
+          }
+          textValue={textValue}
+          onTextChange={handleTextChange}
+          textPlaceholder={'09:30, 100\n10:15, -50'}
+          textRows={Math.max(3, actions.length + 1)}
+          actions={actions}
+          actionLabelSlot={(a) => a.time}
+          actionSortKey={(a) => a.timestamp}
+          onUpdateAction={updateAction}
+          onRemoveAction={removeAction}
+          resultStats={result ? buildSimStats(result, tradeMode, PriceUtils.fmt) : null}
+          resultHistory={result?.portfolioHistory ?? []}
+          resultMarkers={portfolioMarkers}
+          resultTransactions={result?.transactions ?? null}
+          portfolioChartRef={portfolioChartRef}
+          intraday
+        />
       )}
     </div>
   );

@@ -10,21 +10,21 @@ export class ClerkAuthDto {
 }
 
 export class UserDto implements User {
-  @ApiProperty({ description: "User UUID" })
+  @ApiProperty({ description: "User UUID", type: String })
   id: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: String })
   username: string;
 
   @ApiProperty({ enum: ["user", "admin"] })
   role: "user" | "admin";
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ type: String })
   email?: string;
 }
 
 export class AuthResponseDto implements AuthResponse {
-  @ApiProperty({ description: "Signed JWT for subsequent requests" })
+  @ApiProperty({ description: "Signed JWT for subsequent requests", type: String })
   token: string;
 
   @ApiProperty({ type: UserDto })
