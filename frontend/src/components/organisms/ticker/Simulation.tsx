@@ -40,7 +40,6 @@ function snapToWeekday(dateStr: string): string {
   return localDateStr(d);
 }
 
-
 type SimAction = { id: number; date: string; type: 'buy' | 'sell'; value: string };
 
 type SimTransaction = {
