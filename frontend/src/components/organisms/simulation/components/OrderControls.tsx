@@ -16,6 +16,7 @@ type OrderControlsProps = {
   eventSlot?: React.ReactNode;
   onLoad: (e: React.FormEvent) => void;
   showTradeControls: boolean;
+  valueLabel?: string;
 };
 
 export default function OrderControls({
@@ -33,6 +34,7 @@ export default function OrderControls({
   eventSlot,
   onLoad,
   showTradeControls,
+  valueLabel = '$ buy / % sell',
 }: OrderControlsProps) {
   return (
     <form className="dtrade-order-controls" onSubmit={onLoad}>
@@ -67,17 +69,19 @@ export default function OrderControls({
               </>
             )}
           </div>
-          <div className="dtrade-shares">
-            <span className="dtrade-label">Start shares:</span>
-            <Input
-              type="number"
-              min="0"
-              step="any"
-              value={startShares}
-              onChange={(e) => onStartSharesChange(e.target.value)}
-              className="dtrade-shares-input"
-            />
-          </div>
+          {tradeMode === 'long' && (
+            <div className="dtrade-shares">
+              <span className="dtrade-label">Start shares:</span>
+              <Input
+                type="number"
+                min="0"
+                step="any"
+                value={startShares}
+                onChange={(e) => onStartSharesChange(e.target.value)}
+                className="dtrade-shares-input"
+              />
+            </div>
+          )}
           <div className="dtrade-shares">
             <span className="dtrade-label">Value:</span>
             <Input
@@ -88,7 +92,7 @@ export default function OrderControls({
               onChange={(e) => onValueChange(e.target.value)}
               className="dtrade-shares-input"
             />
-            <span className="dtrade-label">$ buy / % sell</span>
+            <span className="dtrade-label">{valueLabel}</span>
           </div>
         </>
       )}

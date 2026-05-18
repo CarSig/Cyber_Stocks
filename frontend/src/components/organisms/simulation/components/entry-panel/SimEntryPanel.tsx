@@ -6,32 +6,34 @@ import ActionTable from './ActionTable';
 import Results from './Results';
 import type { AnyTransaction } from './TransactionTable';
 import type { MarkerPoint } from '@/components/organisms/charts/utils/types';
+import type { SimStrategy } from '../../reducers/baseStrategy';
 
 type StatItem = { label: string; value: string; color?: string };
 
-type ActionRow = { id: number; side: string; value: number | string };
+type ActionRow = Record<string, unknown> & { id: number; value: number | string; side: string };
 
 type SimEntryPanelProps<A extends ActionRow> = {
   topSlot?: React.ReactNode;
-
   tradeMode: 'long' | 'short';
+  strategy: SimStrategy<A>;
 
   // Toolbar
   presets: Record<string, unknown> | undefined;
   onPreset: (name: string) => void;
   textMode: boolean;
   onTextModeToggle: () => void;
-  hasResult: boolean;
   onExportPdf: () => void;
-  hasActions: boolean;
   onClear: () => void;
   presetsLoading?: boolean;
   presetsError?: Error | null;
-  onAiSim?: () => void;
-  aiSimDisabled?: boolean;
-  onSimulateAll?: () => void;
-  aiDelay?: number;
-  onAiDelayChange?: (v: number) => void;
+  /** AI simulation props — only used by IntradaySimulation */
+  ai?: {
+    onAiSim: () => void;
+    aiSimDisabled?: boolean;
+    onSimulateAll?: () => void;
+    aiDelay?: number;
+    onAiDelayChange?: (v: number) => void;
+  };
 
   // ManualEntry
   nextSide: string;
@@ -39,20 +41,26 @@ type SimEntryPanelProps<A extends ActionRow> = {
   manualValue: string;
   onManualValueChange: (v: string) => void;
   onAddManual: () => void;
-  manualInputSlot: React.ReactNode;
+  /** "time" for intraday/daytrade, "date" for long-term simulation */
+  manualInputType: 'time' | 'date';
+  /** Current value of the time/date input */
+  manualInputValue: string;
+  /** Called when the time/date input changes */
+  onManualInputChange: (v: string) => void;
+  /** Min date (only used when manualInputType='date') */
+  manualMinDate?: string;
+  /** Max date (only used when manualInputType='date') */
+  manualMaxDate?: string;
 
   // Textarea
   textValue: string;
   onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  textPlaceholder: string;
-  textRows: number;
 
   // ActionTable
   actions: A[];
-  actionLabelSlot: (action: A, index: number) => React.ReactNode;
+  actionLabelSlot?: (action: A, index: number) => React.ReactNode;
   onUpdateAction: (id: number, field: 'side' | 'value', val: string) => void;
   onRemoveAction: (id: number) => void;
-  actionSortKey?: (action: A) => string;
 
   // Results
   resultStats: StatItem[] | null;
@@ -60,48 +68,42 @@ type SimEntryPanelProps<A extends ActionRow> = {
   resultMarkers: MarkerPoint[];
   resultTransactions: AnyTransaction[] | null;
   portfolioChartRef: RefObject<HTMLDivElement | null>;
-  intraday?: boolean;
 };
 
 export default function SimEntryPanel<A extends ActionRow>({
   topSlot,
   tradeMode,
+  strategy,
   presets,
   onPreset,
   textMode,
   onTextModeToggle,
-  hasResult,
   onExportPdf,
-  hasActions,
   onClear,
   presetsLoading,
   presetsError,
-  onAiSim,
-  aiSimDisabled,
-  onSimulateAll,
-  aiDelay,
-  onAiDelayChange,
+  ai,
   nextSide,
   onNextSideChange,
   manualValue,
   onManualValueChange,
   onAddManual,
-  manualInputSlot,
+  manualInputType,
+  manualInputValue,
+  onManualInputChange,
+  manualMinDate,
+  manualMaxDate,
   textValue,
   onTextChange,
-  textPlaceholder,
-  textRows,
   actions,
   actionLabelSlot,
   onUpdateAction,
   onRemoveAction,
-  actionSortKey,
   resultStats,
   resultHistory,
   resultMarkers,
   resultTransactions,
   portfolioChartRef,
-  intraday = false,
 }: SimEntryPanelProps<A>) {
   const sideOptions =
     tradeMode === 'long'
@@ -113,6 +115,11 @@ export default function SimEntryPanel<A extends ActionRow>({
           { value: 'short', label: 'Short ($)' },
           { value: 'cover', label: 'Cover (%)' },
         ];
+
+  const hasResult = resultStats !== null;
+  const hasActions = actions.length > 0;
+  const defaultLabelSlot = (a: A) => strategy.getLabel(a);
+  const labelSlot = actionLabelSlot ?? defaultLabelSlot;
 
   return (
     <div>
@@ -129,11 +136,11 @@ export default function SimEntryPanel<A extends ActionRow>({
         onExportPdf={onExportPdf}
         hasActions={hasActions}
         onClear={onClear}
-        onAiSim={onAiSim}
-        aiSimDisabled={aiSimDisabled}
-        onSimulateAll={onSimulateAll}
-        aiDelay={aiDelay}
-        onAiDelayChange={onAiDelayChange}
+        onAiSim={ai?.onAiSim}
+        aiSimDisabled={ai?.aiSimDisabled}
+        onSimulateAll={ai?.onSimulateAll}
+        aiDelay={ai?.aiDelay}
+        onAiDelayChange={ai?.onAiDelayChange}
       />
 
       <ManualEntry
@@ -143,25 +150,29 @@ export default function SimEntryPanel<A extends ActionRow>({
         value={manualValue}
         onValueChange={onManualValueChange}
         onAdd={onAddManual}
-        inputSlot={manualInputSlot}
+        inputType={manualInputType}
+        inputValue={manualInputValue}
+        onInputChange={onManualInputChange}
+        minDate={manualMinDate}
+        maxDate={manualMaxDate}
       />
 
-      {textMode && (
+      {textValue && textMode && (
         <Textarea
           value={textValue}
           onChange={onTextChange}
-          placeholder={textPlaceholder}
-          rows={textRows}
+          placeholder={strategy.getTextPlaceholder()}
+          rows={strategy.getTextRows(actions.length)}
           className="sim-textarea"
         />
       )}
 
-      {!textMode && actions.length > 0 && (
+      {!textMode && hasActions && (
         <ActionTable
           actions={actions}
           tradeMode={tradeMode}
-          labelSlot={actionLabelSlot}
-          sortKey={actionSortKey}
+          labelSlot={labelSlot}
+          sortKey={strategy.getSortKey}
           onUpdate={onUpdateAction}
           onRemove={onRemoveAction}
         />
@@ -174,7 +185,7 @@ export default function SimEntryPanel<A extends ActionRow>({
           history={resultHistory}
           markers={resultMarkers}
           transactions={resultTransactions}
-          intraday={intraday}
+          intraday={strategy.isIntraday}
         />
       )}
     </div>

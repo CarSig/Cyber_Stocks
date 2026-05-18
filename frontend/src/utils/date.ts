@@ -5,7 +5,7 @@ export function parseYMD(dateStr: string): Date {
 
 export function safeOffsetDate(dateStr: string | undefined, ms: number): string | null {
   if (!dateStr) return null;
-  const t = new Date(dateStr).getTime();
+  const t = new Date(dateStr + 'T12:00:00Z').getTime();
   if (isNaN(t)) return null;
   return new Date(t + ms).toISOString().slice(0, 10);
 }

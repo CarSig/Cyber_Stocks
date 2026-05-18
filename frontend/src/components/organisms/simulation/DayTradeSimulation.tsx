@@ -1,16 +1,21 @@
-import { useEffect, useRef, useCallback, useMemo, useReducer } from 'react';
+import { useEffect, useRef, useCallback, useMemo, useReducer, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { createChart, CandlestickSeries, LineSeries, AreaSeries, createSeriesMarkers } from 'lightweight-charts';
 import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
 import { getBars } from '@/api/alpaca';
 import type { AlpacaBar } from '@/types';
 import { Input } from '@/components/ui/input';
-import SimEntryPanel from './components/SimEntryPanel';
-import { exportSimPdf } from './utils/exportPdf';
+import SimEntryPanel from './components/entry-panel/SimEntryPanel';
+import ChartTypeToggle from './components/ChartTypeToggle';
+import OrderControls from './components/OrderControls';
+import { useExportSimPdf } from './hooks/useExportSimPdf';
 import { dayTradeReducer, initialDayTradeState } from './reducers/dayTradeReducer';
 import { intradayStrategy } from './reducers/baseStrategy';
+import type { SimStrategy } from './reducers/baseStrategy';
 import { useApplyPreset } from './hooks/useApplyPreset';
 import { useAddManualAction } from './hooks/useAddManualAction';
+import { attachChartClick } from './utils/chartClick';
+import ChartActionPopover from './components/ChartActionPopover';
 import { DateUtils } from '@/utils/date';
 import { PriceUtils } from '@/utils/price';
 import { MarketUtils } from '@/utils/market';
@@ -40,13 +45,7 @@ const DAYTRADE_PRESETS: Record<string, { time: string; side: 'buy' | 'sell'; val
 };
 
 import type { Side, Action, SimResult } from '@/utils/sim';
-import {
-  runLongSimulation,
-  runShortSimulation,
-  buildSimStats,
-  fmtMarkerText,
-  simResultToExportArgs,
-} from '@/utils/sim';
+import { runLongSimulation, runShortSimulation, buildSimStats, fmtMarkerText } from '@/utils/sim';
 
 type ChartRef = { chart: IChartApi; candleSeries: ISeriesApi<SeriesType> } | null;
 
@@ -68,6 +67,11 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
   } = s;
 
   const nextActionId = useRef(Math.max(0, ...s.actions.map((a) => a.id)) + 1);
+
+  const [popover, setPopover] = useState<{ iso: string; x: number; y: number; side: Side; value: string } | null>(null);
+  const [editPopover, setEditPopover] = useState<{ action: Action; x: number; y: number } | null>(null);
+  const actionsRef = useRef(actions);
+  useEffect(() => { actionsRef.current = actions; }, [actions]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ChartRef>(null);
@@ -167,37 +171,34 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       }
       lastHoveredBar = { iso: new Date((param.time as unknown as number) * 1000).toISOString() };
     });
-    chart.subscribeClick((param) => {
-      if (!param.time) return;
-      const iso = new Date((param.time as unknown as number) * 1000).toISOString();
-      const val = Math.max(0.01, Number(valueRef.current) || 100);
-      const side: Side = tradeModeRef.current === 'short' ? 'short' : 'buy';
-      dispatch({
-        type: 'ADD_ACTION',
-        action: { id: nextActionId.current++, timestamp: iso, time: DateUtils.fmtTime(iso), side, value: val },
-        date: query.date,
-      });
-    });
-
     const el = containerRef.current!;
-    function onContextMenu(e: MouseEvent) {
-      e.preventDefault();
-      if (!lastHoveredBar) return;
-      const val = Math.min(100, Math.max(0.01, Number(valueRef.current) || 50));
-      const side: Side = tradeModeRef.current === 'short' ? 'cover' : 'sell';
-      dispatch({
-        type: 'ADD_ACTION',
-        action: {
-          id: nextActionId.current++,
-          timestamp: lastHoveredBar!.iso,
-          time: DateUtils.fmtTime(lastHoveredBar!.iso),
-          side,
-          value: val,
-        },
-        date: query.date,
-      });
-    }
-    el.addEventListener('contextmenu', onContextMenu);
+    const cleanupClick = attachChartClick(el, {
+      chart,
+      getHoveredIso: () => lastHoveredBar?.iso ?? null,
+      onQuickAction: (iso, button) => {
+        if (actionsRef.current.find((a) => a.timestamp === iso)) return;
+        if (button === 0) {
+          const side: Side = tradeModeRef.current === 'short' ? 'short' : 'buy';
+          const val = Math.max(0.01, Number(valueRef.current) || 100);
+          dispatch({ type: 'ADD_ACTION', action: { id: nextActionId.current++, timestamp: iso, time: DateUtils.fmtTime(iso), side, value: val }, date: query.date });
+        } else {
+          const side: Side = tradeModeRef.current === 'short' ? 'cover' : 'sell';
+          const val = Math.min(100, Math.max(0.01, Number(valueRef.current) || 50));
+          dispatch({ type: 'ADD_ACTION', action: { id: nextActionId.current++, timestamp: iso, time: DateUtils.fmtTime(iso), side, value: val }, date: query.date });
+        }
+      },
+      onHoldStart: (iso, x, y, button) => {
+        const existing = actionsRef.current.find((a) => a.timestamp === iso);
+        if (existing) { setEditPopover({ action: existing, x, y }); return; }
+        const side: Side = button === 0
+          ? (tradeModeRef.current === 'short' ? 'short' : 'buy')
+          : (tradeModeRef.current === 'short' ? 'cover' : 'sell');
+        const val = button === 0
+          ? String(Math.max(0.01, Number(valueRef.current) || 100))
+          : String(Math.min(100, Math.max(0.01, Number(valueRef.current) || 50)));
+        setPopover({ iso, x, y, side, value: val });
+      },
+    });
     chartRef.current = { chart, candleSeries };
 
     const ro = new ResizeObserver(() => {
@@ -206,7 +207,7 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
     ro.observe(el);
 
     return () => {
-      el.removeEventListener('contextmenu', onContextMenu);
+      cleanupClick();
       ro.disconnect();
       chart.remove();
       chartRef.current = null;
@@ -260,20 +261,51 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
 
   const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS', date: query.date }), [query.date]);
 
-  const handleExportPdf = useCallback(() => {
-    if (!result) return;
-    const { stats, transactions } = simResultToExportArgs(result);
-    exportSimPdf(
-      ticker,
-      stats,
-      transactions,
-      [
-        { ref: containerRef.current, label: 'Price Chart' },
-        { ref: portfolioChartRef.current, label: 'Portfolio Value' },
-      ],
-      'Time (ET)',
-    );
-  }, [result, ticker]);
+  const dismissPopover = useCallback(() => setPopover(null), []);
+  const confirmPopover = useCallback(
+    (side: Side, rawValue: string) => {
+      if (!popover) return;
+      const isExit = side === 'sell' || side === 'cover';
+      const val = isExit
+        ? Math.min(100, Math.max(0.01, Number(rawValue)))
+        : Math.max(0.01, Number(rawValue));
+      if (!isFinite(val) || val <= 0) { setPopover(null); return; }
+      dispatch({ type: 'ADD_ACTION', action: { id: nextActionId.current++, timestamp: popover.iso, time: DateUtils.fmtTime(popover.iso), side, value: val }, date: query.date });
+      setPopover(null);
+    },
+    [popover, query.date],
+  );
+
+  const dismissEditPopover = useCallback(() => setEditPopover(null), []);
+  const confirmEditPopover = useCallback(
+    (side: Side, rawValue: string) => {
+      if (!editPopover) return;
+      const isExit = side === 'sell' || side === 'cover';
+      const val = isExit
+        ? Math.min(100, Math.max(0.01, Number(rawValue)))
+        : Math.max(0.01, Number(rawValue));
+      if (!isFinite(val) || val <= 0) { setEditPopover(null); return; }
+      dispatch({ type: 'UPDATE_ACTION', id: editPopover.action.id, field: 'side', val: side, date: query.date });
+      dispatch({ type: 'UPDATE_ACTION', id: editPopover.action.id, field: 'value', val: String(val), date: query.date });
+      setEditPopover(null);
+    },
+    [editPopover, query.date],
+  );
+  const deleteFromEditPopover = useCallback(() => {
+    if (!editPopover) return;
+    dispatch({ type: 'REMOVE_ACTION', id: editPopover.action.id, date: query.date });
+    setEditPopover(null);
+  }, [editPopover, query.date]);
+
+  const handleExportPdf = useExportSimPdf(
+    ticker,
+    result,
+    [
+      { ref: containerRef, label: 'Price Chart' },
+      { ref: portfolioChartRef, label: 'Portfolio Value' },
+    ],
+    'Time (ET)',
+  );
 
   const portfolioMarkers = useMemo(
     () => result?.transactions.map((t) => ({ time: t.time, side: t.side, value: t.value, shares: t.shares })) ?? [],
@@ -324,149 +356,61 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       {isPending && <p className="alpaca-status">Loading…</p>}
       {error && <p className="alpaca-status alpaca-error">{(error as Error).message}</p>}
 
-      <form
-        className="dtrade-order-controls"
-        onSubmit={(e) => {
+      <OrderControls
+        tradeMode={tradeMode}
+        onTradeModeChange={(mode) => dispatch({ type: 'SET_TRADE_MODE', mode, date: query.date })}
+        startShares={startShares}
+        onStartSharesChange={(v) => dispatch({ type: 'SET_START_SHARES', startShares: v })}
+        value={value}
+        onValueChange={(v) => dispatch({ type: 'SET_VALUE', value: v })}
+        date={date}
+        onDateChange={(d) => dispatch({ type: 'SET_DATE', date: d })}
+        maxDate={DateUtils.lastWeekday(DateUtils.todayStr())}
+        timeframe={timeframe}
+        onTimeframeChange={(t) => dispatch({ type: 'SET_TIMEFRAME', timeframe: t })}
+        onLoad={(e) => {
           e.preventDefault();
           dispatch({ type: 'LOAD_BARS', date, timeframe });
         }}
-      >
-        {bars.length > 0 && (
-          <>
-            <div className="dtrade-next-side">
-              <button
-                className={`sim-chart-btn${tradeMode === 'long' ? ' active' : ''}`}
-                onClick={() => dispatch({ type: 'SET_TRADE_MODE', mode: 'long', date: query.date })}
-                type="button"
-              >
-                Long
-              </button>
-              <button
-                className={`sim-chart-btn${tradeMode === 'short' ? ' active' : ''}`}
-                onClick={() => dispatch({ type: 'SET_TRADE_MODE', mode: 'short', date: query.date })}
-                type="button"
-                style={tradeMode === 'short' ? { borderColor: '#f97316', color: '#f97316' } : undefined}
-              >
-                Short
-              </button>
-              <span style={{ width: '0.5rem' }} />
-              {tradeMode === 'long' ? (
-                <>
-                  <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Left click = Buy ($)</span>
-                  <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Right click = Sell (%)</span>
-                </>
-              ) : (
-                <>
-                  <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Left click = Short ($)</span>
-                  <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Right click = Cover (%)</span>
-                </>
-              )}
-            </div>
-            {tradeMode === 'long' && (
-              <div className="dtrade-shares">
-                <span className="dtrade-label">Start shares:</span>
-                <Input
-                  type="number"
-                  min="0"
-                  step="any"
-                  value={startShares}
-                  onChange={(e) => dispatch({ type: 'SET_START_SHARES', startShares: e.target.value })}
-                  className="dtrade-shares-input"
-                />
-              </div>
-            )}
-            <div className="dtrade-shares">
-              <span className="dtrade-label">Value:</span>
-              <Input
-                type="number"
-                min="0"
-                step="any"
-                value={value}
-                onChange={(e) => dispatch({ type: 'SET_VALUE', value: e.target.value })}
-                className="dtrade-shares-input"
-              />
-              <span className="dtrade-label">{tradeMode === 'long' ? '$ buy / % sell' : '$ short / % cover'}</span>
-            </div>
-          </>
-        )}
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <input
-            className="alpaca-input"
-            type="date"
-            value={date}
-            max={DateUtils.lastWeekday(DateUtils.todayStr())}
-            onChange={(e) => dispatch({ type: 'SET_DATE', date: e.target.value })}
-          />
-          <select
-            className="alpaca-input"
-            value={timeframe}
-            onChange={(e) => dispatch({ type: 'SET_TIMEFRAME', timeframe: e.target.value })}
-          >
-            {MarketUtils.TIMEFRAMES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-          <button className="alpaca-btn" type="submit">
-            Load
-          </button>
-        </div>
-      </form>
+        showTradeControls={bars.length > 0}
+        valueLabel={tradeMode === 'long' ? '$ buy / % sell' : '$ short / % cover'}
+      />
 
       {bars.length > 0 && (
         <SimEntryPanel
           topSlot={
             <>
-              <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem' }}>
-                {(['line', 'area', 'candlestick'] as const).map((t) => (
-                  <button
-                    key={t}
-                    className={`sim-chart-btn${chartType === t ? ' active' : ''}`}
-                    onClick={() => dispatch({ type: 'SET_CHART_TYPE', chartType: t })}
-                    type="button"
-                  >
-                    {t.charAt(0).toUpperCase() + t.slice(1)}
-                  </button>
-                ))}
-              </div>
+              <ChartTypeToggle
+                chartType={chartType}
+                onChange={(t) => dispatch({ type: 'SET_CHART_TYPE', chartType: t })}
+              />
               <div className="dtrade-chart-hint">
                 {tradeMode === 'long'
-                  ? `Left click to buy $${value} · Right click to sell ${value}%`
-                  : `Left click to short $${value} · Right click to cover ${value}%`}
+                  ? `Left click to buy $${value} · Right click to sell ${value}% · Hold 1s to configure`
+                  : `Left click to short $${value} · Right click to cover ${value}% · Hold 1s to configure`}
               </div>
               <div ref={containerRef} className="alpaca-chart-container" />
             </>
           }
           tradeMode={tradeMode}
+          strategy={intradayStrategy}
           presets={DAYTRADE_PRESETS}
           onPreset={applyPreset}
           textMode={textMode}
           onTextModeToggle={() => dispatch({ type: 'TOGGLE_TEXT_MODE', date: query.date })}
-          hasResult={!!result}
           onExportPdf={handleExportPdf}
-          hasActions={actions.length > 0}
           onClear={clear}
           nextSide={nextSide}
           onNextSideChange={(s) => dispatch({ type: 'SET_NEXT_SIDE', side: s })}
           manualValue={value}
           onManualValueChange={(v) => dispatch({ type: 'SET_VALUE', value: v })}
           onAddManual={addManualAction}
-          manualInputSlot={
-            <input
-              className="alpaca-input"
-              type="time"
-              value={manualTime}
-              onChange={(e) => dispatch({ type: 'SET_MANUAL_TIME', time: e.target.value })}
-            />
-          }
+          manualInputType="time"
+          manualInputValue={manualTime}
+          onManualInputChange={(v) => dispatch({ type: 'SET_MANUAL_TIME', time: v })}
           textValue={textValue}
           onTextChange={handleTextChange}
-          textPlaceholder={'09:30, 100\n10:15, -50'}
-          textRows={Math.max(3, actions.length + 1)}
           actions={actions}
-          actionLabelSlot={(a) => a.time}
-          actionSortKey={(a) => a.timestamp}
           onUpdateAction={updateAction}
           onRemoveAction={removeAction}
           resultStats={result ? buildSimStats(result, tradeMode, PriceUtils.fmt) : null}
@@ -474,7 +418,30 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
           resultMarkers={portfolioMarkers}
           resultTransactions={result?.transactions ?? null}
           portfolioChartRef={portfolioChartRef}
-          intraday
+        />
+      )}
+      {popover && (
+        <ChartActionPopover
+          x={popover.x}
+          y={popover.y}
+          initialSide={popover.side}
+          initialValue={popover.value}
+          tradeMode={tradeMode}
+          onConfirm={confirmPopover}
+          onDismiss={dismissPopover}
+        />
+      )}
+      {editPopover && (
+        <ChartActionPopover
+          mode="edit"
+          x={editPopover.x}
+          y={editPopover.y}
+          initialSide={editPopover.action.side}
+          initialValue={String(editPopover.action.value)}
+          tradeMode={tradeMode}
+          onConfirm={confirmEditPopover}
+          onDelete={deleteFromEditPopover}
+          onDismiss={dismissEditPopover}
         />
       )}
     </div>

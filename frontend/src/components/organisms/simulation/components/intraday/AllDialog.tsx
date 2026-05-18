@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { aiButtonStyle } from '../utils/styles';
+import { aiButtonStyle } from '../../utils/styles';
 
 type AllRow = {
   rank: number;

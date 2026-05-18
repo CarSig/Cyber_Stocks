@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import InspectHighlight from './components/atoms/InspectHighlight';
@@ -7,22 +8,23 @@ import { ThemeProvider } from './context/ThemeContext';
 import Navbar from './components/organisms/layout/Navbar';
 import ProtectedRoute from './components/molecules/routes/ProtectedRoute';
 import AdminRoute from './components/molecules/routes/AdminRoute';
-import Home from './pages/Home';
-import Ticker from './pages/Ticker/index';
-import AdminAudit from './pages/AdminAudit';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminFeedback from './pages/AdminFeedback';
-import ThreatIntel from './pages/ThreatIntel/index';
-import ThreatIntelKev from './pages/ThreatIntel/ThreatIntelKev';
-import ThreatIntelNvd from './pages/ThreatIntel/ThreatIntelNvd';
-import ThreatIntelOtx from './pages/ThreatIntel/ThreatIntelOtx';
-import ThreatIntelMisp from './pages/ThreatIntel/ThreatIntelMisp';
-import Socials from './pages/Socials/index';
-import SocialsTruthSocial from './pages/Socials/SocialsTruthSocial';
-import SocialsReddit from './pages/Socials/SocialsReddit/index';
-import Intelligence from './pages/Intelligence/index';
-import CyberNews from './pages/CyberNews/index';
-import Events from './pages/Events/index';
+
+const Home = lazy(() => import('./pages/Home'));
+const Ticker = lazy(() => import('./pages/Ticker/index'));
+const AdminAudit = lazy(() => import('./pages/AdminAudit'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminFeedback = lazy(() => import('./pages/AdminFeedback'));
+const ThreatIntel = lazy(() => import('./pages/ThreatIntel/index'));
+const ThreatIntelKev = lazy(() => import('./pages/ThreatIntel/ThreatIntelKev'));
+const ThreatIntelNvd = lazy(() => import('./pages/ThreatIntel/ThreatIntelNvd'));
+const ThreatIntelOtx = lazy(() => import('./pages/ThreatIntel/ThreatIntelOtx'));
+const ThreatIntelMisp = lazy(() => import('./pages/ThreatIntel/ThreatIntelMisp'));
+const Socials = lazy(() => import('./pages/Socials/index'));
+const SocialsTruthSocial = lazy(() => import('./pages/Socials/SocialsTruthSocial'));
+const SocialsReddit = lazy(() => import('./pages/Socials/SocialsReddit/index'));
+const Intelligence = lazy(() => import('./pages/Intelligence/index'));
+const CyberNews = lazy(() => import('./pages/CyberNews/index'));
+const Events = lazy(() => import('./pages/Events/index'));
 
 export default function App() {
   return (
@@ -33,137 +35,139 @@ export default function App() {
             <InspectHighlight />
             <Navbar />
             <main className="app-main">
-              <Routes>
-                <Route
-                  path="/"
-                  element={
-                    <ProtectedRoute>
-                      <Home />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin"
-                  element={
-                    <AdminRoute>
-                      <AdminDashboard />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/audit"
-                  element={
-                    <AdminRoute>
-                      <AdminAudit />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/feedback"
-                  element={
-                    <AdminRoute>
-                      <AdminFeedback />
-                    </AdminRoute>
-                  }
-                />
-                <Route
-                  path="/threat-intel"
-                  element={
-                    <ProtectedRoute>
-                      <ThreatIntel />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/threat-intel/list/kev"
-                  element={
-                    <ProtectedRoute>
-                      <ThreatIntelKev />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/threat-intel/list/nvd"
-                  element={
-                    <ProtectedRoute>
-                      <ThreatIntelNvd />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/threat-intel/list/otx"
-                  element={
-                    <ProtectedRoute>
-                      <ThreatIntelOtx />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/threat-intel/list/misp"
-                  element={
-                    <ProtectedRoute>
-                      <ThreatIntelMisp />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/socials"
-                  element={
-                    <ProtectedRoute>
-                      <Socials />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/socials/truth-social"
-                  element={
-                    <ProtectedRoute>
-                      <SocialsTruthSocial />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/socials/reddit"
-                  element={
-                    <ProtectedRoute>
-                      <SocialsReddit />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/intelligence"
-                  element={
-                    <ProtectedRoute>
-                      <Intelligence />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/cyber-news"
-                  element={
-                    <ProtectedRoute>
-                      <CyberNews />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/events"
-                  element={
-                    <ProtectedRoute>
-                      <Events />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/:ticker"
-                  element={
-                    <ProtectedRoute>
-                      <Ticker />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
+              <Suspense>
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <Home />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin"
+                    element={
+                      <AdminRoute>
+                        <AdminDashboard />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/audit"
+                    element={
+                      <AdminRoute>
+                        <AdminAudit />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/feedback"
+                    element={
+                      <AdminRoute>
+                        <AdminFeedback />
+                      </AdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/threat-intel"
+                    element={
+                      <ProtectedRoute>
+                        <ThreatIntel />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/threat-intel/list/kev"
+                    element={
+                      <ProtectedRoute>
+                        <ThreatIntelKev />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/threat-intel/list/nvd"
+                    element={
+                      <ProtectedRoute>
+                        <ThreatIntelNvd />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/threat-intel/list/otx"
+                    element={
+                      <ProtectedRoute>
+                        <ThreatIntelOtx />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/threat-intel/list/misp"
+                    element={
+                      <ProtectedRoute>
+                        <ThreatIntelMisp />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/socials"
+                    element={
+                      <ProtectedRoute>
+                        <Socials />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/socials/truth-social"
+                    element={
+                      <ProtectedRoute>
+                        <SocialsTruthSocial />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/socials/reddit"
+                    element={
+                      <ProtectedRoute>
+                        <SocialsReddit />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/intelligence"
+                    element={
+                      <ProtectedRoute>
+                        <Intelligence />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/cyber-news"
+                    element={
+                      <ProtectedRoute>
+                        <CyberNews />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/events"
+                    element={
+                      <ProtectedRoute>
+                        <Events />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/:ticker"
+                    element={
+                      <ProtectedRoute>
+                        <Ticker />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Suspense>
             </main>
           </BrowserRouter>
         </NotificationProvider>

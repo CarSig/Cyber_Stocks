@@ -844,6 +844,49 @@
   color: var(--text-secondary);
   margin-bottom: -0.5rem;
 }
+.chart-action-popover {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+.chart-action-popover__sides {
+  display: flex;
+  gap: 4px;
+}
+.chart-action-popover__side {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.chart-action-popover__side.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+.chart-action-popover__input {
+  width: 80px;
+  height: 28px;
+  font-size: 0.85rem;
+}
+.chart-action-popover__unit {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+.chart-action-popover__add {
+  height: 28px;
+}
+.chart-action-popover__delete {
+  height: 28px;
+}
 .dtrade-manual {
   display: flex;
   align-items: center;

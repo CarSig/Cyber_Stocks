@@ -3,8 +3,7 @@ function fmtVal(v: number) {
 }
 
 export type BaseTransaction = {
-  side?: string;
-  type?: string;
+  side: string;
   price: number;
   shares: number;
   value: number;
@@ -39,7 +38,7 @@ export default function TransactionTable({ transactions }: TransactionTableProps
       </thead>
       <tbody>
         {transactions.map((t, i) => {
-          const side = (t.side ?? t.type) as string;
+          const side = t.side;
           const label = hasTime ? (t as DayTradeTransaction).time : (t as LongTermTransaction).date;
           return (
             <tr key={i}>

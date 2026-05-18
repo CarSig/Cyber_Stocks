@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import DatePicker from '@/components/atoms/DatePicker';
 
 type ManualEntryProps = {
   side: string;
@@ -7,8 +8,16 @@ type ManualEntryProps = {
   value: string;
   onValueChange: (v: string) => void;
   onAdd: () => void;
-  // Render the time/date input — differs between long-term (DatePicker) and daytrade (time input)
-  inputSlot: React.ReactNode;
+  /** Which type of date/time input to render */
+  inputType: 'time' | 'date';
+  /** Current value of the date/time input */
+  inputValue: string;
+  /** Called when the date/time input changes */
+  onInputChange: (v: string) => void;
+  /** Min date (only used when inputType='date') */
+  minDate?: string;
+  /** Max date (only used when inputType='date') */
+  maxDate?: string;
 };
 
 const DEFAULT_OPTIONS: { value: string; label: string }[] = [
@@ -23,13 +32,26 @@ export default function ManualEntry({
   value,
   onValueChange,
   onAdd,
-  inputSlot,
+  inputType,
+  inputValue,
+  onInputChange,
+  minDate,
+  maxDate,
 }: ManualEntryProps) {
   const isExit = side === 'sell' || side === 'cover';
   return (
     <div className="dtrade-manual">
       <span className="dtrade-label">Manual:</span>
-      {inputSlot}
+      {inputType === 'time' ? (
+        <input
+          className="alpaca-input"
+          type="time"
+          value={inputValue}
+          onChange={(e) => onInputChange(e.target.value)}
+        />
+      ) : (
+        <DatePicker value={inputValue} min={minDate} max={maxDate} onChange={(v) => onInputChange(v ?? '')} />
+      )}
       <select className="dtrade-inline-select" value={side} onChange={(e) => onSideChange(e.target.value)}>
         {sideOptions.map((o) => (
           <option key={o.value} value={o.value}>

@@ -2,7 +2,7 @@ import { makeSimReducer, initialBaseSimState } from './baseReducer';
 import type { BaseSimAction } from './baseReducer';
 import { longTermStrategy } from './baseStrategy';
 
-export type LongTermAction = { id: number; date: string; type: 'buy' | 'sell' | 'short' | 'cover'; value: string };
+export type LongTermAction = { id: number; date: string; side: 'buy' | 'sell' | 'short' | 'cover'; value: string };
 
 export type LongTermSimState = ReturnType<typeof initialLongTermState>;
 

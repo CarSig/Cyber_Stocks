@@ -6,7 +6,14 @@ export type SimStrategy<A> = {
   createAction: (id: number, label: string, side: string, rawValue: string, date?: string) => A | null;
   updateAction: (action: A, field: 'side' | 'value', val: string) => A;
   getLabel: (action: A) => string;
+  getSortKey: (action: A) => string;
   defaultSide: (tradeMode: 'long' | 'short') => string;
+  /** Placeholder text for the textarea */
+  getTextPlaceholder: () => string;
+  /** Number of rows for the textarea based on action count */
+  getTextRows: (actionCount: number) => number;
+  /** Whether this is an intraday simulation (affects Results display) */
+  isIntraday: boolean;
 };
 
 // Shared by DayTradeSimulation and IntradaySimulation (same Action type)
@@ -38,25 +45,33 @@ export const intradayStrategy: SimStrategy<Action> = {
     return { ...a, side: newSide, value: isExit(newSide) ? Math.min(100, a.value) : a.value };
   },
   getLabel: (a) => a.time,
+  getSortKey: (a) => a.timestamp,
   defaultSide: (mode) => (mode === 'short' ? 'short' : 'buy'),
+  getTextPlaceholder: () => '09:30, 100\n10:15, -50',
+  getTextRows: (count) => Math.max(3, count + 1),
+  isIntraday: true,
 };
 
-type LongTermAction = { id: number; date: string; type: 'buy' | 'sell' | 'short' | 'cover'; value: string };
+type LongTermAction = { id: number; date: string; side: 'buy' | 'sell' | 'short' | 'cover'; value: string };
 
-const isLongTermExit = (t: LongTermAction['type']) => t === 'sell' || t === 'cover';
+const isLongTermExit = (t: LongTermAction['side']) => t === 'sell' || t === 'cover';
 
 export const longTermStrategy: SimStrategy<LongTermAction> = {
   toText: (_date, actions) =>
     actions
-      .map((a) => `${a.date}, ${isLongTermExit(a.type) ? -Math.abs(Number(a.value)) : Math.abs(Number(a.value))}`)
+      .map((a) => `${a.date}, ${isLongTermExit(a.side) ? -Math.abs(Number(a.value)) : Math.abs(Number(a.value))}`)
       .join('\n'),
   createAction: (id, date, side, rawValue) => {
     const val = Number(rawValue);
     if (!isFinite(val) || val === 0 || !date) return null;
-    return { id, date, type: side as LongTermAction['type'], value: String(Math.abs(val)) };
+    return { id, date, side: side as LongTermAction['side'], value: String(Math.abs(val)) };
   },
   updateAction: (a, field, val) =>
-    field === 'side' ? { ...a, type: val as LongTermAction['type'] } : { ...a, value: val },
+    field === 'side' ? { ...a, side: val as LongTermAction['side'] } : { ...a, value: val },
   getLabel: (a) => a.date,
+  getSortKey: (a) => a.date,
   defaultSide: (mode) => (mode === 'short' ? 'short' : 'buy'),
+  getTextPlaceholder: () => '2025-01-15, 100\n2025-06-01, -50',
+  getTextRows: (count) => Math.max(3, count + 1),
+  isIntraday: false,
 };

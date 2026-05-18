@@ -48,6 +48,6 @@ describe('longTermStrategy.createAction', () => {
 
   it('creates a valid long-term action', () => {
     const action = longTermStrategy.createAction(1, '2024-01-15', 'buy', '50');
-    expect(action).toEqual({ id: 1, date: '2024-01-15', type: 'buy', value: '50' });
+    expect(action).toEqual({ id: 1, date: '2024-01-15', side: 'buy', value: '50' });
   });
 });
