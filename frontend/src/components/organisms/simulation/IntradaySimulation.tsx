@@ -561,7 +561,13 @@ export default function IntradaySimulation() {
           topSlot={
             <>
               <div
-                style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem', alignItems: 'center', flexWrap: 'wrap' }}
+                style={{
+                  display: 'flex',
+                  gap: '0.25rem',
+                  marginBottom: '0.25rem',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                }}
               >
                 {(['line', 'area', 'candlestick'] as const).map((t) => (
                   <button
@@ -598,7 +604,11 @@ export default function IntradaySimulation() {
                   + Day after ({nextDate})
                 </button>
                 {extraDates.length > 0 && (
-                  <button className="sim-chart-btn" onClick={() => dispatch({ type: 'RESET_EXTRA_DATES' })} type="button">
+                  <button
+                    className="sim-chart-btn"
+                    onClick={() => dispatch({ type: 'RESET_EXTRA_DATES' })}
+                    type="button"
+                  >
                     Reset days
                   </button>
                 )}

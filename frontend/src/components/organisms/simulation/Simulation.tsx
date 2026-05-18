@@ -419,7 +419,8 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
         .filter((a) => a.date)
         .map((a) => {
           const isEntry = a.type === 'buy' || a.type === 'short';
-          const color = a.type === 'buy' ? '#22c55e' : a.type === 'sell' ? '#ef4444' : a.type === 'short' ? '#f97316' : '#3b82f6';
+          const color =
+            a.type === 'buy' ? '#22c55e' : a.type === 'sell' ? '#ef4444' : a.type === 'short' ? '#f97316' : '#3b82f6';
           const prefix = a.type === 'buy' ? 'B' : a.type === 'sell' ? 'S' : a.type === 'short' ? 'SH' : 'C';
           return {
             time: a.date as `${number}-${number}-${number}`,

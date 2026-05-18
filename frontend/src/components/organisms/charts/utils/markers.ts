@@ -305,7 +305,8 @@ export function syncIntradayMarkers(
       return {
         time: t(a.timestamp),
         position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
-        color: a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#60a5fa',
+        color:
+          a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#60a5fa',
         shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
         text: fmtMarkerText(a.side, a.value),
       };

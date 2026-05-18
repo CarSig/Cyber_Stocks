@@ -23,4 +23,3 @@ export function longTermReducer(state: LongTermSimState, action: LongTermSimActi
   if (action.type === 'SET_TIMEFRAME') return { ...state };
   return baseReducer(state, action as BaseSimAction<LongTermAction>);
 }
-
