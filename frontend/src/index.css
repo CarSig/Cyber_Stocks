@@ -11,7 +11,7 @@
   --card: #1c1c21;
   --card-foreground: #9ba3af;
   --popover: #242429;
-  --popover-foreground: #9ba3af;
+  --popover-foreground: #c4cad4;
   --primary: #3b82f6;
   --primary-foreground: #ffffff;
   --secondary: #2b2b31;
@@ -74,7 +74,7 @@
   --series-2: #f59e0b;
   --series-3: #10b981;
   --series-4: #ef4444;
-  --series-5: #8b5cf6;
+  --series-5: #60a5fa;
   --series-6: #ec4899;
   --series-7: #14b8a6;
   --series-8: #f97316;
@@ -109,7 +109,7 @@ html.light {
   --card: #f9fafb;
   --card-foreground: #374151;
   --popover: #ffffff;
-  --popover-foreground: #374151;
+  --popover-foreground: #333333;
   --primary: #2563eb;
   --primary-foreground: #ffffff;
   --secondary: #f3f4f6;
@@ -139,14 +139,19 @@ html.light {
   --text-h: #111827;
   --text-primary: #374151;
   --text-muted: #6b7280;
-  --text-faint: #9ca3af;
+  --text-faint: #6b7280;
+
+  /* Semantic colors — darker for light bg contrast */
+  --color-green: #059669;
+  --color-red: #dc2626;
+  --color-amber: #d97706;
 
   /* App misc */
   --bg: #ffffff;
   --code-bg: #f3f4f6;
-  --accent-color: #7c3aed;
-  --accent-bg: rgba(124, 58, 237, 0.08);
-  --accent-border: rgba(124, 58, 237, 0.35);
+  --accent-color: #2563eb;
+  --accent-bg: rgba(37, 99, 235, 0.08);
+  --accent-border: rgba(37, 99, 235, 0.35);
   --social-bg: rgba(243, 244, 246, 0.8);
   --shadow: rgba(0, 0, 0, 0.08) 0 4px 12px -2px, rgba(0, 0, 0, 0.04) 0 2px 4px -1px;
 

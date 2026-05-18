@@ -257,7 +257,7 @@ export function buildOverlayMarkers(
       ? buildCountMarkers(otxPulsesRef.current as Array<Record<string, unknown>> | undefined, {
           dateField: 'created',
           position: 'belowBar',
-          color: '#a855f7',
+          color: '#3b82f6',
           shape: 'circle',
           label: 'OTX',
         })

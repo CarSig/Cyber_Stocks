@@ -6,7 +6,6 @@ import indexBy from '@/utils/indexBy';
 import TickerCard from '@/components/organisms/cards/ticker/TickerCard';
 import TickerListRow from '@/components/molecules/cyber-news/TickerListRow';
 import TickerDetailPanel from '@/components/organisms/cyber-news/TickerDetailPanel';
-import TopicsSidebar from '@/components/organisms/cards/TopicsSidebar';
 import './CyberNews.css';
 import Page from '@/components/atoms/Page';
 import type { CyberNewsTicker, CyberNewsTopic, CorrelationResult } from '@/types';
@@ -40,7 +39,7 @@ export default function CyberNews() {
         ))}
       </div>
 
-      <div className={`cyber-news-main ${selectedTopic ? 'with-sidebar' : ''}`}>
+      <div className="cyber-news-main">
         <Page title="Cyber News">
           <p style={{ color: 'var(--muted-foreground)', marginBottom: 24 }}>
             Archived cybersecurity news (2025+) matched to tracked companies and analyzed with AI. Click a company to
@@ -108,10 +107,6 @@ export default function CyberNews() {
         </Page>
       </div>
 
-      <TopicsSidebar
-        selectedTopic={selectedTopic}
-        data={allTopics as Array<{ topic: string; count: number }> | undefined}
-      />
     </div>
   );
 }

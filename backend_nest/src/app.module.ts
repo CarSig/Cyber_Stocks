@@ -33,6 +33,7 @@ import { SchedulerModule } from "@/modules/scheduler/scheduler.module";
 import { AuditModule } from "@/modules/audit/audit.module";
 import { AlpacaModule } from "@/modules/alpaca/alpaca.module";
 import { HealthModule } from "@/modules/health/health.module";
+import { InspectDomCaptureModule } from "@/modules/inspect-dom-capture/inspect-dom-capture.module";
 import { CoreDbModule } from "@/shared/core-db.module";
 import { CacheModule } from "@/shared/cache.module";
 import { AuthService } from "@/modules/auth/auth.service";
@@ -81,6 +82,7 @@ import { AuthService } from "@/modules/auth/auth.service";
     AlpacaModule,
     StockModule,
     HealthModule,
+    InspectDomCaptureModule,
   ],
   providers: [
     { provide: APP_FILTER,      useClass: HttpExceptionFilter },

@@ -158,6 +158,30 @@ export class CoreDbService implements OnApplicationBootstrap {
     `);
 
     await this.pool.query(`
+      CREATE TABLE IF NOT EXISTS dom_feedback (
+        id            UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+        message       TEXT        NOT NULL,
+        tag_name      TEXT        NOT NULL,
+        element_id    TEXT        NOT NULL DEFAULT '',
+        classes       TEXT[]      NOT NULL DEFAULT '{}',
+        css_selector  TEXT        NOT NULL,
+        dom_path      TEXT[]      NOT NULL DEFAULT '{}',
+        inner_text    TEXT        NOT NULL DEFAULT '',
+        page_url      TEXT        NOT NULL,
+        bounding_rect JSONB       NOT NULL DEFAULT '{}',
+        submitted_by  TEXT        NOT NULL DEFAULT 'guest',
+        status        TEXT        NOT NULL DEFAULT 'pending'
+                                  CHECK (status IN ('pending', 'approved', 'rejected', 'implemented', 'failed')),
+        dev_comment   TEXT,
+        ai_comment    TEXT        CHECK (char_length(ai_comment) <= 600),
+        created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+      );
+      CREATE INDEX IF NOT EXISTS dom_feedback_status_idx     ON dom_feedback (status);
+      CREATE INDEX IF NOT EXISTS dom_feedback_created_at_idx ON dom_feedback (created_at DESC);
+    `);
+
+    await this.pool.query(`
       CREATE TABLE IF NOT EXISTS audit_log (
         id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id    UUID        NOT NULL,

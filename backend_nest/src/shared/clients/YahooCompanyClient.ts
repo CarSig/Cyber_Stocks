@@ -70,7 +70,7 @@ class CybersecurityClient {
     url.searchParams.set("start", start);
     url.searchParams.set("end", end);
     url.searchParams.set("adjustment", "all");
-    url.searchParams.set("feed", "sip");
+    url.searchParams.set("feed", "iex");
     url.searchParams.set("limit", "10000");
 
     const bars: AlpacaBar[] = [];

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import InspectHighlight from './components/atoms/InspectHighlight';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -10,6 +11,7 @@ import Home from './pages/Home';
 import Ticker from './pages/Ticker/index';
 import AdminAudit from './pages/AdminAudit';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminFeedback from './pages/AdminFeedback';
 import ThreatIntel from './pages/ThreatIntel/index';
 import ThreatIntelKev from './pages/ThreatIntel/ThreatIntelKev';
 import ThreatIntelNvd from './pages/ThreatIntel/ThreatIntelNvd';
@@ -22,12 +24,14 @@ import Intelligence from './pages/Intelligence/index';
 import CyberNews from './pages/CyberNews/index';
 import Events from './pages/Events/index';
 
+
 export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <NotificationProvider>
           <BrowserRouter>
+            <InspectHighlight />
             <Navbar />
             <main className="app-main">
               <Routes>
@@ -52,6 +56,14 @@ export default function App() {
                   element={
                     <AdminRoute>
                       <AdminAudit />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/feedback"
+                  element={
+                    <AdminRoute>
+                      <AdminFeedback />
                     </AdminRoute>
                   }
                 />

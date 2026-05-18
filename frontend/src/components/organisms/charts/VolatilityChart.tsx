@@ -2,55 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import './charts.css';
 import { createChart, LineSeries, AreaSeries, type IChartApi } from 'lightweight-charts';
 import { cssVar, makeChartOptions } from './utils/theme';
-import { toSortedOHLC } from './utils/series';
+import { toSortedOHLC, calcHV, calcATR } from './utils/series';
 import { daysAgoString, todayString } from './utils/dates';
+import { CHART_TYPES } from './utils/options';
 import { attachResizeObserver, subscribeRangeChange, applyRange } from './utils/chartSetup';
 import ChartToggleButton from '@/components/atoms/ChartToggleButton';
 import ChartSep from '@/components/atoms/ChartSep';
 import type { Quote } from '@/types';
 
-const CHART_TYPES = ['Line', 'Area'];
-
-type OhlcEntry = { time: string; open?: number; high?: number; low?: number; close?: number };
-
-function calcHV(quotes: OhlcEntry[], window = 20) {
-  if (quotes.length < window + 1) return [];
-  const result: { time: string; value: number }[] = [];
-  for (let i = window; i < quotes.length; i++) {
-    const slice = quotes.slice(i - window, i + 1);
-    const logReturns: number[] = [];
-    for (let j = 1; j < slice.length; j++) {
-      const prev = slice[j - 1].close ?? 0;
-      const curr = slice[j].close ?? 0;
-      if (prev > 0 && curr > 0) logReturns.push(Math.log(curr / prev));
-    }
-    if (!logReturns.length) continue;
-    const mean = logReturns.reduce((a, b) => a + b, 0) / logReturns.length;
-    const variance = logReturns.reduce((a, b) => a + (b - mean) ** 2, 0) / logReturns.length;
-    const hv = Math.sqrt(variance * 252) * 100;
-    result.push({ time: quotes[i].time, value: parseFloat(hv.toFixed(4)) });
-  }
-  return result;
-}
-
-function calcATR(quotes: OhlcEntry[], window = 14) {
-  if (quotes.length < window + 1) return [];
-  const trs: number[] = [];
-  for (let i = 1; i < quotes.length; i++) {
-    const high = quotes[i].high ?? 0,
-      low = quotes[i].low ?? 0,
-      prevClose = quotes[i - 1].close ?? 0;
-    trs.push(Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose)));
-  }
-  const result: { time: string; value: number }[] = [];
-  for (let i = window - 1; i < trs.length; i++) {
-    const slice = trs.slice(i - window + 1, i + 1);
-    const atr = slice.reduce((a, b) => a + b, 0) / window;
-    const close = quotes[i + 1].close ?? 0;
-    if (close > 0) result.push({ time: quotes[i + 1].time, value: parseFloat(((atr / close) * 100).toFixed(4)) });
-  }
-  return result;
-}
 
 type VolatilityChartProps = {
   quotes: Quote[];
@@ -144,7 +103,7 @@ export default function VolatilityChart({
   return (
     <div>
       <div className="chart-toolbar">
-        {CHART_TYPES.map((t) => (
+        {CHART_TYPES.Volatility.map((t) => (
           <button key={t} onClick={() => setType(t)} className={`btn btn-chart${type === t ? ' active' : ''}`}>
             {t}
           </button>

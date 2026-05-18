@@ -14,6 +14,14 @@ const companies: Record<string, string> = {
   Apple: "AAPL",
   Palantir: "PLTR",
   Cisco: "CSCO",
+  "Alphabet (Google)": "GOOGL",
+  Amazon: "AMZN",
+  "Check Point Software": "CHKP",
+  Okta: "OKTA",
+  "CyberArk Software": "CYBR",
+  Datadog: "DDOG",
+  "Dynatrace": "DT",
+  "Akamai Technologies": "AKAM",
 };
 
 export default companies;

@@ -92,9 +92,10 @@ export class NvdThreatIntelService extends ThreatIntelSource<
   list({ limit = 50, offset = 0, search = "", severity = "", company = "" } = {}): NvdListResult {
     const data = this.read();
     if (!data) return { total: 0, items: [], syncedAt: null };
-    let items = ((data.vulnerabilities ?? []) as NvdVuln[]).slice().sort(
-      (a, b) => new Date(b.cve?.published ?? 0).getTime() - new Date(a.cve?.published ?? 0).getTime()
-    );
+    const cutoff = new Date("2022-01-01").getTime();
+    let items = ((data.vulnerabilities ?? []) as NvdVuln[])
+      .filter((v) => new Date(v.cve?.published ?? 0).getTime() >= cutoff)
+      .sort((a, b) => new Date(b.cve?.published ?? 0).getTime() - new Date(a.cve?.published ?? 0).getTime());
     if (severity) items = items.filter((v) => severityOf(v) === severity.toUpperCase());
     if (company) {
       const kw = vendorKeyword(company);

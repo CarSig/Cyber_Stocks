@@ -1,15 +1,7 @@
 import { useEffect, useRef, forwardRef } from 'react';
 import { createChart, LineSeries, createSeriesMarkers } from 'lightweight-charts';
 import type { Time } from 'lightweight-charts';
-
-type HistoryPoint = { time: string; value: number };
-
-type MarkerPoint = {
-  time: string;
-  side: string;
-  value: number;
-  shares: number;
-};
+import type { MarkerPoint, HistoryPoint } from '@/components/organisms/charts/utils/types';
 
 type SimPortfolioChartProps = {
   history: HistoryPoint[];

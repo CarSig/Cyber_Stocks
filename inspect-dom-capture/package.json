@@ -1,0 +1,16 @@
+{
+  "name": "inspect-dom-capture",
+  "version": "1.0.0",
+  "description": "Floating feedback button with DevTools-style element inspection",
+  "main": "dist/inspect-dom-capture.js",
+  "types": "dist/inspect-dom-capture.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["feedback", "dom", "inspect", "devtools"],
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

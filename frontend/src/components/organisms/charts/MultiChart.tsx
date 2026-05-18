@@ -11,6 +11,7 @@ import PeriodButtons from '@/components/molecules/shared/PeriodButtons';
 import ChartToggleButton from '@/components/atoms/ChartToggleButton';
 import ChartSep from '@/components/atoms/ChartSep';
 import type { Quote } from '@/types';
+import type { QuoteAnalysis } from './utils/types';
 
 const COLOR_VARS = [
   '--series-1',
@@ -25,11 +26,6 @@ const COLOR_VARS = [
   '--series-10',
 ];
 const COLORS = COLOR_VARS.map(cssVar);
-
-type QuoteAnalysis = {
-  biggestSameDayDiff: Quote & { difference: string };
-  biggestNextDayDiff: [Quote, Quote, string];
-} | null;
 
 type SeriesEntry = { ticker: string; quotes: Quote[]; analysis?: QuoteAnalysis };
 

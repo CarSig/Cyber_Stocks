@@ -11,11 +11,8 @@ import { sentimentScoreStyle } from './utils/colors';
 import { NVD_SEVERITY_COLORS, SENTIMENT_COLORS } from './utils/markers';
 import type { Quote, TrumpPost, ThreatIntelItem, NewsArticle, NewsAnalysisMap } from '@/types';
 import type { ChartType } from '@/hooks/charts/useChartInstance';
-
-type QuoteAnalysis = {
-  biggestSameDayDiff: Quote & { difference: string };
-  biggestNextDayDiff: [Quote, Quote, string];
-} | null;
+import { CHART_TYPES } from './utils/options';
+import type { QuoteAnalysis } from './utils/types';
 
 type TrumpOverlay = { posts?: TrumpPost[]; show?: boolean; onToggle?: (v: boolean) => void };
 type DataOverlay<T> = { data?: T[]; show?: boolean; onToggle?: (v: boolean) => void };
@@ -46,7 +43,6 @@ type StockChartProps = {
   overlays?: Overlays;
 };
 
-const CHART_TYPES: ChartType[] = ['Candlestick', 'Bar', 'Line', 'Area', 'Baseline'];
 
 type OverlayTogglesProps = {
   trump: TrumpOverlay;
@@ -140,7 +136,7 @@ function MarkerModalItems({ type, items, newsAnalysis }: MarkerModalItemsProps) 
       ));
     case 'otx':
       return (items as ThreatIntelItem[]).map((p, i) => (
-        <ModalItem key={i} icon="●" iconColor="#a855f7" title={p.name ?? ''} subtitle={p.created?.slice(0, 10)} />
+        <ModalItem key={i} icon="●" iconColor="#3b82f6" title={p.name ?? ''} subtitle={p.created?.slice(0, 10)} />
       ));
     case 'kev':
       return (items as ThreatIntelItem[]).map((v, i) => (
@@ -190,7 +186,7 @@ export default function StockChart({
   return (
     <div>
       <div className="chart-toolbar">
-        {CHART_TYPES.map((t) => (
+        {CHART_TYPES.Stock.map((t) => (
           <button key={t} onClick={() => setType(t)} className={`btn btn-chart${type === t ? ' active' : ''}`}>
             {t}
           </button>

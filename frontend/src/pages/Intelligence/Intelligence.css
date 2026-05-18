@@ -265,6 +265,8 @@
 .entity-list-row-divider {
   border-left: 1px solid var(--border);
   padding-left: 32px;
+  flex: 0 0 auto;
+  min-width: 170px;
 }
 
 .entity-list-row-divider-value {

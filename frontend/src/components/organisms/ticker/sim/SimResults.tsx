@@ -2,10 +2,9 @@ import { forwardRef } from 'react';
 import SimStatsGrid from './SimStatsGrid';
 import SimPortfolioChart from './SimPortfolioChart';
 import SimTransactionTable, { type AnyTransaction } from './SimTransactionTable';
+import type { MarkerPoint } from '@/components/organisms/charts/utils/types';
 
 type StatItem = { label: string; value: string; color?: string };
-
-type MarkerPoint = { time: string; side: string; value: number; shares: number };
 
 type SimResultsProps = {
   stats: StatItem[];

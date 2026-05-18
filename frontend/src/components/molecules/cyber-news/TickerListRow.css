@@ -23,13 +23,17 @@
 }
 
 .ticker-list-row-info {
-  flex: 0 0 auto;
-  min-width: var(--tlr-info-width);
+  flex: 0 0 var(--tlr-info-width);
+  width: var(--tlr-info-width);
+  overflow: hidden;
 }
 
 .ticker-list-row-company {
   font-weight: 600;
   font-size: var(--tlr-text-company);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ticker-list-row-ticker {

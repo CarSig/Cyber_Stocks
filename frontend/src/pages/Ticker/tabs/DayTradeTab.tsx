@@ -1,36 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { createChart, CandlestickSeries, LineSeries, AreaSeries } from 'lightweight-charts';
-import type { ISeriesApi, SeriesType } from 'lightweight-charts';
 import { getBars } from '@/api/alpaca';
 import type { AlpacaBar } from '@/types';
+import { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from '@/components/organisms/charts/utils/options';
+import IntradayChart from '@/components/organisms/charts/IntradayChart';
 import '@/pages/Alpaca/Alpaca.css';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
-
-const TIMEFRAMES = [
-  { label: '1 min', value: '1Min' },
-  { label: '5 min', value: '5Min' },
-  { label: '15 min', value: '15Min' },
-  { label: '30 min', value: '30Min' },
-  { label: '1 hour', value: '1Hour' },
-];
-
-const TIMEZONES = [
-  { label: 'UTC', value: 'UTC' },
-  { label: 'ET (New York)', value: 'America/New_York' },
-  { label: 'CT (Chicago)', value: 'America/Chicago' },
-  { label: 'PT (Los Angeles)', value: 'America/Los_Angeles' },
-  { label: 'GMT (London)', value: 'Europe/London' },
-  { label: 'CET (Paris)', value: 'Europe/Paris' },
-  { label: 'IST (Mumbai)', value: 'Asia/Kolkata' },
-  { label: 'JST (Tokyo)', value: 'Asia/Tokyo' },
-  { label: 'HKT (Hong Kong)', value: 'Asia/Hong_Kong' },
-];
-
-const CHART_TYPES = ['Candlestick', 'Line', 'Area'];
 
 function useAlpacaBars(ticker: string | undefined, date: string, timeframe: string) {
   return useQuery<{ symbol: string; bars: AlpacaBar[] }>({
@@ -41,158 +19,6 @@ function useAlpacaBars(ticker: string | undefined, date: string, timeframe: stri
   });
 }
 
-function getTzOffsetSeconds(ianaTimezone: string, referenceDate?: Date): number {
-  const ref = referenceDate ?? new Date();
-  const fmt = (tz: string) =>
-    new Intl.DateTimeFormat('en-CA', {
-      timeZone: tz,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    }).format(ref);
-  const parse = (s: string) => {
-    const [date, time] = s.split(', ');
-    const [y, mo, d] = date.split('-');
-    const [h, mi, se] = time.split(':');
-    return new Date(Date.UTC(+y, +mo - 1, +d, +h, +mi, +se));
-  };
-  return (parse(fmt(ianaTimezone)).getTime() - parse(fmt('UTC')).getTime()) / 1000;
-}
-
-function toTzTime(isoUtc: string, tzOffsetSeconds: number): number {
-  return Math.floor(new Date(isoUtc).getTime() / 1000) + tzOffsetSeconds;
-}
-
-function buildSeriesData(bars: AlpacaBar[], tzOffsetSeconds: number) {
-  return bars.map((b) => ({
-    time: toTzTime(b.t, tzOffsetSeconds) as unknown as import('lightweight-charts').Time,
-    open: b.o,
-    high: b.h,
-    low: b.l,
-    close: b.c,
-    value: b.c,
-  }));
-}
-
-type ChartWithSeriesRefs = {
-  _seriesRefs?: ISeriesApi<SeriesType>[];
-};
-
-function addSeries(chart: ReturnType<typeof createChart>, chartType: string): ISeriesApi<SeriesType> {
-  if (chartType === 'Line') {
-    return chart.addSeries(LineSeries, { color: '#3b82f6', lineWidth: 2 });
-  }
-  if (chartType === 'Area') {
-    return chart.addSeries(AreaSeries, {
-      lineColor: '#3b82f6',
-      topColor: 'rgba(59,130,246,0.3)',
-      bottomColor: 'rgba(59,130,246,0)',
-    });
-  }
-  return chart.addSeries(CandlestickSeries, {
-    upColor: '#22c55e',
-    downColor: '#ef4444',
-    borderUpColor: '#22c55e',
-    borderDownColor: '#ef4444',
-    wickUpColor: '#22c55e',
-    wickDownColor: '#ef4444',
-  });
-}
-
-const COMPARE_COLORS = ['#f59e0b', '#a78bfa', '#f472b6', '#34d399'];
-
-type CompareBarsEntry = { ticker: string; bars: AlpacaBar[] };
-
-type IntradayChartProps = {
-  bars: AlpacaBar[];
-  compareBars: CompareBarsEntry[];
-  timezone: string;
-  chartType: string;
-};
-
-function IntradayChart({ bars, compareBars, timezone, chartType }: IntradayChartProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<ReturnType<typeof createChart> | null>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const chart = createChart(containerRef.current, {
-      layout: { background: { color: 'transparent' }, textColor: 'var(--foreground, #e5e7eb)' },
-      grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
-      timeScale: { timeVisible: true, secondsVisible: false, borderColor: 'rgba(255,255,255,0.1)' },
-      rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
-      crosshair: { mode: 1 },
-      handleScroll: true,
-      handleScale: true,
-    });
-
-    chartRef.current = chart;
-
-    const ro = new ResizeObserver(() => {
-      if (containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
-    });
-    ro.observe(containerRef.current);
-
-    return () => {
-      ro.disconnect();
-      chart.remove();
-      chartRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    const chart = chartRef.current;
-    if (!chart || !bars?.length) return;
-
-    chart.applyOptions({});
-    const chartWithRefs = chart as unknown as ChartWithSeriesRefs;
-    if (chartWithRefs._seriesRefs) {
-      chartWithRefs._seriesRefs.forEach((s) => {
-        try {
-          chart.removeSeries(s);
-        } catch {}
-      });
-    }
-    chartWithRefs._seriesRefs = [];
-
-    const tzOffset = getTzOffsetSeconds(timezone, new Date(bars[0].t));
-
-    const mainSeries = addSeries(chart, chartType);
-    const mainData = buildSeriesData(bars, tzOffset);
-    mainSeries.setData(mainData as Parameters<typeof mainSeries.setData>[0]);
-    chartWithRefs._seriesRefs.push(mainSeries);
-
-    compareBars.forEach(({ ticker: cTicker, bars: cBars }, i) => {
-      if (!cBars?.length) return;
-      const color = COMPARE_COLORS[i % COMPARE_COLORS.length];
-      const scaleId = `compare_${i}`;
-      const cSeries = chart.addSeries(LineSeries, {
-        color,
-        lineWidth: 2,
-        priceScaleId: scaleId,
-      });
-      chart.priceScale(scaleId).applyOptions({ scaleMargins: { top: 0.1, bottom: 0.1 } });
-      const cTzOffset = getTzOffsetSeconds(timezone, new Date(cBars[0].t));
-      cSeries.setData(
-        cBars.map((b) => ({
-          time: toTzTime(b.t, cTzOffset) as unknown as import('lightweight-charts').Time,
-          value: b.c,
-        })),
-      );
-      cSeries.applyOptions({ title: cTicker });
-      chartWithRefs._seriesRefs!.push(cSeries);
-    });
-
-    chart.timeScale().fitContent();
-  }, [bars, compareBars, timezone, chartType]);
-
-  return <div ref={containerRef} className="alpaca-chart-container" />;
-}
 
 type BarStatsProps = {
   bars: AlpacaBar[];
@@ -320,7 +146,7 @@ export default function DayTradeTab({ ticker, companies }: DayTradeTabProps) {
         </form>
 
         <div className="alpaca-chart-type-btns">
-          {CHART_TYPES.map((ct) => (
+          {CHART_TYPES.General.map((ct) => (
             <button
               key={ct}
               className={`alpaca-type-btn${chartType === ct ? ' alpaca-type-btn--active' : ''}`}

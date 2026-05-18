@@ -7,6 +7,8 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import './index.css';
 import App from './App';
 
+import { initFeedbackButton } from './inspect-dom-capture';
+
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,
   environment: import.meta.env.MODE,
@@ -14,6 +16,8 @@ Sentry.init({
 });
 
 const queryClient = new QueryClient();
+
+initFeedbackButton({ endpoint: 'http://localhost:3000/api/v1/inspect-dom-capture/feedback' });
 
 createRoot(document.getElementById('root')!).render(
   <Sentry.ErrorBoundary fallback={<p>Something went wrong.</p>}>

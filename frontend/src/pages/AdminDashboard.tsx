@@ -38,18 +38,18 @@ function AdminCard({ icon, label, subtitle, to }: AdminCardProps) {
   );
 }
 
-type JobState = 'running' | 'done' | 'error';
+type JobState = { status: 'running' | 'done' | 'error'; message?: string };
 
 function JobTriggers() {
   const [states, setStates] = useState<Record<string, JobState>>({});
 
   async function trigger(job: string) {
-    setStates((s) => ({ ...s, [job]: 'running' }));
+    setStates((s) => ({ ...s, [job]: { status: 'running' } }));
     try {
-      await triggerJob(job);
-      setStates((s) => ({ ...s, [job]: 'done' }));
-    } catch {
-      setStates((s) => ({ ...s, [job]: 'error' }));
+      const res = await triggerJob(job) as { triggered: string; at: string };
+      setStates((s) => ({ ...s, [job]: { status: 'done', message: `triggered at ${new Date(res.at).toLocaleTimeString()}` } }));
+    } catch (e) {
+      setStates((s) => ({ ...s, [job]: { status: 'error', message: e instanceof Error ? e.message : 'Unknown error' } }));
     }
   }
 
@@ -62,11 +62,11 @@ function JobTriggers() {
           return (
             <div key={job} className="admin-job-row">
               <span className="admin-job-name">{job}</span>
-              <Button size="sm" variant="outline" disabled={state === 'running'} onClick={() => trigger(job)}>
-                {state === 'running' ? 'Running…' : 'Trigger'}
+              <Button size="sm" variant="outline" disabled={state?.status === 'running'} onClick={() => trigger(job)}>
+                {state?.status === 'running' ? 'Running…' : 'Trigger'}
               </Button>
-              {state === 'done' && <span className="admin-job-status admin-job-status--ok">✓ triggered</span>}
-              {state === 'error' && <span className="admin-job-status admin-job-status--err">✕ failed</span>}
+              {state?.status === 'done' && <span className="admin-job-status admin-job-status--ok">✓ {state.message}</span>}
+              {state?.status === 'error' && <span className="admin-job-status admin-job-status--err">✕ {state.message}</span>}
             </div>
           );
         })}
@@ -90,6 +90,7 @@ export default function AdminDashboard() {
           subtitle={audit ? `${audit.total} entries` : 'User activity'}
           to="/admin/audit"
         />
+        <AdminCard icon="💬" label="DOM Feedback" subtitle="Element inspect reports" to="/admin/feedback" />
         <AdminCard icon="🤖" label="AI Credits" subtitle="console.anthropic.com ↗" to={ANTHROPIC_CONSOLE_URL} />
         <AdminCard icon="📊" label="Prometheus" subtitle="localhost:9090 ↗" to={PROMETHEUS_URL} />
         <AdminCard icon="📈" label="Grafana" subtitle="localhost:3001 ↗" to={GRAFANA_URL} />

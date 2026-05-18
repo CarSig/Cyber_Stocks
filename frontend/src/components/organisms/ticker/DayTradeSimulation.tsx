@@ -230,7 +230,7 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
         return {
           time: Math.floor(new Date(a.timestamp).getTime() / 1000) as unknown as import('lightweight-charts').Time,
           position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
-          color: a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#a78bfa',
+          color: a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#60a5fa',
           shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
           text: a.side === 'buy' ? `B $${a.value}` : a.side === 'sell' ? `S ${a.value}%` : a.side === 'short' ? `Sh $${a.value}` : `C ${a.value}%`,
         };

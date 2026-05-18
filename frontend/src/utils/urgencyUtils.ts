@@ -73,6 +73,6 @@ export const URGENCY_CONFIG: Record<UrgencyKey, UrgencyConfig> = {
   today: { label: 'Today', color: '#f97316', bg: 'rgba(249,115,22,0.15)', order: 1 },
   recent: { label: 'Recent', color: '#eab308', bg: 'rgba(234,179,8,0.15)', order: 2 },
   future_short: { label: 'Future – Short', color: '#3b82f6', bg: 'rgba(59,130,246,0.15)', order: 3 },
-  future_long: { label: 'Future – Long', color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)', order: 4 },
+  future_long: { label: 'Future – Long', color: '#3b82f6', bg: 'rgba(59,130,246,0.15)', order: 4 },
   past: { label: 'Past', color: '#6b7280', bg: 'rgba(107,114,128,0.15)', order: 5 },
 };
