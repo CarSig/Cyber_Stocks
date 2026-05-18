@@ -38,7 +38,12 @@ export default function SimAllDialog({
   const fmt = (v: number) => (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-2xl" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
         <DialogHeader>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -68,27 +73,44 @@ export default function SimAllDialog({
 
         {running && <p style={{ color: 'var(--text-faint)', fontSize: 13 }}>Running simulations…</p>}
 
-        {results && (() => {
-          const valid = results.filter((r) => r.profitPct != null);
-          const wins = valid.filter((r) => r.profitPct! >= 0);
-          const losses = valid.filter((r) => r.profitPct! < 0);
-          const avgWin = wins.length ? wins.reduce((s, r) => s + r.profitPct!, 0) / wins.length : null;
-          const avgLoss = losses.length ? losses.reduce((s, r) => s + r.profitPct!, 0) / losses.length : null;
-          const total = valid.length ? valid.reduce((s, r) => s + r.profitPct!, 0) / valid.length : null;
-          return (
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', padding: '0.5rem 0', borderBottom: '1px solid var(--border)' }}>
-              <StatCell label={`Wins (${wins.length})`} value={avgWin != null ? fmt(avgWin) : '—'} color="var(--color-green)" />
-              <StatCell label={`Losses (${losses.length})`} value={avgLoss != null ? fmt(avgLoss) : '—'} color="var(--color-red)" />
-              <div style={{ marginLeft: 'auto' }}>
+        {results &&
+          (() => {
+            const valid = results.filter((r) => r.profitPct != null);
+            const wins = valid.filter((r) => r.profitPct! >= 0);
+            const losses = valid.filter((r) => r.profitPct! < 0);
+            const avgWin = wins.length ? wins.reduce((s, r) => s + r.profitPct!, 0) / wins.length : null;
+            const avgLoss = losses.length ? losses.reduce((s, r) => s + r.profitPct!, 0) / losses.length : null;
+            const total = valid.length ? valid.reduce((s, r) => s + r.profitPct!, 0) / valid.length : null;
+            return (
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '1rem',
+                  flexWrap: 'wrap',
+                  padding: '0.5rem 0',
+                  borderBottom: '1px solid var(--border)',
+                }}
+              >
                 <StatCell
-                  label={`Avg Total (${valid.length})`}
-                  value={total != null ? fmt(total) : '—'}
-                  color={total != null && total >= 0 ? 'var(--color-green)' : 'var(--color-red)'}
+                  label={`Wins (${wins.length})`}
+                  value={avgWin != null ? fmt(avgWin) : '—'}
+                  color="var(--color-green)"
                 />
+                <StatCell
+                  label={`Losses (${losses.length})`}
+                  value={avgLoss != null ? fmt(avgLoss) : '—'}
+                  color="var(--color-red)"
+                />
+                <div style={{ marginLeft: 'auto' }}>
+                  <StatCell
+                    label={`Avg Total (${valid.length})`}
+                    value={total != null ? fmt(total) : '—'}
+                    color={total != null && total >= 0 ? 'var(--color-green)' : 'var(--color-red)'}
+                  />
+                </div>
               </div>
-            </div>
-          );
-        })()}
+            );
+          })()}
 
         {results && (
           <table className="sim-table" style={{ width: '100%', marginTop: '0.5rem' }}>
@@ -116,21 +138,49 @@ export default function SimAllDialog({
                   <tr key={row.rank}>
                     <td style={{ color: 'var(--text-faint)', fontSize: 11 }}>{row.rank}</td>
                     <td style={{ fontWeight: 600 }}>{row.ticker}</td>
-                    <td style={{ fontSize: 12, maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <td
+                      style={{
+                        fontSize: 12,
+                        maxWidth: 260,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
                       {row.event}
                     </td>
-                    <td style={{ fontSize: 11, color: 'var(--text-faint)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <td
+                      style={{
+                        fontSize: 11,
+                        color: 'var(--text-faint)',
+                        maxWidth: 160,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
                       {row.trade_idea}
                     </td>
-                    <td style={{ fontWeight: 600, color: row.action === 'short' ? '#f97316' : '#22c55e', whiteSpace: 'nowrap' }}>
+                    <td
+                      style={{
+                        fontWeight: 600,
+                        color: row.action === 'short' ? '#f97316' : '#22c55e',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
                       {row.action.toUpperCase()}
                     </td>
-                    <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: row.preMarket ? '#f59e0b' : 'var(--text-faint)' }}>
-                      {row.chartTime}{row.preMarket && ' ⚡'}
+                    <td
+                      style={{
+                        fontSize: 12,
+                        whiteSpace: 'nowrap',
+                        color: row.preMarket ? '#f59e0b' : 'var(--text-faint)',
+                      }}
+                    >
+                      {row.chartTime}
+                      {row.preMarket && ' ⚡'}
                     </td>
-                    <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: 'var(--text-faint)' }}>
-                      {row.entryTime}
-                    </td>
+                    <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: 'var(--text-faint)' }}>{row.entryTime}</td>
                     <td style={{ textAlign: 'right', fontWeight: 700, color }}>
                       {row.error
                         ? row.error

@@ -10,9 +10,14 @@ function SeverityBar({ severity }: { severity: number }) {
             width: 8,
             height: 12,
             borderRadius: 2,
-            background: i < severity
-              ? severity >= 9 ? '#ef4444' : severity >= 7 ? '#f59e0b' : '#22c55e'
-              : 'rgba(255,255,255,0.1)',
+            background:
+              i < severity
+                ? severity >= 9
+                  ? '#ef4444'
+                  : severity >= 7
+                    ? '#f59e0b'
+                    : '#22c55e'
+                : 'rgba(255,255,255,0.1)',
           }}
         />
       ))}
@@ -49,14 +54,14 @@ export default function IntradayEventCard({ event }: Props) {
           <span className="iec-label">Chart day</span>
           <span className="iec-value">
             {event.chart_date}
-            {event.after_hours && (
-              <span className="iec-badge">next open</span>
-            )}
+            {event.after_hours && <span className="iec-badge">next open</span>}
           </span>
         </div>
         <div className="iec-field">
           <span className="iec-label">First reported</span>
-          <span className="iec-value">{event.first_date} · {event.first_time}</span>
+          <span className="iec-value">
+            {event.first_date} · {event.first_time}
+          </span>
         </div>
         <div className="iec-field">
           <span className="iec-label">Source</span>
@@ -75,11 +80,7 @@ export default function IntradayEventCard({ event }: Props) {
         <a className="iec-link" href={event.source_link} target="_blank" rel="noreferrer">
           Source ↗
         </a>
-        <a
-          className="iec-link iec-link--ticker"
-          href={`/${primaryTicker}`}
-          rel="noreferrer"
-        >
+        <a className="iec-link iec-link--ticker" href={`/${primaryTicker}`} rel="noreferrer">
           {primaryTicker} page ↗
         </a>
       </div>

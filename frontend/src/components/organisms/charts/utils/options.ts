@@ -19,9 +19,9 @@ export const TIMEZONES = [
 ];
 
 export const CHART_TYPES = {
-  Stock:      ['Candlestick', 'Bar', 'Line', 'Area', 'Baseline'],
+  Stock: ['Candlestick', 'Bar', 'Line', 'Area', 'Baseline'],
   Volatility: ['Line', 'Area'],
-  General:    ['Candlestick', 'Line', 'Area'],
+  General: ['Candlestick', 'Line', 'Area'],
 } as const;
 
 export const COMPARE_COLORS = ['#f59e0b', '#60a5fa', '#f472b6', '#34d399'];

@@ -40,9 +40,7 @@ export default function SimulationTab({ ticker, allQuotes, onResult }: Simulatio
         />
       )}
 
-      {subtab === 'daytrade' && (
-        <DayTradeSimulation ticker={ticker} />
-      )}
+      {subtab === 'daytrade' && <DayTradeSimulation ticker={ticker} />}
     </section>
   );
 }

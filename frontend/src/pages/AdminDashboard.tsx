@@ -46,10 +46,16 @@ function JobTriggers() {
   async function trigger(job: string) {
     setStates((s) => ({ ...s, [job]: { status: 'running' } }));
     try {
-      const res = await triggerJob(job) as { triggered: string; at: string };
-      setStates((s) => ({ ...s, [job]: { status: 'done', message: `triggered at ${new Date(res.at).toLocaleTimeString()}` } }));
+      const res = (await triggerJob(job)) as { triggered: string; at: string };
+      setStates((s) => ({
+        ...s,
+        [job]: { status: 'done', message: `triggered at ${new Date(res.at).toLocaleTimeString()}` },
+      }));
     } catch (e) {
-      setStates((s) => ({ ...s, [job]: { status: 'error', message: e instanceof Error ? e.message : 'Unknown error' } }));
+      setStates((s) => ({
+        ...s,
+        [job]: { status: 'error', message: e instanceof Error ? e.message : 'Unknown error' },
+      }));
     }
   }
 
@@ -65,8 +71,12 @@ function JobTriggers() {
               <Button size="sm" variant="outline" disabled={state?.status === 'running'} onClick={() => trigger(job)}>
                 {state?.status === 'running' ? 'Running…' : 'Trigger'}
               </Button>
-              {state?.status === 'done' && <span className="admin-job-status admin-job-status--ok">✓ {state.message}</span>}
-              {state?.status === 'error' && <span className="admin-job-status admin-job-status--err">✕ {state.message}</span>}
+              {state?.status === 'done' && (
+                <span className="admin-job-status admin-job-status--ok">✓ {state.message}</span>
+              )}
+              {state?.status === 'error' && (
+                <span className="admin-job-status admin-job-status--err">✕ {state.message}</span>
+              )}
             </div>
           );
         })}

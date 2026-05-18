@@ -40,8 +40,13 @@ const DAYTRADE_PRESETS: Record<string, { time: string; side: 'buy' | 'sell'; val
 };
 
 import type { Side, Action, SimResult } from '@/utils/sim';
-import { runLongSimulation, runShortSimulation, buildSimStats, fmtMarkerText, simResultToExportArgs } from '@/utils/sim';
-
+import {
+  runLongSimulation,
+  runShortSimulation,
+  buildSimStats,
+  fmtMarkerText,
+  simResultToExportArgs,
+} from '@/utils/sim';
 
 let nextActionId = 1;
 
@@ -66,9 +71,15 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
   const nextSideRef = useRef<Side>(nextSide);
   const valueRef = useRef<string>(value);
   const tradeModeRef = useRef<'long' | 'short'>(tradeMode);
-  useEffect(() => { nextSideRef.current = nextSide; }, [nextSide]);
-  useEffect(() => { valueRef.current = value; }, [value]);
-  useEffect(() => { tradeModeRef.current = tradeMode; }, [tradeMode]);
+  useEffect(() => {
+    nextSideRef.current = nextSide;
+  }, [nextSide]);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+  useEffect(() => {
+    tradeModeRef.current = tradeMode;
+  }, [tradeMode]);
 
   const { textValue, setTextValue, handleTextChange, actionsToText } = useSimTextSync<Action>({
     actions,
@@ -83,19 +94,22 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
     onActionsChange: setActions,
   });
 
-  const applyPreset = useCallback((name: string) => {
-    const preset = DAYTRADE_PRESETS[name];
-    if (!preset) return;
-    const newActions = preset.map((p) => ({
-      id: nextActionId++,
-      timestamp: DateUtils.timeToIso(p.time, query.date),
-      time: p.time,
-      side: p.side,
-      value: p.value,
-    }));
-    setActions(newActions);
-    setTextValue(actionsToText(newActions));
-  }, [query.date, actionsToText, setTextValue]);
+  const applyPreset = useCallback(
+    (name: string) => {
+      const preset = DAYTRADE_PRESETS[name];
+      if (!preset) return;
+      const newActions = preset.map((p) => ({
+        id: nextActionId++,
+        timestamp: DateUtils.timeToIso(p.time, query.date),
+        time: p.time,
+        side: p.side,
+        value: p.value,
+      }));
+      setActions(newActions);
+      setTextValue(actionsToText(newActions));
+    },
+    [query.date, actionsToText, setTextValue],
+  );
 
   const { data, isPending, error } = useQuery<{ symbol: string; bars: AlpacaBar[] }>({
     queryKey: ['alpaca-bars', ticker, query.date, query.timeframe],
@@ -127,14 +141,27 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       handleScale: true,
     });
 
-    const toTime = (b: AlpacaBar) => Math.floor(new Date(b.t).getTime() / 1000) as unknown as import('lightweight-charts').Time;
+    const toTime = (b: AlpacaBar) =>
+      Math.floor(new Date(b.t).getTime() / 1000) as unknown as import('lightweight-charts').Time;
 
     let candleSeries: ISeriesApi<SeriesType>;
     if (chartType === 'candlestick') {
-      candleSeries = chart.addSeries(CandlestickSeries, { upColor: '#22c55e', downColor: '#ef4444', borderUpColor: '#22c55e', borderDownColor: '#ef4444', wickUpColor: '#22c55e', wickDownColor: '#ef4444' });
+      candleSeries = chart.addSeries(CandlestickSeries, {
+        upColor: '#22c55e',
+        downColor: '#ef4444',
+        borderUpColor: '#22c55e',
+        borderDownColor: '#ef4444',
+        wickUpColor: '#22c55e',
+        wickDownColor: '#ef4444',
+      });
       candleSeries.setData(bars.map((b) => ({ time: toTime(b), open: b.o, high: b.h, low: b.l, close: b.c })));
     } else if (chartType === 'area') {
-      candleSeries = chart.addSeries(AreaSeries, { lineColor: '#22c55e', topColor: '#22c55e55', bottomColor: '#22c55e00', lineWidth: 2 });
+      candleSeries = chart.addSeries(AreaSeries, {
+        lineColor: '#22c55e',
+        topColor: '#22c55e55',
+        bottomColor: '#22c55e00',
+        lineWidth: 2,
+      });
       candleSeries.setData(bars.map((b) => ({ time: toTime(b), value: b.c })));
     } else {
       candleSeries = chart.addSeries(LineSeries, { color: '#22c55e', lineWidth: 2 });
@@ -145,7 +172,10 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
 
     let lastHoveredBar: { iso: string } | null = null;
     chart.subscribeCrosshairMove((param) => {
-      if (!param.time) { lastHoveredBar = null; return; }
+      if (!param.time) {
+        lastHoveredBar = null;
+        return;
+      }
       lastHoveredBar = { iso: new Date((param.time as unknown as number) * 1000).toISOString() };
     });
     chart.subscribeClick((param) => {
@@ -153,7 +183,10 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       const iso = new Date((param.time as unknown as number) * 1000).toISOString();
       const val = Math.max(0.01, Number(valueRef.current) || 100);
       const side: Side = tradeModeRef.current === 'short' ? 'short' : 'buy';
-      setActions((prev) => [...prev, { id: nextActionId++, timestamp: iso, time: DateUtils.fmtTime(iso), side, value: val }]);
+      setActions((prev) => [
+        ...prev,
+        { id: nextActionId++, timestamp: iso, time: DateUtils.fmtTime(iso), side, value: val },
+      ]);
     });
 
     const el = containerRef.current!;
@@ -162,7 +195,16 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       if (!lastHoveredBar) return;
       const val = Math.min(100, Math.max(0.01, Number(valueRef.current) || 50));
       const side: Side = tradeModeRef.current === 'short' ? 'cover' : 'sell';
-      setActions((prev) => [...prev, { id: nextActionId++, timestamp: lastHoveredBar!.iso, time: DateUtils.fmtTime(lastHoveredBar!.iso), side, value: val }]);
+      setActions((prev) => [
+        ...prev,
+        {
+          id: nextActionId++,
+          timestamp: lastHoveredBar!.iso,
+          time: DateUtils.fmtTime(lastHoveredBar!.iso),
+          side,
+          value: val,
+        },
+      ]);
     }
     el.addEventListener('contextmenu', onContextMenu);
     chartRef.current = { chart, candleSeries };
@@ -178,25 +220,29 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       chart.remove();
       chartRef.current = null;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bars, chartType]);
 
   // Sync action markers onto chart
   useEffect(() => {
     const ref = chartRef.current;
     if (!ref) return;
-    createSeriesMarkers(ref.candleSeries, actions
-      .map((a) => {
-        const isEntry = a.side === 'buy' || a.side === 'short';
-        return {
-          time: Math.floor(new Date(a.timestamp).getTime() / 1000) as unknown as import('lightweight-charts').Time,
-          position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
-          color: a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#60a5fa',
-          shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
-          text: fmtMarkerText(a.side, a.value),
-        };
-      })
-      .sort((a, b) => (a.time < b.time ? -1 : 1)));
+    createSeriesMarkers(
+      ref.candleSeries,
+      actions
+        .map((a) => {
+          const isEntry = a.side === 'buy' || a.side === 'short';
+          return {
+            time: Math.floor(new Date(a.timestamp).getTime() / 1000) as unknown as import('lightweight-charts').Time,
+            position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
+            color:
+              a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#60a5fa',
+            shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
+            text: fmtMarkerText(a.side, a.value),
+          };
+        })
+        .sort((a, b) => (a.time < b.time ? -1 : 1)),
+    );
   }, [actions]);
 
   const addManualAction = useCallback(() => {
@@ -206,22 +252,30 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
     const iso = DateUtils.timeToIso(manualTime, query.date);
     const newAction: Action = { id: nextActionId++, timestamp: iso, time: manualTime, side: nextSide, value: val };
     setActions((prev) => [...prev, newAction]);
-    setTextValue((prev) => prev ? prev + `\n${manualTime}, ${isExit ? -val : val}` : `${manualTime}, ${isExit ? -val : val}`);
+    setTextValue((prev) =>
+      prev ? prev + `\n${manualTime}, ${isExit ? -val : val}` : `${manualTime}, ${isExit ? -val : val}`,
+    );
     setManualTime('');
   }, [manualTime, nextSide, value, query.date, setTextValue]);
 
   const removeAction = useCallback((id: number) => setActions((prev) => prev.filter((a) => a.id !== id)), []);
   const updateAction = useCallback((id: number, field: 'side' | 'value', val: string) => {
-    setActions((prev) => prev.map((a) => {
-      if (a.id !== id) return a;
-      const isExit = (s: Side) => s === 'sell' || s === 'cover';
-      if (field === 'value') return { ...a, value: isExit(a.side) ? Math.min(100, Number(val)) : Number(val) };
-      const newSide = val as Side;
-      return { ...a, side: newSide, value: isExit(newSide) ? Math.min(100, a.value) : a.value };
-    }));
+    setActions((prev) =>
+      prev.map((a) => {
+        if (a.id !== id) return a;
+        const isExit = (s: Side) => s === 'sell' || s === 'cover';
+        if (field === 'value') return { ...a, value: isExit(a.side) ? Math.min(100, Number(val)) : Number(val) };
+        const newSide = val as Side;
+        return { ...a, side: newSide, value: isExit(newSide) ? Math.min(100, a.value) : a.value };
+      }),
+    );
   }, []);
 
-  const clear = useCallback(() => { setActions([]); setTextValue(''); setNextSide(tradeMode === 'short' ? 'short' : 'buy'); }, [setTextValue, tradeMode]);
+  const clear = useCallback(() => {
+    setActions([]);
+    setTextValue('');
+    setNextSide(tradeMode === 'short' ? 'short' : 'buy');
+  }, [setTextValue, tradeMode]);
 
   const handleExportPdf = useCallback(() => {
     if (!result) return;
@@ -230,66 +284,119 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       ticker,
       stats,
       transactions,
-      [{ ref: containerRef.current, label: 'Price Chart' }, { ref: portfolioChartRef.current, label: 'Portfolio Value' }],
+      [
+        { ref: containerRef.current, label: 'Price Chart' },
+        { ref: portfolioChartRef.current, label: 'Portfolio Value' },
+      ],
       'Time (ET)',
     );
   }, [result, ticker]);
 
-  const portfolioMarkers = useMemo(() =>
-    result?.transactions.map((t) => ({ time: t.time, side: t.side, value: t.value, shares: t.shares })) ?? [],
-  [result]);
-
+  const portfolioMarkers = useMemo(
+    () => result?.transactions.map((t) => ({ time: t.time, side: t.side, value: t.value, shares: t.shares })) ?? [],
+    [result],
+  );
 
   return (
     <div className="dtrade-sim">
       {isPending && <p className="alpaca-status">Loading…</p>}
       {error && <p className="alpaca-status alpaca-error">{(error as Error).message}</p>}
 
-      <form className="dtrade-order-controls" onSubmit={(e) => { e.preventDefault(); const d = DateUtils.lastWeekday(date); setDate(d); setQuery({ date: d, timeframe }); setActions([]); setTextValue(''); }}>
-        {bars.length > 0 && (<>
-          <div className="dtrade-next-side">
-            <button
-              className={`sim-chart-btn${tradeMode === 'long' ? ' active' : ''}`}
-              onClick={() => { setTradeMode('long'); setActions([]); setNextSide('buy'); }}
-              type="button"
-            >Long</button>
-            <button
-              className={`sim-chart-btn${tradeMode === 'short' ? ' active' : ''}`}
-              onClick={() => { setTradeMode('short'); setActions([]); setNextSide('short'); }}
-              type="button"
-              style={tradeMode === 'short' ? { borderColor: '#f97316', color: '#f97316' } : undefined}
-            >Short</button>
-            <span style={{ width: '0.5rem' }} />
-            {tradeMode === 'long' ? (
-              <>
-                <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Left click = Buy ($)</span>
-                <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Right click = Sell (%)</span>
-              </>
-            ) : (
-              <>
-                <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Left click = Short ($)</span>
-                <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Right click = Cover (%)</span>
-              </>
-            )}
-          </div>
-          {tradeMode === 'long' && (
-            <div className="dtrade-shares">
-              <span className="dtrade-label">Start shares:</span>
-              <Input type="number" min="0" step="any" value={startShares} onChange={(e) => setStartShares(e.target.value)} className="dtrade-shares-input" />
+      <form
+        className="dtrade-order-controls"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const d = DateUtils.lastWeekday(date);
+          setDate(d);
+          setQuery({ date: d, timeframe });
+          setActions([]);
+          setTextValue('');
+        }}
+      >
+        {bars.length > 0 && (
+          <>
+            <div className="dtrade-next-side">
+              <button
+                className={`sim-chart-btn${tradeMode === 'long' ? ' active' : ''}`}
+                onClick={() => {
+                  setTradeMode('long');
+                  setActions([]);
+                  setNextSide('buy');
+                }}
+                type="button"
+              >
+                Long
+              </button>
+              <button
+                className={`sim-chart-btn${tradeMode === 'short' ? ' active' : ''}`}
+                onClick={() => {
+                  setTradeMode('short');
+                  setActions([]);
+                  setNextSide('short');
+                }}
+                type="button"
+                style={tradeMode === 'short' ? { borderColor: '#f97316', color: '#f97316' } : undefined}
+              >
+                Short
+              </button>
+              <span style={{ width: '0.5rem' }} />
+              {tradeMode === 'long' ? (
+                <>
+                  <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Left click = Buy ($)</span>
+                  <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Right click = Sell (%)</span>
+                </>
+              ) : (
+                <>
+                  <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Left click = Short ($)</span>
+                  <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Right click = Cover (%)</span>
+                </>
+              )}
             </div>
-          )}
-          <div className="dtrade-shares">
-            <span className="dtrade-label">Value:</span>
-            <Input type="number" min="0" step="any" value={value} onChange={(e) => setValue(e.target.value)} className="dtrade-shares-input" />
-            <span className="dtrade-label">{tradeMode === 'long' ? '$ buy / % sell' : '$ short / % cover'}</span>
-          </div>
-        </>)}
+            {tradeMode === 'long' && (
+              <div className="dtrade-shares">
+                <span className="dtrade-label">Start shares:</span>
+                <Input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={startShares}
+                  onChange={(e) => setStartShares(e.target.value)}
+                  className="dtrade-shares-input"
+                />
+              </div>
+            )}
+            <div className="dtrade-shares">
+              <span className="dtrade-label">Value:</span>
+              <Input
+                type="number"
+                min="0"
+                step="any"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                className="dtrade-shares-input"
+              />
+              <span className="dtrade-label">{tradeMode === 'long' ? '$ buy / % sell' : '$ short / % cover'}</span>
+            </div>
+          </>
+        )}
         <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <input className="alpaca-input" type="date" value={date} max={DateUtils.lastWeekday(DateUtils.todayStr())} onChange={(e) => setDate(e.target.value)} />
+          <input
+            className="alpaca-input"
+            type="date"
+            value={date}
+            max={DateUtils.lastWeekday(DateUtils.todayStr())}
+            onChange={(e) => setDate(e.target.value)}
+          />
           <select className="alpaca-input" value={timeframe} onChange={(e) => setTimeframe(e.target.value)}>
-            {MarketUtils.TIMEFRAMES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+            {MarketUtils.TIMEFRAMES.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
           </select>
-          <button className="alpaca-btn" type="submit">Load</button>
+          <button className="alpaca-btn" type="submit">
+            Load
+          </button>
         </div>
       </form>
 
@@ -297,7 +404,12 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
         <>
           <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem' }}>
             {(['line', 'area', 'candlestick'] as const).map((t) => (
-              <button key={t} className={`sim-chart-btn${chartType === t ? ' active' : ''}`} onClick={() => setChartType(t)} type="button">
+              <button
+                key={t}
+                className={`sim-chart-btn${chartType === t ? ' active' : ''}`}
+                onClick={() => setChartType(t)}
+                type="button"
+              >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
               </button>
             ))}
@@ -326,14 +438,27 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
           <SimManualEntry
             side={nextSide}
             onSideChange={(s) => setNextSide(s as Side)}
-            sideOptions={tradeMode === 'long'
-              ? [{ value: 'buy', label: 'Buy ($)' }, { value: 'sell', label: 'Sell (%)' }]
-              : [{ value: 'short', label: 'Short ($)' }, { value: 'cover', label: 'Cover (%)' }]}
+            sideOptions={
+              tradeMode === 'long'
+                ? [
+                    { value: 'buy', label: 'Buy ($)' },
+                    { value: 'sell', label: 'Sell (%)' },
+                  ]
+                : [
+                    { value: 'short', label: 'Short ($)' },
+                    { value: 'cover', label: 'Cover (%)' },
+                  ]
+            }
             value={value}
             onValueChange={setValue}
             onAdd={addManualAction}
             inputSlot={
-              <input className="alpaca-input" type="time" value={manualTime} onChange={(e) => setManualTime(e.target.value)} />
+              <input
+                className="alpaca-input"
+                type="time"
+                value={manualTime}
+                onChange={(e) => setManualTime(e.target.value)}
+              />
             }
           />
 
@@ -352,34 +477,56 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
               <div className="dtrade-section-title">Actions</div>
               <table className="sim-table">
                 <thead>
-                  <tr>{['Time (ET)', 'Side', 'Value', ''].map((h) => <th key={h}>{h}</th>)}</tr>
+                  <tr>
+                    {['Time (ET)', 'Side', 'Value', ''].map((h) => (
+                      <th key={h}>{h}</th>
+                    ))}
+                  </tr>
                 </thead>
                 <tbody>
-                  {[...actions].sort((a, b) => a.timestamp.localeCompare(b.timestamp)).map((a) => (
-                    <tr key={a.id}>
-                      <td>{a.time}</td>
-                      <td>
-                        <select className="dtrade-inline-select" value={a.side} onChange={(e) => updateAction(a.id, 'side', e.target.value)}>
-                          {tradeMode === 'long' ? (
-                            <>
-                              <option value="buy">BUY</option>
-                              <option value="sell">SELL</option>
-                            </>
-                          ) : (
-                            <>
-                              <option value="short">SHORT</option>
-                              <option value="cover">COVER</option>
-                            </>
-                          )}
-                        </select>
-                      </td>
-                      <td>
-                        <input className="dtrade-inline-input" type="number" min="0" max={a.side === 'sell' || a.side === 'cover' ? 100 : undefined} step="any" value={a.value} onChange={(e) => updateAction(a.id, 'value', e.target.value)} />
-                        <span className="dtrade-unit">{a.side === 'buy' || a.side === 'short' ? '$' : '%'}</span>
-                      </td>
-                      <td><button className="dtrade-remove" onClick={() => removeAction(a.id)}>✕</button></td>
-                    </tr>
-                  ))}
+                  {[...actions]
+                    .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+                    .map((a) => (
+                      <tr key={a.id}>
+                        <td>{a.time}</td>
+                        <td>
+                          <select
+                            className="dtrade-inline-select"
+                            value={a.side}
+                            onChange={(e) => updateAction(a.id, 'side', e.target.value)}
+                          >
+                            {tradeMode === 'long' ? (
+                              <>
+                                <option value="buy">BUY</option>
+                                <option value="sell">SELL</option>
+                              </>
+                            ) : (
+                              <>
+                                <option value="short">SHORT</option>
+                                <option value="cover">COVER</option>
+                              </>
+                            )}
+                          </select>
+                        </td>
+                        <td>
+                          <input
+                            className="dtrade-inline-input"
+                            type="number"
+                            min="0"
+                            max={a.side === 'sell' || a.side === 'cover' ? 100 : undefined}
+                            step="any"
+                            value={a.value}
+                            onChange={(e) => updateAction(a.id, 'value', e.target.value)}
+                          />
+                          <span className="dtrade-unit">{a.side === 'buy' || a.side === 'short' ? '$' : '%'}</span>
+                        </td>
+                        <td>
+                          <button className="dtrade-remove" onClick={() => removeAction(a.id)}>
+                            ✕
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>

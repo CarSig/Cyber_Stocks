@@ -19,7 +19,6 @@ function useAlpacaBars(ticker: string | undefined, date: string, timeframe: stri
   });
 }
 
-
 type BarStatsProps = {
   bars: AlpacaBar[];
 };

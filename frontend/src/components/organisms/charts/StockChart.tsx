@@ -43,7 +43,6 @@ type StockChartProps = {
   overlays?: Overlays;
 };
 
-
 type OverlayTogglesProps = {
   trump: TrumpOverlay;
   nvd: DataOverlay<ThreatIntelItem>;

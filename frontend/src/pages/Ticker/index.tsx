@@ -206,7 +206,12 @@ function TickerContent() {
             )}
 
             {activeTab === 'simulation' && (
-              <SimulationTab ticker={ticker ?? ''} allQuotes={allQuotes} onResult={simulation.onResult} companies={companies} />
+              <SimulationTab
+                ticker={ticker ?? ''}
+                allQuotes={allQuotes}
+                onResult={simulation.onResult}
+                companies={companies}
+              />
             )}
 
             {activeTab === 'correlations' && (

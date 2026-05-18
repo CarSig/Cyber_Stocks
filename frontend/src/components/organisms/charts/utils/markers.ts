@@ -8,7 +8,6 @@ import { fmtMarkerText } from '@/utils/sim';
 import { DateUtils } from '@/utils/date';
 import type { IntradayEvent } from '@/api/alpaca';
 
-
 type Marker = SeriesMarker<Time>;
 
 export const SENTIMENT_COLORS: Record<string, string> = {
@@ -310,7 +309,14 @@ export function syncIntradayMarkers(
     };
   });
 
-  const eventMarkers: { time: Time; position: 'aboveBar'; color: string; shape: 'circle'; size: number; text: string }[] = [];
+  const eventMarkers: {
+    time: Time;
+    position: 'aboveBar';
+    color: string;
+    shape: 'circle';
+    size: number;
+    text: string;
+  }[] = [];
 
   if (selectedEvent) {
     eventMarkers.push({
@@ -328,7 +334,14 @@ export function syncIntradayMarkers(
       const blueT = t(DateUtils.timeToIso(selectedEvent.chart_time, queryDate));
       const validOrder = selectedEvent.after_hours || (yellowT as unknown as number) >= (blueT as unknown as number);
       if (validOrder) {
-        eventMarkers.push({ time: yellowT, position: 'aboveBar', color: '#eab308', shape: 'circle', size: 2, text: '' });
+        eventMarkers.push({
+          time: yellowT,
+          position: 'aboveBar',
+          color: '#eab308',
+          shape: 'circle',
+          size: 2,
+          text: '',
+        });
       }
     }
   }

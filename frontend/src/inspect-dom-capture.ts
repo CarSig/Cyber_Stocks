@@ -18,7 +18,7 @@ export type FeedbackButtonConfig = {
   /** Button label text. Defaults to "Feedback" */
   buttonLabel?: string;
   /** Position of the button. Defaults to bottom-right */
-  position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
+  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
   /** Called after a successful send */
   onSuccess?: (payload: FeedbackPayload) => void;
   /** Called on send error */
@@ -50,13 +50,13 @@ export type FeedbackPayload = {
   metadata: ElementMetadata;
 };
 
-type ModalState = "idle" | "open" | "sending" | "success" | "error";
+type ModalState = 'idle' | 'open' | 'sending' | 'success' | 'error';
 
 // ─────────────────────────────────────────────
 // Constants — unique prefixes to avoid collisions
 // ─────────────────────────────────────────────
 
-const PREFIX = "idc"; // inspect-dom-capture
+const PREFIX = 'idc'; // inspect-dom-capture
 
 const ID = {
   styleTag: `${PREFIX}-styles`,
@@ -74,14 +74,14 @@ const ID = {
 // CSS — injected dynamically, fully scoped
 // ─────────────────────────────────────────────
 
-function buildCSS(position: FeedbackButtonConfig["position"]): string {
-  const positionStyles: Record<NonNullable<FeedbackButtonConfig["position"]>, string> = {
-    "bottom-right": "bottom: 24px; right: 24px;",
-    "bottom-left": "bottom: 24px; left: 24px;",
-    "top-right": "top: 24px; right: 24px;",
-    "top-left": "top: 24px; left: 24px;",
+function buildCSS(position: FeedbackButtonConfig['position']): string {
+  const positionStyles: Record<NonNullable<FeedbackButtonConfig['position']>, string> = {
+    'bottom-right': 'bottom: 24px; right: 24px;',
+    'bottom-left': 'bottom: 24px; left: 24px;',
+    'top-right': 'top: 24px; right: 24px;',
+    'top-left': 'top: 24px; left: 24px;',
   };
-  const pos = positionStyles[position ?? "bottom-right"];
+  const pos = positionStyles[position ?? 'bottom-right'];
 
   return `
     /* Floating trigger button */
@@ -387,9 +387,7 @@ function buildCSSSelector(el: Element): string {
       parts.unshift(part);
       break; // ID is unique — stop here
     }
-    const siblings = Array.from(current.parentElement?.children ?? []).filter(
-      (c) => c.tagName === current!.tagName
-    );
+    const siblings = Array.from(current.parentElement?.children ?? []).filter((c) => c.tagName === current!.tagName);
     if (siblings.length > 1) {
       const idx = siblings.indexOf(current) + 1;
       part += `:nth-of-type(${idx})`;
@@ -398,7 +396,7 @@ function buildCSSSelector(el: Element): string {
     current = current.parentElement;
   }
 
-  return parts.join(" > ") || el.tagName.toLowerCase();
+  return parts.join(' > ') || el.tagName.toLowerCase();
 }
 
 function buildDOMPath(el: Element): string[] {
@@ -408,7 +406,7 @@ function buildDOMPath(el: Element): string[] {
   while (current && current !== document.documentElement) {
     let label = current.tagName.toLowerCase();
     if (current.id) label += `#${current.id}`;
-    else if (current.classList.length) label += `.${Array.from(current.classList).join(".")}`;
+    else if (current.classList.length) label += `.${Array.from(current.classList).join('.')}`;
     path.unshift(label);
     current = current.parentElement;
   }
@@ -418,7 +416,7 @@ function buildDOMPath(el: Element): string[] {
 
 function extractMetadata(el: Element): ElementMetadata {
   const rect = el.getBoundingClientRect();
-  const text = (el.textContent ?? "").trim().replace(/\s+/g, " ").slice(0, 200);
+  const text = (el.textContent ?? '').trim().replace(/\s+/g, ' ').slice(0, 200);
 
   return {
     tagName: el.tagName.toLowerCase(),
@@ -445,7 +443,7 @@ function injectCSS(css: string): HTMLStyleElement {
   const existing = document.getElementById(ID.styleTag) as HTMLStyleElement | null;
   if (existing) return existing;
 
-  const style = document.createElement("style");
+  const style = document.createElement('style');
   style.id = ID.styleTag;
   style.textContent = css;
   document.head.appendChild(style);
@@ -461,11 +459,11 @@ function removeElement(id: string): void {
 // ─────────────────────────────────────────────
 
 function createTriggerButton(label: string): HTMLButtonElement {
-  const btn = document.createElement("button");
+  const btn = document.createElement('button');
   btn.id = ID.button;
-  btn.setAttribute("aria-label", "Open feedback tool");
-  btn.setAttribute("aria-pressed", "false");
-  btn.title = "Feedback — click to select an element";
+  btn.setAttribute('aria-label', 'Open feedback tool');
+  btn.setAttribute('aria-pressed', 'false');
+  btn.title = 'Feedback — click to select an element';
 
   // SVG icon (comment bubble)
   btn.innerHTML = `
@@ -480,28 +478,28 @@ function createTriggerButton(label: string): HTMLButtonElement {
 }
 
 function createHighlightOverlay(): HTMLDivElement {
-  const overlay = document.createElement("div");
+  const overlay = document.createElement('div');
   overlay.id = ID.overlay;
   overlay.classList.add(`${PREFIX}-hidden`);
-  overlay.setAttribute("aria-hidden", "true");
+  overlay.setAttribute('aria-hidden', 'true');
   return overlay;
 }
 
 function createMetadataHTML(meta: ElementMetadata): string {
   const rows: [string, string][] = [
-    ["Tag", `<${meta.tagName}>`],
-    ["ID", meta.id || "—"],
-    ["Classes", meta.classes.length ? meta.classes.join(" ") : "—"],
-    ["Text preview", meta.innerTextPreview || "—"],
-    ["CSS selector", meta.cssSelector],
-    ["DOM path", meta.domPath.join(" › ")],
-    ["URL", meta.pageUrl],
-    ["Timestamp", meta.timestamp],
-    ["Top", `${meta.boundingRect.top}px`],
-    ["Left", `${meta.boundingRect.left}px`],
-    ["Width", `${meta.boundingRect.width}px`],
-    ["Height", `${meta.boundingRect.height}px`],
-    ["Screenshot", "—  (hook: replace null with base64 data)"],
+    ['Tag', `<${meta.tagName}>`],
+    ['ID', meta.id || '—'],
+    ['Classes', meta.classes.length ? meta.classes.join(' ') : '—'],
+    ['Text preview', meta.innerTextPreview || '—'],
+    ['CSS selector', meta.cssSelector],
+    ['DOM path', meta.domPath.join(' › ')],
+    ['URL', meta.pageUrl],
+    ['Timestamp', meta.timestamp],
+    ['Top', `${meta.boundingRect.top}px`],
+    ['Left', `${meta.boundingRect.left}px`],
+    ['Width', `${meta.boundingRect.width}px`],
+    ['Height', `${meta.boundingRect.height}px`],
+    ['Screenshot', '—  (hook: replace null with base64 data)'],
   ];
 
   const rowsHTML = rows
@@ -510,9 +508,9 @@ function createMetadataHTML(meta: ElementMetadata): string {
         `<div class="${PREFIX}-meta-row">
            <span class="${PREFIX}-meta-key">${k}</span>
            <span class="${PREFIX}-meta-val">${escapeHTML(v)}</span>
-         </div>`
+         </div>`,
     )
-    .join("");
+    .join('');
 
   return `
     <div class="${PREFIX}-meta-section">
@@ -523,25 +521,21 @@ function createMetadataHTML(meta: ElementMetadata): string {
 }
 
 function escapeHTML(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function createModal(meta: ElementMetadata): {
   backdrop: HTMLDivElement;
   modal: HTMLDivElement;
 } {
-  const backdrop = document.createElement("div");
+  const backdrop = document.createElement('div');
   backdrop.id = ID.backdrop;
 
-  const modal = document.createElement("div");
+  const modal = document.createElement('div');
   modal.id = ID.modal;
-  modal.setAttribute("role", "dialog");
-  modal.setAttribute("aria-modal", "true");
-  modal.setAttribute("aria-labelledby", `${PREFIX}-modal-title`);
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', `${PREFIX}-modal-title`);
 
   modal.innerHTML = `
     <div class="${PREFIX}-modal-header">
@@ -585,18 +579,18 @@ function createModal(meta: ElementMetadata): {
 // ─────────────────────────────────────────────
 
 async function postFeedback(endpoint: string, payload: FeedbackPayload): Promise<void> {
-  const token = localStorage.getItem("auth_token");
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  if (token) headers["Authorization"] = `Bearer ${token}`;
+  const token = localStorage.getItem('auth_token');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(endpoint, {
-    method: "POST",
+    method: 'POST',
     headers,
     body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
-    const text = await res.text().catch(() => "Unknown error");
+    const text = await res.text().catch(() => 'Unknown error');
     throw new Error(`Server responded with ${res.status}: ${text}`);
   }
 }
@@ -620,7 +614,7 @@ function startSelectionMode(
   overlay: HTMLDivElement,
   modalRoot: HTMLDivElement | null,
   onSelect: (el: Element) => void,
-  onCancel: () => void
+  onCancel: () => void,
 ): SelectionHandlers {
   document.body.classList.add(`${PREFIX}-selecting`);
 
@@ -666,7 +660,7 @@ function startSelectionMode(
     },
 
     keydown(e: KeyboardEvent) {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         onCancel();
       }
     },
@@ -674,10 +668,10 @@ function startSelectionMode(
 
   // Attach to document to work regardless of React synthetic events.
   // useCapture=true ensures we intercept before React's event system.
-  document.addEventListener("mouseover", handlers.mouseover, { capture: true });
-  document.addEventListener("mouseout", handlers.mouseout, { capture: true });
-  document.addEventListener("click", handlers.click, { capture: true });
-  document.addEventListener("keydown", handlers.keydown, { capture: true });
+  document.addEventListener('mouseover', handlers.mouseover, { capture: true });
+  document.addEventListener('mouseout', handlers.mouseout, { capture: true });
+  document.addEventListener('click', handlers.click, { capture: true });
+  document.addEventListener('keydown', handlers.keydown, { capture: true });
 
   return handlers;
 }
@@ -686,10 +680,10 @@ function stopSelectionMode(handlers: SelectionHandlers, overlay: HTMLDivElement)
   document.body.classList.remove(`${PREFIX}-selecting`);
   overlay.classList.add(`${PREFIX}-hidden`);
 
-  document.removeEventListener("mouseover", handlers.mouseover, { capture: true });
-  document.removeEventListener("mouseout", handlers.mouseout, { capture: true });
-  document.removeEventListener("click", handlers.click, { capture: true });
-  document.removeEventListener("keydown", handlers.keydown, { capture: true });
+  document.removeEventListener('mouseover', handlers.mouseover, { capture: true });
+  document.removeEventListener('mouseout', handlers.mouseout, { capture: true });
+  document.removeEventListener('click', handlers.click, { capture: true });
+  document.removeEventListener('keydown', handlers.keydown, { capture: true });
 }
 
 // ─────────────────────────────────────────────
@@ -698,11 +692,7 @@ function stopSelectionMode(handlers: SelectionHandlers, overlay: HTMLDivElement)
 
 type ModalCleanup = () => void;
 
-function openModal(
-  meta: ElementMetadata,
-  config: FeedbackButtonConfig,
-  onClose: () => void
-): ModalCleanup {
+function openModal(meta: ElementMetadata, config: FeedbackButtonConfig, onClose: () => void): ModalCleanup {
   const { backdrop, modal } = createModal(meta);
   document.body.appendChild(backdrop);
   document.body.appendChild(modal);
@@ -712,62 +702,62 @@ function openModal(
   const cancelBtn = document.getElementById(ID.cancelBtn) as HTMLButtonElement;
   const statusMsg = document.getElementById(ID.statusMsg) as HTMLSpanElement;
 
-  let state: ModalState = "open";
+  let state: ModalState = 'open';
   let autoCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
   function setModalState(next: ModalState): void {
     state = next;
 
-    statusMsg.className = "";
-    statusMsg.textContent = "";
+    statusMsg.className = '';
+    statusMsg.textContent = '';
 
     switch (next) {
-      case "sending":
+      case 'sending':
         sendBtn.disabled = true;
         sendBtn.innerHTML = `<span class="${PREFIX}-spinner"></span>Sending…`;
         break;
-      case "success":
+      case 'success':
         sendBtn.disabled = false;
-        sendBtn.textContent = "Send";
-        statusMsg.textContent = "Feedback sent — thank you!";
+        sendBtn.textContent = 'Send';
+        statusMsg.textContent = 'Feedback sent — thank you!';
         statusMsg.classList.add(`${PREFIX}-success`);
         break;
-      case "error":
+      case 'error':
         sendBtn.disabled = false;
-        sendBtn.textContent = "Send";
+        sendBtn.textContent = 'Send';
         break;
       default:
         sendBtn.disabled = false;
-        sendBtn.textContent = "Send";
+        sendBtn.textContent = 'Send';
     }
   }
 
   async function handleSend(): Promise<void> {
-    if (state === "sending") return;
+    if (state === 'sending') return;
 
     const message = textarea.value.trim();
     if (!message) {
       textarea.focus();
-      textarea.style.borderColor = "#f87171";
+      textarea.style.borderColor = '#f87171';
       setTimeout(() => {
-        textarea.style.borderColor = "";
+        textarea.style.borderColor = '';
       }, 1500);
       return;
     }
 
-    setModalState("sending");
+    setModalState('sending');
 
     const payload: FeedbackPayload = { message, metadata: meta };
 
     try {
       await postFeedback(config.endpoint, payload);
-      setModalState("success");
+      setModalState('success');
       config.onSuccess?.(payload);
 
       autoCloseTimer = setTimeout(() => cleanup(), 1800);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      setModalState("error");
+      setModalState('error');
       statusMsg.textContent = `Error: ${error.message}`;
       statusMsg.classList.add(`${PREFIX}-error`);
       config.onError?.(error);
@@ -775,7 +765,10 @@ function openModal(
   }
 
   function cleanup(): void {
-    if (autoCloseTimer !== null) { clearTimeout(autoCloseTimer); autoCloseTimer = null; }
+    if (autoCloseTimer !== null) {
+      clearTimeout(autoCloseTimer);
+      autoCloseTimer = null;
+    }
     backdrop.remove();
     modal.remove();
     onClose();
@@ -783,16 +776,14 @@ function openModal(
 
   // Trap focus inside modal for accessibility
   function handleKeydown(e: KeyboardEvent): void {
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       cleanup();
       return;
     }
 
-    if (e.key === "Tab") {
+    if (e.key === 'Tab') {
       const focusable = Array.from(
-        modal.querySelectorAll<HTMLElement>(
-          "button:not(:disabled), textarea, [tabindex]:not([tabindex='-1'])"
-        )
+        modal.querySelectorAll<HTMLElement>("button:not(:disabled), textarea, [tabindex]:not([tabindex='-1'])"),
       );
       if (focusable.length === 0) return;
 
@@ -809,16 +800,16 @@ function openModal(
     }
   }
 
-  sendBtn.addEventListener("click", () => void handleSend());
-  cancelBtn.addEventListener("click", cleanup);
-  backdrop.addEventListener("click", cleanup);
-  document.addEventListener("keydown", handleKeydown, { capture: true });
+  sendBtn.addEventListener('click', () => void handleSend());
+  cancelBtn.addEventListener('click', cleanup);
+  backdrop.addEventListener('click', cleanup);
+  document.addEventListener('keydown', handleKeydown, { capture: true });
 
   // Focus textarea on open
   setTimeout(() => textarea.focus(), 50);
 
   return () => {
-    document.removeEventListener("keydown", handleKeydown, { capture: true });
+    document.removeEventListener('keydown', handleKeydown, { capture: true });
     backdrop.remove();
     modal.remove();
   };
@@ -843,10 +834,10 @@ class FeedbackController {
   mount(): void {
     injectCSS(buildCSS(this.#config.position));
 
-    const button = createTriggerButton(this.#config.buttonLabel ?? "Feedback");
+    const button = createTriggerButton(this.#config.buttonLabel ?? 'Feedback');
     const overlay = createHighlightOverlay();
 
-    button.addEventListener("click", () => this.#handleButtonClick());
+    button.addEventListener('click', () => this.#handleButtonClick());
 
     document.body.appendChild(button);
     document.body.appendChild(overlay);
@@ -884,14 +875,14 @@ class FeedbackController {
     if (!this.#button || !this.#overlay) return;
 
     this.#isSelecting = true;
-    this.#button.setAttribute("aria-pressed", "true");
-    this.#button.querySelector("span")!.textContent = "Click an element";
+    this.#button.setAttribute('aria-pressed', 'true');
+    this.#button.querySelector('span')!.textContent = 'Click an element';
 
     this.#selectionHandlers = startSelectionMode(
       this.#overlay,
       document.getElementById(ID.modal) as HTMLDivElement | null,
       (el) => this.#onElementSelected(el),
-      () => this.#stopSelection()
+      () => this.#stopSelection(),
     );
   }
 
@@ -899,9 +890,8 @@ class FeedbackController {
     if (!this.#button || !this.#overlay) return;
 
     this.#isSelecting = false;
-    this.#button.setAttribute("aria-pressed", "false");
-    this.#button.querySelector("span")!.textContent =
-      this.#config.buttonLabel ?? "Feedback";
+    this.#button.setAttribute('aria-pressed', 'false');
+    this.#button.querySelector('span')!.textContent = this.#config.buttonLabel ?? 'Feedback';
 
     if (this.#selectionHandlers) {
       stopSelectionMode(this.#selectionHandlers, this.#overlay);

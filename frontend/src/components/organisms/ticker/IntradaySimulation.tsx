@@ -86,13 +86,27 @@ let nextActionId = 1;
 
 type ChartRef = { chart: IChartApi; series: ISeriesApi<SeriesType> } | null;
 
-
 export default function IntradaySimulation() {
   const [s, dispatch] = useReducer(intradaySimReducer, undefined, initialIntradaySimState);
   const {
-    date, timeframe, query, actions, nextSide, value, startShares,
-    manualTime, textMode, textValue, chartType, tradeMode,
-    selectedEvent, showPeers, extraDates, simAllResults, simAllRunning, aiDelay,
+    date,
+    timeframe,
+    query,
+    actions,
+    nextSide,
+    value,
+    startShares,
+    manualTime,
+    textMode,
+    textValue,
+    chartType,
+    tradeMode,
+    selectedEvent,
+    showPeers,
+    extraDates,
+    simAllResults,
+    simAllRunning,
+    aiDelay,
   } = s;
 
   const queryClient = useQueryClient();
@@ -178,7 +192,12 @@ export default function IntradaySimulation() {
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const raw = e.target.value;
       const { parsedDate, actions: parsed } = parseIntradayText(raw, query.date);
-      dispatch({ type: 'SET_TEXT', raw, parsedDate: parsedDate ?? undefined, parsedActions: parsed.length ? parsed : undefined });
+      dispatch({
+        type: 'SET_TEXT',
+        raw,
+        parsedDate: parsedDate ?? undefined,
+        parsedActions: parsed.length ? parsed : undefined,
+      });
     },
     [query.date],
   );
@@ -359,10 +378,7 @@ export default function IntradaySimulation() {
     dispatch({ type: 'SET_MANUAL_TIME', time: '' });
   }, [manualTime, nextSide, value, query.date]);
 
-  const removeAction = useCallback(
-    (id: number) => dispatch({ type: 'REMOVE_ACTION', id }),
-    [],
-  );
+  const removeAction = useCallback((id: number) => dispatch({ type: 'REMOVE_ACTION', id }), []);
 
   const updateAction = useCallback(
     (id: number, field: 'side' | 'value', val: string) => dispatch({ type: 'UPDATE_ACTION', id, field, val }),
@@ -399,8 +415,16 @@ export default function IntradaySimulation() {
 
         if (!bars.length)
           return {
-            rank: ev.rank, ticker: primaryTicker, event: ev.event, trade_idea: ev.trade_idea,
-            action, chartTime: ev.chart_time, preMarket: isPreMarket, entryTime, profitPct: null, error: 'No data',
+            rank: ev.rank,
+            ticker: primaryTicker,
+            event: ev.event,
+            trade_idea: ev.trade_idea,
+            action,
+            chartTime: ev.chart_time,
+            preMarket: isPreMarket,
+            entryTime,
+            profitPct: null,
+            error: 'No data',
           };
 
         const entryIso = DateUtils.timeToIso(entryTime, ev.chart_date);
@@ -410,17 +434,33 @@ export default function IntradaySimulation() {
           { id: 2, timestamp: exitIso, time: '15:45', side: isShort ? 'cover' : 'sell', value: 100 },
         ];
 
-        const result = isShort ? runShortSimulation(bars, actions, DateUtils.fmtTime) : runLongSimulation(bars, actions, DateUtils.fmtTime, 0);
+        const result = isShort
+          ? runShortSimulation(bars, actions, DateUtils.fmtTime)
+          : runLongSimulation(bars, actions, DateUtils.fmtTime, 0);
 
         return {
-          rank: ev.rank, ticker: primaryTicker, event: ev.event, trade_idea: ev.trade_idea,
-          action, chartTime: ev.chart_time, preMarket: isPreMarket, entryTime, profitPct: result.profitPct,
+          rank: ev.rank,
+          ticker: primaryTicker,
+          event: ev.event,
+          trade_idea: ev.trade_idea,
+          action,
+          chartTime: ev.chart_time,
+          preMarket: isPreMarket,
+          entryTime,
+          profitPct: result.profitPct,
         };
       } catch (err) {
         return {
-          rank: ev.rank, ticker: primaryTicker, event: ev.event, trade_idea: ev.trade_idea,
-          action, chartTime: ev.chart_time, preMarket: false, entryTime: '09:30',
-          profitPct: null, error: err instanceof Error ? err.message : 'Failed',
+          rank: ev.rank,
+          ticker: primaryTicker,
+          event: ev.event,
+          trade_idea: ev.trade_idea,
+          action,
+          chartTime: ev.chart_time,
+          preMarket: false,
+          entryTime: '09:30',
+          profitPct: null,
+          error: err instanceof Error ? err.message : 'Failed',
         };
       }
     };
@@ -491,10 +531,10 @@ export default function IntradaySimulation() {
   }, [result, query.ticker]);
 
   const portfolioMarkers = useMemo(
-    () => result?.transactions.map((t) => ({ time: t.timestamp, side: t.side, value: t.value, shares: t.shares })) ?? [],
+    () =>
+      result?.transactions.map((t) => ({ time: t.timestamp, side: t.side, value: t.value, shares: t.shares })) ?? [],
     [result],
   );
-
 
   return (
     <div className="dtrade-sim">

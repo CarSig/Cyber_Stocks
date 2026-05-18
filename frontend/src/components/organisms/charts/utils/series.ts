@@ -49,7 +49,9 @@ export function calcATR(quotes: OhlcEntry[], window = 14): { time: string; value
   if (quotes.length < window + 1) return [];
   const trs: number[] = [];
   for (let i = 1; i < quotes.length; i++) {
-    const high = quotes[i].high ?? 0, low = quotes[i].low ?? 0, prevClose = quotes[i - 1].close ?? 0;
+    const high = quotes[i].high ?? 0,
+      low = quotes[i].low ?? 0,
+      prevClose = quotes[i - 1].close ?? 0;
     trs.push(Math.max(high - low, Math.abs(high - prevClose), Math.abs(low - prevClose)));
   }
   const result: { time: string; value: number }[] = [];

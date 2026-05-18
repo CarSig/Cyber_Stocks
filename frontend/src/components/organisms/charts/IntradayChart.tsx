@@ -90,7 +90,9 @@ export default function IntradayChart({ bars, compareBars, timezone, chartType }
     const chartWithRefs = chart as unknown as ChartWithSeriesRefs;
     if (chartWithRefs._seriesRefs) {
       chartWithRefs._seriesRefs.forEach((s) => {
-        try { chart.removeSeries(s); } catch {}
+        try {
+          chart.removeSeries(s);
+        } catch {}
       });
     }
     chartWithRefs._seriesRefs = [];

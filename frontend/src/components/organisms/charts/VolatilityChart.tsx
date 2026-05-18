@@ -10,7 +10,6 @@ import ChartToggleButton from '@/components/atoms/ChartToggleButton';
 import ChartSep from '@/components/atoms/ChartSep';
 import type { Quote } from '@/types';
 
-
 type VolatilityChartProps = {
   quotes: Quote[];
   period?: number | null;

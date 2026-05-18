@@ -106,7 +106,6 @@ export default function CyberNews() {
           )}
         </Page>
       </div>
-
     </div>
   );
 }

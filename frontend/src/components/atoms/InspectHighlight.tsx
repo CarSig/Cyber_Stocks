@@ -11,7 +11,11 @@ export default function InspectHighlight() {
     const selector = params.get('inspect');
     if (!selector) return;
 
-    try { document.querySelector(selector); } catch { return; }
+    try {
+      document.querySelector(selector);
+    } catch {
+      return;
+    }
 
     let observer: MutationObserver | null = null;
     let giveUpTimer: ReturnType<typeof setTimeout> | null = null;
@@ -34,7 +38,10 @@ export default function InspectHighlight() {
 
     function highlight(el: Element) {
       overlayEl?.remove();
-      if (overlayTimer !== null) { clearTimeout(overlayTimer); overlayTimer = null; }
+      if (overlayTimer !== null) {
+        clearTimeout(overlayTimer);
+        overlayTimer = null;
+      }
 
       const rect = el.getBoundingClientRect();
       const overlay = document.createElement('div');
@@ -57,12 +64,22 @@ export default function InspectHighlight() {
       document.body.appendChild(overlay);
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-      const removeOverlay = () => { overlay.remove(); if (overlayEl === overlay) overlayEl = null; };
+      const removeOverlay = () => {
+        overlay.remove();
+        if (overlayEl === overlay) overlayEl = null;
+      };
       overlayTimer = setTimeout(removeOverlay, 4000);
-      window.addEventListener('click', () => {
-        if (overlayTimer !== null) { clearTimeout(overlayTimer); overlayTimer = null; }
-        removeOverlay();
-      }, { once: true });
+      window.addEventListener(
+        'click',
+        () => {
+          if (overlayTimer !== null) {
+            clearTimeout(overlayTimer);
+            overlayTimer = null;
+          }
+          removeOverlay();
+        },
+        { once: true },
+      );
     }
 
     function showNotFound(sel: string) {
@@ -98,7 +115,9 @@ export default function InspectHighlight() {
       banner.querySelector('#idc-inspect-sel')?.addEventListener('click', () => {
         navigator.clipboard.writeText(sel).catch(() => {});
         copiedEl.style.display = 'block';
-        setTimeout(() => { copiedEl.style.display = 'none'; }, 1500);
+        setTimeout(() => {
+          copiedEl.style.display = 'none';
+        }, 1500);
       });
 
       observer?.disconnect();
@@ -109,7 +128,10 @@ export default function InspectHighlight() {
           observer?.disconnect();
           observer = null;
           banner.remove();
-          if (bannerTimer !== null) { clearTimeout(bannerTimer); bannerTimer = null; }
+          if (bannerTimer !== null) {
+            clearTimeout(bannerTimer);
+            bannerTimer = null;
+          }
           highlight(target);
         }
       });
@@ -139,18 +161,33 @@ export default function InspectHighlight() {
       cancelled = true;
       observer?.disconnect();
       observer = null;
-      if (giveUpTimer !== null) { clearTimeout(giveUpTimer); giveUpTimer = null; }
-      if (startTimer !== null) { clearTimeout(startTimer); startTimer = null; }
-      if (bannerTimer !== null) { clearTimeout(bannerTimer); bannerTimer = null; }
-      if (overlayTimer !== null) { clearTimeout(overlayTimer); overlayTimer = null; }
-      overlayEl?.remove(); overlayEl = null;
+      if (giveUpTimer !== null) {
+        clearTimeout(giveUpTimer);
+        giveUpTimer = null;
+      }
+      if (startTimer !== null) {
+        clearTimeout(startTimer);
+        startTimer = null;
+      }
+      if (bannerTimer !== null) {
+        clearTimeout(bannerTimer);
+        bannerTimer = null;
+      }
+      if (overlayTimer !== null) {
+        clearTimeout(overlayTimer);
+        overlayTimer = null;
+      }
+      overlayEl?.remove();
+      overlayEl = null;
       document.getElementById('idc-inspect-notfound')?.remove();
     }
 
     function begin() {
       if (cancelled) return;
       if (!tryFind()) {
-        observer = new MutationObserver(() => { if (!cancelled) tryFind(); });
+        observer = new MutationObserver(() => {
+          if (!cancelled) tryFind();
+        });
         observer.observe(document.body, { childList: true, subtree: true });
         giveUpTimer = setTimeout(() => {
           if (cancelled) return;

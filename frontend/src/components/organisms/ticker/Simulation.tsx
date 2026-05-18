@@ -116,14 +116,30 @@ function runLongTermSim(quotes: Quote[], actions: SimAction[], startShares = 0):
         const bought = act.value / price;
         shares += bought;
         totalInvested += act.value;
-        transactions.push({ date: d, type: 'buy', value: act.value, shares: bought, price, sharesAfter: shares, portfolioValue: shares * price });
+        transactions.push({
+          date: d,
+          type: 'buy',
+          value: act.value,
+          shares: bought,
+          price,
+          sharesAfter: shares,
+          portfolioValue: shares * price,
+        });
       } else {
         const pct = Math.min(act.value, 100) / 100;
         const sold = shares * pct;
         const proceeds = sold * price;
         shares -= sold;
         cashWithdrawn += proceeds;
-        transactions.push({ date: d, type: 'sell', value: proceeds, shares: sold, price, sharesAfter: shares, portfolioValue: shares * price });
+        transactions.push({
+          date: d,
+          type: 'sell',
+          value: proceeds,
+          shares: sold,
+          price,
+          sharesAfter: shares,
+          portfolioValue: shares * price,
+        });
       }
     }
     portfolioHistory.push({ date: d, value: shares * price });
@@ -141,7 +157,17 @@ function runLongTermSim(quotes: Quote[], actions: SimAction[], startShares = 0):
     return h.filter((p) => p.date >= from && p.date <= to);
   };
 
-  return { totalInvested, finalShares: shares, sharesValue, cashWithdrawn, profit, profitPct, transactions, portfolioHistory: trimHistory(portfolioHistory), priceHistory: trimHistory(priceHistory) };
+  return {
+    totalInvested,
+    finalShares: shares,
+    sharesValue,
+    cashWithdrawn,
+    profit,
+    profitPct,
+    transactions,
+    portfolioHistory: trimHistory(portfolioHistory),
+    priceHistory: trimHistory(priceHistory),
+  };
 }
 
 let nextId = 1;
@@ -168,7 +194,9 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
   const [manualValue, setManualValue] = useState('100');
   const [clickValue, setClickValue] = useState('100');
   const clickValueRef = useRef(clickValue);
-  useEffect(() => { clickValueRef.current = clickValue; }, [clickValue]);
+  useEffect(() => {
+    clickValueRef.current = clickValue;
+  }, [clickValue]);
   const [chartType, setChartType] = useState<'line' | 'area' | 'candlestick'>('line');
 
   const { textValue, setTextValue, handleTextChange, actionsToText } = useSimTextSync<SimAction>({
@@ -184,32 +212,44 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
   });
 
   type PresetsMap = Record<string, SimulationPreset[]>;
-  const { data: presets, error: presetsError, isLoading: presetsLoading } = useQuery<PresetsMap>({
+  const {
+    data: presets,
+    error: presetsError,
+    isLoading: presetsLoading,
+  } = useQuery<PresetsMap>({
     queryKey: ['simulation-presets', ticker],
     queryFn: () => getSimulationPresets(ticker) as unknown as Promise<PresetsMap>,
     enabled: !!ticker,
     retry: false,
   });
 
-  const applyPreset = useCallback((name: string) => {
-    if (!presets?.[name]) return;
-    const next = presets[name]
-      .map((item: SimulationPreset) => {
-        const num = Number(item.number);
-        if (!isFinite(num) || num === 0) return null;
-        return { id: nextId++, date: item.date, type: (num > 0 ? 'buy' : 'sell') as 'buy' | 'sell', value: String(Math.abs(num)) };
-      })
-      .filter((x): x is SimAction => x !== null);
-    setActions(next);
-    setTextValue(actionsToText(next));
-  }, [presets, actionsToText, setTextValue]);
+  const applyPreset = useCallback(
+    (name: string) => {
+      if (!presets?.[name]) return;
+      const next = presets[name]
+        .map((item: SimulationPreset) => {
+          const num = Number(item.number);
+          if (!isFinite(num) || num === 0) return null;
+          return {
+            id: nextId++,
+            date: item.date,
+            type: (num > 0 ? 'buy' : 'sell') as 'buy' | 'sell',
+            value: String(Math.abs(num)),
+          };
+        })
+        .filter((x): x is SimAction => x !== null);
+      setActions(next);
+      setTextValue(actionsToText(next));
+    },
+    [presets, actionsToText, setTextValue],
+  );
 
   const result = useMemo<SimResult | null>(() => {
     if (!quotes.length || !actions.some((a) => a.date && a.value)) return null;
     const res = runLongTermSim(quotes, actions, Math.max(0, Number(startShares) || 0));
     onResult?.(res);
     return res;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actions, quotes, startShares]);
 
   const remove = useCallback((id: number) => setActions((prev) => prev.filter((a) => a.id !== id)), []);
@@ -224,7 +264,10 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       return next;
     });
   }, []);
-  const clear = useCallback(() => { setActions([]); setTextValue(''); }, [setTextValue]);
+  const clear = useCallback(() => {
+    setActions([]);
+    setTextValue('');
+  }, [setTextValue]);
 
   // Interactive price chart
   useEffect(() => {
@@ -244,14 +287,33 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
 
     let series: ISeriesApi<SeriesType>;
     if (chartType === 'area') {
-      series = chart.addSeries(AreaSeries, { lineColor: cv('--color-green'), topColor: cv('--color-green') + '55', bottomColor: cv('--color-green') + '00', lineWidth: 2 });
+      series = chart.addSeries(AreaSeries, {
+        lineColor: cv('--color-green'),
+        topColor: cv('--color-green') + '55',
+        bottomColor: cv('--color-green') + '00',
+        lineWidth: 2,
+      });
       series.setData(priceData);
     } else if (chartType === 'candlestick') {
-      series = chart.addSeries(CandlestickSeries, { upColor: '#22c55e', downColor: '#ef4444', borderUpColor: '#22c55e', borderDownColor: '#ef4444', wickUpColor: '#22c55e', wickDownColor: '#ef4444' });
-      series.setData(quotes.filter((q) => q.open != null && q.close != null).map((q) => ({
-        time: q.date.slice(0, 10) as `${number}-${number}-${number}`,
-        open: q.open, high: q.high ?? q.close, low: q.low ?? q.close, close: q.close,
-      })));
+      series = chart.addSeries(CandlestickSeries, {
+        upColor: '#22c55e',
+        downColor: '#ef4444',
+        borderUpColor: '#22c55e',
+        borderDownColor: '#ef4444',
+        wickUpColor: '#22c55e',
+        wickDownColor: '#ef4444',
+      });
+      series.setData(
+        quotes
+          .filter((q) => q.open != null && q.close != null)
+          .map((q) => ({
+            time: q.date.slice(0, 10) as `${number}-${number}-${number}`,
+            open: q.open,
+            high: q.high ?? q.close,
+            low: q.low ?? q.close,
+            close: q.close,
+          })),
+      );
     } else {
       series = chart.addSeries(LineSeries, { color: cv('--color-green'), lineWidth: 2 });
       series.setData(priceData);
@@ -260,7 +322,10 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
 
     let lastHoveredDate: string | null = null;
     chart.subscribeCrosshairMove((param) => {
-      if (!param.time) { lastHoveredDate = null; return; }
+      if (!param.time) {
+        lastHoveredDate = null;
+        return;
+      }
       lastHoveredDate = param.time as string;
     });
     chart.subscribeClick((param) => {
@@ -288,40 +353,54 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       chart.remove();
       interactiveRef.current = null;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quotes, chartType]);
 
   // Sync action markers onto interactive chart
   useEffect(() => {
     const ref = interactiveRef.current;
     if (!ref) return;
-    createSeriesMarkers(ref.series, actions
-      .filter((a) => a.date)
-      .map((a) => ({
-        time: a.date as `${number}-${number}-${number}`,
-        position: a.type === 'buy' ? ('belowBar' as const) : ('aboveBar' as const),
-        color: a.type === 'buy' ? '#22c55e' : '#ef4444',
-        shape: a.type === 'buy' ? ('arrowUp' as const) : ('arrowDown' as const),
-        text: a.type === 'buy' ? `B $${a.value}` : `S ${a.value}%`,
-      }))
-      .sort((a, b) => (a.time < b.time ? -1 : 1)));
+    createSeriesMarkers(
+      ref.series,
+      actions
+        .filter((a) => a.date)
+        .map((a) => ({
+          time: a.date as `${number}-${number}-${number}`,
+          position: a.type === 'buy' ? ('belowBar' as const) : ('aboveBar' as const),
+          color: a.type === 'buy' ? '#22c55e' : '#ef4444',
+          shape: a.type === 'buy' ? ('arrowUp' as const) : ('arrowDown' as const),
+          text: a.type === 'buy' ? `B $${a.value}` : `S ${a.value}%`,
+        }))
+        .sort((a, b) => (a.time < b.time ? -1 : 1)),
+    );
   }, [actions]);
 
-  const portfolioMarkers = useMemo(() =>
-    result?.transactions.map((t) => ({ time: t.date, side: t.type, value: t.value, shares: t.shares })) ?? [],
-  [result]);
+  const portfolioMarkers = useMemo(
+    () => result?.transactions.map((t) => ({ time: t.date, side: t.type, value: t.value, shares: t.shares })) ?? [],
+    [result],
+  );
 
   const handleExportPdf = useCallback(() => {
     if (!result) return;
     exportSimPdf(
       ticker,
       simStatsToExportRows(result),
-      result.transactions.map((t) => ({ label: t.date, side: t.type, price: t.price, shares: t.shares, value: t.value, sharesAfter: t.sharesAfter, portfolioValue: t.portfolioValue })),
-      [{ ref: interactiveChartRef.current, label: 'Stock Price' }, { ref: portfolioChartRef.current, label: 'Portfolio Value' }],
+      result.transactions.map((t) => ({
+        label: t.date,
+        side: t.type,
+        price: t.price,
+        shares: t.shares,
+        value: t.value,
+        sharesAfter: t.sharesAfter,
+        portfolioValue: t.portfolioValue,
+      })),
+      [
+        { ref: interactiveChartRef.current, label: 'Stock Price' },
+        { ref: portfolioChartRef.current, label: 'Portfolio Value' },
+      ],
       'Date',
     );
   }, [result, ticker]);
-
 
   return (
     <div>
@@ -334,17 +413,36 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
             </div>
             <div className="dtrade-shares">
               <span className="dtrade-label">Start shares:</span>
-              <Input type="number" min="0" step="any" value={startShares} onChange={(e) => setStartShares(e.target.value)} className="dtrade-shares-input" />
+              <Input
+                type="number"
+                min="0"
+                step="any"
+                value={startShares}
+                onChange={(e) => setStartShares(e.target.value)}
+                className="dtrade-shares-input"
+              />
             </div>
             <div className="dtrade-shares">
               <span className="dtrade-label">Value:</span>
-              <Input type="number" min="0" step="any" value={clickValue} onChange={(e) => setClickValue(e.target.value)} className="dtrade-shares-input" />
+              <Input
+                type="number"
+                min="0"
+                step="any"
+                value={clickValue}
+                onChange={(e) => setClickValue(e.target.value)}
+                className="dtrade-shares-input"
+              />
               <span className="dtrade-label">$ buy / % sell</span>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.25rem' }}>
             {(['line', 'area', 'candlestick'] as const).map((t) => (
-              <button key={t} className={`sim-chart-btn${chartType === t ? ' active' : ''}`} onClick={() => setChartType(t)} type="button">
+              <button
+                key={t}
+                className={`sim-chart-btn${chartType === t ? ' active' : ''}`}
+                onClick={() => setChartType(t)}
+                type="button"
+              >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
               </button>
             ))}
@@ -377,7 +475,12 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
           setActions((prev) => [...prev, { id: nextId++, date: manualDate, type: manualType, value: manualValue }]);
         }}
         inputSlot={
-          <DatePicker value={manualDate} min={minDate} max={maxDate} onChange={(v) => setManualDate(v ? snapToWeekday(v) : '')} />
+          <DatePicker
+            value={manualDate}
+            min={minDate}
+            max={maxDate}
+            onChange={(v) => setManualDate(v ? snapToWeekday(v) : '')}
+          />
         }
       />
 
@@ -402,23 +505,42 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
               const actionMax = safeOffsetDate(nextDate, -86400000) ?? maxDate;
               return (
                 <div key={a.id} className="sim-action-row">
-                  <DatePicker value={a.date} min={actionMin} max={actionMax} onChange={(v) => update(a.id, 'date', v ? snapToWeekday(v) : '')} />
-                  <Select value={a.type} onValueChange={(v: string | null) => { if (v) update(a.id, 'type', v); }}>
-                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <DatePicker
+                    value={a.date}
+                    min={actionMin}
+                    max={actionMax}
+                    onChange={(v) => update(a.id, 'date', v ? snapToWeekday(v) : '')}
+                  />
+                  <Select
+                    value={a.type}
+                    onValueChange={(v: string | null) => {
+                      if (v) update(a.id, 'type', v);
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="buy">Buy ($)</SelectItem>
                       <SelectItem value="sell">Sell (%)</SelectItem>
                     </SelectContent>
                   </Select>
                   <Input
-                    type="number" min="0" max={a.type === 'sell' ? 100 : undefined} step="any"
+                    type="number"
+                    min="0"
+                    max={a.type === 'sell' ? 100 : undefined}
+                    step="any"
                     placeholder={a.type === 'buy' ? 'Amount ($)' : 'Percent (0–100)'}
                     value={a.value}
                     onChange={(e) => update(a.id, 'value', e.target.value)}
                     className="form-input--number"
                   />
-                  <Button variant="ghost" onClick={() => insertBefore(a.id)}>+ before</Button>
-                  <Button variant="ghost" onClick={() => remove(a.id)}>✕</Button>
+                  <Button variant="ghost" onClick={() => insertBefore(a.id)}>
+                    + before
+                  </Button>
+                  <Button variant="ghost" onClick={() => remove(a.id)}>
+                    ✕
+                  </Button>
                 </div>
               );
             })}

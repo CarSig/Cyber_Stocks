@@ -63,7 +63,10 @@ export type IntradaySimAction =
   | { type: 'SIM_ALL_CLOSE' };
 
 function actionsToText(date: string, actions: Action[]): string {
-  return [date, ...actions.map((a) => `${a.time}, ${a.side === 'sell' || a.side === 'cover' ? -a.value : a.value}`)].join('\n');
+  return [
+    date,
+    ...actions.map((a) => `${a.time}, ${a.side === 'sell' || a.side === 'cover' ? -a.value : a.value}`),
+  ].join('\n');
 }
 
 function syncTextDate(prev: string, newDate: string): string {
@@ -157,7 +160,8 @@ export function intradaySimReducer(state: IntradaySimState, action: IntradaySimA
       const isExit = (s: Side) => s === 'sell' || s === 'cover';
       const next = state.actions.map((a) => {
         if (a.id !== action.id) return a;
-        if (action.field === 'value') return { ...a, value: isExit(a.side) ? Math.min(100, Number(action.val)) : Number(action.val) };
+        if (action.field === 'value')
+          return { ...a, value: isExit(a.side) ? Math.min(100, Number(action.val)) : Number(action.val) };
         const newSide = action.val as Side;
         return { ...a, side: newSide, value: isExit(newSide) ? Math.min(100, a.value) : a.value };
       });

@@ -16,14 +16,26 @@ const DEFAULT_OPTIONS: { value: string; label: string }[] = [
   { value: 'sell', label: 'Sell (%)' },
 ];
 
-export default function SimManualEntry({ side, onSideChange, sideOptions = DEFAULT_OPTIONS, value, onValueChange, onAdd, inputSlot }: SimManualEntryProps) {
+export default function SimManualEntry({
+  side,
+  onSideChange,
+  sideOptions = DEFAULT_OPTIONS,
+  value,
+  onValueChange,
+  onAdd,
+  inputSlot,
+}: SimManualEntryProps) {
   const isExit = side === 'sell' || side === 'cover';
   return (
     <div className="dtrade-manual">
       <span className="dtrade-label">Manual:</span>
       {inputSlot}
       <select className="dtrade-inline-select" value={side} onChange={(e) => onSideChange(e.target.value)}>
-        {sideOptions.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+        {sideOptions.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
       </select>
       <input
         type="number"
@@ -35,7 +47,9 @@ export default function SimManualEntry({ side, onSideChange, sideOptions = DEFAU
         value={value}
         onChange={(e) => onValueChange(e.target.value)}
       />
-      <Button variant="outline" onClick={onAdd}>Add</Button>
+      <Button variant="outline" onClick={onAdd}>
+        Add
+      </Button>
     </div>
   );
 }

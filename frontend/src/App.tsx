@@ -24,7 +24,6 @@ import Intelligence from './pages/Intelligence/index';
 import CyberNews from './pages/CyberNews/index';
 import Events from './pages/Events/index';
 
-
 export default function App() {
   return (
     <ThemeProvider>

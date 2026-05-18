@@ -25,15 +25,17 @@ export function useSimTextSync<TAction>({
 }: UseSimTextSyncOptions<TAction>) {
   const fromTextRef = useRef(false);
 
-  const actionsToText = useCallback((acts: TAction[]) =>
-    acts
-      .map((a) => {
-        const { label, side, value } = toTextAction(a);
-        const n = (side === 'sell' || side === 'cover') ? -Math.abs(value) : Math.abs(value);
-        return `${label}, ${n}`;
-      })
-      .join('\n'),
-  [toTextAction]);
+  const actionsToText = useCallback(
+    (acts: TAction[]) =>
+      acts
+        .map((a) => {
+          const { label, side, value } = toTextAction(a);
+          const n = side === 'sell' || side === 'cover' ? -Math.abs(value) : Math.abs(value);
+          return `${label}, ${n}`;
+        })
+        .join('\n'),
+    [toTextAction],
+  );
 
   const [textValue, setTextValue] = useState(() => actionsToText(actions));
 
@@ -41,30 +43,33 @@ export function useSimTextSync<TAction>({
   useEffect(() => {
     if (fromTextRef.current) return;
     setTextValue(actionsToText(actions));
-  // actionsToText is stable (useCallback with stable toTextAction)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // actionsToText is stable (useCallback with stable toTextAction)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actions]);
 
-  const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const raw = e.target.value;
-    setTextValue(raw);
-    fromTextRef.current = true;
-    const parsed = raw
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        const parts = line.split(',').map((s) => s.trim());
-        if (parts.length !== 2) return null;
-        const [label, numStr] = parts;
-        const num = Number(numStr);
-        if (isNaN(num) || num === 0) return null;
-        return parseTextAction(label, num);
-      })
-      .filter((x): x is TAction => x !== null);
-    if (parsed.length) onActionsChange(parsed);
-    fromTextRef.current = false;
-  }, [parseTextAction, onActionsChange]);
+  const handleTextChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const raw = e.target.value;
+      setTextValue(raw);
+      fromTextRef.current = true;
+      const parsed = raw
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          const parts = line.split(',').map((s) => s.trim());
+          if (parts.length !== 2) return null;
+          const [label, numStr] = parts;
+          const num = Number(numStr);
+          if (isNaN(num) || num === 0) return null;
+          return parseTextAction(label, num);
+        })
+        .filter((x): x is TAction => x !== null);
+      if (parsed.length) onActionsChange(parsed);
+      fromTextRef.current = false;
+    },
+    [parseTextAction, onActionsChange],
+  );
 
   return { textValue, setTextValue, handleTextChange, actionsToText };
 }

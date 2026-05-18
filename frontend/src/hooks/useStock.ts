@@ -90,7 +90,9 @@ export function useStock(ticker: string, { compareTicker, period }: UseStockOpts
     allQuotes,
     compareQuotes,
     periodAnalysis,
-    news: (Array.isArray(data?.news) ? data.news : (data?.news as { news?: NewsArticle[] } | undefined)?.news ?? []) as NewsArticle[],
+    news: (Array.isArray(data?.news)
+      ? data.news
+      : ((data?.news as { news?: NewsArticle[] } | undefined)?.news ?? [])) as NewsArticle[],
     summary: data?.summary,
     companies,
   };

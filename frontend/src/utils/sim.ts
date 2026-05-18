@@ -55,14 +55,32 @@ export function runLongSimulation(
         const bought = act.value / price;
         shares += bought;
         totalInvested += act.value;
-        transactions.push({ time: fmtTime(act.timestamp), timestamp: act.timestamp, side: 'buy', price, shares: bought, value: act.value, sharesAfter: shares, portfolioValue: shares * price });
+        transactions.push({
+          time: fmtTime(act.timestamp),
+          timestamp: act.timestamp,
+          side: 'buy',
+          price,
+          shares: bought,
+          value: act.value,
+          sharesAfter: shares,
+          portfolioValue: shares * price,
+        });
       } else {
         const pct = Math.min(act.value, 100) / 100;
         const sold = shares * pct;
         const proceeds = sold * price;
         shares -= sold;
         cashWithdrawn += proceeds;
-        transactions.push({ time: fmtTime(act.timestamp), timestamp: act.timestamp, side: 'sell', price, shares: sold, value: proceeds, sharesAfter: shares, portfolioValue: shares * price });
+        transactions.push({
+          time: fmtTime(act.timestamp),
+          timestamp: act.timestamp,
+          side: 'sell',
+          price,
+          shares: sold,
+          value: proceeds,
+          sharesAfter: shares,
+          portfolioValue: shares * price,
+        });
       }
     }
     portfolioHistory.push({ time: barTime, value: shares * price });
@@ -72,7 +90,16 @@ export function runLongSimulation(
   const sharesValue = shares * lastPrice;
   const profit = sharesValue + cashWithdrawn - totalInvested;
   const profitPct = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
-  return { transactions, portfolioHistory, totalInvested, cashWithdrawn, finalShares: shares, sharesValue, profit, profitPct };
+  return {
+    transactions,
+    portfolioHistory,
+    totalInvested,
+    cashWithdrawn,
+    finalShares: shares,
+    sharesValue,
+    profit,
+    profitPct,
+  };
 }
 
 /** Build the stats rows for SimResults given a result and trade mode. */
@@ -136,9 +163,14 @@ export function runShortSimulation(
         sharesShort += shorted;
         cashReceived += act.value;
         transactions.push({
-          time: fmtTime(act.timestamp), timestamp: act.timestamp, side: 'short', price,
-          shares: shorted, value: act.value,
-          sharesAfter: -sharesShort, portfolioValue: -sharesShort * price,
+          time: fmtTime(act.timestamp),
+          timestamp: act.timestamp,
+          side: 'short',
+          price,
+          shares: shorted,
+          value: act.value,
+          sharesAfter: -sharesShort,
+          portfolioValue: -sharesShort * price,
         });
       } else if (act.side === 'cover') {
         const pct = Math.min(act.value, 100) / 100;
@@ -147,9 +179,14 @@ export function runShortSimulation(
         sharesShort -= covered;
         coverCost += cost;
         transactions.push({
-          time: fmtTime(act.timestamp), timestamp: act.timestamp, side: 'cover', price,
-          shares: covered, value: cost,
-          sharesAfter: -sharesShort, portfolioValue: -sharesShort * price,
+          time: fmtTime(act.timestamp),
+          timestamp: act.timestamp,
+          side: 'cover',
+          price,
+          shares: covered,
+          value: cost,
+          sharesAfter: -sharesShort,
+          portfolioValue: -sharesShort * price,
         });
       }
     }
@@ -175,7 +212,14 @@ export function runShortSimulation(
 }
 
 /** Build the stats and transactions args for exportSimPdf from a SimResult. */
-type SimStats = { totalInvested: number; finalShares: number; sharesValue: number; cashWithdrawn: number; profit: number; profitPct: number };
+type SimStats = {
+  totalInvested: number;
+  finalShares: number;
+  sharesValue: number;
+  cashWithdrawn: number;
+  profit: number;
+  profitPct: number;
+};
 
 export function simStatsToExportRows(result: SimStats) {
   const profitColor = result.profit >= 0 ? '#16a34a' : '#dc2626';
@@ -185,7 +229,11 @@ export function simStatsToExportRows(result: SimStats) {
     { label: 'Shares value', value: `$${result.sharesValue.toFixed(2)}` },
     { label: 'Cash withdrawn', value: `$${result.cashWithdrawn.toFixed(2)}` },
     { label: 'Profit', value: (result.profit >= 0 ? '+' : '') + `$${result.profit.toFixed(2)}`, color: profitColor },
-    { label: 'Profit %', value: (result.profitPct >= 0 ? '+' : '') + result.profitPct.toFixed(2) + '%', color: profitColor },
+    {
+      label: 'Profit %',
+      value: (result.profitPct >= 0 ? '+' : '') + result.profitPct.toFixed(2) + '%',
+      color: profitColor,
+    },
   ];
 }
 

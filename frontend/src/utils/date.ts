@@ -17,20 +17,27 @@ export const DateUtils = {
 
   prevWeekday(dateStr: string): string {
     const d = new Date(dateStr + 'T12:00:00Z');
-    do { d.setUTCDate(d.getUTCDate() - 1); } while (d.getUTCDay() === 0 || d.getUTCDay() === 6);
+    do {
+      d.setUTCDate(d.getUTCDate() - 1);
+    } while (d.getUTCDay() === 0 || d.getUTCDay() === 6);
     return d.toISOString().slice(0, 10);
   },
 
   nextWeekday(dateStr: string): string {
     const d = new Date(dateStr + 'T12:00:00Z');
-    do { d.setUTCDate(d.getUTCDate() + 1); } while (d.getUTCDay() === 0 || d.getUTCDay() === 6);
+    do {
+      d.setUTCDate(d.getUTCDate() + 1);
+    } while (d.getUTCDay() === 0 || d.getUTCDay() === 6);
     return d.toISOString().slice(0, 10);
   },
 
   /** Format an ISO UTC timestamp as YYYY-MM-DD in US Eastern time. */
   fmtDateEt(isoUtc: string): string {
     const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
     }).formatToParts(new Date(isoUtc));
     const y = parts.find((p) => p.type === 'year')?.value;
     const m = parts.find((p) => p.type === 'month')?.value;
@@ -41,7 +48,10 @@ export const DateUtils = {
   /** Format an ISO UTC timestamp as HH:MM in US Eastern time. */
   fmtTime(isoUtc: string): string {
     return new Date(isoUtc).toLocaleTimeString('en-US', {
-      hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/New_York',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'America/New_York',
     });
   },
 
@@ -56,8 +66,14 @@ export const DateUtils = {
     const ET = 'America/New_York';
     const fmt = (tz: string) =>
       new Intl.DateTimeFormat('en-CA', {
-        timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
-        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+        timeZone: tz,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
       }).format(referenceDate);
     const parse = (s: string) => {
       const [date, time] = s.split(', ');

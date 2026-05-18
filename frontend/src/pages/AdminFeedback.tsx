@@ -12,19 +12,19 @@ import Page from '@/components/atoms/Page';
 const PAGE_SIZE = 50;
 
 const STATUS_OPTIONS = [
-  { label: 'Pending',     value: 'pending'     },
-  { label: 'Approved',    value: 'approved'    },
-  { label: 'Rejected',    value: 'rejected'    },
+  { label: 'Pending', value: 'pending' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Rejected', value: 'rejected' },
   { label: 'Implemented', value: 'implemented' },
-  { label: 'Failed',      value: 'failed'      },
+  { label: 'Failed', value: 'failed' },
 ];
 
 const STATUS_COLORS: Record<FeedbackStatus, string> = {
-  pending:     'var(--color-amber, #f59e0b)',
-  approved:    'var(--color-green, #10b981)',
-  rejected:    'var(--color-red, #ef4444)',
+  pending: 'var(--color-amber, #f59e0b)',
+  approved: 'var(--color-green, #10b981)',
+  rejected: 'var(--color-red, #ef4444)',
   implemented: 'var(--color-blue, #3b82f6)',
-  failed:      'var(--color-red, #ef4444)',
+  failed: 'var(--color-red, #ef4444)',
 };
 
 function formatTime(iso: string) {
@@ -53,17 +53,36 @@ function ReviewModal({ entry, onClose }: ReviewModalProps) {
 
   return (
     <div className="af-backdrop" onClick={onClose}>
-      <div className="af-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Review feedback">
+      <div
+        className="af-modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Review feedback"
+      >
         <div className="af-modal-header">
           <span className="af-modal-title">Review Feedback</span>
-          <button className="af-close-btn" onClick={onClose} aria-label="Close">✕</button>
+          <button className="af-close-btn" onClick={onClose} aria-label="Close">
+            ✕
+          </button>
         </div>
 
         <div className="af-modal-body">
           <div className="af-meta-box">
-            <div className="af-meta-row"><span className="af-meta-k">Element</span><span className="af-meta-v">&lt;{entry.tag_name}&gt; {entry.css_selector}</span></div>
-            <div className="af-meta-row"><span className="af-meta-k">Page</span><span className="af-meta-v">{entry.page_url}</span></div>
-            <div className="af-meta-row"><span className="af-meta-k">Submitted</span><span className="af-meta-v">{formatTime(entry.created_at)}</span></div>
+            <div className="af-meta-row">
+              <span className="af-meta-k">Element</span>
+              <span className="af-meta-v">
+                &lt;{entry.tag_name}&gt; {entry.css_selector}
+              </span>
+            </div>
+            <div className="af-meta-row">
+              <span className="af-meta-k">Page</span>
+              <span className="af-meta-v">{entry.page_url}</span>
+            </div>
+            <div className="af-meta-row">
+              <span className="af-meta-k">Submitted</span>
+              <span className="af-meta-v">{formatTime(entry.created_at)}</span>
+            </div>
           </div>
 
           <div className="af-field">
@@ -92,7 +111,9 @@ function ReviewModal({ entry, onClose }: ReviewModalProps) {
           </div>
 
           <div className="af-field">
-            <label className="af-label" htmlFor="af-comment">Dev comment (optional)</label>
+            <label className="af-label" htmlFor="af-comment">
+              Dev comment (optional)
+            </label>
             <textarea
               id="af-comment"
               className="af-textarea"
@@ -114,7 +135,9 @@ function ReviewModal({ entry, onClose }: ReviewModalProps) {
         <div className="af-modal-footer">
           {mutation.isError && <span className="af-error">Failed to save</span>}
           <div className="af-btn-group">
-            <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+            <Button variant="outline" size="sm" onClick={onClose}>
+              Cancel
+            </Button>
             <Button size="sm" disabled={mutation.isPending} onClick={() => mutation.mutate()}>
               {mutation.isPending ? 'Saving…' : 'Save'}
             </Button>
@@ -195,15 +218,28 @@ function FeedbackRow({ entry, onReview, onInspect }: RowProps) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <span className="af-tag">&lt;{entry.tag_name}&gt;</span>
           <span className="af-selector">{entry.css_selector}</span>
-          <button className="af-eye-btn" onClick={() => onInspect(entry)} title="Go to element on page" aria-label="Inspect element">
+          <button
+            className="af-eye-btn"
+            onClick={() => onInspect(entry)}
+            title="Go to element on page"
+            aria-label="Inspect element"
+          >
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"/>
-              <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.4"/>
+              <path
+                d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5Z"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinejoin="round"
+              />
+              <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.4" />
             </svg>
           </button>
         </div>
       </td>
-      <td className="af-td af-td-msg">{entry.message.slice(0, 80)}{entry.message.length > 80 ? '…' : ''}</td>
+      <td className="af-td af-td-msg">
+        {entry.message.slice(0, 80)}
+        {entry.message.length > 80 ? '…' : ''}
+      </td>
       <td className="af-td">
         <span className="af-status-badge" style={{ color: STATUS_COLORS[entry.status] }}>
           {entry.status}
@@ -211,12 +247,12 @@ function FeedbackRow({ entry, onReview, onInspect }: RowProps) {
       </td>
       <td className="af-td af-td-comment">{entry.dev_comment ?? '—'}</td>
       <td className="af-td af-td-ai-comment">
-        {entry.ai_comment
-          ? <span style={{ color: '#3b82f6', fontStyle: 'italic' }}>{entry.ai_comment}</span>
-          : '—'}
+        {entry.ai_comment ? <span style={{ color: '#3b82f6', fontStyle: 'italic' }}>{entry.ai_comment}</span> : '—'}
       </td>
       <td className="af-td">
-        <Button size="sm" variant="outline" onClick={() => onReview(entry)}>Review</Button>
+        <Button size="sm" variant="outline" onClick={() => onReview(entry)}>
+          Review
+        </Button>
       </td>
     </tr>
   );
@@ -238,7 +274,8 @@ export default function AdminFeedback() {
 
   const { data, isPending, error } = useQuery({
     queryKey: ['dom-feedback', page, statusFilter],
-    queryFn: () => getFeedbackList({ limit: PAGE_SIZE, offset: page * PAGE_SIZE, status: statusFilter as FeedbackStatus | '' }),
+    queryFn: () =>
+      getFeedbackList({ limit: PAGE_SIZE, offset: page * PAGE_SIZE, status: statusFilter as FeedbackStatus | '' }),
   });
 
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0;
@@ -273,7 +310,10 @@ export default function AdminFeedback() {
       <div className="af-toolbar">
         <FilterSelect
           value={statusFilter}
-          onChange={(v) => { setStatusFilter(v ?? ''); setPage(0); }}
+          onChange={(v) => {
+            setStatusFilter(v ?? '');
+            setPage(0);
+          }}
           placeholder="All statuses"
           options={STATUS_OPTIONS}
         />
