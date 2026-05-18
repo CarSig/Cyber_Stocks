@@ -1,7 +1,13 @@
-import type { SeriesMarker, Time } from 'lightweight-charts';
+import type { SeriesMarker, Time, ISeriesApi, SeriesType } from 'lightweight-charts';
+import { createSeriesMarkers } from 'lightweight-charts';
 import { cssVar } from './theme';
 import type { Quote, TrumpPost, ThreatIntelItem, NewsArticle, NewsAnalysisMap } from '@/types';
 import type { OverlayRefs } from '@/hooks/charts/useOverlayRefs';
+import type { Action } from '@/utils/sim';
+import { fmtMarkerText } from '@/utils/sim';
+import { DateUtils } from '@/utils/date';
+import type { IntradayEvent } from '@/api/alpaca';
+
 
 type Marker = SeriesMarker<Time>;
 
@@ -21,6 +27,9 @@ export const NVD_SEVERITY_COLORS: Record<string, string> = {
   UNKNOWN: '#6b7280',
 };
 
+const byTime = (a: Marker, b: Marker) => (a.time < b.time ? -1 : 1);
+const toDay = (date: string) => new Date(date).toISOString().slice(0, 10) as Time;
+
 export function dedupeMarkers(markers: Marker[]): Marker[] {
   return [...new Map(markers.map((m) => [`${m.time}|${m.position}|${m.color}`, m])).values()];
 }
@@ -39,21 +48,21 @@ export function buildMarkers(analysis: QuoteAnalysis | null | undefined, color?:
   const red = color ?? cssVar('--color-red');
   return [
     same?.date && {
-      time: new Date(same.date).toISOString().slice(0, 10) as Time,
+      time: toDay(same.date),
       position: 'aboveBar' as const,
       color: amber,
       shape: 'circle' as const,
       text: `Swing ${same.difference}`,
     },
     next?.[0]?.date && {
-      time: new Date(next[0].date).toISOString().slice(0, 10) as Time,
+      time: toDay(next[0].date),
       position: 'belowBar' as const,
       color: red,
       shape: 'arrowUp' as const,
       text: 'Move D1',
     },
     next?.[1]?.date && {
-      time: new Date(next[1].date).toISOString().slice(0, 10) as Time,
+      time: toDay(next[1].date),
       position: 'belowBar' as const,
       color: red,
       shape: 'arrowUp' as const,
@@ -61,7 +70,7 @@ export function buildMarkers(analysis: QuoteAnalysis | null | undefined, color?:
     },
   ]
     .filter(Boolean)
-    .sort((a, b) => ((a as Marker).time < (b as Marker).time ? -1 : 1)) as Marker[];
+    .sort((a, b) => byTime(a as Marker, b as Marker)) as Marker[];
 }
 
 type CountMarkersOpts = {
@@ -85,7 +94,7 @@ export function buildCountMarkers(
   }
   return [...byDay.entries()]
     .map(([time, count]) => ({ time: time as Time, position, color, shape, text: `${label} ×${count}` }))
-    .sort((a, b) => (a.time < b.time ? -1 : 1));
+    .sort(byTime);
 }
 
 export function buildNvdMarkers(nvdVulns: ThreatIntelItem[] | null | undefined): Marker[] {
@@ -112,7 +121,7 @@ export function buildNvdMarkers(nvdVulns: ThreatIntelItem[] | null | undefined):
       shape: 'circle' as const,
       text: `${severity}${count > 1 ? ` ×${count}` : ''}`,
     }))
-    .sort((a, b) => (a.time < b.time ? -1 : 1));
+    .sort(byTime);
 }
 
 export function buildTrumpMarkers(posts: TrumpPost[] | null | undefined, quotes: Quote[]): Marker[] {
@@ -135,7 +144,7 @@ export function buildTrumpMarkers(posts: TrumpPost[] | null | undefined, quotes:
       shape: 'circle' as const,
       text: '',
     }))
-    .sort((a, b) => (a.time < b.time ? -1 : 1));
+    .sort(byTime);
 }
 
 function nextTradingDate(dateStr: string, tradingDaySet: Set<string>): string | null {
@@ -227,7 +236,7 @@ export function buildNewsMarkers(
           : []),
       ];
     })
-    .sort((a, b) => (a.time < b.time ? -1 : 1));
+    .sort(byTime);
 }
 
 export function buildOverlayMarkers(
@@ -273,4 +282,59 @@ export function buildOverlayMarkers(
       : []),
     ...(showNewsRef.current ? buildNewsMarkers(newsArticlesRef.current, newsAnalysisRef.current, quotes) : []),
   ];
+}
+
+function parseMarkerTime(timeStr: string): string | null {
+  const m = timeStr.match(/(\d{1,2}):(\d{2})/);
+  if (!m) return null;
+  return `${String(m[1]).padStart(2, '0')}:${m[2]}`;
+}
+
+export function syncIntradayMarkers(
+  series: ISeriesApi<SeriesType>,
+  actions: Action[],
+  selectedEvent: IntradayEvent | null,
+  queryDate: string,
+  offset: number,
+) {
+  const t = (iso: string) => DateUtils.toEtChartTime(iso, offset);
+
+  const actionMarkers = actions.map((a) => {
+    const isEntry = a.side === 'buy' || a.side === 'short';
+    return {
+      time: t(a.timestamp),
+      position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
+      color: a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#60a5fa',
+      shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
+      text: fmtMarkerText(a.side, a.value),
+    };
+  });
+
+  const eventMarkers: { time: Time; position: 'aboveBar'; color: string; shape: 'circle'; size: number; text: string }[] = [];
+
+  if (selectedEvent) {
+    eventMarkers.push({
+      time: t(DateUtils.timeToIso(selectedEvent.chart_time, queryDate)),
+      position: 'aboveBar',
+      color: '#3b82f6',
+      shape: 'circle',
+      size: 2,
+      text: '',
+    });
+    const srcTime = parseMarkerTime(selectedEvent.source_time);
+    const srcDate = selectedEvent.after_hours ? queryDate : selectedEvent.source_date;
+    if (srcTime && srcDate === queryDate) {
+      const yellowT = t(DateUtils.timeToIso(srcTime, queryDate));
+      const blueT = t(DateUtils.timeToIso(selectedEvent.chart_time, queryDate));
+      const validOrder = selectedEvent.after_hours || (yellowT as unknown as number) >= (blueT as unknown as number);
+      if (validOrder) {
+        eventMarkers.push({ time: yellowT, position: 'aboveBar', color: '#eab308', shape: 'circle', size: 2, text: '' });
+      }
+    }
+  }
+
+  createSeriesMarkers(
+    series,
+    [...actionMarkers, ...eventMarkers].sort((a, b) => (a.time < b.time ? -1 : 1)),
+  );
 }

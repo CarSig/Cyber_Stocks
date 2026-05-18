@@ -1,24 +1,26 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useEffect, useRef, useCallback, useMemo, useReducer } from 'react';
 import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query';
-import { createChart, CandlestickSeries, LineSeries, AreaSeries, createSeriesMarkers } from 'lightweight-charts';
+import { createChart, CandlestickSeries, LineSeries, AreaSeries } from 'lightweight-charts';
 import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
+import { syncIntradayMarkers } from '@/components/organisms/charts/utils/markers';
+import { setupDayLines } from '@/components/organisms/charts/utils/dayLines';
 import { getBars, getIntradayEvents } from '@/api/alpaca';
-import { getCompanies } from '@/api/stock';
 import type { AlpacaBar } from '@/types';
 import type { IntradayEvent } from '@/api/alpaca';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import FilterSelect from '@/components/molecules/shared/FilterSelect';
 import SimToolbar from './sim/SimToolbar';
 import SimManualEntry from './sim/SimManualEntry';
 import SimResults from './sim/SimResults';
 import IntradayEventCard from './sim/IntradayEventCard';
+import SimOrderControls from './sim/SimOrderControls';
+import SimAllDialog from './sim/SimAllDialog';
+import { intradaySimReducer, initialIntradaySimState } from './sim/intradaySimReducer';
+import type { SimAllRow } from './sim/intradaySimReducer';
 import { exportSimPdf } from './sim/simExportPdf';
 import { DateUtils } from '@/utils/date';
 import { PriceUtils } from '@/utils/price';
-import { MarketUtils } from '@/utils/market';
 
 const INTRADAY_SIM_PRESETS: Record<string, { time: string; side: 'buy' | 'sell'; value: number }[]> = {
   'Open & Close': [
@@ -36,73 +38,7 @@ const INTRADAY_SIM_PRESETS: Record<string, { time: string; side: 'buy' | 'sell';
 };
 
 import type { Side, Action, Transaction, SimResult } from '@/utils/sim';
-import { runShortSimulation, simResultToExportArgs } from '@/utils/sim';
-
-function runSimulation(bars: AlpacaBar[], actions: Action[], startShares = 0): SimResult {
-  const sorted = [...actions].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-  const firstOpen = bars[0]?.o ?? 0;
-  let shares = startShares;
-  let totalInvested = startShares * firstOpen;
-  let cashWithdrawn = 0;
-  const transactions: Transaction[] = [];
-  const portfolioHistory: { time: string; value: number }[] = [];
-
-  for (const bar of bars) {
-    const price = bar.c;
-    const barTime = bar.t;
-    for (const act of sorted) {
-      if (act.timestamp > barTime) continue;
-      if (transactions.some((t) => t.time === DateUtils.fmtTime(act.timestamp) && t.side === act.side)) continue;
-      if (act.side === 'buy') {
-        const bought = act.value / price;
-        shares += bought;
-        totalInvested += act.value;
-        transactions.push({
-          time: DateUtils.fmtTime(act.timestamp),
-          timestamp: act.timestamp,
-          side: 'buy',
-          price,
-          shares: bought,
-          value: act.value,
-          sharesAfter: shares,
-          portfolioValue: shares * price,
-        });
-      } else {
-        const pct = Math.min(act.value, 100) / 100;
-        const sold = shares * pct;
-        const proceeds = sold * price;
-        shares -= sold;
-        cashWithdrawn += proceeds;
-        transactions.push({
-          time: DateUtils.fmtTime(act.timestamp),
-          timestamp: act.timestamp,
-          side: 'sell',
-          price,
-          shares: sold,
-          value: proceeds,
-          sharesAfter: shares,
-          portfolioValue: shares * price,
-        });
-      }
-    }
-    portfolioHistory.push({ time: barTime, value: shares * price });
-  }
-
-  const lastPrice = bars.at(-1)?.c ?? 0;
-  const sharesValue = shares * lastPrice;
-  const profit = sharesValue + cashWithdrawn - totalInvested;
-  const profitPct = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
-  return {
-    transactions,
-    portfolioHistory,
-    totalInvested,
-    cashWithdrawn,
-    finalShares: shares,
-    sharesValue,
-    profit,
-    profitPct,
-  };
-}
+import { runLongSimulation, runShortSimulation, buildSimStats, simResultToExportArgs } from '@/utils/sim';
 
 function parseIntradayText(raw: string, date: string): { parsedDate: string | null; actions: Action[] } {
   const lines = raw
@@ -150,121 +86,14 @@ let nextActionId = 1;
 
 type ChartRef = { chart: IChartApi; series: ISeriesApi<SeriesType> } | null;
 
-function parseMarkerTime(timeStr: string): string | null {
-  const m = timeStr.match(/(\d{1,2}):(\d{2})/);
-  if (!m) return null;
-  return `${String(m[1]).padStart(2, '0')}:${m[2]}`;
-}
-
-function syncMarkers(
-  series: ISeriesApi<SeriesType>,
-  actions: Action[],
-  selectedEvent: IntradayEvent | null,
-  queryDate: string,
-  offset: number,
-) {
-  const t = (iso: string) => DateUtils.toEtChartTime(iso, offset);
-
-  const actionMarkers = actions.map((a) => {
-    const isEntry = a.side === 'buy' || a.side === 'short';
-    return {
-      time: t(a.timestamp),
-      position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
-      color: a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#60a5fa',
-      shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
-      text:
-        a.side === 'buy'
-          ? `B $${a.value}`
-          : a.side === 'sell'
-            ? `S ${a.value}%`
-            : a.side === 'short'
-              ? `Sh $${a.value}`
-              : `C ${a.value}%`,
-    };
-  });
-
-  const eventMarkers: {
-    time: import('lightweight-charts').Time;
-    position: 'aboveBar';
-    color: string;
-    shape: 'circle';
-    size: number;
-    text: string;
-  }[] = [];
-
-  if (selectedEvent) {
-    eventMarkers.push({
-      time: t(DateUtils.timeToIso(selectedEvent.chart_time, queryDate)),
-      position: 'aboveBar',
-      color: '#3b82f6',
-      shape: 'circle',
-      size: 2,
-      text: '',
-    });
-    const srcTime = parseMarkerTime(selectedEvent.source_time);
-    const srcDate = selectedEvent.after_hours ? queryDate : selectedEvent.source_date;
-    if (srcTime && srcDate === queryDate) {
-      const yellowT = t(DateUtils.timeToIso(srcTime, queryDate));
-      // For intraday events: yellow must not precede blue (first report ≤ source report)
-      // For after-hours events: blue is artificial market-open; yellow can appear before it
-      const blueT = t(DateUtils.timeToIso(selectedEvent.chart_time, queryDate));
-      const validOrder = selectedEvent.after_hours || (yellowT as unknown as number) >= (blueT as unknown as number);
-      if (validOrder) {
-        eventMarkers.push({
-          time: yellowT,
-          position: 'aboveBar',
-          color: '#eab308',
-          shape: 'circle',
-          size: 2,
-          text: '',
-        });
-      }
-    }
-  }
-
-  createSeriesMarkers(
-    series,
-    [...actionMarkers, ...eventMarkers].sort((a, b) => (a.time < b.time ? -1 : 1)),
-  );
-}
 
 export default function IntradaySimulation() {
-  const [ticker, setTicker] = useState('CRWD');
-  const [date, setDate] = useState(() => DateUtils.lastWeekday(DateUtils.todayStr()));
-  const [timeframe, setTimeframe] = useState('5Min');
-  const [query, setQuery] = useState(() => ({
-    ticker: 'CRWD',
-    date: DateUtils.lastWeekday(DateUtils.todayStr()),
-    timeframe: '5Min',
-  }));
-  const [actions, setActions] = useState<Action[]>([]);
-  const [nextSide, setNextSide] = useState<Side>('buy');
-  const [value, setValue] = useState('100');
-  const [startShares, setStartShares] = useState('0');
-  const [manualTime, setManualTime] = useState('');
-  const [textMode, setTextMode] = useState(false);
-  const [textValue, setTextValue] = useState(() => DateUtils.lastWeekday(DateUtils.todayStr()));
-  const [chartType, setChartType] = useState<'line' | 'area' | 'candlestick'>('area');
-  const [tradeMode, setTradeMode] = useState<'long' | 'short'>('long');
-  const [selectedEvent, setSelectedEvent] = useState<IntradayEvent | null>(null);
-  const [showPeers, setShowPeers] = useState(false);
-  const [extraDates, setExtraDates] = useState<string[]>([]);
-
-  type SimAllRow = {
-    rank: number;
-    ticker: string;
-    event: string;
-    trade_idea: string;
-    action: 'buy' | 'short';
-    chartTime: string;
-    preMarket: boolean;
-    entryTime: string;
-    profitPct: number | null;
-    error?: string;
-  };
-  const [simAllResults, setSimAllResults] = useState<SimAllRow[] | null>(null);
-  const [simAllRunning, setSimAllRunning] = useState(false);
-  const [aiDelay, setAiDelay] = useState(1);
+  const [s, dispatch] = useReducer(intradaySimReducer, undefined, initialIntradaySimState);
+  const {
+    date, timeframe, query, actions, nextSide, value, startShares,
+    manualTime, textMode, textValue, chartType, tradeMode,
+    selectedEvent, showPeers, extraDates, simAllResults, simAllRunning, aiDelay,
+  } = s;
 
   const queryClient = useQueryClient();
 
@@ -282,22 +111,11 @@ export default function IntradaySimulation() {
     tradeModeRef.current = tradeMode;
   }, [tradeMode]);
 
-  const { data: companiesData } = useQuery<Record<string, string>>({
-    queryKey: ['companies'],
-    queryFn: getCompanies,
-    staleTime: 60 * 60 * 1000,
-  });
-
   const { data: eventsData } = useQuery<IntradayEvent[]>({
     queryKey: ['intraday-events'],
     queryFn: getIntradayEvents,
     staleTime: Infinity,
   });
-
-  const tickerOptions = useMemo(() => {
-    if (!companiesData) return [];
-    return Object.values(companiesData).sort();
-  }, [companiesData]);
 
   const { data, isPending, error } = useQuery<{ symbol: string; bars: AlpacaBar[] }>({
     queryKey: ['alpaca-bars', query.ticker, query.date, query.timeframe],
@@ -336,65 +154,33 @@ export default function IntradaySimulation() {
 
   const PEER_COLORS = ['#f59e0b', '#60a5fa', '#f472b6', '#34d399'];
 
-  const peerQueries = [
-    useQuery<{ symbol: string; bars: AlpacaBar[] }>({
-      queryKey: ['alpaca-bars', peerTickers[0] ?? '', query.date, query.timeframe],
-      queryFn: () => getBars(peerTickers[0]!, query.date, query.timeframe),
-      enabled: Boolean(peerTickers[0] && query.date),
+  const peerQueryResults = useQueries({
+    queries: peerTickers.map((t) => ({
+      queryKey: ['alpaca-bars', t, query.date, query.timeframe] as const,
+      queryFn: () => getBars(t, query.date, query.timeframe),
+      enabled: Boolean(t && query.date),
       staleTime: 5 * 60 * 1000,
-    }),
-    useQuery<{ symbol: string; bars: AlpacaBar[] }>({
-      queryKey: ['alpaca-bars', peerTickers[1] ?? '', query.date, query.timeframe],
-      queryFn: () => getBars(peerTickers[1]!, query.date, query.timeframe),
-      enabled: Boolean(peerTickers[1] && query.date),
-      staleTime: 5 * 60 * 1000,
-    }),
-    useQuery<{ symbol: string; bars: AlpacaBar[] }>({
-      queryKey: ['alpaca-bars', peerTickers[2] ?? '', query.date, query.timeframe],
-      queryFn: () => getBars(peerTickers[2]!, query.date, query.timeframe),
-      enabled: Boolean(peerTickers[2] && query.date),
-      staleTime: 5 * 60 * 1000,
-    }),
-    useQuery<{ symbol: string; bars: AlpacaBar[] }>({
-      queryKey: ['alpaca-bars', peerTickers[3] ?? '', query.date, query.timeframe],
-      queryFn: () => getBars(peerTickers[3]!, query.date, query.timeframe),
-      enabled: Boolean(peerTickers[3] && query.date),
-      staleTime: 5 * 60 * 1000,
-    }),
-  ];
+    })),
+  });
 
   const peerBars = useMemo(
-    () => peerTickers.map((t, i) => ({ ticker: t, bars: peerQueries[i].data?.bars ?? [] })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [peerTickers, peerQueries[0].data, peerQueries[1].data, peerQueries[2].data, peerQueries[3].data],
+    () => peerTickers.map((t, i) => ({ ticker: t, bars: peerQueryResults[i]?.data?.bars ?? [] })),
+    [peerTickers, peerQueryResults],
   );
 
   const result = useMemo<SimResult | null>(() => {
     if (!bars.length || !actions.length) return null;
     if (tradeMode === 'short') return runShortSimulation(bars, actions, DateUtils.fmtTime);
-    return runSimulation(bars, actions, Math.max(0, Number(startShares) || 0));
+    return runLongSimulation(bars, actions, DateUtils.fmtTime, Math.max(0, Number(startShares) || 0));
   }, [bars, actions, startShares, tradeMode]);
-
-  const syncTextDate = useCallback((newDate: string) => {
-    setTextValue((prev) => {
-      const lines = prev.split('\n');
-      if (/^\d{4}-\d{2}-\d{2}$/.test(lines[0] ?? '')) {
-        lines[0] = newDate;
-        return lines.join('\n');
-      }
-      return newDate + (prev ? '\n' + prev : '');
-    });
-  }, []);
 
   const handleTextChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const raw = e.target.value;
-      setTextValue(raw);
       const { parsedDate, actions: parsed } = parseIntradayText(raw, query.date);
-      if (parsedDate && parsedDate !== date) setDate(parsedDate);
-      if (parsed.length) setActions(parsed);
+      dispatch({ type: 'SET_TEXT', raw, parsedDate: parsedDate ?? undefined, parsedActions: parsed.length ? parsed : undefined });
     },
-    [query.date, date],
+    [query.date],
   );
 
   const applyPreset = useCallback(
@@ -408,8 +194,7 @@ export default function IntradaySimulation() {
         side: p.side,
         value: p.value,
       }));
-      setActions(newActions);
-      setTextValue(actionsToText(query.date, newActions));
+      dispatch({ type: 'SET_ACTIONS', actions: newActions, textValue: actionsToText(query.date, newActions) });
     },
     [query.date],
   );
@@ -419,31 +204,14 @@ export default function IntradaySimulation() {
       if (!eventLabel) return;
       const ev = eventsData?.find((e) => e.event === eventLabel);
       if (!ev) return;
-      setSelectedEvent(ev);
-      // Use primary ticker from event (before any '/')
-      const primaryTicker = ev.ticker.split('/')[0].trim();
-      setTicker(primaryTicker);
-      setDate(ev.chart_date);
-      syncTextDate(ev.chart_date);
-      // Auto-load
-      setQuery({ ticker: primaryTicker, date: ev.chart_date, timeframe });
-      setActions([]);
-      setExtraDates([]);
+      dispatch({ type: 'LOAD_EVENT', event: ev, timeframe });
     },
-    [eventsData, syncTextDate, timeframe],
+    [eventsData, timeframe],
   );
-
-  const handleCompanySelect = useCallback((t: string | null) => {
-    if (!t) return;
-    setTicker(t);
-  }, []);
 
   function handleLoad(e: React.FormEvent) {
     e.preventDefault();
-    setQuery({ ticker, date, timeframe });
-    setActions([]);
-    setTextValue(date);
-    setExtraDates([]);
+    dispatch({ type: 'LOAD_BARS', ticker: query.ticker, date, timeframe });
   }
 
   // Build price chart
@@ -540,11 +308,7 @@ export default function IntradaySimulation() {
         side: tradeModeRef.current === 'short' ? 'short' : 'buy',
         value: val,
       };
-      setActions((prev) => {
-        const next = [...prev, newAction];
-        setTextValue(actionsToText(query.date, next));
-        return next;
-      });
+      dispatch({ type: 'ADD_ACTION', action: newAction });
     });
 
     const el = containerRef.current!;
@@ -560,61 +324,21 @@ export default function IntradaySimulation() {
         side: tradeModeRef.current === 'short' ? 'cover' : 'sell',
         value: val,
       };
-      setActions((prev) => {
-        const next = [...prev, newAction];
-        setTextValue(actionsToText(query.date, next));
-        return next;
-      });
+      dispatch({ type: 'ADD_ACTION', action: newAction });
     }
     el.addEventListener('contextmenu', onContextMenu);
     chartRef.current = { chart, series };
-    syncMarkers(series, actions, selectedEvent, query.date, offset);
+    syncIntradayMarkers(series, actions, selectedEvent, query.date, offset);
 
-    // Day boundaries: vertical line at the first bar of each new ET day; weekend gaps get a thicker yellow line.
-    const overlayEl = dayLinesRef.current;
-    const boundaries: { time: number; weekend: boolean }[] = [];
-    let prevEtDate: string | null = null;
-    for (const b of bars) {
-      const etDate = DateUtils.fmtDateEt(b.t);
-      if (prevEtDate !== null && etDate !== prevEtDate) {
-        const prevD = new Date(prevEtDate + 'T12:00:00Z');
-        const curD = new Date(etDate + 'T12:00:00Z');
-        const dayDiff = Math.round((curD.getTime() - prevD.getTime()) / 86_400_000);
-        boundaries.push({
-          time: Math.floor(new Date(b.t).getTime() / 1000) + offset,
-          weekend: dayDiff > 1,
-        });
-      }
-      prevEtDate = etDate;
-    }
-    const drawDayLines = () => {
-      if (!overlayEl) return;
-      const ts = chart.timeScale();
-      const html: string[] = [];
-      for (const b of boundaries) {
-        const x = ts.timeToCoordinate(b.time as unknown as import('lightweight-charts').Time);
-        if (x == null) continue;
-        html.push(`<span class="${b.weekend ? 'weekend' : ''}" style="left:${x}px"></span>`);
-      }
-      overlayEl.innerHTML = html.join('');
-    };
-    drawDayLines();
-    const ts = chart.timeScale();
-    ts.subscribeVisibleTimeRangeChange(drawDayLines);
-
-    const ro = new ResizeObserver(() => {
-      if (containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
-      drawDayLines();
-    });
-    ro.observe(el);
+    const cleanupDayLines = dayLinesRef.current
+      ? setupDayLines(chart, dayLinesRef.current, el, bars, offset)
+      : () => {};
 
     return () => {
       el.removeEventListener('contextmenu', onContextMenu);
-      ts.unsubscribeVisibleTimeRangeChange(drawDayLines);
-      ro.disconnect();
+      cleanupDayLines();
       chart.remove();
       chartRef.current = null;
-      if (overlayEl) overlayEl.innerHTML = '';
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bars, chartType, peerBars]);
@@ -623,7 +347,7 @@ export default function IntradaySimulation() {
   useEffect(() => {
     const ref = chartRef.current;
     if (!ref) return;
-    syncMarkers(ref.series, actions, selectedEvent, query.date, tzOffsetRef.current);
+    syncIntradayMarkers(ref.series, actions, selectedEvent, query.date, tzOffsetRef.current);
   }, [actions, selectedEvent, query.date]);
 
   const addManualAction = useCallback(() => {
@@ -631,52 +355,25 @@ export default function IntradaySimulation() {
     const val = Math.max(0.01, Number(value) || (nextSide === 'buy' ? 100 : 50));
     const iso = DateUtils.timeToIso(manualTime, query.date);
     const newAction: Action = { id: nextActionId++, timestamp: iso, time: manualTime, side: nextSide, value: val };
-    setActions((prev) => {
-      const next = [...prev, newAction];
-      setTextValue(actionsToText(query.date, next));
-      return next;
-    });
-    setManualTime('');
+    dispatch({ type: 'ADD_ACTION', action: newAction });
+    dispatch({ type: 'SET_MANUAL_TIME', time: '' });
   }, [manualTime, nextSide, value, query.date]);
 
   const removeAction = useCallback(
-    (id: number) => {
-      setActions((prev) => {
-        const next = prev.filter((a) => a.id !== id);
-        setTextValue(actionsToText(query.date, next));
-        return next;
-      });
-    },
-    [query.date],
+    (id: number) => dispatch({ type: 'REMOVE_ACTION', id }),
+    [],
   );
 
   const updateAction = useCallback(
-    (id: number, field: 'side' | 'value', val: string) => {
-      setActions((prev) => {
-        const next = prev.map((a) => {
-          if (a.id !== id) return a;
-          const isExit = (s: Side) => s === 'sell' || s === 'cover';
-          if (field === 'value') return { ...a, value: isExit(a.side) ? Math.min(100, Number(val)) : Number(val) };
-          const newSide = val as Side;
-          return { ...a, side: newSide, value: isExit(newSide) ? Math.min(100, a.value) : a.value };
-        });
-        setTextValue(actionsToText(query.date, next));
-        return next;
-      });
-    },
-    [query.date],
+    (id: number, field: 'side' | 'value', val: string) => dispatch({ type: 'UPDATE_ACTION', id, field, val }),
+    [],
   );
 
-  const clear = useCallback(() => {
-    setActions([]);
-    setTextValue(query.date);
-    setNextSide(tradeMode === 'short' ? 'short' : 'buy');
-  }, [query.date, tradeMode]);
+  const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS' }), []);
 
   const handleSimulateAll = useCallback(async () => {
     if (!eventsData?.length) return;
-    setSimAllRunning(true);
-    setSimAllResults(null);
+    dispatch({ type: 'SIM_ALL_START' });
 
     const simOne = async (ev: IntradayEvent): Promise<SimAllRow> => {
       const primaryTicker = ev.ticker.split('/')[0].trim();
@@ -713,7 +410,7 @@ export default function IntradaySimulation() {
           { id: 2, timestamp: exitIso, time: '15:45', side: isShort ? 'cover' : 'sell', value: 100 },
         ];
 
-        const result = isShort ? runShortSimulation(bars, actions, DateUtils.fmtTime) : runSimulation(bars, actions, 0);
+        const result = isShort ? runShortSimulation(bars, actions, DateUtils.fmtTime) : runLongSimulation(bars, actions, DateUtils.fmtTime, 0);
 
         return {
           rank: ev.rank, ticker: primaryTicker, event: ev.event, trade_idea: ev.trade_idea,
@@ -738,8 +435,7 @@ export default function IntradaySimulation() {
     }
 
     rows.sort((a, b) => (b.profitPct ?? -Infinity) - (a.profitPct ?? -Infinity));
-    setSimAllResults(rows);
-    setSimAllRunning(false);
+    dispatch({ type: 'SIM_ALL_DONE', results: rows });
   }, [eventsData, aiDelay, queryClient]);
 
   const handleAiSim = useCallback(() => {
@@ -774,17 +470,16 @@ export default function IntradaySimulation() {
       { id: nextActionId++, timestamp: exitIso, time: exitTime, side: isShort ? 'cover' : 'sell', value: 100 },
     ];
 
-    setTradeMode(isShort ? 'short' : 'long');
-    setNextSide(isShort ? 'short' : 'buy');
-    setActions(newActions);
-    setTextValue(actionsToText(chartDate, newActions));
+    const mode = isShort ? 'short' : 'long';
+    dispatch({ type: 'SET_TRADE_MODE', mode });
+    dispatch({ type: 'SET_ACTIONS', actions: newActions, textValue: actionsToText(chartDate, newActions) });
   }, [selectedEvent, aiDelay]);
 
   const handleExportPdf = useCallback(() => {
     if (!result) return;
     const { stats, transactions } = simResultToExportArgs(result);
     exportSimPdf(
-      ticker,
+      query.ticker,
       stats,
       transactions,
       [
@@ -793,14 +488,13 @@ export default function IntradaySimulation() {
       ],
       'Time (ET)',
     );
-  }, [result, ticker]);
+  }, [result, query.ticker]);
 
   const portfolioMarkers = useMemo(
     () => result?.transactions.map((t) => ({ time: t.timestamp, side: t.side, value: t.value, shares: t.shares })) ?? [],
     [result],
   );
 
-  const profitColor = result ? (result.profit >= 0 ? 'var(--color-green)' : 'var(--color-red)') : undefined;
 
   return (
     <div className="dtrade-sim">
@@ -808,124 +502,36 @@ export default function IntradaySimulation() {
       {error && <p className="alpaca-status alpaca-error">{(error as Error).message}</p>}
 
       {/* Controls */}
-      <form className="dtrade-order-controls" onSubmit={handleLoad}>
-        {bars.length > 0 && (
-          <>
-            <div className="dtrade-next-side">
-              <button
-                className={`sim-chart-btn${tradeMode === 'long' ? ' active' : ''}`}
-                onClick={() => {
-                  setTradeMode('long');
-                  setActions([]);
-                  setNextSide('buy');
-                }}
-                type="button"
-              >
-                Long
-              </button>
-              <button
-                className={`sim-chart-btn${tradeMode === 'short' ? ' active' : ''}`}
-                onClick={() => {
-                  setTradeMode('short');
-                  setActions([]);
-                  setNextSide('short');
-                }}
-                type="button"
-                style={tradeMode === 'short' ? { borderColor: '#f97316', color: '#f97316' } : undefined}
-              >
-                Short
-              </button>
-              <span style={{ width: '0.5rem' }} />
-              {tradeMode === 'long' ? (
-                <>
-                  <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Left click = Buy ($)</span>
-                  <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Right click = Sell (%)</span>
-                </>
-              ) : (
-                <>
-                  <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Left click = Short ($)</span>
-                  <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Right click = Cover (%)</span>
-                </>
-              )}
-            </div>
-            <div className="dtrade-shares">
-              <span className="dtrade-label">Start shares:</span>
-              <Input
-                type="number"
-                min="0"
-                step="any"
-                value={startShares}
-                onChange={(e) => setStartShares(e.target.value)}
-                className="dtrade-shares-input"
-              />
-            </div>
-            <div className="dtrade-shares">
-              <span className="dtrade-label">Value:</span>
-              <Input
-                type="number"
-                min="0"
-                step="any"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                className="dtrade-shares-input"
-              />
-              <span className="dtrade-label">$ buy / % sell</span>
-            </div>
-          </>
-        )}
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          {tickerOptions.length > 0 && (
-            <Select value={ticker} onValueChange={handleCompanySelect}>
-              <SelectTrigger className="alpaca-input" style={{ width: '110px' }}>
-                <SelectValue placeholder="Ticker" />
-              </SelectTrigger>
-              <SelectContent>
-                {tickerOptions.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {t}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          {eventsData && eventsData.length > 0 && (
-            <Select value={selectedEvent?.event ?? ''} onValueChange={handleEventSelect}>
-              <SelectTrigger className="alpaca-input" style={{ width: '220px' }}>
-                <SelectValue placeholder="Events…" />
-              </SelectTrigger>
-              <SelectContent>
-                {eventsData.map((ev) => (
-                  <SelectItem key={ev.rank} value={ev.event}>
-                    #{ev.rank} {ev.ticker} — {ev.event.slice(0, 40)}
-                    {ev.event.length > 40 ? '…' : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-          <input
-            className="alpaca-input"
-            type="date"
-            value={date}
-            max={DateUtils.lastWeekday(DateUtils.todayStr())}
-            onChange={(e) => {
-              setDate(e.target.value);
-              syncTextDate(e.target.value);
-              setSelectedEvent(null);
-            }}
-          />
-          <select className="alpaca-input" value={timeframe} onChange={(e) => setTimeframe(e.target.value)}>
-            {MarketUtils.TIMEFRAMES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-          <button className="alpaca-btn" type="submit">
-            Load
-          </button>
-        </div>
-      </form>
+      <SimOrderControls
+        tradeMode={tradeMode}
+        onTradeModeChange={(mode) => dispatch({ type: 'SET_TRADE_MODE', mode })}
+        startShares={startShares}
+        onStartSharesChange={(v) => dispatch({ type: 'SET_START_SHARES', startShares: v })}
+        value={value}
+        onValueChange={(v) => dispatch({ type: 'SET_VALUE', value: v })}
+        date={date}
+        onDateChange={(d) => dispatch({ type: 'SET_DATE', date: d })}
+        maxDate={DateUtils.lastWeekday(DateUtils.todayStr())}
+        timeframe={timeframe}
+        onTimeframeChange={(t) => dispatch({ type: 'SET_TIMEFRAME', timeframe: t })}
+        eventSlot={
+          eventsData && eventsData.length > 0 ? (
+            <FilterSelect
+              value={selectedEvent?.event ?? null}
+              onChange={handleEventSelect}
+              placeholder="Events…"
+              showAll={false}
+              className="alpaca-input w-55"
+              options={eventsData.map((ev) => ({
+                value: ev.event,
+                label: `#${ev.rank} ${ev.ticker} — ${ev.event.slice(0, 40)}${ev.event.length > 40 ? '…' : ''}`,
+              }))}
+            />
+          ) : undefined
+        }
+        onLoad={handleLoad}
+        showTradeControls={bars.length > 0}
+      />
 
       {/* Event card */}
       {selectedEvent && <IntradayEventCard event={selectedEvent} />}
@@ -939,7 +545,7 @@ export default function IntradaySimulation() {
               <button
                 key={t}
                 className={`sim-chart-btn${chartType === t ? ' active' : ''}`}
-                onClick={() => setChartType(t)}
+                onClick={() => dispatch({ type: 'SET_CHART_TYPE', chartType: t })}
                 type="button"
               >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -948,7 +554,7 @@ export default function IntradaySimulation() {
             {selectedEvent && selectedEvent.peers.length > 0 && (
               <button
                 className={`sim-chart-btn${showPeers ? ' active' : ''}`}
-                onClick={() => setShowPeers((v) => !v)}
+                onClick={() => dispatch({ type: 'TOGGLE_PEERS' })}
                 type="button"
                 style={showPeers ? { borderColor: '#f59e0b', color: '#f59e0b' } : undefined}
               >
@@ -957,20 +563,20 @@ export default function IntradaySimulation() {
             )}
             <button
               className="sim-chart-btn"
-              onClick={() => setExtraDates((prev) => [...new Set([...prev, prevDate])])}
+              onClick={() => dispatch({ type: 'ADD_EXTRA_DATE', date: prevDate })}
               type="button"
             >
               + Day before ({prevDate})
             </button>
             <button
               className="sim-chart-btn"
-              onClick={() => setExtraDates((prev) => [...new Set([...prev, nextDate])])}
+              onClick={() => dispatch({ type: 'ADD_EXTRA_DATE', date: nextDate })}
               type="button"
             >
               + Day after ({nextDate})
             </button>
             {extraDates.length > 0 && (
-              <button className="sim-chart-btn" onClick={() => setExtraDates([])} type="button">
+              <button className="sim-chart-btn" onClick={() => dispatch({ type: 'RESET_EXTRA_DATES' })} type="button">
                 Reset days
               </button>
             )}
@@ -997,10 +603,7 @@ export default function IntradaySimulation() {
             presets={INTRADAY_SIM_PRESETS}
             onPreset={applyPreset}
             textMode={textMode}
-            onTextModeToggle={() => {
-              if (!textMode) setTextValue(actionsToText(query.date, actions));
-              setTextMode((v) => !v);
-            }}
+            onTextModeToggle={() => dispatch({ type: 'TOGGLE_TEXT_MODE', currentActions: actions })}
             hasResult={!!result}
             onExportPdf={handleExportPdf}
             hasActions={actions.length > 0}
@@ -1009,7 +612,7 @@ export default function IntradaySimulation() {
             aiSimDisabled={!selectedEvent}
             onSimulateAll={eventsData?.length ? handleSimulateAll : undefined}
             aiDelay={aiDelay}
-            onAiDelayChange={setAiDelay}
+            onAiDelayChange={(d) => dispatch({ type: 'SET_AI_DELAY', delay: d })}
           />
 
           {textMode && (
@@ -1024,7 +627,7 @@ export default function IntradaySimulation() {
 
           <SimManualEntry
             side={nextSide}
-            onSideChange={(s) => setNextSide(s as Side)}
+            onSideChange={(s) => dispatch({ type: 'SET_NEXT_SIDE', side: s as Side })}
             sideOptions={
               tradeMode === 'long'
                 ? [
@@ -1037,14 +640,14 @@ export default function IntradaySimulation() {
                   ]
             }
             value={value}
-            onValueChange={setValue}
+            onValueChange={(v) => dispatch({ type: 'SET_VALUE', value: v })}
             onAdd={addManualAction}
             inputSlot={
               <input
                 className="alpaca-input"
                 type="time"
                 value={manualTime}
-                onChange={(e) => setManualTime(e.target.value)}
+                onChange={(e) => dispatch({ type: 'SET_MANUAL_TIME', time: e.target.value })}
               />
             }
           />
@@ -1112,41 +715,7 @@ export default function IntradaySimulation() {
           {result && result.transactions.length > 0 && (
             <SimResults
               ref={portfolioChartRef}
-              stats={
-                tradeMode === 'long'
-                  ? [
-                      { label: 'Total invested', value: PriceUtils.fmt(result.totalInvested) },
-                      { label: 'Shares held', value: result.finalShares.toFixed(4) },
-                      { label: 'Shares value', value: PriceUtils.fmt(result.sharesValue) },
-                      { label: 'Cash withdrawn', value: PriceUtils.fmt(result.cashWithdrawn) },
-                      {
-                        label: 'Profit',
-                        value: (result.profit >= 0 ? '+' : '') + PriceUtils.fmt(result.profit),
-                        color: profitColor,
-                      },
-                      {
-                        label: 'Profit %',
-                        value: (result.profitPct >= 0 ? '+' : '') + result.profitPct.toFixed(2) + '%',
-                        color: profitColor,
-                      },
-                    ]
-                  : [
-                      { label: 'Cash received', value: PriceUtils.fmt(result.totalInvested) },
-                      { label: 'Shares short', value: Math.abs(result.finalShares).toFixed(4) },
-                      { label: 'Remaining liability', value: PriceUtils.fmt(Math.abs(result.sharesValue)) },
-                      { label: 'Cover cost', value: PriceUtils.fmt(result.cashWithdrawn) },
-                      {
-                        label: 'Profit',
-                        value: (result.profit >= 0 ? '+' : '') + PriceUtils.fmt(result.profit),
-                        color: profitColor,
-                      },
-                      {
-                        label: 'Profit %',
-                        value: (result.profitPct >= 0 ? '+' : '') + result.profitPct.toFixed(2) + '%',
-                        color: profitColor,
-                      },
-                    ]
-              }
+              stats={buildSimStats(result, tradeMode, PriceUtils.fmt)}
               history={result.portfolioHistory}
               markers={portfolioMarkers}
               transactions={result.transactions}
@@ -1156,194 +725,15 @@ export default function IntradaySimulation() {
         </>
       )}
 
-      <Dialog
+      <SimAllDialog
         open={simAllRunning || !!simAllResults}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSimAllResults(null);
-            setSimAllRunning(false);
-          }
-        }}
-      >
-        <DialogContent className="sm:max-w-2xl" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
-          <DialogHeader>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <DialogTitle>Simulate All Results</DialogTitle>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Input
-                  type="number"
-                  min={0}
-                  max={60}
-                  value={aiDelay}
-                  onChange={(e) => setAiDelay(Math.max(0, Number(e.target.value)))}
-                  style={{ width: 82, textAlign: 'center' }}
-                  className="dtrade-shares-input"
-                />
-                <span style={{ fontSize: 12, color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>min delay</span>
-                <Button
-                  variant="ghost"
-                  onClick={handleSimulateAll}
-                  disabled={simAllRunning}
-                  style={{ fontSize: 12, padding: '0 0.5rem' }}
-                >
-                  ↺ Reload
-                </Button>
-              </div>
-            </div>
-          </DialogHeader>
-          {simAllRunning && <p style={{ color: 'var(--text-faint)', fontSize: 13 }}>Running simulations…</p>}
-          {simAllResults &&
-            (() => {
-              const valid = simAllResults.filter((r) => r.profitPct != null);
-              const wins = valid.filter((r) => r.profitPct! >= 0);
-              const losses = valid.filter((r) => r.profitPct! < 0);
-              const avgWin = wins.length ? wins.reduce((s, r) => s + r.profitPct!, 0) / wins.length : null;
-              const avgLoss = losses.length ? losses.reduce((s, r) => s + r.profitPct!, 0) / losses.length : null;
-              const total = valid.length ? valid.reduce((s, r) => s + r.profitPct!, 0) / valid.length : null;
-              const fmt = (v: number) => (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
-              return (
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '1rem',
-                    flexWrap: 'wrap',
-                    padding: '0.5rem 0',
-                    borderBottom: '1px solid var(--border)',
-                  }}
-                >
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: 'var(--text-faint)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                      }}
-                    >
-                      Wins ({wins.length})
-                    </span>
-                    <span style={{ fontWeight: 700, color: 'var(--color-green)', fontSize: 15 }}>
-                      {avgWin != null ? fmt(avgWin) : '—'}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: 'var(--text-faint)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                      }}
-                    >
-                      Losses ({losses.length})
-                    </span>
-                    <span style={{ fontWeight: 700, color: 'var(--color-red)', fontSize: 15 }}>
-                      {avgLoss != null ? fmt(avgLoss) : '—'}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginLeft: 'auto' }}>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: 'var(--text-faint)',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                      }}
-                    >
-                      Avg Total ({valid.length})
-                    </span>
-                    <span
-                      style={{
-                        fontWeight: 700,
-                        color: total != null && total >= 0 ? 'var(--color-green)' : 'var(--color-red)',
-                        fontSize: 15,
-                      }}
-                    >
-                      {total != null ? fmt(total) : '—'}
-                    </span>
-                  </div>
-                </div>
-              );
-            })()}
-          {simAllResults && (
-            <table className="sim-table" style={{ width: '100%', marginTop: '0.5rem' }}>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Ticker</th>
-                  <th>Event</th>
-                  <th>Idea</th>
-                  <th>Action</th>
-                  <th>Event time</th>
-                  <th>Entry</th>
-                  <th style={{ textAlign: 'right' }}>P&L %</th>
-                </tr>
-              </thead>
-              <tbody>
-                {simAllResults.map((row) => {
-                  const color =
-                    row.profitPct == null
-                      ? 'var(--text-faint)'
-                      : row.profitPct >= 0
-                        ? 'var(--color-green)'
-                        : 'var(--color-red)';
-                  return (
-                    <tr key={row.rank}>
-                      <td style={{ color: 'var(--text-faint)', fontSize: 11 }}>{row.rank}</td>
-                      <td style={{ fontWeight: 600 }}>{row.ticker}</td>
-                      <td
-                        style={{
-                          fontSize: 12,
-                          maxWidth: 260,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {row.event}
-                      </td>
-                      <td
-                        style={{
-                          fontSize: 11,
-                          color: 'var(--text-faint)',
-                          maxWidth: 160,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {row.trade_idea}
-                      </td>
-                      <td
-                        style={{
-                          fontWeight: 600,
-                          color: row.action === 'short' ? '#f97316' : '#22c55e',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {row.action.toUpperCase()}
-                      </td>
-                      <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: row.preMarket ? '#f59e0b' : 'var(--text-faint)' }}>
-                        {row.chartTime}{row.preMarket && ' ⚡'}
-                      </td>
-                      <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: 'var(--text-faint)' }}>
-                        {row.entryTime}
-                      </td>
-                      <td style={{ textAlign: 'right', fontWeight: 700, color }}>
-                        {row.error
-                          ? row.error
-                          : row.profitPct == null
-                            ? '—'
-                            : (row.profitPct >= 0 ? '+' : '') + row.profitPct.toFixed(2) + '%'}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-        </DialogContent>
-      </Dialog>
+        onClose={() => dispatch({ type: 'SIM_ALL_CLOSE' })}
+        running={simAllRunning}
+        results={simAllResults}
+        aiDelay={aiDelay}
+        onAiDelayChange={(d) => dispatch({ type: 'SET_AI_DELAY', delay: d })}
+        onReload={handleSimulateAll}
+      />
     </div>
   );
 }

@@ -39,47 +39,8 @@ const DAYTRADE_PRESETS: Record<string, { time: string; side: 'buy' | 'sell'; val
   ],
 };
 
-import type { Side, Action, Transaction, SimResult } from '@/utils/sim';
-import { runShortSimulation, simResultToExportArgs } from '@/utils/sim';
-
-function runSimulation(bars: AlpacaBar[], actions: Action[], startShares = 0): SimResult {
-  const sorted = [...actions].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-  const firstOpen = bars[0]?.o ?? 0;
-  let shares = startShares;
-  let totalInvested = startShares * firstOpen;
-  let cashWithdrawn = 0;
-  const transactions: Transaction[] = [];
-  const portfolioHistory: { time: string; value: number }[] = [];
-
-  for (const bar of bars) {
-    const price = bar.c;
-    const barTime = bar.t;
-    for (const act of sorted) {
-      if (act.timestamp > barTime) continue;
-      if (transactions.some((t) => t.time === DateUtils.fmtTime(act.timestamp) && t.side === act.side)) continue;
-      if (act.side === 'buy') {
-        const bought = act.value / price;
-        shares += bought;
-        totalInvested += act.value;
-        transactions.push({ time: DateUtils.fmtTime(act.timestamp), timestamp: act.timestamp, side: 'buy', price, shares: bought, value: act.value, sharesAfter: shares, portfolioValue: shares * price });
-      } else {
-        const pct = Math.min(act.value, 100) / 100;
-        const sold = shares * pct;
-        const proceeds = sold * price;
-        shares -= sold;
-        cashWithdrawn += proceeds;
-        transactions.push({ time: DateUtils.fmtTime(act.timestamp), timestamp: act.timestamp, side: 'sell', price, shares: sold, value: proceeds, sharesAfter: shares, portfolioValue: shares * price });
-      }
-    }
-    portfolioHistory.push({ time: barTime, value: shares * price });
-  }
-
-  const lastPrice = bars.at(-1)?.c ?? 0;
-  const sharesValue = shares * lastPrice;
-  const profit = sharesValue + cashWithdrawn - totalInvested;
-  const profitPct = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
-  return { transactions, portfolioHistory, totalInvested, cashWithdrawn, finalShares: shares, sharesValue, profit, profitPct };
-}
+import type { Side, Action, SimResult } from '@/utils/sim';
+import { runLongSimulation, runShortSimulation, buildSimStats, fmtMarkerText, simResultToExportArgs } from '@/utils/sim';
 
 
 let nextActionId = 1;
@@ -148,7 +109,7 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
   const result = useMemo<SimResult | null>(() => {
     if (!bars.length || !actions.length) return null;
     if (tradeMode === 'short') return runShortSimulation(bars, actions, DateUtils.fmtTime);
-    return runSimulation(bars, actions, Math.max(0, Number(startShares) || 0));
+    return runLongSimulation(bars, actions, DateUtils.fmtTime, Math.max(0, Number(startShares) || 0));
   }, [bars, actions, startShares, tradeMode]);
 
   // Build price chart
@@ -232,7 +193,7 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
           position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
           color: a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#60a5fa',
           shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
-          text: a.side === 'buy' ? `B $${a.value}` : a.side === 'sell' ? `S ${a.value}%` : a.side === 'short' ? `Sh $${a.value}` : `C ${a.value}%`,
+          text: fmtMarkerText(a.side, a.value),
         };
       })
       .sort((a, b) => (a.time < b.time ? -1 : 1)));
@@ -278,7 +239,6 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
     result?.transactions.map((t) => ({ time: t.time, side: t.side, value: t.value, shares: t.shares })) ?? [],
   [result]);
 
-  const profitColor = result ? (result.profit >= 0 ? 'var(--color-green)' : 'var(--color-red)') : undefined;
 
   return (
     <div className="dtrade-sim">
@@ -428,21 +388,7 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
           {result && result.transactions.length > 0 && (
             <SimResults
               ref={portfolioChartRef}
-              stats={tradeMode === 'long' ? [
-                { label: 'Total invested', value: PriceUtils.fmt(result.totalInvested) },
-                { label: 'Shares held', value: result.finalShares.toFixed(4) },
-                { label: 'Shares value', value: PriceUtils.fmt(result.sharesValue) },
-                { label: 'Cash withdrawn', value: PriceUtils.fmt(result.cashWithdrawn) },
-                { label: 'Profit', value: (result.profit >= 0 ? '+' : '') + PriceUtils.fmt(result.profit), color: profitColor },
-                { label: 'Profit %', value: (result.profitPct >= 0 ? '+' : '') + result.profitPct.toFixed(2) + '%', color: profitColor },
-              ] : [
-                { label: 'Cash received', value: PriceUtils.fmt(result.totalInvested) },
-                { label: 'Shares short', value: Math.abs(result.finalShares).toFixed(4) },
-                { label: 'Remaining liability', value: PriceUtils.fmt(Math.abs(result.sharesValue)) },
-                { label: 'Cover cost', value: PriceUtils.fmt(result.cashWithdrawn) },
-                { label: 'Profit', value: (result.profit >= 0 ? '+' : '') + PriceUtils.fmt(result.profit), color: profitColor },
-                { label: 'Profit %', value: (result.profitPct >= 0 ? '+' : '') + result.profitPct.toFixed(2) + '%', color: profitColor },
-              ]}
+              stats={buildSimStats(result, tradeMode, PriceUtils.fmt)}
               history={result.portfolioHistory}
               markers={portfolioMarkers}
               transactions={result.transactions}
