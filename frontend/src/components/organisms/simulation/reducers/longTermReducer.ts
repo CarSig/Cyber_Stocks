@@ -21,10 +21,7 @@ export function initialLongTermState() {
   };
 }
 
-export function longTermReducer(
-  state: LongTermSimState,
-  action: LongTermSimAction,
-): LongTermSimState {
+export function longTermReducer(state: LongTermSimState, action: LongTermSimAction): LongTermSimState {
   if (action.type === 'SET_DATE') return { ...state };
   if (action.type === 'SET_TIMEFRAME') return { ...state };
   return baseReducer(state, action as BaseSimAction<LongTermAction>);

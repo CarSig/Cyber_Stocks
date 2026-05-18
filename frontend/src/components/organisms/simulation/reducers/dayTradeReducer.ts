@@ -24,10 +24,7 @@ export function initialDayTradeState() {
   };
 }
 
-export function dayTradeReducer(
-  state: DayTradeSimState,
-  action: DayTradeSimAction,
-): DayTradeSimState {
+export function dayTradeReducer(state: DayTradeSimState, action: DayTradeSimAction): DayTradeSimState {
   if (action.type === 'LOAD_BARS') {
     const d = DateUtils.lastWeekday(action.date);
     return { ...state, date: d, query: { date: d, timeframe: action.timeframe }, actions: [], textValue: d };

@@ -33,8 +33,7 @@ export const intradayStrategy: SimStrategy<Action> = {
   },
   updateAction: (a, field, val) => {
     const isExit = (s: Side) => s === 'sell' || s === 'cover';
-    if (field === 'value')
-      return { ...a, value: isExit(a.side) ? Math.min(100, Number(val)) : Number(val) };
+    if (field === 'value') return { ...a, value: isExit(a.side) ? Math.min(100, Number(val)) : Number(val) };
     const newSide = val as Side;
     return { ...a, side: newSide, value: isExit(newSide) ? Math.min(100, a.value) : a.value };
   },
@@ -54,8 +53,7 @@ export const longTermStrategy: SimStrategy<LongTermAction> = {
     if (!isFinite(val) || val === 0 || !date) return null;
     return { id, date, type: side as 'buy' | 'sell', value: String(Math.abs(val)) };
   },
-  updateAction: (a, field, val) =>
-    field === 'side' ? { ...a, type: val as 'buy' | 'sell' } : { ...a, value: val },
+  updateAction: (a, field, val) => (field === 'side' ? { ...a, type: val as 'buy' | 'sell' } : { ...a, value: val }),
   getLabel: (a) => a.date,
   defaultSide: () => 'buy',
 };

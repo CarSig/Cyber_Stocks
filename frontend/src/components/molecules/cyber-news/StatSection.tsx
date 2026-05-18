@@ -20,7 +20,9 @@ export default function StatSection({
   return (
     <div className="stat-section" style={{ minWidth }}>
       <div className="stat-section-label">{label}</div>
-      <div className="stat-section-value" style={{ color: valueColor }}>{value}</div>
+      <div className="stat-section-value" style={{ color: valueColor }}>
+        {value}
+      </div>
       {subtitle && <div className="stat-section-subtitle">{subtitle}</div>}
       {children}
     </div>

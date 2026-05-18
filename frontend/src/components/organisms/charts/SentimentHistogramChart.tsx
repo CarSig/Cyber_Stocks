@@ -66,7 +66,9 @@ function aggregateByDay(
   while (cursor <= end) {
     const time = cursor.toISOString().slice(0, 10);
     const d = byDay.get(time);
-    countData.push(d ? { time, value: d.count, color: sentimentToColor(d.sum / d.count) } : { time, value: 0, color: 'transparent' });
+    countData.push(
+      d ? { time, value: d.count, color: sentimentToColor(d.sum / d.count) } : { time, value: 0, color: 'transparent' },
+    );
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
 
@@ -94,8 +96,12 @@ export default function SentimentHistogramChart({
   const getSentimentRef = useSyncRef(getSentiment);
   const getDateRef = useSyncRef(getDate);
 
-  useEffect(() => { periodRef.current = period; }, [period]);
-  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
+  useEffect(() => {
+    periodRef.current = period;
+  }, [period]);
+  useEffect(() => {
+    visibleRangeRef.current = visibleRange;
+  }, [visibleRange]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -123,7 +129,11 @@ export default function SentimentHistogramChart({
     skipRangeRef.current = true;
     if (visibleRangeRef.current) {
       try {
-        chart.timeScale().setVisibleRange(visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
+        chart
+          .timeScale()
+          .setVisibleRange(
+            visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0],
+          );
       } catch {
         chart.timeScale().fitContent();
       }
@@ -131,7 +141,11 @@ export default function SentimentHistogramChart({
       chart.timeScale().fitContent();
     } else {
       try {
-        chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current!), to: todayString() } as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
+        chart
+          .timeScale()
+          .setVisibleRange({ from: daysAgoString(periodRef.current!), to: todayString() } as Parameters<
+            ReturnType<IChartApi['timeScale']>['setVisibleRange']
+          >[0]);
       } catch {
         chart.timeScale().fitContent();
       }

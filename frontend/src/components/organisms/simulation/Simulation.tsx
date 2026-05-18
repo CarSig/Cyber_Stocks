@@ -84,14 +84,30 @@ function runLongTermSim(quotes: Quote[], actions: LongTermAction[], startShares 
         const bought = act.value / price;
         shares += bought;
         totalInvested += act.value;
-        transactions.push({ date: d, type: 'buy', value: act.value, shares: bought, price, sharesAfter: shares, portfolioValue: shares * price });
+        transactions.push({
+          date: d,
+          type: 'buy',
+          value: act.value,
+          shares: bought,
+          price,
+          sharesAfter: shares,
+          portfolioValue: shares * price,
+        });
       } else {
         const pct = Math.min(act.value, 100) / 100;
         const sold = shares * pct;
         const proceeds = sold * price;
         shares -= sold;
         cashWithdrawn += proceeds;
-        transactions.push({ date: d, type: 'sell', value: proceeds, shares: sold, price, sharesAfter: shares, portfolioValue: shares * price });
+        transactions.push({
+          date: d,
+          type: 'sell',
+          value: proceeds,
+          shares: sold,
+          price,
+          sharesAfter: shares,
+          portfolioValue: shares * price,
+        });
       }
     }
     portfolioHistory.push({ date: d, value: shares * price });
@@ -109,7 +125,17 @@ function runLongTermSim(quotes: Quote[], actions: LongTermAction[], startShares 
     return h.filter((p) => p.date >= from && p.date <= to);
   };
 
-  return { totalInvested, finalShares: shares, sharesValue, cashWithdrawn, profit, profitPct, transactions, portfolioHistory: trimHistory(portfolioHistory), priceHistory: trimHistory(priceHistory) };
+  return {
+    totalInvested,
+    finalShares: shares,
+    sharesValue,
+    cashWithdrawn,
+    profit,
+    profitPct,
+    transactions,
+    portfolioHistory: trimHistory(portfolioHistory),
+    priceHistory: trimHistory(priceHistory),
+  };
 }
 
 const nextId = { current: 1 };
@@ -132,14 +158,20 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
   const interactiveChartRef = useRef<HTMLDivElement>(null);
   const interactiveRef = useRef<{ chart: IChartApi; series: ISeriesApi<SeriesType> } | null>(null);
   const clickValueRef = useRef(clickValue);
-  useEffect(() => { clickValueRef.current = clickValue; }, [clickValue]);
+  useEffect(() => {
+    clickValueRef.current = clickValue;
+  }, [clickValue]);
 
   const [manualDate, setManualDate] = useState('');
   const [manualType, setManualType] = useState<'buy' | 'sell'>('buy');
   const [manualValue, setManualValue] = useState('100');
 
   type PresetsMap = Record<string, SimulationPreset[]>;
-  const { data: presets, error: presetsError, isLoading: presetsLoading } = useQuery<PresetsMap>({
+  const {
+    data: presets,
+    error: presetsError,
+    isLoading: presetsLoading,
+  } = useQuery<PresetsMap>({
     queryKey: ['simulation-presets', ticker],
     queryFn: () => getSimulationPresets(ticker) as unknown as Promise<PresetsMap>,
     enabled: !!ticker,
@@ -153,7 +185,12 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
         .map((item: SimulationPreset) => {
           const num = Number(item.number);
           if (!isFinite(num) || num === 0) return null;
-          return { id: nextId.current++, date: item.date, type: (num > 0 ? 'buy' : 'sell') as 'buy' | 'sell', value: String(Math.abs(num)) };
+          return {
+            id: nextId.current++,
+            date: item.date,
+            type: (num > 0 ? 'buy' : 'sell') as 'buy' | 'sell',
+            value: String(Math.abs(num)),
+          };
         })
         .filter((x): x is LongTermAction => x !== null);
       dispatch({ type: 'SET_ACTIONS', actions: next, textValue: longTermStrategy.toText('', next) });
@@ -161,29 +198,40 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     [presets],
   );
 
-  const addManualAction = useAddManualAction(longTermStrategy, manualDate, manualType, manualValue, '', dispatch, nextId, () => setManualDate(''));
+  const addManualAction = useAddManualAction(
+    longTermStrategy,
+    manualDate,
+    manualType,
+    manualValue,
+    '',
+    dispatch,
+    nextId,
+    () => setManualDate(''),
+  );
 
   const result = useMemo<SimResult | null>(() => {
     if (!quotes.length || !actions.some((a) => a.date && a.value)) return null;
     return runLongTermSim(quotes, actions, Math.max(0, Number(startShares) || 0));
   }, [actions, quotes, startShares]);
 
-  useEffect(() => { if (result) onResult?.(result); }, [result, onResult]);
+  useEffect(() => {
+    if (result) onResult?.(result);
+  }, [result, onResult]);
 
   const remove = useCallback((id: number) => dispatch({ type: 'REMOVE_ACTION', id, date: '' }), []);
-  const update = useCallback(
-    (id: number, field: keyof LongTermAction, val: string) => {
-      if (field === 'id') return;
-      dispatch({ type: 'UPDATE_ACTION', id, field: field === 'type' ? 'side' : 'value', val, date: '' });
+  const update = useCallback((id: number, field: keyof LongTermAction, val: string) => {
+    if (field === 'id') return;
+    dispatch({ type: 'UPDATE_ACTION', id, field: field === 'type' ? 'side' : 'value', val, date: '' });
+  }, []);
+  const insertBefore = useCallback(
+    (id: number) => {
+      const idx = actions.findIndex((a) => a.id === id);
+      const next = [...actions];
+      next.splice(idx, 0, { id: nextId.current++, date: '', type: 'buy', value: '100' });
+      dispatch({ type: 'SET_ACTIONS', actions: next, textValue: longTermStrategy.toText('', next) });
     },
-    [],
+    [actions],
   );
-  const insertBefore = useCallback((id: number) => {
-    const idx = actions.findIndex((a) => a.id === id);
-    const next = [...actions];
-    next.splice(idx, 0, { id: nextId.current++, date: '', type: 'buy', value: '100' });
-    dispatch({ type: 'SET_ACTIONS', actions: next, textValue: longTermStrategy.toText('', next) });
-  }, [actions]);
   const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS', date: '' }), []);
 
   // Interactive price chart
@@ -204,11 +252,33 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
 
     let series: ISeriesApi<SeriesType>;
     if (chartType === 'area') {
-      series = chart.addSeries(AreaSeries, { lineColor: cv('--color-green'), topColor: cv('--color-green') + '55', bottomColor: cv('--color-green') + '00', lineWidth: 2 });
+      series = chart.addSeries(AreaSeries, {
+        lineColor: cv('--color-green'),
+        topColor: cv('--color-green') + '55',
+        bottomColor: cv('--color-green') + '00',
+        lineWidth: 2,
+      });
       series.setData(priceData);
     } else if (chartType === 'candlestick') {
-      series = chart.addSeries(CandlestickSeries, { upColor: '#22c55e', downColor: '#ef4444', borderUpColor: '#22c55e', borderDownColor: '#ef4444', wickUpColor: '#22c55e', wickDownColor: '#ef4444' });
-      series.setData(quotes.filter((q) => q.open != null && q.close != null).map((q) => ({ time: q.date.slice(0, 10) as `${number}-${number}-${number}`, open: q.open, high: q.high ?? q.close, low: q.low ?? q.close, close: q.close })));
+      series = chart.addSeries(CandlestickSeries, {
+        upColor: '#22c55e',
+        downColor: '#ef4444',
+        borderUpColor: '#22c55e',
+        borderDownColor: '#ef4444',
+        wickUpColor: '#22c55e',
+        wickDownColor: '#ef4444',
+      });
+      series.setData(
+        quotes
+          .filter((q) => q.open != null && q.close != null)
+          .map((q) => ({
+            time: q.date.slice(0, 10) as `${number}-${number}-${number}`,
+            open: q.open,
+            high: q.high ?? q.close,
+            low: q.low ?? q.close,
+            close: q.close,
+          })),
+      );
     } else {
       series = chart.addSeries(LineSeries, { color: cv('--color-green'), lineWidth: 2 });
       series.setData(priceData);
@@ -217,14 +287,21 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
 
     let lastHoveredDate: string | null = null;
     chart.subscribeCrosshairMove((param) => {
-      if (!param.time) { lastHoveredDate = null; return; }
+      if (!param.time) {
+        lastHoveredDate = null;
+        return;
+      }
       lastHoveredDate = param.time as string;
     });
     chart.subscribeClick((param) => {
       if (!param.time) return;
       const date = snapToWeekday(param.time as string);
       const val = Math.max(0.01, Number(clickValueRef.current) || 100);
-      dispatch({ type: 'ADD_ACTION', action: { id: nextId.current++, date, type: 'buy', value: String(val) }, date: '' });
+      dispatch({
+        type: 'ADD_ACTION',
+        action: { id: nextId.current++, date, type: 'buy', value: String(val) },
+        date: '',
+      });
     });
 
     const el = interactiveChartRef.current!;
@@ -233,7 +310,11 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       const date = lastHoveredDate ? snapToWeekday(lastHoveredDate) : '';
       if (!date) return;
       const val = Math.min(100, Math.max(0.01, Number(clickValueRef.current) || 50));
-      dispatch({ type: 'ADD_ACTION', action: { id: nextId.current++, date, type: 'sell', value: String(val) }, date: '' });
+      dispatch({
+        type: 'ADD_ACTION',
+        action: { id: nextId.current++, date, type: 'sell', value: String(val) },
+        date: '',
+      });
     }
     el.addEventListener('contextmenu', onContextMenu);
     interactiveRef.current = { chart, series };
@@ -276,8 +357,19 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     exportSimPdf(
       ticker,
       simStatsToExportRows(result),
-      result.transactions.map((t) => ({ label: t.date, side: t.type, price: t.price, shares: t.shares, value: t.value, sharesAfter: t.sharesAfter, portfolioValue: t.portfolioValue })),
-      [{ ref: interactiveChartRef.current, label: 'Stock Price' }, { ref: portfolioChartRef.current, label: 'Portfolio Value' }],
+      result.transactions.map((t) => ({
+        label: t.date,
+        side: t.type,
+        price: t.price,
+        shares: t.shares,
+        value: t.value,
+        sharesAfter: t.sharesAfter,
+        portfolioValue: t.portfolioValue,
+      })),
+      [
+        { ref: interactiveChartRef.current, label: 'Stock Price' },
+        { ref: portfolioChartRef.current, label: 'Portfolio Value' },
+      ],
       'Date',
     );
   }, [result, ticker]);
@@ -286,7 +378,10 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     const raw = e.target.value;
     let id = Date.now();
     const parsed: LongTermAction[] = [];
-    for (const line of raw.split('\n').map((l) => l.trim()).filter(Boolean)) {
+    for (const line of raw
+      .split('\n')
+      .map((l) => l.trim())
+      .filter(Boolean)) {
       const parts = line.split(',').map((s) => s.trim());
       if (parts.length !== 2) continue;
       const [label, numStr] = parts;
@@ -405,7 +500,9 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
                   />
                   <Select
                     value={a.type}
-                    onValueChange={(v: string | null) => { if (v) update(a.id, 'type', v); }}
+                    onValueChange={(v: string | null) => {
+                      if (v) update(a.id, 'type', v);
+                    }}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue />
@@ -425,8 +522,12 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
                     onChange={(e) => update(a.id, 'value', e.target.value)}
                     className="form-input--number"
                   />
-                  <Button variant="ghost" onClick={() => insertBefore(a.id)}>+ before</Button>
-                  <Button variant="ghost" onClick={() => remove(a.id)}>✕</Button>
+                  <Button variant="ghost" onClick={() => insertBefore(a.id)}>
+                    + before
+                  </Button>
+                  <Button variant="ghost" onClick={() => remove(a.id)}>
+                    ✕
+                  </Button>
                 </div>
               );
             })}

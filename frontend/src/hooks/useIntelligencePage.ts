@@ -21,7 +21,10 @@ export function useIntelligencePage() {
     ? [...new Map((entities as IntelligenceEntity[]).map((e) => [e.entityId, e])).values()]
     : [];
 
-  const correlationByEntityId = indexBy((correlations as Array<{ entityId: string; correlation?: CorrelationResult }>) ?? [], 'entityId');
+  const correlationByEntityId = indexBy(
+    (correlations as Array<{ entityId: string; correlation?: CorrelationResult }>) ?? [],
+    'entityId',
+  );
   const filteredSignals = (allSignals as IntelligenceSignal[] | undefined)?.filter((s) => s.count >= 5) ?? [];
 
   return {

@@ -57,7 +57,20 @@ type ChartRef = { chart: IChartApi; candleSeries: ISeriesApi<SeriesType> } | nul
 
 export default function DayTradeSimulation({ ticker }: { ticker: string }) {
   const [s, dispatch] = useReducer(dayTradeReducer, undefined, initialDayTradeState);
-  const { date, timeframe, query, actions, nextSide, value, startShares, manualTime, textMode, textValue, chartType, tradeMode } = s;
+  const {
+    date,
+    timeframe,
+    query,
+    actions,
+    nextSide,
+    value,
+    startShares,
+    manualTime,
+    textMode,
+    textValue,
+    chartType,
+    tradeMode,
+  } = s;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ChartRef>(null);
@@ -65,9 +78,15 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
   const nextSideRef = useRef<Side>(nextSide as Side);
   const valueRef = useRef<string>(value);
   const tradeModeRef = useRef<'long' | 'short'>(tradeMode);
-  useEffect(() => { nextSideRef.current = nextSide as Side; }, [nextSide]);
-  useEffect(() => { valueRef.current = value; }, [value]);
-  useEffect(() => { tradeModeRef.current = tradeMode; }, [tradeMode]);
+  useEffect(() => {
+    nextSideRef.current = nextSide as Side;
+  }, [nextSide]);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+  useEffect(() => {
+    tradeModeRef.current = tradeMode;
+  }, [tradeMode]);
 
   const applyPreset = useApplyPreset(
     DAYTRADE_PRESETS,
@@ -145,7 +164,10 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
 
     let lastHoveredBar: { iso: string } | null = null;
     chart.subscribeCrosshairMove((param) => {
-      if (!param.time) { lastHoveredBar = null; return; }
+      if (!param.time) {
+        lastHoveredBar = null;
+        return;
+      }
       lastHoveredBar = { iso: new Date((param.time as unknown as number) * 1000).toISOString() };
     });
     chart.subscribeClick((param) => {
@@ -238,10 +260,7 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
     [query.date],
   );
 
-  const clear = useCallback(
-    () => dispatch({ type: 'CLEAR_ACTIONS', date: query.date }),
-    [query.date],
-  );
+  const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS', date: query.date }), [query.date]);
 
   const handleExportPdf = useCallback(() => {
     if (!result) return;
@@ -266,7 +285,10 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
   const handleTextChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const raw = e.target.value;
-      const lines = raw.split('\n').map((l) => l.trim()).filter(Boolean);
+      const lines = raw
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean);
       let parsedDate: string | undefined;
       let actionLines = lines;
       if (/^\d{4}-\d{2}-\d{2}$/.test(lines[0] ?? '')) {
@@ -286,7 +308,13 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
         if (isNaN(h) || isNaN(m)) continue;
         const side: Side = num > 0 ? 'buy' : 'sell';
         const val = Math.min(side === 'sell' ? 100 : Infinity, Math.abs(num));
-        parsed.push({ id: id++, timestamp: DateUtils.timeToIso(timeStr, effectiveDate), time: timeStr, side, value: val });
+        parsed.push({
+          id: id++,
+          timestamp: DateUtils.timeToIso(timeStr, effectiveDate),
+          time: timeStr,
+          side,
+          value: val,
+        });
       }
       dispatch({ type: 'SET_TEXT', raw, parsedDate, parsedActions: parsed.length ? parsed : undefined });
     },

@@ -53,12 +53,8 @@ export default function ChartsTab({
     setHideIntelligence,
   } = useTickerContext();
 
-  const newsOverlay = overlays.news as
-    | { articles: NewsArticle[]; analysis?: NewsAnalysisMap }
-    | undefined;
-  const cyberNewsOverlay = overlays.cyberNews as
-    | { articles?: NewsArticle[]; analysis?: NewsAnalysisMap }
-    | undefined;
+  const newsOverlay = overlays.news as { articles: NewsArticle[]; analysis?: NewsAnalysisMap } | undefined;
+  const cyberNewsOverlay = overlays.cyberNews as { articles?: NewsArticle[]; analysis?: NewsAnalysisMap } | undefined;
 
   return (
     <section>

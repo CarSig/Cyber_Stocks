@@ -6,9 +6,7 @@ type CorrelationSelectorProps = {
 export function CorrelationSelector({ lagDays, setLagDays }: CorrelationSelectorProps) {
   return (
     <div className="correlation-selector">
-      <h2 className="correlation-selector-label">
-        Sentiment ↔ Price Correlation
-      </h2>
+      <h2 className="correlation-selector-label">Sentiment ↔ Price Correlation</h2>
       <select
         value={lagDays}
         onChange={(e) => setLagDays(Number(e.target.value))}

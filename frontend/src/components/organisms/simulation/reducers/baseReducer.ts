@@ -92,7 +92,10 @@ export function makeSimReducer<A extends { id: number }>(strategy: SimStrategy<A
   };
 }
 
-export function initialBaseSimState<A>(date: string, chartType: 'line' | 'area' | 'candlestick' = 'line'): BaseSimState<A> {
+export function initialBaseSimState<A>(
+  date: string,
+  chartType: 'line' | 'area' | 'candlestick' = 'line',
+): BaseSimState<A> {
   return {
     actions: [],
     nextSide: 'buy',

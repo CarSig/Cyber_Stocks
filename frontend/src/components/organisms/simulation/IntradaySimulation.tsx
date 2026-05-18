@@ -82,7 +82,6 @@ function parseIntradayText(raw: string, date: string): { parsedDate: string | nu
   return { parsedDate, actions };
 }
 
-
 const nextActionId = { current: 1 };
 
 type ChartRef = { chart: IChartApi; series: ISeriesApi<SeriesType> } | null;
