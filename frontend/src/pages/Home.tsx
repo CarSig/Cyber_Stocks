@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import StateHandler from '@/components/organisms/shared/StateHandler';
 import { getCompanies, getTicker } from '@/api/stock';
 import MultiChart from '@/components/organisms/charts/MultiChart';
-import CorrelationMatrix from '@/components/organisms/ticker/CorrelationMatrix';
+import CorrelationMatrix from '@/components/organisms/correlation/CorrelationMatrix';
 import Toggle from '@/components/molecules/shared/Toggle';
 import Page from '@/components/atoms/Page';
 

@@ -2,7 +2,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import FilterSelect from '@/components/molecules/shared/FilterSelect';
 import { useTickerContext } from '@/context/TickerContext';
-import CorrelationBox from '@/components/organisms/ticker/CorrelationBox';
+import CorrelationBox from '@/components/organisms/correlation/CorrelationBox';
 import CorrLagTable from '@/pages/Ticker/CorrLagTable';
 import type { CorrelationResult } from '@/types';
 
@@ -63,7 +63,7 @@ export default function CorrelationsTab({
         </div>
       )}
 
-      <div className="compare-row" style={{ marginTop: '1rem' }}>
+      <div className="compare-row compare-row-mt">
         <FilterSelect
           value={compareTicker}
           onChange={setCompareTicker}

@@ -109,7 +109,7 @@ export default function SocialsTruthSocial() {
         {error && <p className="ti-error">{(error as Error).message}</p>}
         {posts && (
           <>
-            <div className="ti-filters" style={{ marginBottom: 16 }}>
+            <div className="ti-filters ti-filters-mb-16">
               <FilterSelect
                 value={company}
                 onChange={(v) => setCompany(v ?? '')}

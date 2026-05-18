@@ -44,7 +44,7 @@ export default function SocialsReddit() {
         <h1>Reddit</h1>
       </div>
 
-      <div className="ti-filters" style={{ marginBottom: '1rem' }}>
+      <div className="ti-filters ti-filters-mb">
         <FilterSelect
           value={subreddit}
           onChange={(v) => {

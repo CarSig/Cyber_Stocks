@@ -20,7 +20,7 @@ export default function TickerCard({ row, onClick, topic, correlation }: TickerC
   return (
     <BaseCard variant="interactive" style={{ cursor: 'pointer', opacity: isPending ? 0.6 : 1 }} onClick={onClick}>
       <CardHeader title={row.company}>
-        <span style={{ fontSize: 12, color: 'var(--muted-foreground)' }}>{row.ticker}</span>
+        <span className="ticker-card-ticker">{row.ticker}</span>
       </CardHeader>
       <div className="ti-card-body">
         {isPending || !summary ? (

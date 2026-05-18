@@ -3,12 +3,11 @@ import ChartCard from '@/components/molecules/shared/ChartCard';
 import { useTickerContext } from '@/context/TickerContext';
 import StockChart from '@/components/organisms/charts/StockChart';
 import VolatilityChart from '@/components/organisms/charts/VolatilityChart';
-import NewsChart from '@/components/organisms/charts/NewsChart';
-import IntelligenceChart from '@/components/organisms/charts/IntelligenceChart';
+import SentimentHistogramChart from '@/components/organisms/charts/SentimentHistogramChart';
 import PeriodButtons from '@/components/molecules/shared/PeriodButtons';
 import Analysis from '@/components/organisms/ticker/Analysis';
 import TickerKPI from '@/pages/Ticker/TickerKPI';
-import type { Quote, TickerSummary, NewsArticle } from '@/types';
+import type { Quote, TickerSummary, NewsArticle, NewsAnalysisMap } from '@/types';
 
 type ChartsTabProps = {
   summary?: TickerSummary | null;
@@ -55,10 +54,10 @@ export default function ChartsTab({
   } = useTickerContext();
 
   const newsOverlay = overlays.news as
-    | { articles: NewsArticle[]; analysis?: Parameters<typeof NewsChart>[0]['analysis'] }
+    | { articles: NewsArticle[]; analysis?: NewsAnalysisMap }
     | undefined;
   const cyberNewsOverlay = overlays.cyberNews as
-    | { articles?: NewsArticle[]; analysis?: Parameters<typeof NewsChart>[0]['analysis'] }
+    | { articles?: NewsArticle[]; analysis?: NewsAnalysisMap }
     | undefined;
 
   return (
@@ -115,9 +114,16 @@ export default function ChartsTab({
           hidden={hideNewsSentiment}
           onToggle={() => setHideNewsSentiment(!hideNewsSentiment)}
         >
-          <NewsChart
+          <SentimentHistogramChart
             articles={newsOverlay!.articles}
-            analysis={newsOverlay?.analysis}
+            getSentiment={(a) => newsOverlay?.analysis?.[a.link]?.sentiment ?? null}
+            getDate={(a) => {
+              const ts = a.providerPublishTime;
+              if (!ts) return null;
+              return new Date(
+                typeof ts === 'number' || (typeof ts === 'string' && /^\d{10}$/.test(ts)) ? Number(ts) * 1000 : ts,
+              ).toISOString();
+            }}
             period={period}
             onPeriodChange={setPeriod}
             visibleRange={visibleRange}
@@ -133,9 +139,17 @@ export default function ChartsTab({
           hidden={hideIntelligence}
           onToggle={() => setHideIntelligence(!hideIntelligence)}
         >
-          <IntelligenceChart
-            articles={intelligenceArticles as Parameters<typeof IntelligenceChart>[0]['articles']}
-            entityId={entityId}
+          <SentimentHistogramChart
+            articles={intelligenceArticles as NewsArticle[]}
+            getSentiment={(a) => {
+              const entities = (a as Record<string, unknown>)['entities'] as
+                | Array<{ entityId: string; sentiment: number }>
+                | undefined;
+              const match = entities?.find((e) => e.entityId === entityId);
+              const avg = entities?.length ? entities.reduce((s, e) => s + e.sentiment, 0) / entities.length : 0;
+              return match?.sentiment ?? avg;
+            }}
+            getDate={(a) => (a.timestamp ? String(a.timestamp) : null)}
             period={period}
             onPeriodChange={setPeriod}
             visibleRange={visibleRange}
@@ -151,9 +165,16 @@ export default function ChartsTab({
           hidden={hideCyberNewsSentiment}
           onToggle={() => setHideCyberNewsSentiment?.(!hideCyberNewsSentiment)}
         >
-          <NewsChart
+          <SentimentHistogramChart
             articles={cyberNewsOverlay!.articles!}
-            analysis={cyberNewsOverlay?.analysis}
+            getSentiment={(a) => cyberNewsOverlay?.analysis?.[a.link]?.sentiment ?? null}
+            getDate={(a) => {
+              const ts = a.providerPublishTime;
+              if (!ts) return null;
+              return new Date(
+                typeof ts === 'number' || (typeof ts === 'string' && /^\d{10}$/.test(ts)) ? Number(ts) * 1000 : ts,
+              ).toISOString();
+            }}
             period={period}
             onPeriodChange={setPeriod}
             visibleRange={visibleRange}

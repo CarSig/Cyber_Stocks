@@ -139,3 +139,9 @@
 .cyber-news-list-container {
   margin-bottom: var(--cn-spacing-3xl);
 }
+
+/* ── Page intro paragraph ──────────────────────────────────────────────────── */
+.cyber-news-intro {
+  color: var(--muted-foreground);
+  margin-bottom: 24px;
+}

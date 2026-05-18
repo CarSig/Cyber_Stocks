@@ -114,10 +114,10 @@ export default function VolatilityChart({
         <ChartToggleButton active={showATR} onClick={() => setShowATR((v) => !v)}>
           ATR14
         </ChartToggleButton>
-        <span className="chart-series-label" style={{ color: 'var(--color-amber)', marginLeft: 8 }}>
+        <span className="chart-series-label chart-series-label-ml" style={{ color: 'var(--color-amber)' }}>
           — HV20%
         </span>
-        <span className="chart-series-label" style={{ color: 'var(--color-red)', marginLeft: 8 }}>
+        <span className="chart-series-label chart-series-label-ml" style={{ color: 'var(--color-red)' }}>
           — ATR14%
         </span>
       </div>

@@ -4,11 +4,11 @@ type StatItem = {
   color?: string;
 };
 
-type SimStatsGridProps = {
+type StatsGridProps = {
   stats: StatItem[];
 };
 
-export default function SimStatsGrid({ stats }: SimStatsGridProps) {
+export default function StatsGrid({ stats }: StatsGridProps) {
   return (
     <div className="sim-stats">
       {stats.map(({ label, value, color }) => (

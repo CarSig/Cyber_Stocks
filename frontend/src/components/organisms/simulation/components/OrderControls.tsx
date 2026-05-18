@@ -1,7 +1,7 @@
 import { Input } from '@/components/ui/input';
 import { MarketUtils } from '@/utils/market';
 
-type SimOrderControlsProps = {
+type OrderControlsProps = {
   tradeMode: 'long' | 'short';
   onTradeModeChange: (mode: 'long' | 'short') => void;
   startShares: string;
@@ -18,7 +18,7 @@ type SimOrderControlsProps = {
   showTradeControls: boolean;
 };
 
-export default function SimOrderControls({
+export default function OrderControls({
   tradeMode,
   onTradeModeChange,
   startShares,
@@ -33,7 +33,7 @@ export default function SimOrderControls({
   eventSlot,
   onLoad,
   showTradeControls,
-}: SimOrderControlsProps) {
+}: OrderControlsProps) {
   return (
     <form className="dtrade-order-controls" onSubmit={onLoad}>
       {showTradeControls && (

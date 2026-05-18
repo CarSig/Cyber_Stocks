@@ -10,15 +10,19 @@ import type { IntradayEvent } from '@/api/alpaca';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import FilterSelect from '@/components/molecules/shared/FilterSelect';
-import SimToolbar from './sim/SimToolbar';
-import SimManualEntry from './sim/SimManualEntry';
-import SimResults from './sim/SimResults';
-import IntradayEventCard from './sim/IntradayEventCard';
-import SimOrderControls from './sim/SimOrderControls';
-import SimAllDialog from './sim/SimAllDialog';
-import { intradaySimReducer, initialIntradaySimState } from './sim/intradaySimReducer';
-import type { SimAllRow } from './sim/intradaySimReducer';
-import { exportSimPdf } from './sim/simExportPdf';
+import Toolbar from './components/Toolbar';
+import ManualEntry from './components/ManualEntry';
+import Results from './components/Results';
+import IntradayEventCard from './components/IntradayEventCard';
+import OrderControls from './components/OrderControls';
+import AllDialog from './components/AllDialog';
+import { intradayReducer, initialIntradayState } from './reducers/intradayReducer';
+import type { SimAllRow } from './reducers/intradayReducer';
+import { intradayStrategy } from './reducers/baseStrategy';
+import { useApplyPreset } from './hooks/useApplyPreset';
+import { useAddManualAction } from './hooks/useAddManualAction';
+import { exportSimPdf } from './utils/exportPdf';
+import { detectShortDirection, calcEntryTime } from './utils/intradaySimUtils';
 import { DateUtils } from '@/utils/date';
 import { PriceUtils } from '@/utils/price';
 
@@ -78,16 +82,13 @@ function parseIntradayText(raw: string, date: string): { parsedDate: string | nu
   return { parsedDate, actions };
 }
 
-function actionsToText(date: string, actions: Action[]): string {
-  return [date, ...actions.map((a) => `${a.time}, ${a.side === 'sell' ? -a.value : a.value}`)].join('\n');
-}
 
-let nextActionId = 1;
+const nextActionId = { current: 1 };
 
 type ChartRef = { chart: IChartApi; series: ISeriesApi<SeriesType> } | null;
 
 export default function IntradaySimulation() {
-  const [s, dispatch] = useReducer(intradaySimReducer, undefined, initialIntradaySimState);
+  const [s, dispatch] = useReducer(intradayReducer, undefined, initialIntradayState);
   const {
     date,
     timeframe,
@@ -202,20 +203,19 @@ export default function IntradaySimulation() {
     [query.date],
   );
 
-  const applyPreset = useCallback(
-    (name: string) => {
-      const preset = INTRADAY_SIM_PRESETS[name];
-      if (!preset) return;
-      const newActions = preset.map((p) => ({
-        id: nextActionId++,
-        timestamp: DateUtils.timeToIso(p.time, query.date),
-        time: p.time,
-        side: p.side,
-        value: p.value,
-      }));
-      dispatch({ type: 'SET_ACTIONS', actions: newActions, textValue: actionsToText(query.date, newActions) });
-    },
-    [query.date],
+  const applyPreset = useApplyPreset(
+    INTRADAY_SIM_PRESETS,
+    (p, id) => ({
+      id,
+      timestamp: DateUtils.timeToIso(p.time, query.date),
+      time: p.time,
+      side: p.side,
+      value: p.value,
+    }),
+    intradayStrategy,
+    query.date,
+    dispatch,
+    nextActionId,
   );
 
   const handleEventSelect = useCallback(
@@ -321,13 +321,13 @@ export default function IntradaySimulation() {
       const iso = chartTimeToIso(param.time as unknown as number);
       const val = Math.max(0.01, Number(valueRef.current) || 100);
       const newAction: Action = {
-        id: nextActionId++,
+        id: nextActionId.current++,
         timestamp: iso,
         time: DateUtils.fmtTime(iso),
         side: tradeModeRef.current === 'short' ? 'short' : 'buy',
         value: val,
       };
-      dispatch({ type: 'ADD_ACTION', action: newAction });
+      dispatch({ type: 'ADD_ACTION', action: newAction, date: query.date });
     });
 
     const el = containerRef.current!;
@@ -337,13 +337,13 @@ export default function IntradaySimulation() {
       const val = Math.min(100, Math.max(0.01, Number(valueRef.current) || 50));
       const iso = lastHoveredBar.iso;
       const newAction: Action = {
-        id: nextActionId++,
+        id: nextActionId.current++,
         timestamp: iso,
         time: DateUtils.fmtTime(iso),
         side: tradeModeRef.current === 'short' ? 'cover' : 'sell',
         value: val,
       };
-      dispatch({ type: 'ADD_ACTION', action: newAction });
+      dispatch({ type: 'ADD_ACTION', action: newAction, date: query.date });
     }
     el.addEventListener('contextmenu', onContextMenu);
     chartRef.current = { chart, series };
@@ -369,23 +369,29 @@ export default function IntradaySimulation() {
     syncIntradayMarkers(ref.series, actions, selectedEvent, query.date, tzOffsetRef.current);
   }, [actions, selectedEvent, query.date]);
 
-  const addManualAction = useCallback(() => {
-    if (!manualTime) return;
-    const val = Math.max(0.01, Number(value) || (nextSide === 'buy' ? 100 : 50));
-    const iso = DateUtils.timeToIso(manualTime, query.date);
-    const newAction: Action = { id: nextActionId++, timestamp: iso, time: manualTime, side: nextSide, value: val };
-    dispatch({ type: 'ADD_ACTION', action: newAction });
-    dispatch({ type: 'SET_MANUAL_TIME', time: '' });
-  }, [manualTime, nextSide, value, query.date]);
-
-  const removeAction = useCallback((id: number) => dispatch({ type: 'REMOVE_ACTION', id }), []);
-
-  const updateAction = useCallback(
-    (id: number, field: 'side' | 'value', val: string) => dispatch({ type: 'UPDATE_ACTION', id, field, val }),
-    [],
+  const addManualAction = useAddManualAction(
+    intradayStrategy,
+    manualTime,
+    nextSide,
+    value,
+    query.date,
+    dispatch,
+    nextActionId,
+    () => dispatch({ type: 'SET_MANUAL_TIME', time: '' }),
   );
 
-  const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS' }), []);
+  const removeAction = useCallback(
+    (id: number) => dispatch({ type: 'REMOVE_ACTION', id, date: query.date }),
+    [query.date],
+  );
+
+  const updateAction = useCallback(
+    (id: number, field: 'side' | 'value', val: string) =>
+      dispatch({ type: 'UPDATE_ACTION', id, field, val, date: query.date }),
+    [query.date],
+  );
+
+  const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS', date: query.date }), [query.date]);
 
   const handleSimulateAll = useCallback(async () => {
     if (!eventsData?.length) return;
@@ -393,12 +399,7 @@ export default function IntradaySimulation() {
 
     const simOne = async (ev: IntradayEvent): Promise<SimAllRow> => {
       const primaryTicker = ev.ticker.split('/')[0].trim();
-      const idea = ev.trade_idea.toLowerCase();
-      const tickerLower = primaryTicker.toLowerCase();
-      let isShort = false;
-      if (new RegExp(`${tickerLower}\\s+short`).test(idea)) isShort = true;
-      else if (!new RegExp(`${tickerLower}\\s+long`).test(idea) && /\bshort\b/.test(idea) && !/\blong\b/.test(idea))
-        isShort = true;
+      const isShort = detectShortDirection(primaryTicker, ev.trade_idea);
       const action = isShort ? ('short' as const) : ('buy' as const);
 
       try {
@@ -408,10 +409,8 @@ export default function IntradaySimulation() {
           staleTime: Infinity,
         });
         const [ch, cm] = ev.chart_time.split(':').map(Number);
-        const eventMinutes = ch * 60 + cm;
-        const isPreMarket = eventMinutes < 9 * 60 + 30;
-        const entryMinutes = Math.min(isPreMarket ? 9 * 60 + 30 : eventMinutes + aiDelay, 15 * 60 + 44);
-        const entryTime = `${String(Math.floor(entryMinutes / 60)).padStart(2, '0')}:${String(entryMinutes % 60).padStart(2, '0')}`;
+        const isPreMarket = ch * 60 + cm < 9 * 60 + 30;
+        const entryTime = calcEntryTime(ev.chart_time, aiDelay, isPreMarket);
 
         if (!bars.length)
           return {
@@ -480,39 +479,25 @@ export default function IntradaySimulation() {
 
   const handleAiSim = useCallback(() => {
     if (!selectedEvent) return;
-    const idea = selectedEvent.trade_idea.toLowerCase();
     const primaryTicker = selectedEvent.ticker.split('/')[0].trim();
-
-    // Determine direction for the primary ticker
-    // Patterns: "<ticker> short", "<ticker> long", "short", "long"
-    const tickerLower = primaryTicker.toLowerCase();
-    let isShort = false;
-    const tickerShortMatch = new RegExp(`${tickerLower}\\s+short`).test(idea);
-    const tickerLongMatch = new RegExp(`${tickerLower}\\s+long`).test(idea);
-    if (tickerShortMatch) {
-      isShort = true;
-    } else if (tickerLongMatch) {
-      isShort = false;
-    } else if (/\bshort\b/.test(idea) && !/\blong\b/.test(idea)) {
-      isShort = true;
-    }
+    const isShort = detectShortDirection(primaryTicker, selectedEvent.trade_idea);
 
     const chartDate = selectedEvent.chart_date;
     const [ch, cm] = selectedEvent.chart_time.split(':').map(Number);
-    const entryMinutes = Math.min(ch * 60 + cm + aiDelay, 15 * 60 + 44);
-    const entryTime = `${String(Math.floor(entryMinutes / 60)).padStart(2, '0')}:${String(entryMinutes % 60).padStart(2, '0')}`;
+    const isPreMarket = ch * 60 + cm < 9 * 60 + 30;
+    const entryTime = calcEntryTime(selectedEvent.chart_time, aiDelay, isPreMarket);
     const exitTime = '15:45';
     const entryIso = DateUtils.timeToIso(entryTime, chartDate);
     const exitIso = DateUtils.timeToIso(exitTime, chartDate);
 
     const newActions: Action[] = [
-      { id: nextActionId++, timestamp: entryIso, time: entryTime, side: isShort ? 'short' : 'buy', value: 100 },
-      { id: nextActionId++, timestamp: exitIso, time: exitTime, side: isShort ? 'cover' : 'sell', value: 100 },
+      { id: nextActionId.current++, timestamp: entryIso, time: entryTime, side: isShort ? 'short' : 'buy', value: 100 },
+      { id: nextActionId.current++, timestamp: exitIso, time: exitTime, side: isShort ? 'cover' : 'sell', value: 100 },
     ];
 
     const mode = isShort ? 'short' : 'long';
-    dispatch({ type: 'SET_TRADE_MODE', mode });
-    dispatch({ type: 'SET_ACTIONS', actions: newActions, textValue: actionsToText(chartDate, newActions) });
+    dispatch({ type: 'SET_TRADE_MODE', mode, date: chartDate });
+    dispatch({ type: 'SET_ACTIONS', actions: newActions, textValue: intradayStrategy.toText(chartDate, newActions) });
   }, [selectedEvent, aiDelay]);
 
   const handleExportPdf = useCallback(() => {
@@ -542,9 +527,9 @@ export default function IntradaySimulation() {
       {error && <p className="alpaca-status alpaca-error">{(error as Error).message}</p>}
 
       {/* Controls */}
-      <SimOrderControls
+      <OrderControls
         tradeMode={tradeMode}
-        onTradeModeChange={(mode) => dispatch({ type: 'SET_TRADE_MODE', mode })}
+        onTradeModeChange={(mode) => dispatch({ type: 'SET_TRADE_MODE', mode, date: query.date })}
         startShares={startShares}
         onStartSharesChange={(v) => dispatch({ type: 'SET_START_SHARES', startShares: v })}
         value={value}
@@ -639,11 +624,11 @@ export default function IntradaySimulation() {
             <div ref={dayLinesRef} className="alpaca-chart-daylines" />
           </div>
 
-          <SimToolbar
+          <Toolbar
             presets={INTRADAY_SIM_PRESETS}
             onPreset={applyPreset}
             textMode={textMode}
-            onTextModeToggle={() => dispatch({ type: 'TOGGLE_TEXT_MODE', currentActions: actions })}
+            onTextModeToggle={() => dispatch({ type: 'TOGGLE_TEXT_MODE', date: query.date })}
             hasResult={!!result}
             onExportPdf={handleExportPdf}
             hasActions={actions.length > 0}
@@ -665,7 +650,7 @@ export default function IntradaySimulation() {
             />
           )}
 
-          <SimManualEntry
+          <ManualEntry
             side={nextSide}
             onSideChange={(s) => dispatch({ type: 'SET_NEXT_SIDE', side: s as Side })}
             sideOptions={
@@ -753,7 +738,7 @@ export default function IntradaySimulation() {
           )}
 
           {result && result.transactions.length > 0 && (
-            <SimResults
+            <Results
               ref={portfolioChartRef}
               stats={buildSimStats(result, tradeMode, PriceUtils.fmt)}
               history={result.portfolioHistory}
@@ -765,7 +750,7 @@ export default function IntradaySimulation() {
         </>
       )}
 
-      <SimAllDialog
+      <AllDialog
         open={simAllRunning || !!simAllResults}
         onClose={() => dispatch({ type: 'SIM_ALL_CLOSE' })}
         running={simAllRunning}

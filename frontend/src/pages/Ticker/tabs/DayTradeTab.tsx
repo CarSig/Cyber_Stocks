@@ -4,7 +4,6 @@ import { getBars } from '@/api/alpaca';
 import type { AlpacaBar } from '@/types';
 import { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from '@/components/organisms/charts/utils/options';
 import IntradayChart from '@/components/organisms/charts/IntradayChart';
-import '@/pages/Alpaca/Alpaca.css';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);

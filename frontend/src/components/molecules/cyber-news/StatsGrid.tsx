@@ -12,14 +12,14 @@ import React from 'react';
 
 export default function StatsGrid({ stats }: StatsGridProps) {
   return (
-    <div style={{ display: 'flex', gap: 32, flex: '1' }}>
+    <div className="stats-grid">
       <div>
-        <div style={{ fontSize: 11, color: 'var(--muted-foreground)', marginBottom: 6 }}>Articles</div>
-        <div style={{ display: 'flex', gap: 16 }}>
+        <div className="stats-grid-label">Articles</div>
+        <div className="stats-grid-items">
           {stats.map((stat) => (
-            <div key={stat.label} style={{ textAlign: 'center' }}>
-              <div style={{ fontWeight: 600, fontSize: 16, color: stat.color }}>{stat.value}</div>
-              <div style={{ fontSize: 10, color: 'var(--muted-foreground)' }}>{stat.label}</div>
+            <div key={stat.label} className="stats-grid-item">
+              <div className="stats-grid-item-value" style={{ color: stat.color }}>{stat.value}</div>
+              <div className="stats-grid-item-label">{stat.label}</div>
             </div>
           ))}
         </div>

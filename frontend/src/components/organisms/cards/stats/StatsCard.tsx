@@ -14,13 +14,13 @@ type StatsCardProps = { summary: StatsCardSummary };
 export default function StatsCard({ summary }: StatsCardProps) {
   return (
     <BaseCard variant="stats">
-      <div className="ti-stats-row" style={{ marginBottom: 12 }}>
+      <div className="ti-stats-row stats-card-header">
         <Stat value={summary.articleCount} label="Articles" />
         <Stat value={summary.positiveCount} label="Positive" color="var(--color-green, #22c55e)" />
         <Stat value={summary.negativeCount} label="Negative" color="var(--color-red, #ef4444)" />
         <Stat value={summary.neutralCount} label="Neutral" />
       </div>
-      <p style={{ fontSize: 12, color: 'var(--muted-foreground)', marginBottom: 6 }}>Avg sentiment</p>
+      <p className="stats-card-avg-label">Avg sentiment</p>
       <SentimentBar value={summary.avgSentiment ?? 0} />
     </BaseCard>
   );

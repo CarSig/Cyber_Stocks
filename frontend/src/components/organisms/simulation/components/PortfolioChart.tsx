@@ -3,7 +3,7 @@ import { createChart, LineSeries, createSeriesMarkers } from 'lightweight-charts
 import type { Time } from 'lightweight-charts';
 import type { MarkerPoint, HistoryPoint } from '@/components/organisms/charts/utils/types';
 
-type SimPortfolioChartProps = {
+type PortfolioChartProps = {
   history: HistoryPoint[];
   markers?: MarkerPoint[];
   // When true, time strings are HH:MM (ET) — convert to unix seconds for display
@@ -41,7 +41,7 @@ function fmtVal(v: number) {
   return `$${v.toFixed(2)}`;
 }
 
-const SimPortfolioChart = forwardRef<HTMLDivElement, SimPortfolioChartProps>(function SimPortfolioChart(
+const PortfolioChart = forwardRef<HTMLDivElement, PortfolioChartProps>(function PortfolioChart(
   { history, markers = [], intraday = false },
   outerRef,
 ) {
@@ -111,7 +111,7 @@ const SimPortfolioChart = forwardRef<HTMLDivElement, SimPortfolioChartProps>(fun
     };
   }, [history, markers, intraday]);
 
-  return <div ref={setRef} className="chart-container" style={{ marginTop: '0.75rem' }} />;
+  return <div ref={setRef} className="chart-container chart-mt-75" />;
 });
 
-export default SimPortfolioChart;
+export default PortfolioChart;

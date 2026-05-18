@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { aiButtonStyle } from './simStyles';
+import { aiButtonStyle } from '../utils/styles';
 
-type SimToolbarProps = {
+type ToolbarProps = {
   presets: Record<string, unknown> | undefined;
   presetsLoading?: boolean;
   presetsError?: Error | null;
@@ -21,7 +21,7 @@ type SimToolbarProps = {
   onAiDelayChange?: (v: number) => void;
 };
 
-export default function SimToolbar({
+export default function Toolbar({
   presets,
   presetsLoading,
   presetsError,
@@ -37,7 +37,7 @@ export default function SimToolbar({
   onSimulateAll,
   aiDelay,
   onAiDelayChange,
-}: SimToolbarProps) {
+}: ToolbarProps) {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.5rem' }}>
       <Select onValueChange={(v: string | null) => v && onPreset(v)} disabled={!presets}>

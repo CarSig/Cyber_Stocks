@@ -2,7 +2,9 @@ import { useEffect, useRef, forwardRef } from 'react';
 import './charts.css';
 import { createChart, LineSeries, AreaSeries, CandlestickSeries, createSeriesMarkers } from 'lightweight-charts';
 import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
-import { snapToWeekday } from './utils/dates';
+import { DateUtils } from '@/utils/date';
+
+const { snapToWeekday } = DateUtils;
 import type { Quote } from '@/types';
 
 type SimAction = { id: number; date: string; type: 'buy' | 'sell'; value: string };

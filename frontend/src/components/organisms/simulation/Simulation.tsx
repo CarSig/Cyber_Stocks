@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useCallback, useRef, useEffect, useMemo, useReducer, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getSimulationPresets } from '@/api/stock';
 import type { SimulationPreset } from '@/types';
@@ -10,37 +10,18 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { Quote } from '@/types';
-import SimToolbar from './sim/SimToolbar';
-import SimManualEntry from './sim/SimManualEntry';
-import SimResults from './sim/SimResults';
-import { exportSimPdf } from './sim/simExportPdf';
-import { useSimTextSync } from './sim/useSimTextSync';
+import Toolbar from './components/Toolbar';
+import ManualEntry from './components/ManualEntry';
+import Results from './components/Results';
+import { exportSimPdf } from './utils/exportPdf';
+import { longTermReducer, initialLongTermState } from './reducers/longTermReducer';
+import type { LongTermAction } from './reducers/longTermReducer';
+import { longTermStrategy } from './reducers/baseStrategy';
+import { useAddManualAction } from './hooks/useAddManualAction';
 import { simStatsToExportRows } from '@/utils/sim';
+import { DateUtils, safeOffsetDate } from '@/utils/date';
 
-function localDateStr(d: Date): string {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-function parseYMD(dateStr: string): Date {
-  const [y, m, day] = dateStr.split('-').map(Number);
-  return new Date(y, m - 1, day);
-}
-
-function safeOffsetDate(dateStr: string | undefined, ms: number): string | null {
-  if (!dateStr) return null;
-  const t = new Date(dateStr).getTime();
-  if (isNaN(t)) return null;
-  return new Date(t + ms).toISOString().slice(0, 10);
-}
-
-function snapToWeekday(dateStr: string): string {
-  const d = parseYMD(dateStr);
-  if (d.getDay() === 6) d.setDate(d.getDate() - 1);
-  if (d.getDay() === 0) d.setDate(d.getDate() + 1);
-  return localDateStr(d);
-}
-
-type SimAction = { id: number; date: string; type: 'buy' | 'sell'; value: string };
+const { snapToWeekday } = DateUtils;
 
 type SimTransaction = {
   date: string;
@@ -66,7 +47,7 @@ type SimResult = {
   priceHistory: SimHistoryPoint[];
 };
 
-function runLongTermSim(quotes: Quote[], actions: SimAction[], startShares = 0): SimResult {
+function runLongTermSim(quotes: Quote[], actions: LongTermAction[], startShares = 0): SimResult {
   const quoteMap = new Map<string, number>();
   for (const q of quotes) {
     const d = q.date.slice(0, 10);
@@ -103,30 +84,14 @@ function runLongTermSim(quotes: Quote[], actions: SimAction[], startShares = 0):
         const bought = act.value / price;
         shares += bought;
         totalInvested += act.value;
-        transactions.push({
-          date: d,
-          type: 'buy',
-          value: act.value,
-          shares: bought,
-          price,
-          sharesAfter: shares,
-          portfolioValue: shares * price,
-        });
+        transactions.push({ date: d, type: 'buy', value: act.value, shares: bought, price, sharesAfter: shares, portfolioValue: shares * price });
       } else {
         const pct = Math.min(act.value, 100) / 100;
         const sold = shares * pct;
         const proceeds = sold * price;
         shares -= sold;
         cashWithdrawn += proceeds;
-        transactions.push({
-          date: d,
-          type: 'sell',
-          value: proceeds,
-          shares: sold,
-          price,
-          sharesAfter: shares,
-          portfolioValue: shares * price,
-        });
+        transactions.push({ date: d, type: 'sell', value: proceeds, shares: sold, price, sharesAfter: shares, portfolioValue: shares * price });
       }
     }
     portfolioHistory.push({ date: d, value: shares * price });
@@ -144,20 +109,10 @@ function runLongTermSim(quotes: Quote[], actions: SimAction[], startShares = 0):
     return h.filter((p) => p.date >= from && p.date <= to);
   };
 
-  return {
-    totalInvested,
-    finalShares: shares,
-    sharesValue,
-    cashWithdrawn,
-    profit,
-    profitPct,
-    transactions,
-    portfolioHistory: trimHistory(portfolioHistory),
-    priceHistory: trimHistory(priceHistory),
-  };
+  return { totalInvested, finalShares: shares, sharesValue, cashWithdrawn, profit, profitPct, transactions, portfolioHistory: trimHistory(portfolioHistory), priceHistory: trimHistory(priceHistory) };
 }
 
-let nextId = 1;
+const nextId = { current: 1 };
 
 type SimulationProps = {
   ticker: string;
@@ -170,40 +125,21 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
   const minDate = dates[0] ?? '';
   const maxDate = dates.at(-1) ?? '';
 
-  const [actions, setActions] = useState<SimAction[]>([]);
-  const [startShares, setStartShares] = useState('0');
+  const [s, dispatch] = useReducer(longTermReducer, undefined, initialLongTermState);
+  const { actions, startShares, textMode, textValue, chartType, value: clickValue } = s;
+
   const portfolioChartRef = useRef<HTMLDivElement>(null);
   const interactiveChartRef = useRef<HTMLDivElement>(null);
   const interactiveRef = useRef<{ chart: IChartApi; series: ISeriesApi<SeriesType> } | null>(null);
-  const [textMode, setTextMode] = useState(false);
+  const clickValueRef = useRef(clickValue);
+  useEffect(() => { clickValueRef.current = clickValue; }, [clickValue]);
+
   const [manualDate, setManualDate] = useState('');
   const [manualType, setManualType] = useState<'buy' | 'sell'>('buy');
   const [manualValue, setManualValue] = useState('100');
-  const [clickValue, setClickValue] = useState('100');
-  const clickValueRef = useRef(clickValue);
-  useEffect(() => {
-    clickValueRef.current = clickValue;
-  }, [clickValue]);
-  const [chartType, setChartType] = useState<'line' | 'area' | 'candlestick'>('line');
-
-  const { textValue, setTextValue, handleTextChange, actionsToText } = useSimTextSync<SimAction>({
-    actions,
-    toTextAction: (a) => ({ label: a.date, side: a.type, value: Number(a.value) }),
-    parseTextAction: (label, num) => ({
-      id: nextId++,
-      date: label,
-      type: num > 0 ? 'buy' : 'sell',
-      value: String(Math.abs(num)),
-    }),
-    onActionsChange: setActions,
-  });
 
   type PresetsMap = Record<string, SimulationPreset[]>;
-  const {
-    data: presets,
-    error: presetsError,
-    isLoading: presetsLoading,
-  } = useQuery<PresetsMap>({
+  const { data: presets, error: presetsError, isLoading: presetsLoading } = useQuery<PresetsMap>({
     queryKey: ['simulation-presets', ticker],
     queryFn: () => getSimulationPresets(ticker) as unknown as Promise<PresetsMap>,
     enabled: !!ticker,
@@ -217,45 +153,38 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
         .map((item: SimulationPreset) => {
           const num = Number(item.number);
           if (!isFinite(num) || num === 0) return null;
-          return {
-            id: nextId++,
-            date: item.date,
-            type: (num > 0 ? 'buy' : 'sell') as 'buy' | 'sell',
-            value: String(Math.abs(num)),
-          };
+          return { id: nextId.current++, date: item.date, type: (num > 0 ? 'buy' : 'sell') as 'buy' | 'sell', value: String(Math.abs(num)) };
         })
-        .filter((x): x is SimAction => x !== null);
-      setActions(next);
-      setTextValue(actionsToText(next));
+        .filter((x): x is LongTermAction => x !== null);
+      dispatch({ type: 'SET_ACTIONS', actions: next, textValue: longTermStrategy.toText('', next) });
     },
-    [presets, actionsToText, setTextValue],
+    [presets],
   );
+
+  const addManualAction = useAddManualAction(longTermStrategy, manualDate, manualType, manualValue, '', dispatch, nextId, () => setManualDate(''));
 
   const result = useMemo<SimResult | null>(() => {
     if (!quotes.length || !actions.some((a) => a.date && a.value)) return null;
     return runLongTermSim(quotes, actions, Math.max(0, Number(startShares) || 0));
   }, [actions, quotes, startShares]);
 
-  useEffect(() => {
-    if (result) onResult?.(result);
-  }, [result, onResult]);
+  useEffect(() => { if (result) onResult?.(result); }, [result, onResult]);
 
-  const remove = useCallback((id: number) => setActions((prev) => prev.filter((a) => a.id !== id)), []);
-  const update = useCallback((id: number, field: keyof SimAction, val: string) => {
-    setActions((prev) => prev.map((a) => (a.id === id ? { ...a, [field]: val } : a)));
-  }, []);
+  const remove = useCallback((id: number) => dispatch({ type: 'REMOVE_ACTION', id, date: '' }), []);
+  const update = useCallback(
+    (id: number, field: keyof LongTermAction, val: string) => {
+      if (field === 'id') return;
+      dispatch({ type: 'UPDATE_ACTION', id, field: field === 'type' ? 'side' : 'value', val, date: '' });
+    },
+    [],
+  );
   const insertBefore = useCallback((id: number) => {
-    setActions((prev) => {
-      const idx = prev.findIndex((a) => a.id === id);
-      const next = [...prev];
-      next.splice(idx, 0, { id: nextId++, date: '', type: 'buy', value: '100' });
-      return next;
-    });
-  }, []);
-  const clear = useCallback(() => {
-    setActions([]);
-    setTextValue('');
-  }, [setTextValue]);
+    const idx = actions.findIndex((a) => a.id === id);
+    const next = [...actions];
+    next.splice(idx, 0, { id: nextId.current++, date: '', type: 'buy', value: '100' });
+    dispatch({ type: 'SET_ACTIONS', actions: next, textValue: longTermStrategy.toText('', next) });
+  }, [actions]);
+  const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS', date: '' }), []);
 
   // Interactive price chart
   useEffect(() => {
@@ -275,33 +204,11 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
 
     let series: ISeriesApi<SeriesType>;
     if (chartType === 'area') {
-      series = chart.addSeries(AreaSeries, {
-        lineColor: cv('--color-green'),
-        topColor: cv('--color-green') + '55',
-        bottomColor: cv('--color-green') + '00',
-        lineWidth: 2,
-      });
+      series = chart.addSeries(AreaSeries, { lineColor: cv('--color-green'), topColor: cv('--color-green') + '55', bottomColor: cv('--color-green') + '00', lineWidth: 2 });
       series.setData(priceData);
     } else if (chartType === 'candlestick') {
-      series = chart.addSeries(CandlestickSeries, {
-        upColor: '#22c55e',
-        downColor: '#ef4444',
-        borderUpColor: '#22c55e',
-        borderDownColor: '#ef4444',
-        wickUpColor: '#22c55e',
-        wickDownColor: '#ef4444',
-      });
-      series.setData(
-        quotes
-          .filter((q) => q.open != null && q.close != null)
-          .map((q) => ({
-            time: q.date.slice(0, 10) as `${number}-${number}-${number}`,
-            open: q.open,
-            high: q.high ?? q.close,
-            low: q.low ?? q.close,
-            close: q.close,
-          })),
-      );
+      series = chart.addSeries(CandlestickSeries, { upColor: '#22c55e', downColor: '#ef4444', borderUpColor: '#22c55e', borderDownColor: '#ef4444', wickUpColor: '#22c55e', wickDownColor: '#ef4444' });
+      series.setData(quotes.filter((q) => q.open != null && q.close != null).map((q) => ({ time: q.date.slice(0, 10) as `${number}-${number}-${number}`, open: q.open, high: q.high ?? q.close, low: q.low ?? q.close, close: q.close })));
     } else {
       series = chart.addSeries(LineSeries, { color: cv('--color-green'), lineWidth: 2 });
       series.setData(priceData);
@@ -310,17 +217,14 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
 
     let lastHoveredDate: string | null = null;
     chart.subscribeCrosshairMove((param) => {
-      if (!param.time) {
-        lastHoveredDate = null;
-        return;
-      }
+      if (!param.time) { lastHoveredDate = null; return; }
       lastHoveredDate = param.time as string;
     });
     chart.subscribeClick((param) => {
       if (!param.time) return;
       const date = snapToWeekday(param.time as string);
       const val = Math.max(0.01, Number(clickValueRef.current) || 100);
-      setActions((prev) => [...prev, { id: nextId++, date, type: 'buy', value: String(val) }]);
+      dispatch({ type: 'ADD_ACTION', action: { id: nextId.current++, date, type: 'buy', value: String(val) }, date: '' });
     });
 
     const el = interactiveChartRef.current!;
@@ -329,7 +233,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       const date = lastHoveredDate ? snapToWeekday(lastHoveredDate) : '';
       if (!date) return;
       const val = Math.min(100, Math.max(0.01, Number(clickValueRef.current) || 50));
-      setActions((prev) => [...prev, { id: nextId++, date, type: 'sell', value: String(val) }]);
+      dispatch({ type: 'ADD_ACTION', action: { id: nextId.current++, date, type: 'sell', value: String(val) }, date: '' });
     }
     el.addEventListener('contextmenu', onContextMenu);
     interactiveRef.current = { chart, series };
@@ -372,22 +276,26 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     exportSimPdf(
       ticker,
       simStatsToExportRows(result),
-      result.transactions.map((t) => ({
-        label: t.date,
-        side: t.type,
-        price: t.price,
-        shares: t.shares,
-        value: t.value,
-        sharesAfter: t.sharesAfter,
-        portfolioValue: t.portfolioValue,
-      })),
-      [
-        { ref: interactiveChartRef.current, label: 'Stock Price' },
-        { ref: portfolioChartRef.current, label: 'Portfolio Value' },
-      ],
+      result.transactions.map((t) => ({ label: t.date, side: t.type, price: t.price, shares: t.shares, value: t.value, sharesAfter: t.sharesAfter, portfolioValue: t.portfolioValue })),
+      [{ ref: interactiveChartRef.current, label: 'Stock Price' }, { ref: portfolioChartRef.current, label: 'Portfolio Value' }],
       'Date',
     );
   }, [result, ticker]);
+
+  const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const raw = e.target.value;
+    let id = Date.now();
+    const parsed: LongTermAction[] = [];
+    for (const line of raw.split('\n').map((l) => l.trim()).filter(Boolean)) {
+      const parts = line.split(',').map((s) => s.trim());
+      if (parts.length !== 2) continue;
+      const [label, numStr] = parts;
+      const num = Number(numStr);
+      if (isNaN(num) || num === 0) continue;
+      parsed.push({ id: id++, date: label, type: num > 0 ? 'buy' : 'sell', value: String(Math.abs(num)) });
+    }
+    dispatch({ type: 'SET_TEXT', raw, parsedActions: parsed.length ? parsed : undefined });
+  }, []);
 
   return (
     <div>
@@ -405,7 +313,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
                 min="0"
                 step="any"
                 value={startShares}
-                onChange={(e) => setStartShares(e.target.value)}
+                onChange={(e) => dispatch({ type: 'SET_START_SHARES', startShares: e.target.value })}
                 className="dtrade-shares-input"
               />
             </div>
@@ -416,7 +324,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
                 min="0"
                 step="any"
                 value={clickValue}
-                onChange={(e) => setClickValue(e.target.value)}
+                onChange={(e) => dispatch({ type: 'SET_VALUE', value: e.target.value })}
                 className="dtrade-shares-input"
               />
               <span className="dtrade-label">$ buy / % sell</span>
@@ -427,7 +335,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
               <button
                 key={t}
                 className={`sim-chart-btn${chartType === t ? ' active' : ''}`}
-                onClick={() => setChartType(t)}
+                onClick={() => dispatch({ type: 'SET_CHART_TYPE', chartType: t })}
                 type="button"
               >
                 {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -439,28 +347,25 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
         </div>
       )}
 
-      <SimToolbar
+      <Toolbar
         presets={presets}
         presetsLoading={presetsLoading}
         presetsError={presetsError as Error | null}
         onPreset={applyPreset}
         textMode={textMode}
-        onTextModeToggle={() => setTextMode((v) => !v)}
+        onTextModeToggle={() => dispatch({ type: 'TOGGLE_TEXT_MODE', date: '' })}
         hasResult={!!result}
         onExportPdf={handleExportPdf}
         hasActions={actions.length > 0}
         onClear={clear}
       />
 
-      <SimManualEntry
+      <ManualEntry
         side={manualType}
         onSideChange={(s) => setManualType(s as 'buy' | 'sell')}
         value={manualValue}
         onValueChange={setManualValue}
-        onAdd={() => {
-          if (!manualDate || !manualValue) return;
-          setActions((prev) => [...prev, { id: nextId++, date: manualDate, type: manualType, value: manualValue }]);
-        }}
+        onAdd={addManualAction}
         inputSlot={
           <DatePicker
             value={manualDate}
@@ -500,9 +405,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
                   />
                   <Select
                     value={a.type}
-                    onValueChange={(v: string | null) => {
-                      if (v) update(a.id, 'type', v);
-                    }}
+                    onValueChange={(v: string | null) => { if (v) update(a.id, 'type', v); }}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue />
@@ -522,12 +425,8 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
                     onChange={(e) => update(a.id, 'value', e.target.value)}
                     className="form-input--number"
                   />
-                  <Button variant="ghost" onClick={() => insertBefore(a.id)}>
-                    + before
-                  </Button>
-                  <Button variant="ghost" onClick={() => remove(a.id)}>
-                    ✕
-                  </Button>
+                  <Button variant="ghost" onClick={() => insertBefore(a.id)}>+ before</Button>
+                  <Button variant="ghost" onClick={() => remove(a.id)}>✕</Button>
                 </div>
               );
             })}
@@ -536,7 +435,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       )}
 
       {result && (
-        <SimResults
+        <Results
           ref={portfolioChartRef}
           stats={simStatsToExportRows(result)}
           history={result.portfolioHistory.map((p) => ({ time: p.date, value: p.value }))}

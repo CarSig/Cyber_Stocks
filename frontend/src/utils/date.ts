@@ -1,3 +1,15 @@
+export function parseYMD(dateStr: string): Date {
+  const [y, m, day] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, day);
+}
+
+export function safeOffsetDate(dateStr: string | undefined, ms: number): string | null {
+  if (!dateStr) return null;
+  const t = new Date(dateStr).getTime();
+  if (isNaN(t)) return null;
+  return new Date(t + ms).toISOString().slice(0, 10);
+}
+
 export const DateUtils = {
   formatDate: (iso: string | null | undefined): string => (iso ? new Date(iso).toLocaleDateString() : '—'),
 
@@ -21,6 +33,13 @@ export const DateUtils = {
       d.setUTCDate(d.getUTCDate() - 1);
     } while (d.getUTCDay() === 0 || d.getUTCDay() === 6);
     return d.toISOString().slice(0, 10);
+  },
+
+  snapToWeekday(dateStr: string): string {
+    const d = parseYMD(dateStr);
+    if (d.getDay() === 6) d.setDate(d.getDate() - 1);
+    if (d.getDay() === 0) d.setDate(d.getDate() + 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   },
 
   nextWeekday(dateStr: string): string {

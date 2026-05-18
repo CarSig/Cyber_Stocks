@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { aiButtonStyle } from './simStyles';
+import { aiButtonStyle } from '../utils/styles';
 
-type SimAllRow = {
+type AllRow = {
   rank: number;
   ticker: string;
   event: string;
@@ -20,13 +20,13 @@ type SimAllDialogProps = {
   open: boolean;
   onClose: () => void;
   running: boolean;
-  results: SimAllRow[] | null;
+  results: AllRow[] | null;
   aiDelay: number;
   onAiDelayChange: (v: number) => void;
   onReload: () => void;
 };
 
-export default function SimAllDialog({
+export default function AllDialog({
   open,
   onClose,
   running,

@@ -16,11 +16,11 @@ export type LongTermTransaction = BaseTransaction & { date: string; time?: never
 export type DayTradeTransaction = BaseTransaction & { time: string; date?: never };
 export type AnyTransaction = LongTermTransaction | DayTradeTransaction;
 
-type SimTransactionTableProps = {
+type TransactionTableProps = {
   transactions: AnyTransaction[];
 };
 
-export default function SimTransactionTable({ transactions }: SimTransactionTableProps) {
+export default function TransactionTable({ transactions }: TransactionTableProps) {
   if (!transactions.length) return null;
   const hasTime = 'time' in transactions[0] && transactions[0].time != null;
 

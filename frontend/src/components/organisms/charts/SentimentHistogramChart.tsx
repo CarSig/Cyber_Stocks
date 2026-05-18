@@ -11,47 +11,53 @@ import ChartModal from './ChartModal';
 import type { NewsArticle } from '@/types';
 
 type QuoteBounds = { from: string; to: string } | null;
+type ModalState = { date: string; items: { article: NewsArticle; sentiment: number | null }[] };
 
-type ArticleWithSentiment = NewsArticle & { _sentiment: number };
-type ModalState = { date: string; items: ArticleWithSentiment[] };
+type SentimentHistogramChartProps = {
+  articles?: NewsArticle[];
+  getSentiment: (article: NewsArticle) => number | null;
+  getDate: (article: NewsArticle) => string | null;
+  period?: number | null;
+  onPeriodChange?: (days: number) => void;
+  visibleRange?: { from: string; to: string } | null;
+  onRangeChange?: (range: { from: string; to: string }) => void;
+  quoteBounds?: QuoteBounds;
+};
 
 function aggregateByDay(
   articles: NewsArticle[] | undefined,
-  entityId: string | null | undefined,
-  quoteBounds?: QuoteBounds,
+  getSentiment: (a: NewsArticle) => number | null,
+  getDate: (a: NewsArticle) => string | null,
+  quoteBounds: QuoteBounds,
 ) {
   const byDay = new Map<string, { sum: number; count: number }>();
-  const articlesByDay = new Map<string, ArticleWithSentiment[]>();
+  const articlesByDay = new Map<string, { article: NewsArticle; sentiment: number | null }[]>();
 
   for (const a of articles ?? []) {
-    if (!a.timestamp) continue;
-    const day = new Date(String(a.timestamp)).toISOString().slice(0, 10);
-
-    const entities = (a as Record<string, unknown>)['entities'] as
-      | Array<{ entityId: string; sentiment: number }>
-      | undefined;
-    const match = entities?.find((e) => e.entityId === entityId);
-    const avgSentiment = entities?.length ? entities.reduce((s, e) => s + e.sentiment, 0) / entities.length : 0;
-    const sentiment = match?.sentiment ?? avgSentiment;
+    const dateStr = getDate(a);
+    if (!dateStr) continue;
+    const day = new Date(dateStr).toISOString().slice(0, 10);
+    const sentiment = getSentiment(a);
+    if (sentiment === null) continue;
 
     if (!byDay.has(day)) {
       byDay.set(day, { sum: 0, count: 0 });
       articlesByDay.set(day, []);
     }
-    const d = byDay.get(day)!;
-    d.sum += sentiment;
-    d.count++;
-    articlesByDay.get(day)!.push({ ...a, _sentiment: sentiment });
+    byDay.get(day)!.sum += sentiment;
+    byDay.get(day)!.count++;
+    articlesByDay.get(day)!.push({ article: a, sentiment });
   }
 
   const sorted = [...byDay.entries()].sort();
   const countData: { time: string; value: number; color: string }[] = [];
-  const { from: boundsFrom, to: boundsTo } = quoteBounds ?? {};
-  const firstDay = sorted[0]?.[0];
-  const lastDay = sorted[sorted.length - 1]?.[0];
 
-  const rangeFrom = boundsFrom && (!sorted.length || boundsFrom < firstDay) ? boundsFrom : firstDay;
-  const rangeTo = boundsTo && (!sorted.length || boundsTo > lastDay) ? boundsTo : lastDay;
+  const rangeFrom =
+    quoteBounds?.from && (!sorted.length || quoteBounds.from < sorted[0][0]) ? quoteBounds.from : sorted[0]?.[0];
+  const rangeTo =
+    quoteBounds?.to && (!sorted.length || quoteBounds.to > sorted[sorted.length - 1]?.[0])
+      ? quoteBounds.to
+      : sorted[sorted.length - 1]?.[0];
 
   if (!rangeFrom) return { countData, articlesByDay };
 
@@ -60,36 +66,23 @@ function aggregateByDay(
   while (cursor <= end) {
     const time = cursor.toISOString().slice(0, 10);
     const d = byDay.get(time);
-    if (d) {
-      countData.push({ time, value: d.count, color: sentimentToColor(d.sum / d.count) });
-    } else {
-      countData.push({ time, value: 0, color: 'transparent' });
-    }
+    countData.push(d ? { time, value: d.count, color: sentimentToColor(d.sum / d.count) } : { time, value: 0, color: 'transparent' });
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
 
   return { countData, articlesByDay };
 }
 
-type IntelligenceChartProps = {
-  articles?: NewsArticle[];
-  entityId?: string | null;
-  period?: number | null;
-  onPeriodChange?: (days: number) => void;
-  visibleRange?: { from: string; to: string } | null;
-  onRangeChange?: (range: { from: string; to: string }) => void;
-  quoteBounds?: QuoteBounds;
-};
-
-export default function IntelligenceChart({
+export default function SentimentHistogramChart({
   articles,
-  entityId,
+  getSentiment,
+  getDate,
   period,
   onPeriodChange,
   visibleRange,
   onRangeChange,
   quoteBounds,
-}: IntelligenceChartProps) {
+}: SentimentHistogramChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const skipRangeRef = useRef(false);
@@ -98,14 +91,11 @@ export default function IntelligenceChart({
   const [modal, setModal] = useState<ModalState | null>(null);
 
   const articlesRef = useSyncRef(articles);
-  const entityIdRef = useSyncRef(entityId);
+  const getSentimentRef = useSyncRef(getSentiment);
+  const getDateRef = useSyncRef(getDate);
 
-  useEffect(() => {
-    periodRef.current = period;
-  }, [period]);
-  useEffect(() => {
-    visibleRangeRef.current = visibleRange;
-  }, [visibleRange]);
+  useEffect(() => { periodRef.current = period; }, [period]);
+  useEffect(() => { visibleRangeRef.current = visibleRange; }, [visibleRange]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -113,7 +103,7 @@ export default function IntelligenceChart({
     const chart = createChart(containerRef.current, makeChartOptions(containerRef.current, 180));
     chartRef.current = chart;
 
-    const { countData } = aggregateByDay(articles, entityId, quoteBounds ?? null);
+    const { countData } = aggregateByDay(articles, getSentiment, getDate, quoteBounds ?? null);
 
     if (countData.length) {
       const series = chart.addSeries(HistogramSeries, { priceScaleId: 'right' });
@@ -125,19 +115,15 @@ export default function IntelligenceChart({
       if (!param.time) return;
       const date =
         typeof param.time === 'string' ? param.time : new Date(Number(param.time) * 1000).toISOString().slice(0, 10);
-      const { articlesByDay: abd } = aggregateByDay(articlesRef.current, entityIdRef.current);
-      const items = abd.get(date) ?? [];
+      const { articlesByDay } = aggregateByDay(articlesRef.current, getSentimentRef.current, getDateRef.current, null);
+      const items = articlesByDay.get(date) ?? [];
       if (items.length) setModal({ date, items });
     });
 
     skipRangeRef.current = true;
     if (visibleRangeRef.current) {
       try {
-        chart
-          .timeScale()
-          .setVisibleRange(
-            visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0],
-          );
+        chart.timeScale().setVisibleRange(visibleRangeRef.current as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
       } catch {
         chart.timeScale().fitContent();
       }
@@ -145,11 +131,7 @@ export default function IntelligenceChart({
       chart.timeScale().fitContent();
     } else {
       try {
-        chart
-          .timeScale()
-          .setVisibleRange({ from: daysAgoString(periodRef.current!), to: todayString() } as Parameters<
-            ReturnType<IChartApi['timeScale']>['setVisibleRange']
-          >[0]);
+        chart.timeScale().setVisibleRange({ from: daysAgoString(periodRef.current!), to: todayString() } as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
       } catch {
         chart.timeScale().fitContent();
       }
@@ -164,7 +146,7 @@ export default function IntelligenceChart({
       observer.disconnect();
       chart.remove();
     };
-  }, [articles, entityId, quoteBounds]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [articles, getSentiment, getDate, quoteBounds]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -174,28 +156,17 @@ export default function IntelligenceChart({
   return (
     <div>
       <div className="chart-toolbar">
-        <span className="chart-series-label" style={{ marginLeft: 8 }}>
+        <span className="chart-series-label chart-series-label-ml">
           Bar height = article count · Color = avg sentiment
-          <span
-            style={{
-              background: 'linear-gradient(to right, #ef4444, #eab308, #22c55e)',
-              borderRadius: 3,
-              display: 'inline-block',
-              width: 80,
-              height: 8,
-              marginLeft: 6,
-              verticalAlign: 'middle',
-            }}
-          />
+          <span className="sentiment-gradient-legend" />
         </span>
       </div>
       <div ref={containerRef} className="chart-container" />
 
       {modal && (
         <ChartModal date={modal.date} onClose={() => setModal(null)}>
-          {modal.items.map((a) => {
-            const score = a._sentiment;
-            const { color, icon } = sentimentScoreStyle(score);
+          {modal.items.map(({ article: a, sentiment }) => {
+            const { color, icon } = sentimentScoreStyle(sentiment);
             return (
               <ModalItem
                 key={a.link}

@@ -18,10 +18,10 @@ export default function StatSection({
   minWidth = 170,
 }: StatSectionProps) {
   return (
-    <div style={{ borderLeft: '1px solid var(--border)', paddingLeft: 32, flex: '0 0 auto', minWidth }}>
-      <div style={{ fontSize: 11, color: 'var(--muted-foreground)', marginBottom: 6 }}>{label}</div>
-      <div style={{ fontSize: 16, fontWeight: 600, color: valueColor, marginBottom: 4 }}>{value}</div>
-      {subtitle && <div style={{ fontSize: 11, color: 'var(--muted-foreground)' }}>{subtitle}</div>}
+    <div className="stat-section" style={{ minWidth }}>
+      <div className="stat-section-label">{label}</div>
+      <div className="stat-section-value" style={{ color: valueColor }}>{value}</div>
+      {subtitle && <div className="stat-section-subtitle">{subtitle}</div>}
       {children}
     </div>
   );

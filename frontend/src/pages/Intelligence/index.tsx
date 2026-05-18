@@ -1,9 +1,7 @@
-import { useState } from 'react';
-import { useBackendEntities, useAllSentimentCorrelations, useGlobalSignals } from '@/hooks/useIntelligence';
+import { useIntelligencePage } from '@/hooks/useIntelligencePage';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { CorrelationSelector, ViewToggle } from '@/components/shared/CorrelationControls';
 import { URGENCY_CONFIG } from '@/utils/urgencyUtils';
-import indexBy from '@/utils/indexBy';
 import CountBadge from '@/components/atoms/CountBadge';
 import EntityDetailPanel from '@/components/organisms/intelligence/EntityDetailPanel';
 import EntityCard from '@/components/organisms/cards/entity/EntityCard';
@@ -12,27 +10,32 @@ import SignalSidebar from '@/components/molecules/intelligence/SignalSidebar';
 import ExpandableFilterSection from '@/components/molecules/shared/ExpandableFilterSection';
 import './Intelligence.css';
 import Page from '@/components/atoms/Page';
-import type { IntelligenceEntity, IntelligenceSignal, UrgencyKey, CorrelationResult } from '@/types';
+import type { UrgencyKey, CorrelationResult } from '@/types';
 
 export default function Intelligence() {
-  const [selected, setSelected] = useState<string | null>(null);
-  const [selectedSignal, setSelectedSignal] = useState<string | null>(null);
-  const [selectedUrgency, setSelectedUrgency] = useState<UrgencyKey | null>(null);
-  const [urgencyCounts, setUrgencyCounts] = useState<Record<string, number>>({});
-  const [lagDays, setLagDays] = useState(1);
-  const [viewMode, setViewMode] = useState('list');
-  const [signalsExpanded, setSignalsExpanded] = useState(true);
-  const [urgencyExpanded, setUrgencyExpanded] = useState(true);
-  const { data: entities, isPending } = useBackendEntities();
-  const { data: correlations } = useAllSentimentCorrelations(lagDays, selectedSignal ?? undefined);
-  const { data: allSignals, isPending: signalsLoading } = useGlobalSignals();
-
-  const uniqueEntities: IntelligenceEntity[] = entities
-    ? [...new Map((entities as IntelligenceEntity[]).map((e) => [e.entityId, e])).values()]
-    : [];
-
-  const correlationByEntityId = indexBy((correlations as Array<{ entityId: string }>) ?? [], 'entityId');
-  const filteredSignals = (allSignals as IntelligenceSignal[] | undefined)?.filter((s) => s.count >= 5) ?? [];
+  const {
+    selected,
+    setSelected,
+    selectedSignal,
+    setSelectedSignal,
+    selectedUrgency,
+    setSelectedUrgency,
+    urgencyCounts,
+    setUrgencyCounts,
+    lagDays,
+    setLagDays,
+    viewMode,
+    setViewMode,
+    signalsExpanded,
+    setSignalsExpanded,
+    urgencyExpanded,
+    setUrgencyExpanded,
+    uniqueEntities,
+    isPending,
+    correlationByEntityId,
+    filteredSignals,
+    signalsLoading,
+  } = useIntelligencePage();
 
   return (
     <div className="intelligence-sidebar">
@@ -117,7 +120,7 @@ export default function Intelligence() {
           {isPending ? (
             <LoadingSpinner />
           ) : viewMode === 'grid' ? (
-            <div className="ti-grid" style={{ marginBottom: 32 }}>
+            <div className="ti-grid mb-32px">
               {uniqueEntities.map((e) => (
                 <EntityCard
                   key={e.entityId}
@@ -131,7 +134,7 @@ export default function Intelligence() {
               ))}
             </div>
           ) : (
-            <div style={{ marginBottom: 32 }}>
+            <div className="mb-32px">
               {uniqueEntities.map((e) => (
                 <EntityListRow
                   key={e.entityId}

@@ -1,34 +1,36 @@
-import { useState } from 'react';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
 import { CorrelationSelector, ViewToggle } from '@/components/shared/CorrelationControls';
-import { useCyberNewsTickers, useCyberNewsTopics, useCyberNewsCorrelations } from '@/hooks/useCyberNews';
-import indexBy from '@/utils/indexBy';
+import { useCyberNewsPage } from '@/hooks/useCyberNewsPage';
 import TickerCard from '@/components/organisms/cards/ticker/TickerCard';
 import TickerListRow from '@/components/molecules/cyber-news/TickerListRow';
 import TickerDetailPanel from '@/components/organisms/cyber-news/TickerDetailPanel';
 import './CyberNews.css';
 import Page from '@/components/atoms/Page';
-import type { CyberNewsTicker, CyberNewsTopic, CorrelationResult } from '@/types';
-
-type CyberNewsCorrelationEntry = { ticker: string; correlation?: CorrelationResult };
+import type { CorrelationResult } from '@/types';
 
 export default function CyberNews() {
-  const [selected, setSelected] = useState<CyberNewsTicker | null>(null);
-  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-  const [lagDays, setLagDays] = useState(1);
-  const [viewMode, setViewMode] = useState('list');
-  const { data: tickers, isPending } = useCyberNewsTickers(selectedTopic ?? undefined);
-  const { data: correlations } = useCyberNewsCorrelations(lagDays, selectedTopic ?? undefined);
-  const { data: allTopics, isPending: topicsLoading } = useCyberNewsTopics();
-
-  const correlationByTicker = indexBy((correlations as CyberNewsCorrelationEntry[]) ?? [], 'ticker');
+  const {
+    selected,
+    setSelected,
+    selectedTopic,
+    setSelectedTopic,
+    lagDays,
+    setLagDays,
+    viewMode,
+    setViewMode,
+    tickers,
+    isPending,
+    allTopics,
+    topicsLoading,
+    correlationByTicker,
+  } = useCyberNewsPage();
 
   return (
     <div className="cyber-news-layout">
       <div className="cyber-news-sidebar-left">
         <h3 className="cyber-news-sidebar-title">🏷️ Topics</h3>
         {topicsLoading && <p className="ti-loading">Loading…</p>}
-        {(allTopics as CyberNewsTopic[] | undefined)?.slice(0, 15).map((t) => (
+        {allTopics?.slice(0, 15).map((t) => (
           <div
             key={t.topic}
             onClick={() => setSelectedTopic(selectedTopic === t.topic ? null : t.topic)}
@@ -41,7 +43,7 @@ export default function CyberNews() {
 
       <div className="cyber-news-main">
         <Page title="Cyber News">
-          <p style={{ color: 'var(--muted-foreground)', marginBottom: 24 }}>
+          <p className="cyber-news-intro">
             Archived cybersecurity news (2025+) matched to tracked companies and analyzed with AI. Click a company to
             see all articles.
           </p>
@@ -68,7 +70,7 @@ export default function CyberNews() {
             <LoadingSpinner />
           ) : viewMode === 'grid' ? (
             <div className="ti-grid cyber-news-grid-container">
-              {(tickers as CyberNewsTicker[] | undefined)?.map((row) => (
+              {tickers?.map((row) => (
                 <TickerCard
                   key={row.ticker}
                   row={row}
@@ -82,7 +84,7 @@ export default function CyberNews() {
             </div>
           ) : (
             <div className="cyber-news-list-container">
-              {(tickers as CyberNewsTicker[] | undefined)?.map((row) => (
+              {tickers?.map((row) => (
                 <TickerListRow
                   key={row.ticker}
                   row={row}

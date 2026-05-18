@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 
-type SimManualEntryProps = {
+type ManualEntryProps = {
   side: string;
   onSideChange: (s: string) => void;
   sideOptions?: { value: string; label: string }[];
@@ -16,7 +16,7 @@ const DEFAULT_OPTIONS: { value: string; label: string }[] = [
   { value: 'sell', label: 'Sell (%)' },
 ];
 
-export default function SimManualEntry({
+export default function ManualEntry({
   side,
   onSideChange,
   sideOptions = DEFAULT_OPTIONS,
@@ -24,7 +24,7 @@ export default function SimManualEntry({
   onValueChange,
   onAdd,
   inputSlot,
-}: SimManualEntryProps) {
+}: ManualEntryProps) {
   const isExit = side === 'sell' || side === 'cover';
   return (
     <div className="dtrade-manual">

@@ -15,7 +15,7 @@ function SocialCard({ to, icon, title, description }: SocialCardProps) {
     <BaseCard variant="interactive" as={Link} to={to}>
       <CardHeader icon={icon} title={title} />
       <div className="ti-card-body">
-        <p className="ti-empty" style={{ marginTop: 0 }}>
+        <p className="ti-empty ti-empty-no-top">
           {description}
         </p>
       </div>

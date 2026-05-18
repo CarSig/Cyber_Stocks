@@ -18,10 +18,10 @@ export default function DetailPanelOverlay({
   return (
     <div className="overlay-panel-backdrop" onClick={onClose}>
       <div className={`panel-slide-right ${className}`} onClick={(e) => e.stopPropagation()}>
-        <div className="header-flex-between" style={{ marginBottom: 16 }}>
+        <div className="header-flex-between detail-panel-header">
           <div>
-            <h2 style={{ margin: 0 }}>{title}</h2>
-            {subtitle && <span style={{ fontSize: 13, color: 'var(--muted-foreground)' }}>{subtitle}</span>}
+            <h2 className="detail-panel-title">{title}</h2>
+            {subtitle && <span className="detail-panel-subtitle">{subtitle}</span>}
           </div>
           <button className="btn-close-icon" onClick={onClose}>
             ✕

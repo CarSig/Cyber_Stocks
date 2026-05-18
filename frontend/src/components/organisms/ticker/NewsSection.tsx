@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNewsAnalysis } from '@/hooks/useNewsAnalysis';
-import CorrelationBox from './CorrelationBox';
+import CorrelationBox from '@/components/organisms/correlation/CorrelationBox';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import TagBadge from '@/components/atoms/TagBadge';
