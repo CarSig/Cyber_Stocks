@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getBars } from '@/api/alpaca';
 import type { AlpacaBar } from '@/types';
 import { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from '@/components/organisms/charts/utils/options';
+import { useTimezone } from '@/context/TimezoneContext';
 import IntradayChart from '@/components/organisms/charts/IntradayChart';
 
 function todayStr() {
@@ -77,7 +78,7 @@ type DayTradeTabProps = {
 export default function DayTradeTab({ ticker, companies }: DayTradeTabProps) {
   const [date, setDate] = useState(todayStr());
   const [timeframe, setTimeframe] = useState('1Min');
-  const [timezone, setTimezone] = useState('America/New_York');
+  const { timezone } = useTimezone();
   const [chartType, setChartType] = useState('Candlestick');
   const [query, setQuery] = useState({ date: todayStr(), timeframe: '1Min' });
   const [compareTickers, setCompareTickers] = useState<string[]>([]);
@@ -126,13 +127,6 @@ export default function DayTradeTab({ ticker, companies }: DayTradeTabProps) {
           />
           <select className="alpaca-input" value={timeframe} onChange={(e) => setTimeframe(e.target.value)}>
             {TIMEFRAMES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
-          <select className="alpaca-input" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
-            {TIMEZONES.map((t) => (
               <option key={t.value} value={t.value}>
                 {t.label}
               </option>
@@ -198,7 +192,7 @@ export default function DayTradeTab({ ticker, companies }: DayTradeTabProps) {
           {data.bars?.length > 0 ? (
             <>
               <BarStats bars={data.bars} />
-              <IntradayChart bars={data.bars} compareBars={compareBars} timezone={timezone} chartType={chartType} />
+              <IntradayChart bars={data.bars} compareBars={compareBars} chartType={chartType} />
             </>
           ) : (
             <p className="alpaca-status">No bars returned — market may have been closed on this date.</p>

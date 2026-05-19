@@ -4,6 +4,7 @@ import type { IntradayEvent } from '@/api/alpaca';
 import { makeSimReducer, initialBaseSimState } from './baseReducer';
 import type { BaseSimAction } from './baseReducer';
 import { intradayStrategy } from './baseStrategy';
+import { prevWeekday, nextWeekday } from '../utils/intradaySimUtils';
 
 export type SimAllRow = {
   rank: number;
@@ -11,9 +12,16 @@ export type SimAllRow = {
   event: string;
   trade_idea: string;
   action: 'buy' | 'short';
+  chartDate: string;
   chartTime: string;
+  firstDate: string;
+  firstTime: string;
   preMarket: boolean;
+  afterHours: boolean;
+  entryDate: string;
   entryTime: string;
+  exitDate: string;
+  daysAfter: number | null;
   profitPct: number | null;
   error?: string;
 };
@@ -30,6 +38,7 @@ export type IntradaySimAction =
   | { type: 'ADD_EXTRA_DATE'; date: string }
   | { type: 'RESET_EXTRA_DATES' }
   | { type: 'SET_AI_DELAY'; delay: number }
+  | { type: 'SET_EXIT_AT_CLOSE'; exitAtClose: boolean }
   | { type: 'SIM_ALL_START' }
   | { type: 'SIM_ALL_DONE'; results: SimAllRow[] }
   | { type: 'SIM_ALL_CLOSE' };
@@ -60,6 +69,7 @@ export function initialIntradayState() {
     simAllResults: null as SimAllRow[] | null,
     simAllRunning: false,
     aiDelay: 1,
+    exitAtClose: false,
   };
 }
 
@@ -71,6 +81,7 @@ export function intradayReducer(
     case 'LOAD_EVENT': {
       const primaryTicker = action.event.ticker.split('/')[0].trim();
       const date = action.event.chart_date;
+      const extraDates = [prevWeekday(date), nextWeekday(date)];
       return {
         ...state,
         selectedEvent: action.event,
@@ -78,7 +89,7 @@ export function intradayReducer(
         textValue: syncTextDate(state.textValue, date),
         query: { ticker: primaryTicker, date, timeframe: action.timeframe },
         actions: [],
-        extraDates: [],
+        extraDates,
       };
     }
     case 'LOAD_BARS':
@@ -106,6 +117,8 @@ export function intradayReducer(
       return { ...state, extraDates: [] };
     case 'SET_AI_DELAY':
       return { ...state, aiDelay: action.delay };
+    case 'SET_EXIT_AT_CLOSE':
+      return { ...state, exitAtClose: action.exitAtClose };
     case 'SIM_ALL_START':
       return { ...state, simAllRunning: true, simAllResults: null };
     case 'SIM_ALL_DONE':

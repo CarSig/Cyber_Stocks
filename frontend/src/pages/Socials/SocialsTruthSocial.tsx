@@ -46,11 +46,13 @@ function TrumpPostsChart({ posts }: TrumpPostsChartProps) {
     s.setData(data as Parameters<typeof s.setData>[0]);
     chart.timeScale().fitContent();
 
+    let disposed = false;
     const obs = new ResizeObserver(() => {
-      if (ref.current) chart.applyOptions({ width: ref.current.clientWidth });
+      if (!disposed && ref.current) chart.applyOptions({ width: ref.current.clientWidth });
     });
     obs.observe(ref.current);
     return () => {
+      disposed = true;
       obs.disconnect();
       chart.remove();
     };

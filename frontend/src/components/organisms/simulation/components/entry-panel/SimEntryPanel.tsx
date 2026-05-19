@@ -6,104 +6,42 @@ import ActionTable from './ActionTable';
 import Results from './Results';
 import type { AnyTransaction } from './TransactionTable';
 import type { MarkerPoint } from '@/components/organisms/charts/utils/types';
-import type { SimStrategy } from '../../reducers/baseStrategy';
+import type { SimStrategy, BuiltToolbar, BuiltManual, BuiltActions } from '../../reducers/baseStrategy';
 
 type StatItem = { label: string; value: string; color?: string };
 
 type ActionRow = Record<string, unknown> & { id: number; value: number | string; side: string };
 
+type ResultProps = {
+  stats: StatItem[] | null;
+  history: { time: string; value: number }[];
+  markers: MarkerPoint[];
+  transactions: AnyTransaction[] | null;
+  chartRef: RefObject<HTMLDivElement | null>;
+};
+
 type SimEntryPanelProps<A extends ActionRow> = {
   topSlot?: React.ReactNode;
   tradeMode: 'long' | 'short';
   strategy: SimStrategy<A>;
-
-  // Toolbar
-  presets: Record<string, unknown> | undefined;
-  onPreset: (name: string) => void;
-  textMode: boolean;
-  onTextModeToggle: () => void;
-  onExportPdf: () => void;
-  onClear: () => void;
-  presetsLoading?: boolean;
-  presetsError?: Error | null;
-  /** AI simulation props — only used by IntradaySimulation */
-  ai?: {
-    onAiSim: () => void;
-    aiSimDisabled?: boolean;
-    onSimulateAll?: () => void;
-    aiDelay?: number;
-    onAiDelayChange?: (v: number) => void;
-  };
-
-  // ManualEntry
-  nextSide: string;
-  onNextSideChange: (s: string) => void;
-  manualValue: string;
-  onManualValueChange: (v: string) => void;
-  onAddManual: () => void;
-  /** "time" for intraday/daytrade, "date" for long-term simulation */
-  manualInputType: 'time' | 'date';
-  /** Current value of the time/date input */
-  manualInputValue: string;
-  /** Called when the time/date input changes */
-  onManualInputChange: (v: string) => void;
-  /** Min date (only used when manualInputType='date') */
-  manualMinDate?: string;
-  /** Max date (only used when manualInputType='date') */
-  manualMaxDate?: string;
-
-  // Textarea
   textValue: string;
   onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-
-  // ActionTable
-  actions: A[];
-  actionLabelSlot?: (action: A, index: number) => React.ReactNode;
-  onUpdateAction: (id: number, field: 'side' | 'value', val: string) => void;
-  onRemoveAction: (id: number) => void;
-
-  // Results
-  resultStats: StatItem[] | null;
-  resultHistory: { time: string; value: number }[];
-  resultMarkers: MarkerPoint[];
-  resultTransactions: AnyTransaction[] | null;
-  portfolioChartRef: RefObject<HTMLDivElement | null>;
+  toolbar: BuiltToolbar;
+  manual: BuiltManual;
+  actions: BuiltActions<A>;
+  result: ResultProps;
 };
 
 export default function SimEntryPanel<A extends ActionRow>({
   topSlot,
   tradeMode,
   strategy,
-  presets,
-  onPreset,
-  textMode,
-  onTextModeToggle,
-  onExportPdf,
-  onClear,
-  presetsLoading,
-  presetsError,
-  ai,
-  nextSide,
-  onNextSideChange,
-  manualValue,
-  onManualValueChange,
-  onAddManual,
-  manualInputType,
-  manualInputValue,
-  onManualInputChange,
-  manualMinDate,
-  manualMaxDate,
   textValue,
   onTextChange,
+  toolbar,
+  manual,
   actions,
-  actionLabelSlot,
-  onUpdateAction,
-  onRemoveAction,
-  resultStats,
-  resultHistory,
-  resultMarkers,
-  resultTransactions,
-  portfolioChartRef,
+  result,
 }: SimEntryPanelProps<A>) {
   const sideOptions =
     tradeMode === 'long'
@@ -116,75 +54,77 @@ export default function SimEntryPanel<A extends ActionRow>({
           { value: 'cover', label: 'Cover (%)' },
         ];
 
-  const hasResult = resultStats !== null;
-  const hasActions = actions.length > 0;
-  const defaultLabelSlot = (a: A) => strategy.getLabel(a);
-  const labelSlot = actionLabelSlot ?? defaultLabelSlot;
+  const hasResult = result.stats !== null;
+  const hasActions = actions.list.length > 0;
+  const labelSlot = actions.labelSlot ?? ((a: A) => strategy.getLabel(a));
 
   return (
     <div>
       {topSlot}
 
       <Toolbar
-        presets={presets}
-        presetsLoading={presetsLoading}
-        presetsError={presetsError}
-        onPreset={onPreset}
-        textMode={textMode}
-        onTextModeToggle={onTextModeToggle}
+        presets={toolbar.presets}
+        presetsLoading={toolbar.presetsLoading}
+        presetsError={toolbar.presetsError}
+        onPreset={toolbar.onPreset}
+        textMode={toolbar.textMode}
+        onTextModeToggle={toolbar.onTextModeToggle}
         hasResult={hasResult}
-        onExportPdf={onExportPdf}
+        onExportPdf={toolbar.onExportPdf}
         hasActions={hasActions}
-        onClear={onClear}
-        onAiSim={ai?.onAiSim}
-        aiSimDisabled={ai?.aiSimDisabled}
-        onSimulateAll={ai?.onSimulateAll}
-        aiDelay={ai?.aiDelay}
-        onAiDelayChange={ai?.onAiDelayChange}
+        onClear={toolbar.onClear}
+        onAiSim={toolbar.ai?.onAiSim}
+        aiSimDisabled={toolbar.ai?.aiSimDisabled}
+        onSimulateAll={toolbar.ai?.onSimulateAll}
+        simulateAllLabel={toolbar.ai?.simulateAllLabel}
+        aiDelay={toolbar.ai?.aiDelay}
+        onAiDelayChange={toolbar.ai?.onAiDelayChange}
+        exitAtClose={toolbar.ai?.exitAtClose}
+        onExitAtCloseChange={toolbar.ai?.onExitAtCloseChange}
       />
 
       <ManualEntry
-        side={nextSide}
-        onSideChange={onNextSideChange}
+        side={manual.nextSide}
+        onSideChange={manual.onNextSideChange}
         sideOptions={sideOptions}
-        value={manualValue}
-        onValueChange={onManualValueChange}
-        onAdd={onAddManual}
-        inputType={manualInputType}
-        inputValue={manualInputValue}
-        onInputChange={onManualInputChange}
-        minDate={manualMinDate}
-        maxDate={manualMaxDate}
+        value={manual.value}
+        onValueChange={manual.onValueChange}
+        onAdd={manual.onAdd}
+        inputType={manual.inputType}
+        inputValue={manual.inputValue}
+        onInputChange={manual.onInputChange}
+        minDate={manual.minDate}
+        maxDate={manual.maxDate}
       />
 
-      {textValue && textMode && (
+      {textValue && toolbar.textMode && (
         <Textarea
           value={textValue}
           onChange={onTextChange}
           placeholder={strategy.getTextPlaceholder()}
-          rows={strategy.getTextRows(actions.length)}
+          rows={strategy.getTextRows(actions.list.length)}
           className="sim-textarea"
         />
       )}
 
-      {!textMode && hasActions && (
+      {!toolbar.textMode && hasActions && (
         <ActionTable
-          actions={actions}
+          actions={actions.list}
           tradeMode={tradeMode}
           labelSlot={labelSlot}
           sortKey={strategy.getSortKey}
-          onUpdate={onUpdateAction}
-          onRemove={onRemoveAction}
+          onUpdate={actions.onUpdate}
+          onRemove={actions.onRemove}
         />
       )}
 
-      {resultStats && resultTransactions && (
+      {result.stats && result.transactions && (
         <Results
-          ref={portfolioChartRef}
-          stats={resultStats}
-          history={resultHistory}
-          markers={resultMarkers}
-          transactions={resultTransactions}
+          ref={result.chartRef}
+          stats={result.stats}
+          history={result.history}
+          markers={result.markers}
+          transactions={result.transactions}
           intraday={strategy.isIntraday}
         />
       )}

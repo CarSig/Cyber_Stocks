@@ -9,9 +9,16 @@ type AllRow = {
   event: string;
   trade_idea: string;
   action: 'buy' | 'short';
+  chartDate: string;
   chartTime: string;
+  firstDate: string;
+  firstTime: string;
   preMarket: boolean;
+  afterHours: boolean;
+  entryDate: string;
   entryTime: string;
+  exitDate: string;
+  daysAfter: number | null;
   profitPct: number | null;
   error?: string;
 };
@@ -24,7 +31,23 @@ type SimAllDialogProps = {
   aiDelay: number;
   onAiDelayChange: (v: number) => void;
   onReload: () => void;
+  onRowSelect: (row: AllRow) => void;
 };
+
+function getEventTiming(chartTime: string, afterHours: boolean): { label: string; color: string } {
+  if (afterHours) return { label: 'post market', color: '#f97316' };
+
+  const [h, m] = chartTime.split(':').map(Number);
+  const minutes = h * 60 + m;
+  if (minutes < 9 * 60 + 30) return { label: 'pre market', color: '#f59e0b' };
+  if (minutes <= 15 * 60 + 45) return { label: 'during', color: '#22c55e' };
+  return { label: 'post market', color: '#f97316' };
+}
+
+function fmtTime(raw: string): string {
+  const m = raw.match(/\d{2}:\d{2}/);
+  return m ? m[0] : raw;
+}
 
 export default function AllDialog({
   open,
@@ -34,6 +57,7 @@ export default function AllDialog({
   aiDelay,
   onAiDelayChange,
   onReload,
+  onRowSelect,
 }: SimAllDialogProps) {
   const fmt = (v: number) => (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
 
@@ -44,7 +68,7 @@ export default function AllDialog({
         if (!o) onClose();
       }}
     >
-      <DialogContent className="sm:max-w-2xl" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+      <DialogContent className="sm:max-w-[calc(48rem+250px)]" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
         <DialogHeader>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <DialogTitle>Simulate All Results</DialogTitle>
@@ -119,10 +143,12 @@ export default function AllDialog({
                 <th>#</th>
                 <th>Ticker</th>
                 <th>Event</th>
+                <th>Event date and time</th>
+                <th>Event Timing</th>
                 <th>Idea</th>
                 <th>Action</th>
-                <th>Event time</th>
-                <th>Entry</th>
+                <th>Entry Time</th>
+                <th>Days After</th>
                 <th style={{ textAlign: 'right' }}>P&L %</th>
               </tr>
             </thead>
@@ -134,14 +160,19 @@ export default function AllDialog({
                     : row.profitPct >= 0
                       ? 'var(--color-green)'
                       : 'var(--color-red)';
+                const timing = getEventTiming(row.chartTime, row.afterHours);
                 return (
-                  <tr key={row.rank}>
+                  <tr
+                    key={row.rank}
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => { onRowSelect(row); onClose(); }}
+                  >
                     <td style={{ color: 'var(--text-faint)', fontSize: 11 }}>{row.rank}</td>
                     <td style={{ fontWeight: 600 }}>{row.ticker}</td>
                     <td
                       style={{
                         fontSize: 12,
-                        maxWidth: 260,
+                        maxWidth: 180,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -149,11 +180,24 @@ export default function AllDialog({
                     >
                       {row.event}
                     </td>
+                    <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: 'var(--text-faint)' }}>
+                      {row.firstDate} {fmtTime(row.firstTime)}
+                    </td>
+                    <td
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: timing.color,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {timing.label}
+                    </td>
                     <td
                       style={{
                         fontSize: 11,
                         color: 'var(--text-faint)',
-                        maxWidth: 160,
+                        maxWidth: 120,
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -170,17 +214,12 @@ export default function AllDialog({
                     >
                       {row.action.toUpperCase()}
                     </td>
-                    <td
-                      style={{
-                        fontSize: 12,
-                        whiteSpace: 'nowrap',
-                        color: row.preMarket ? '#f59e0b' : 'var(--text-faint)',
-                      }}
-                    >
-                      {row.chartTime}
-                      {row.preMarket && ' ⚡'}
+                    <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: 'var(--text-faint)' }}>
+                      {row.entryTime}
                     </td>
-                    <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: 'var(--text-faint)' }}>{row.entryTime}</td>
+                    <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: 'var(--text-faint)' }}>
+                      {row.daysAfter != null ? `+${row.daysAfter}d` : '—'}
+                    </td>
                     <td style={{ textAlign: 'right', fontWeight: 700, color }}>
                       {row.error
                         ? row.error

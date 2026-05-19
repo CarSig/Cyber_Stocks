@@ -5,6 +5,7 @@ import InspectHighlight from './components/atoms/InspectHighlight';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { TimezoneProvider } from './context/TimezoneContext';
 import Navbar from './components/organisms/layout/Navbar';
 import ProtectedRoute from './components/molecules/routes/ProtectedRoute';
 import AdminRoute from './components/molecules/routes/AdminRoute';
@@ -29,6 +30,7 @@ const Events = lazy(() => import('./pages/Events/index'));
 export default function App() {
   return (
     <ThemeProvider>
+      <TimezoneProvider>
       <AuthProvider>
         <NotificationProvider>
           <BrowserRouter>
@@ -172,6 +174,7 @@ export default function App() {
           </BrowserRouter>
         </NotificationProvider>
       </AuthProvider>
+      </TimezoneProvider>
     </ThemeProvider>
   );
 }

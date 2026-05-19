@@ -84,13 +84,15 @@ export default function VolatilityChart({
     }
 
     const rangeTimer = subscribeRangeChange(chart, skipRangeRef, { onRangeChange, onPeriodChange });
-    const observer = attachResizeObserver(chart, containerRef);
+    const disposedRef = { current: false };
+    const observer = attachResizeObserver(chart, containerRef, disposedRef);
 
     return () => {
       clearTimeout(rangeTimer);
-      chartRef.current = null;
+      disposedRef.current = true;
       observer.disconnect();
       chart.remove();
+      chartRef.current = null;
     };
   }, [quotes, type, showHV, showATR]); // eslint-disable-line react-hooks/exhaustive-deps
 

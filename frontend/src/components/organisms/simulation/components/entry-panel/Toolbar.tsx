@@ -17,8 +17,11 @@ type ToolbarProps = {
   onAiSim?: () => void;
   aiSimDisabled?: boolean;
   onSimulateAll?: () => void;
+  simulateAllLabel?: string;
   aiDelay?: number;
   onAiDelayChange?: (v: number) => void;
+  exitAtClose?: boolean;
+  onExitAtCloseChange?: (v: boolean) => void;
 };
 
 export default function Toolbar({
@@ -35,8 +38,11 @@ export default function Toolbar({
   onAiSim,
   aiSimDisabled,
   onSimulateAll,
+  simulateAllLabel,
   aiDelay,
   onAiDelayChange,
+  exitAtClose,
+  onExitAtCloseChange,
 }: ToolbarProps) {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.5rem' }}>
@@ -80,11 +86,31 @@ export default function Toolbar({
             />
             <span style={{ fontSize: 12, color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>min delay</span>
           </div>
+          {onExitAtCloseChange !== undefined && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              <button
+                type="button"
+                onClick={() => onExitAtCloseChange?.(!exitAtClose)}
+                style={{
+                  padding: '2px 8px',
+                  fontSize: 11,
+                  borderRadius: 4,
+                  border: '1px solid var(--border)',
+                  background: exitAtClose ? 'var(--accent)' : 'transparent',
+                  color: exitAtClose ? 'var(--accent-foreground)' : 'var(--text-faint)',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {exitAtClose ? 'Exit 15:59' : 'Exit 15:45'}
+              </button>
+            </div>
+          )}
         </>
       )}
       {onSimulateAll && (
         <Button variant="ghost" onClick={onSimulateAll} style={aiButtonStyle}>
-          ✦ Simulate All
+          ✦ {simulateAllLabel ?? 'Simulate All'}
         </Button>
       )}
       {hasResult && (

@@ -3,12 +3,15 @@ import { Link, useLocation } from 'react-router-dom';
 import { UserButton } from '@clerk/react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useTimezone } from '@/context/TimezoneContext';
+import { TIMEZONES } from '@/components/organisms/charts/utils/options';
 import NotificationBell from '@/components/molecules/shared/NotificationBell';
 
 export default function Navbar() {
   const { pathname } = useLocation();
   const { user } = useAuth();
   const themeCtx = useTheme();
+  const { timezone, setTimezone } = useTimezone();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const segments = pathname.split('/').filter(Boolean);
@@ -99,6 +102,16 @@ export default function Navbar() {
               {themeCtx.theme === 'dark' ? '☀' : '☽'}
             </button>
           )}
+          <select
+            className="navbar-tz-select"
+            value={timezone}
+            onChange={(e) => setTimezone(e.target.value)}
+            title="Display timezone"
+          >
+            {TIMEZONES.map((t) => (
+              <option key={t.value} value={t.value}>{t.label}</option>
+            ))}
+          </select>
           <NotificationBell />
           <span className="navbar-username">{String(user.username ?? user.email)}</span>
           {user.role === 'admin' && (

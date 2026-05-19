@@ -6,9 +6,20 @@
     "text": "This is the weekly thread for career and education questions and advice. There are no stupid questions; so, what do *you* want to know about certs/degrees, job requirements, and any other general cybersecurity career questions? Ask away!\n\nInterested in what other people are asking, or think your question has been asked before? Have a look through prior weeks of content - though we're working on making this more easily searchable for the future.",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tg62g1/mentorship_monday_post_all_career_education_and/",
     "author": "AutoModerator",
-    "score": 8,
-    "numComments": 64,
+    "score": 10,
+    "numComments": 78,
     "createdAt": "2026-05-18T00:00:11.000Z"
+  },
+  {
+    "id": "1th72lo",
+    "subreddit": "cybersecurity",
+    "title": "CISA Contractor Admin Leaked AWS GovCloud Keys on Github",
+    "text": "",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1th72lo/cisa_contractor_admin_leaked_aws_govcloud_keys_on/",
+    "author": "Wonderfullyboredme",
+    "score": 99,
+    "numComments": 8,
+    "createdAt": "2026-05-19T00:47:06.000Z"
   },
   {
     "id": "1tgibc2",
@@ -17,8 +28,8 @@
     "text": "",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgibc2/linus_torvalds_says_aipowered_bug_hunters_have/",
     "author": "rkhunter_",
-    "score": 808,
-    "numComments": 60,
+    "score": 1316,
+    "numComments": 101,
     "createdAt": "2026-05-18T10:20:08.000Z"
   },
   {
@@ -28,8 +39,8 @@
     "text": "",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgl37m/linkedin_user_hides_ai_prompt_injection_in_bio_to/",
     "author": "uid_0",
-    "score": 204,
-    "numComments": 14,
+    "score": 405,
+    "numComments": 20,
     "createdAt": "2026-05-18T12:26:39.000Z"
   },
   {
@@ -39,9 +50,31 @@
     "text": "Anthropic has reportedly restricted EU access to Claude Mythos, keeping it mostly available to select U.S. companies and government agencies.\n\nEuropean banks, software firms, and governments may now be unable to test their defenses against one of the most advanced AI cyber tools out there, which could deepen Europe’s dependence on U.S. tech and widen the cybersecurity gap.\n\nMaybe this becomes an opportunity for Mistral and Lumo if things line up right.\n\n[https://www.theparliamentmagazine.eu/news/article/anthropic-shuts-the-eu-out-of-its-most-advanced-cyber-ai-model](https://www.theparliamentmagazine.eu/news/article/anthropic-shuts-the-eu-out-of-its-most-advanced-cyber-ai-model)",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgmscx/anthropic_shuts_the_eu_out_of_its_most_advanced/",
     "author": "x4rvi0n",
-    "score": 95,
-    "numComments": 29,
+    "score": 217,
+    "numComments": 49,
     "createdAt": "2026-05-18T13:32:44.000Z"
+  },
+  {
+    "id": "1tgxgr6",
+    "subreddit": "cybersecurity",
+    "title": "Microsoft - \"your single use code\" email when it was not requested by yourself",
+    "text": "Posting again as it appears a link to a legitimate website caused the post to be removed automatically by Reddit filters. Mods could not undo this and removing the link didn't work either.\n\n\\-----\n\n\\*\\*\\*Update\\*\\*\\*\n\nThis may be what I suspected as a possibility, in that this is checking email addresses to see if they are connected to MS accounts, such as a Gmail address in my case.\n\n\"Threat actors are allegedly using leaked databases for large-scale account enumeration to identify email addresses linked to Microsoft accounts, potentially for later credential-stuffing attacks.\n\nUsers are advised to ignore unexpected codes, change passwords, and enable 2FA.\"\n\nThis issue will impact both personal and business users, so it should be relevant here.\n\nIf this is the same for you, make sure to follow steps mentioned in this post to log into that account, set up a MS outlook address for it, set it as the primary, then change sign-in preferences and remove the other address from being used as a sign in credential for the account.\n\nOf course, implement all other security measures, especially MFA, update password, review all details on the account too (security logs, recovery details). To stop these messages (if the article is correct), the above should be done at a minimum, regarding creating a MS account for the non-MS address that received the code.\n\n***Some useful steps that may stop these emails***\n\nThese are steps I have done so far, I think most are just good practice to follow in general. This isn't a complete guide, but hopefully will help -\n\nUse link to discover which MS accounts are linked to the email you received the code on.\n\nhttps://account.live.com/username/recover\n\nLog into these MS accounts and check security activity logs, look for anything suspicious and flag it with MS.\n\nCheck your account details are correct, especially security details for recovery addresses etc...\n\nCreate recovery code(s) to give you a way back into your account (should always have this as a backup).\n\nSet up MFA if not already done so for the MS accounts. There is plenty of information when setting this up, make sure to read it.\n\nFor all the MS accounts, check sign in preferences and perhaps disable sign-in for any aliases you may have and you do not need it enabled for, rather than deleting the alias entirely.\n\nTry to log into MS account with the email address you received the code on (if you can, this is the most likely reason why the codes are coming through). You may have an account tied to this address in MS, if so, create a MS account for this address that is sufficiently different from the original address to reduce guessing of the account login details/address (keep this private to yourself).\n\nIf you did the step directly above, set the new MS account address as the primary, then remove the other address from sign in preferences.\n\n***What can Microsoft do?***\n\nThese are my thoughts, not an expert -\n\nIf this is account enumeration to discover valid non-MS accounts, in part to target valid user accounts now and in the future, the flow does appear to tell the attacker if the account exists or not (as in an invalid address to a MS account will tell them it doesn't exist). This typically isn't great practice, but I'm guessing they have their reasons for this for the overall login flow. Maybe end user usability?.This is why you should probably make it so that the non-MS email address you received this code on is not a valid sign-in credential for that account.\n\nI'm sure they have many protections in place, otherwise we'd be getting more than a couple of these emails, but it is a constant battle to detect and block these, so some will get through. \n\n\n\\------\n\nThought I'd post what I've done so far in a hope to stop these from happening and get some insight from others as to what else could be done. Also, would be great to find out exactly why this has been happening.\n\nI have a Gmail address that I have set up on my Microsoft account to send these codes to; I receive the emails to my Gmail account, but it does not indicate which Microsoft account it is links to.\n\nYou can use a Microsoft service to see which accounts your email (the one you received codes on) links to in some way on Microsoft. The details are obfuscated, but useful.\n\nhttps://account.live.com/username/recover\n\nI also use my Gmail address as my account for my windows laptop, so effectively I have another Microsoft account, but with my Gmail address. Perhaps this is something others have done and do not realise the linkage here.\n\nMicrosoft have not said anything about this still (AFAIK), my guess is that it is a bug or some kind of cyber incident, perhaps probing for flaws in the service. As long as you don't use these codes you have not requested, it should be fine. There is a very small chance that the code could be guessed (1 in a million, maybe less if a guessed code can be entered a few times).\n\nI have checked aliases I have for my Microsoft accounts and removed them as options from sign in preferences, didn't know about this but found that on Microsoft forum. Unfortunately, I received a code after these changes, so didn't resolve my issue but still worthwhile checking.\n\nLast thing I've tried is to set my Microsoft account with my Gmail address to have an alias (made sure it was quite different to the Gmail address), I have then made this the primary address and removed the Gmail email address from being used as a sign in address option (it's still there, just disabled that feature for it). Unsure if this will impact my Windows laptop as will not have access to it until tomorrow, will update as soon as I find out.\n\nSince the above change, I have not received another email with a code that I have not initiated myself, but it has only been 1 day...\n\nThe Microsoft security log is pretty useless as it doesn't log these code requests, only successful logins (makes me think these logs would show a disturbing number of events if it included even partial attempts to sign in with your email address). I would hope it would include unsuccessful attempts too (I don't see any of these), but really don't know.\n\nI have various things in place to help secure my accounts, such as authenticator, MFA, complex and unique passwords etc... I need to look into going password-less more, but unsure if this will help here at all. I have created recovery codes for all my accounts, in the event I could mess something up.\n\nAnyway, any other thoughts on what we can do? Hopefully some bits here will help others too.",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgxgr6/microsoft_your_single_use_code_email_when_it_was/",
+    "author": "lostinmygarden",
+    "score": 78,
+    "numComments": 20,
+    "createdAt": "2026-05-18T19:05:45.000Z"
+  },
+  {
+    "id": "1tgo5ho",
+    "subreddit": "cybersecurity",
+    "title": "Ultimate irony: Microsoft researchers say you shouldn’t trust AI with work docs",
+    "text": "",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgo5ho/ultimate_irony_microsoft_researchers_say_you/",
+    "author": "Cybernews_com",
+    "score": 105,
+    "numComments": 4,
+    "createdAt": "2026-05-18T14:21:52.000Z"
   },
   {
     "id": "1tgda6s",
@@ -50,8 +83,8 @@
     "text": "",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgda6s/new_windows_miniplasma_zeroday_exploit_gives/",
     "author": "rkhunter_",
-    "score": 370,
-    "numComments": 46,
+    "score": 469,
+    "numComments": 60,
     "createdAt": "2026-05-18T05:41:04.000Z"
   },
   {
@@ -61,53 +94,20 @@
     "text": "",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgijk0/microsoft_confirms_windows_11_security_update/",
     "author": "Doug24",
-    "score": 73,
-    "numComments": 9,
+    "score": 102,
+    "numComments": 18,
     "createdAt": "2026-05-18T10:31:18.000Z"
   },
   {
-    "id": "1tgo5ho",
+    "id": "1th120n",
     "subreddit": "cybersecurity",
-    "title": "Ultimate irony: Microsoft researchers say you shouldn’t trust AI with work docs",
-    "text": "",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgo5ho/ultimate_irony_microsoft_researchers_say_you/",
-    "author": "Cybernews_com",
-    "score": 26,
-    "numComments": 2,
-    "createdAt": "2026-05-18T14:21:52.000Z"
-  },
-  {
-    "id": "1tg2s2h",
-    "subreddit": "cybersecurity",
-    "title": "A million baby monitors and security cameras were easily viewable by hackers",
-    "text": "",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tg2s2h/a_million_baby_monitors_and_security_cameras_were/",
-    "author": "julian88888888",
-    "score": 441,
-    "numComments": 28,
-    "createdAt": "2026-05-17T21:42:25.000Z"
-  },
-  {
-    "id": "1tgi94n",
-    "subreddit": "cybersecurity",
-    "title": "Exploit available for new DirtyDecrypt Linux root escalation flaw",
-    "text": "",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgi94n/exploit_available_for_new_dirtydecrypt_linux_root/",
-    "author": "rkhunter_",
-    "score": 37,
+    "title": "Fellow Tier 1 SOC/Security Analysts   - What does your day to day look like?",
+    "text": "I'm joining an organization soon which is an MSSP.I'd like to know how your day looks like.Not like generic stuff,more like what are your daily tasks. Do you guys do active threat hunting or is it just monitoring. What are the tools you use on regular basis and if you have multiple clients you are handling,do they have different SIEM and XDR/EDR being used. I would like to get a full idea how things work in production environment before i start.",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1th120n/fellow_tier_1_socsecurity_analysts_what_does_your/",
+    "author": "Necessary_Trifle7677",
+    "score": 13,
     "numComments": 1,
-    "createdAt": "2026-05-18T10:16:57.000Z"
-  },
-  {
-    "id": "1tg58gm",
-    "subreddit": "cybersecurity",
-    "title": "Mean time-to-exploit just hit 2.1 days. Critical vulnerabilities everywhere. Is the AI apocalypse here?",
-    "text": "Mandiant's new figure: attacks begin 7 days before the patch ships. Patch Tuesday is now exploit-last-Friday\n\nSupporting stats:\n\n71% of known exploits hit same-day as disclosure (Zero Day Clock)\n\n40% of breaches start with an unpatched flaw (IBM)\n\n\\+162% CVE volume since 2020 (Mondoo)\n\n25,973 CVEs filed in 2026 already — heading towards 70k, FIRST.org forecasts up to 100k\n\nAnd we seem to be seeing a lot of Linux and other software critical vulnerabilities lately, all thanks to AI.\n\nTake a look at https://zerodayclock.com\n\nIs the AI exploit apocalypse here?\n\nIs this the end?",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tg58gm/mean_timetoexploit_just_hit_21_days_critical/",
-    "author": "Mr_Prometius",
-    "score": 228,
-    "numComments": 41,
-    "createdAt": "2026-05-17T23:23:33.000Z"
+    "createdAt": "2026-05-18T20:58:41.000Z"
   },
   {
     "id": "1tgmaqv",
@@ -116,42 +116,53 @@
     "text": "Got approval to go to Vegas this year for the first time. We might be biting off too much but looking at doing BSides on Monday/Tuesday, BH on Wednesday/Thursday and DEFCON Friday/Saturday. Will  \nBe a busy week for sure and first time at all of them.\n\nDon’t want to hotel hop so was looking to see what the best plan of attack would be. ChatGPT says staying at the BSides hotel (Tuscany) would be a good middle area. Was thinking either that or Luxor hotel since Mandaly Bay is sold out. ",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgmaqv/best_hotel_for_attending_all_three_conferences_in/",
     "author": "Important_Emphasis12",
-    "score": 17,
-    "numComments": 19,
+    "score": 37,
+    "numComments": 34,
     "createdAt": "2026-05-18T13:14:39.000Z"
   },
   {
-    "id": "1tgmowd",
+    "id": "1tgi94n",
     "subreddit": "cybersecurity",
-    "title": "Most AI agent governance playbooks still assume you can turn the agent off... Once its wired into production that stops being true [Rethinking AI security through a dimmer switch lens]",
-    "text": "Hey everyone! observation from working in authorization: the default plan I have been seeing for \"what if the AI agent misbehaves\" is some version of \"kill the agent.\"\n\nThat's fine for sandboxes. But for anything integrated into real workflows, such as claims, support, data writes, etc - pulling the switch creates a secondary incident, sometimes worse than the original. (queues halt, compliance windows slip, the team relying on the agent's output is scrambling.)\n\nA colleague of mine was talking to a CISO recently and the framing that CISO used was dimmer switch, not kill switch.\n\nWhat that looks like in practice is narrowing what the agent can do, not switching it off. Read-only on certain data first. Sensitive tools dropped next. Higher approval thresholds for anything above a certain size. each adjustment is reversible and logged. If the agent turns out to be fine, the restrictions fade back. If it doesn'y -&gt; you keep tightening until access is at zero, but you got there deliberately and with a record.\n\nThe mechanics aren't new - per-action policy enforcement has been around for years in policy-as-code stacks. The part that's newe**r** is tying it to the agent's identity and intent at runtime, so when something looks off you can narrow scope without redeploying or stopping the agent in the middle of work\n\nPlenty of teams already have circuit breakers, rate limits, tool allowlists. Those help, but they tend to be blunt : full-access or off, no middle. The dimmer is what sits between those two states, and it's the part most agent governance plans I've seen don't actually include, unfortunately.\n\nI'm vendor-side (work at Cerbos) so not dropping a link :) Happy to share the writeup in DMs or comments if useful. Wanted to put the framing out there because most IR playbooks I've seen still default to the kill switch, and the gap is going to start mattering as agents move past copilot work.\n\nWould be really intersting to hear how the community here is handling having to revoke without creating a worse incident",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgmowd/most_ai_agent_governance_playbooks_still_assume/",
-    "author": "morphAB",
-    "score": 17,
-    "numComments": 4,
-    "createdAt": "2026-05-18T13:29:16.000Z"
-  },
-  {
-    "id": "1tg2nd9",
-    "subreddit": "cybersecurity",
-    "title": "NGINX CVE-2026-42945 Exploited in the Wild, Causing Worker Crashes and Possible RCE",
+    "title": "Exploit available for new DirtyDecrypt Linux root escalation flaw",
     "text": "",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tg2nd9/nginx_cve202642945_exploited_in_the_wild_causing/",
-    "author": "Cristiano1",
-    "score": 104,
-    "numComments": 5,
-    "createdAt": "2026-05-17T21:37:18.000Z"
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgi94n/exploit_available_for_new_dirtydecrypt_linux_root/",
+    "author": "rkhunter_",
+    "score": 57,
+    "numComments": 1,
+    "createdAt": "2026-05-18T10:16:57.000Z"
   },
   {
-    "id": "1tgr6gk",
+    "id": "1tgwxcs",
     "subreddit": "cybersecurity",
-    "title": "YellowKey Mitigation",
-    "text": "Hello there, I hope this is an allowed post. It seems to be based on the FAQ. \n\nI was curious if anyone has tested any YellowKey mitigations? I read a post last week that looked like if you used Microsoft Intune to store the key and decrypt the Bitlocker volume rather than the TPM on the computer that seemed to defeat YellowKey as it had no way to extract that key.\n\nI'm curious if anyone knows if using Network Unlock in Active Directory would do the same thing? I believe it would as it works very much the same way, but I am not 100% sure as I have not tested it.\n\nLet me know your thoughts. ",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgr6gk/yellowkey_mitigation/",
-    "author": "Titanium125",
+    "title": "Mini Shai-Hulud Strikes Again: TanStack + more npm Packages Compromised",
+    "text": "",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgwxcs/mini_shaihulud_strikes_again_tanstack_more_npm/",
+    "author": "Expensive-Mud8050",
+    "score": 26,
+    "numComments": 5,
+    "createdAt": "2026-05-18T18:51:05.000Z"
+  },
+  {
+    "id": "1th5fei",
+    "subreddit": "cybersecurity",
+    "title": "Stuck choosing a cybersecurity specialization — especially with a local market context (Senegal). Need honest advice.",
+    "text": "Hi everyone,  \nI’ve been deep into cybersecurity for a while now and the problem is… I love all of it. Red team, blue team, web pentesting, network pentesting, malware analysis — I’ve touched everything and genuinely enjoyed it all. And now that’s actually my biggest problem.  \nI want to pick ONE thing and go hard on it for the next 3–4 months. Build real depth, not just breadth.  \nHere’s my dilemma:  \nWeb pentesting feels like the obvious choice skill-wise. I enjoy it, there’s a clear learning path, and bug bounty is a real income stream. But:  \n\t•\tBug bounty is insanely competitive globally  \n\t•\tIn Senegal (where I’m based), web pentesting isn’t really an established local market yet  \n\t•\tCompanies here are more likely to ask for network pentesting if they want any freelance security work done  \nNetwork pentesting is less exciting to me personally, but it seems more aligned with what local businesses actually need and pay for.  \nSo I’m torn between:  \n\t1.\tFollowing what I’m better at / enjoy more (web) and betting on bug bounty + remote work  \n\t2.\tSpecializing in what the local market actually wants (network) and building a freelance client base in Senegal  \nFor those of you who’ve been through this — did you follow the market or follow your interest? And did it pay off?  \nAlso curious if anyone here has navigated cybersecurity freelancing in an emerging/developing market. The dynamic is very different from Europe or the US and I rarely see it discussed.  \nThanks ",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1th5fei/stuck_choosing_a_cybersecurity_specialization/",
+    "author": "BullfrogOdd667",
     "score": 4,
-    "numComments": 9,
-    "createdAt": "2026-05-18T16:07:17.000Z"
+    "numComments": 0,
+    "createdAt": "2026-05-18T23:37:59.000Z"
+  },
+  {
+    "id": "1tg2s2h",
+    "subreddit": "cybersecurity",
+    "title": "A million baby monitors and security cameras were easily viewable by hackers",
+    "text": "",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tg2s2h/a_million_baby_monitors_and_security_cameras_were/",
+    "author": "julian88888888",
+    "score": 465,
+    "numComments": 31,
+    "createdAt": "2026-05-17T21:42:25.000Z"
   },
   {
     "id": "1tgs4gg",
@@ -160,9 +171,119 @@
     "text": "Hey,\n\nHow are you handling MCP security in your companies?\n\nI want to build some kind of whitelist/approval process for MCP servers used with Copilot/internal AI tooling and started looking at MCP scanners, but I’m stuck on the security architecture part.\n\nMy understanding is that MCP servers should basically be treated as untrusted code/potential malware, so scanning them safely is not that straightforward.\n\nDo you:  \n\\- scan them in isolated VMs/runners?  \n\\- allow those environments to access internal GitLab/GitHub?  \n\\- do it automatically in CI/CD or mostly manually?  \n\\- use things like VirusTotal/YARA before deeper scans?\n\nThe more I think about it, the harder it feels to automate safely without creating a sandbox that still has access to internal infrastructure.\n\nCurious how others are solving this.",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgs4gg/mcp_security/",
     "author": "Mad_Hatter_XYZ",
-    "score": 2,
-    "numComments": 1,
+    "score": 12,
+    "numComments": 14,
     "createdAt": "2026-05-18T16:38:43.000Z"
+  },
+  {
+    "id": "1tg58gm",
+    "subreddit": "cybersecurity",
+    "title": "Mean time-to-exploit just hit 2.1 days. Critical vulnerabilities everywhere. Is the AI apocalypse here?",
+    "text": "Mandiant's new figure: attacks begin 7 days before the patch ships. Patch Tuesday is now exploit-last-Friday\n\nSupporting stats:\n\n71% of known exploits hit same-day as disclosure (Zero Day Clock)\n\n40% of breaches start with an unpatched flaw (IBM)\n\n\\+162% CVE volume since 2020 (Mondoo)\n\n25,973 CVEs filed in 2026 already — heading towards 70k, FIRST.org forecasts up to 100k\n\nAnd we seem to be seeing a lot of Linux and other software critical vulnerabilities lately, all thanks to AI.\n\nTake a look at https://zerodayclock.com\n\nIs the AI exploit apocalypse here?\n\nIs this the end?",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tg58gm/mean_timetoexploit_just_hit_21_days_critical/",
+    "author": "Mr_Prometius",
+    "score": 275,
+    "numComments": 45,
+    "createdAt": "2026-05-17T23:23:33.000Z"
+  },
+  {
+    "id": "1tgxo0y",
+    "subreddit": "cybersecurity",
+    "title": "How do you threat hunt for RMM tools in environments where RMM is all over the place?",
+    "text": "I'm a T3 analyst/threat hunter. I've been doing threat hunts across various client environments for a decent amount of time, sometimes we get asked to hunt for RMM misuse. When certain RMM tools are explicitly sanctioned it's easy enough.\n\nBut in a client environment where there is no explicit allow/block list for these tools it's a bit trickier to hunt for, especially in large environments with RMM all over the place.\n\nWhat I usual hunt for here is\n\n* RMM spawning from an unusual file path\n   * Might baseline what's normal for various RMM tools, look for downloads, temp folders, this isn't perfect, some such as LMI-Rescue spawn straight from downloads\n   * RMM tools in my experience don't spawn processes directly from the RMM process, but from explorer like they're user actions\n   * Thinking maybe installs from strange parents could be something?\n   * Again, a lot of RMM connections are going straight to the RMM tools corporate infrastructure/relay, so this isn't high fidelity\n   * Events in the SIEM where the original filename and the filename running don't match, renamed RMM binaries\n   * RMM tools in my experience don't spawn processes directly from the RMM process, but from explorer like they're user actions\n   * Thinking maybe installs from strange parents could be something?\n   * Again, a lot of RMM connections are going straight to the RMM tools corporate infrastructure/relay, so this isn't high fidelity\n   * Events in the SIEM where the original filename and the filename running don't match, renamed RMM binaries\n   * Again, a lot of RMM connections are going straight to the RMM tools corporate infrastructure/relay, so this isn't high fidelity\n   * Events in the SIEM where the original filename and the filename running don't match, renamed RMM binaries\n   * Events in the SIEM where the original filename and the filename running don't match, renamed RMM binaries\n* Allowed/disallowed RMM list/known identifiers/provenance\n* Parent/child relationships (sometimes)\n   * RMM tools in my experience don't spawn processes directly from the RMM process, but from explorer like they're user actions\n   * Thinking maybe installs from strange parents could be something?\n   * Again, a lot of RMM connections are going straight to the RMM tools corporate infrastructure/relay, so this isn't high fidelity\n   * Events in the SIEM where the original filename and the filename running don't match, renamed RMM binaries\n   * Again, a lot of RMM connections are going straight to the RMM tools corporate infrastructure/relay, so this isn't high fidelity\n   * Events in the SIEM where the original filename and the filename running don't match, renamed RMM binaries\n   * Events in the SIEM where the original filename and the filename running don't match, renamed RMM binaries\n* Network connections/DNS (sometimes)\n   * Again, a lot of RMM connections are going straight to the RMM tools corporate infrastructure/relay, so this isn't high fidelity\n   * Events in the SIEM where the original filename and the filename running don't match, renamed RMM binaries\n   * Events in the SIEM where the original filename and the filename running don't match, renamed RMM binaries\n* PE data mismatch\n   * Events in the SIEM where the original filename and the filename running don't match, renamed RMM binaries\n\nAny other threat hunters here? How do you hunt for RMM tools in large environments where RMM is all over the place.",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgxo0y/how_do_you_threat_hunt_for_rmm_tools_in/",
+    "author": "LickMyCockGoAway",
+    "score": 5,
+    "numComments": 15,
+    "createdAt": "2026-05-18T19:11:10.000Z"
+  },
+  {
+    "id": "1tgmowd",
+    "subreddit": "cybersecurity",
+    "title": "Most AI agent governance playbooks still assume you can turn the agent off... Once its wired into production that stops being true [Rethinking AI security through a dimmer switch lens]",
+    "text": "Hey everyone! observation from working in authorization: the default plan I have been seeing for \"what if the AI agent misbehaves\" is some version of \"kill the agent.\"\n\nThat's fine for sandboxes. But for anything integrated into real workflows, such as claims, support, data writes, etc - pulling the switch creates a secondary incident, sometimes worse than the original. (queues halt, compliance windows slip, the team relying on the agent's output is scrambling.)\n\nA colleague of mine was talking to a CISO recently and the framing that CISO used was dimmer switch, not kill switch.\n\nWhat that looks like in practice is narrowing what the agent can do, not switching it off. Read-only on certain data first. Sensitive tools dropped next. Higher approval thresholds for anything above a certain size. each adjustment is reversible and logged. If the agent turns out to be fine, the restrictions fade back. If it doesn'y -&gt; you keep tightening until access is at zero, but you got there deliberately and with a record.\n\nThe mechanics aren't new - per-action policy enforcement has been around for years in policy-as-code stacks. The part that's newe**r** is tying it to the agent's identity and intent at runtime, so when something looks off you can narrow scope without redeploying or stopping the agent in the middle of work\n\nPlenty of teams already have circuit breakers, rate limits, tool allowlists. Those help, but they tend to be blunt : full-access or off, no middle. The dimmer is what sits between those two states, and it's the part most agent governance plans I've seen don't actually include, unfortunately.\n\nI'm vendor-side (work at Cerbos) so not dropping a link :) Happy to share the writeup in DMs or comments if useful. Wanted to put the framing out there because most IR playbooks I've seen still default to the kill switch, and the gap is going to start mattering as agents move past copilot work.\n\nWould be really intersting to hear how the community here is handling having to revoke without creating a worse incident",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgmowd/most_ai_agent_governance_playbooks_still_assume/",
+    "author": "morphAB",
+    "score": 15,
+    "numComments": 5,
+    "createdAt": "2026-05-18T13:29:16.000Z"
+  },
+  {
+    "id": "1th8pgk",
+    "subreddit": "cybersecurity",
+    "title": "ntroducing Yokai Linux — A Cyberpunk Security-Focused Linux Distro”",
+    "text": "",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1th8pgk/ntroducing_yokai_linux_a_cyberpunk/",
+    "author": "PatientCollar4613",
+    "score": 1,
+    "numComments": 0,
+    "createdAt": "2026-05-19T01:57:02.000Z"
+  },
+  {
+    "id": "1tgr6gk",
+    "subreddit": "cybersecurity",
+    "title": "YellowKey Mitigation",
+    "text": "Hello there, I hope this is an allowed post. It seems to be based on the FAQ. \n\nI was curious if anyone has tested any YellowKey mitigations? I read a post last week that looked like if you used Microsoft Intune to store the key and decrypt the Bitlocker volume rather than the TPM on the computer that seemed to defeat YellowKey as it had no way to extract that key.\n\nI'm curious if anyone knows if using Network Unlock in Active Directory would do the same thing? I believe it would as it works very much the same way, but I am not 100% sure as I have not tested it.\n\nLet me know your thoughts. ",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgr6gk/yellowkey_mitigation/",
+    "author": "Titanium125",
+    "score": 6,
+    "numComments": 13,
+    "createdAt": "2026-05-18T16:07:17.000Z"
+  },
+  {
+    "id": "1tgvz80",
+    "subreddit": "cybersecurity",
+    "title": "MCA student with 2 yrs SOC/VAPT experience struggling to land interviews — looking for guidance/referrals",
+    "text": "I’ve been applying through LinkedIn for months but getting very few responses, and I think I may be approaching the market the wrong way.\n\nAt this point, I’m open to:\n\n* SECURITY/ SOC Analyst roles \n* Security hybrid roles\n* VAPT​\n* Entry-level cybersecurity opportunities\n* Remote opportunities\n\nI’m willing to learn fast and work hard. If anyone has advice, referrals, startup openings, or suggestions on how I can improve my profile, I’d genuinely appreciate it.\n\nThank you.",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgvz80/mca_student_with_2_yrs_socvapt_experience/",
+    "author": "FoundationPure5005",
+    "score": 3,
+    "numComments": 1,
+    "createdAt": "2026-05-18T18:24:37.000Z"
+  },
+  {
+    "id": "1tg2nd9",
+    "subreddit": "cybersecurity",
+    "title": "NGINX CVE-2026-42945 Exploited in the Wild, Causing Worker Crashes and Possible RCE",
+    "text": "",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tg2nd9/nginx_cve202642945_exploited_in_the_wild_causing/",
+    "author": "Cristiano1",
+    "score": 120,
+    "numComments": 6,
+    "createdAt": "2026-05-17T21:37:18.000Z"
+  },
+  {
+    "id": "1th47qx",
+    "subreddit": "cybersecurity",
+    "title": "Just received an email from shinyhunters about their amtrack hack",
+    "text": "I just received an email from shinyhunters about this amtrack hacking (purchased tickets via amtrack once several years ago). The email went directly into my gmail spam folder and I did not open it. Is there anything I should do / be concerned about?",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1th47qx/just_received_an_email_from_shinyhunters_about/",
+    "author": "witty__username5",
+    "score": 0,
+    "numComments": 6,
+    "createdAt": "2026-05-18T22:49:41.000Z"
+  },
+  {
+    "id": "1th3a58",
+    "subreddit": "cybersecurity",
+    "title": "Optoma CinemaX Projectors: Critical Vulnerabilities Including Remote Root Access",
+    "text": "/u/Smagdali is the security researcher who discovered these findings and wrote the article. ",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1th3a58/optoma_cinemax_projectors_critical/",
+    "author": "Bulls729",
+    "score": 1,
+    "numComments": 0,
+    "createdAt": "2026-05-18T22:15:33.000Z"
+  },
+  {
+    "id": "1th1uku",
+    "subreddit": "cybersecurity",
+    "title": "Bywaf: an auditable Python commandlet framework for chained pentest  workflows",
+    "text": "I’ve been working on Bywaf, a GPLv3 Python framework for auditable  penetration-testing workflows. It started as a rewrite of an older  \nWAF-bypass-oriented project, but the scope has broadened into a  commandlet framework for chaining network, host, and web testing  \nsteps.\n\nThe core idea is to reduce the manual glue between tools. A host- discovery commandlet can emit live hosts into an event database; a port scanner can consume only the hosts from that run; HTTP  probing, fingerprinting, finding deduplication, and reporting can then consume later events. Each run/pipeline/job gets durable IDs,  captured arguments, variable snapshots, notes, artifacts, hashes, and audit events so results can be traced back to the exact command  context that produced them.\n\nSome design features:\n\n\\- Metasploit-like REPL with commandlet pipelines  \n\\- SQLite-backed event model for plugin communication  \n\\- Auditable artifacts and command history  \n\\- Policy engine for scope enforcement and run planning  \n\\- Plugin capability declarations  \n\\- Pervasive tab completion for commands and arguments  \n\\- Native, library-backed, helper/provider, and wrapped-binary  plugin types  \n\\- Packages for .deb, .rpm, and Python wheel installs\n\nExample intended flow:\n\nhostscanner 192.168.1.1-255 | portscanner | http\\_probe | webfin |  finding\\_dedupe | finding\\_report\n\nThe project is still pre-1.0, currently 0.9.2, so APIs and behavior may change. I’m especially interested in feedback on the  architecture, event model, plugin API, auditability model, and whether this approach would actually reduce friction in real  assessment workflows.\n\nRepository:  \n[https://github.com/roeyk/Bywaf](https://github.com/roeyk/Bywaf)\n\nDocs include a usage guide, block &amp; system flow diagrams, and plugin writer’s guide.",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1th1uku/bywaf_an_auditable_python_commandlet_framework/",
+    "author": "roeyk",
+    "score": 1,
+    "numComments": 0,
+    "createdAt": "2026-05-18T21:26:50.000Z"
   },
   {
     "id": "1tgfenv",
@@ -171,9 +292,20 @@
     "text": "So little context, i started applying daily, and got a call for interview, fast forward i never gave interview for this role, before this i gave interview for ransom roles lol. I am a fresher no prior experience. So yeah if any had tips for me like what should I know, what is must know stuff, where most people get trapped in interview so that I can learn and avoid those mistakes. ",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgfenv/need_help_with_interview_for_soc_l1/",
     "author": "OpenCapital582",
-    "score": 8,
+    "score": 10,
     "numComments": 12,
     "createdAt": "2026-05-18T07:36:59.000Z"
+  },
+  {
+    "id": "1tgfd1n",
+    "subreddit": "cybersecurity",
+    "title": "Feeling stuck in SOC want to moving toward Detection Engineering &amp; Cloud Security (need guidance &amp; cert roadmap)",
+    "text": "Hello everyone, I need advice. I have been working in cybersecurity for almost 2 years. I worked in SOC engineering and analysis, and in detection (but for a short time). Currently, I work as a deployment engineer dealing with parsers, collectors, implementations, and so on.\n\nI hold CDSA and AWS CCP.\n\nI want to go deeper into detection engineering and cloud security, but I feel stuck and overwhelmed. I don’t enjoy operational analysis anymore, so I am focusing more on engineering and deployment. What should I study next, and which certifications should I prepare for (not SANS)?\n\n\"my company works with azure not AWS\"\n\nThanks.",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgfd1n/feeling_stuck_in_soc_want_to_moving_toward/",
+    "author": "ZYADWALEED",
+    "score": 10,
+    "numComments": 7,
+    "createdAt": "2026-05-18T07:34:17.000Z"
   },
   {
     "id": "1tfw8i8",
@@ -182,9 +314,20 @@
     "text": "I got an Authenticator request from another country for my Microsoft account. I denied it and went in and changed my password, a day later I get another Authenticator request from a different country than the first. Again change password and again it happens. How can I secure my account how are they able to send these Authenticator requests?",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tfw8i8/microsoft_account_keeps_getting_authenticator/",
     "author": "birdsofjay",
-    "score": 96,
-    "numComments": 61,
+    "score": 106,
+    "numComments": 63,
     "createdAt": "2026-05-17T17:39:42.000Z"
+  },
+  {
+    "id": "1tgx2vk",
+    "subreddit": "cybersecurity",
+    "title": "Directory of vendor security questionnaires",
+    "text": "I built a small directory of vendor security / third-party risk questionnaires:\n\n[https://vendorquestionnaires.com/](https://vendorquestionnaires.com/)\n\nIt covers things like CAIQ, SIG, HECVAT, NIST-based templates, and other security review questionnaires.\n\nGoal: make it easier to find the official source, maintainer, purpose, and licensing / usage notes.\n\nWhat security questionnaires or assessment templates should I add? Would love to know if you find it useful.",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgx2vk/directory_of_vendor_security_questionnaires/",
+    "author": "sirdong",
+    "score": 0,
+    "numComments": 0,
+    "createdAt": "2026-05-18T18:55:23.000Z"
   },
   {
     "id": "1tgi4vq",
@@ -193,20 +336,20 @@
     "text": "[https://thehackernews.com/2026/05/four-malicious-npm-packages-deliver.html](https://thehackernews.com/2026/05/four-malicious-npm-packages-deliver.html)",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgi4vq/four_malicious_npm_packages_deliver_infostealers/",
     "author": "sunychoudhary",
-    "score": 3,
+    "score": 4,
     "numComments": 0,
     "createdAt": "2026-05-18T10:10:46.000Z"
   },
   {
-    "id": "1tgskdj",
+    "id": "1tgsz6q",
     "subreddit": "cybersecurity",
-    "title": "How is AI affecting the cybersecurity market?",
-    "text": "",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgskdj/how_is_ai_affecting_the_cybersecurity_market/",
-    "author": "No-Suggestion-4083",
+    "title": "Cybersecurity job market in Phoenix (East/West Valley?) – looking for local insight",
+    "text": "Relocating to the Phoenix area and wanted to get an honest feel for what the cybersecurity job market is like across Phoenix, Scottsdale, Tempe, Chandler, Mesa/Gilbert (East Valley?), and the West Valley as well. A little about me: I’m a cybersecurity analyst gov civilian with 8+ years of DoD experience, an active TS/SCI, Security+ and CySA+, and hands-on experience in threat detection, incident response, threat hunting, SIEM engineering, and computer network defense. Also just finished my B.S. in Computer Science.\n\nFor those working in the area, what’s the market actually like right now?  Are certain parts of the valley stronger for cyber or cleared work? Any companies with great reputations, strong security teams, and good work-life balance? On the flip side, any companies or contractors people would avoid ? Not looking for gossip, just honest “wish I knew this before moving here” advice. Thanks.",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgsz6q/cybersecurity_job_market_in_phoenix_eastwest/",
+    "author": "Defiant-Chipmunk-321",
     "score": 1,
-    "numComments": 0,
-    "createdAt": "2026-05-18T16:53:39.000Z"
+    "numComments": 4,
+    "createdAt": "2026-05-18T17:07:20.000Z"
   },
   {
     "id": "1tgm0gv",
@@ -216,19 +359,8 @@
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgm0gv/whats_your_companys_actual_pqc_migration_plan_not/",
     "author": "rushikesh_n_k",
     "score": 2,
-    "numComments": 2,
+    "numComments": 4,
     "createdAt": "2026-05-18T13:03:35.000Z"
-  },
-  {
-    "id": "1tfksxd",
-    "subreddit": "cybersecurity",
-    "title": "Am I overthinking Claude Code security or is this actually a risk?",
-    "text": "Maybe I'm being paranoid but Claude Code running on dev machines with access to our codebase and network... that seems like a pretty big deal   \nfrom a security perspective.\n\nLike if it got compromised somehow, it would have direct access to everything.\n\nAm I the only one thinking about this? Or are companies actually locking this down?\n\nHow are you all handling AI tools like Claude Code?",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tfksxd/am_i_overthinking_claude_code_security_or_is_this/",
-    "author": "Sweaty-Career330",
-    "score": 229,
-    "numComments": 92,
-    "createdAt": "2026-05-17T09:36:56.000Z"
   },
   {
     "id": "1tg1kkg",
@@ -237,9 +369,64 @@
     "text": "Lately I’ve been feeling like attackers are targeting human behavior more than infrastructure itself.\n\nA lot of breaches don’t happen because security is completely missing.Usually it’s an employee mistake, rushed decision, reused password, ignored alert.\n\nMeanwhile most security discussions still focus heavily on tools, dashboards and AI detection.\n\nFeels like the human side of security is becoming more important than ever.\n\nCurious how people working in SOC/blue team environments see this.",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tg1kkg/is_cybersecurity_becoming_more_behavioral_than/",
     "author": "Andrewpaul46",
-    "score": 27,
+    "score": 33,
     "numComments": 33,
     "createdAt": "2026-05-17T20:55:30.000Z"
+  },
+  {
+    "id": "1tghdhg",
+    "subreddit": "cybersecurity",
+    "title": "Direct external access to CyberArk PVWA vs. enforcing a VDI/Jump Box first?",
+    "text": "I’m currently reviewing the onboarding and remote access architecture for external vendors who require privileged access to our internal environment.\n\nRight now, our workflow allows external vendors to log directly into our CyberArk PVWA (Password Vault Web Access) portal via a browser from their own external corporate laptops (unmanaged by us). Once in the portal, they initiate their privileged sessions to target databases and servers.\n\nI want to get some industry perspective:\n\n1. Is it considered acceptable practice to allow direct PVWA portal access to unmanaged external endpoints? \n2. Is it a standard best practice to force vendors through a company-owned, hardened VDI (like Citrix/Horizon) or a corporate Jump Server *before* they can even access the CyberArk login page?\n\nHow does your organization handle third-party PAM access? Do you isolate the endpoint before letting them hit your PAM web portal, or do you rely on the PAM system's native isolation capabilities to mitigate the risk of a dirty endpoint?\n\nAppreciate any insights!",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tghdhg/direct_external_access_to_cyberark_pvwa_vs/",
+    "author": "Big-Razzmatazz3034",
+    "score": 3,
+    "numComments": 3,
+    "createdAt": "2026-05-18T09:28:57.000Z"
+  },
+  {
+    "id": "1tfksxd",
+    "subreddit": "cybersecurity",
+    "title": "Am I overthinking Claude Code security or is this actually a risk?",
+    "text": "Maybe I'm being paranoid but Claude Code running on dev machines with access to our codebase and network... that seems like a pretty big deal   \nfrom a security perspective.\n\nLike if it got compromised somehow, it would have direct access to everything.\n\nAm I the only one thinking about this? Or are companies actually locking this down?\n\nHow are you all handling AI tools like Claude Code?",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tfksxd/am_i_overthinking_claude_code_security_or_is_this/",
+    "author": "Sweaty-Career330",
+    "score": 230,
+    "numComments": 93,
+    "createdAt": "2026-05-17T09:36:56.000Z"
+  },
+  {
+    "id": "1th5jw9",
+    "subreddit": "cybersecurity",
+    "title": "Is it safe to use my first name and middle name on platforms?",
+    "text": "Hi there!   \n  \nI'm content creator here who has a yt channel/IG with a nickname, but as I got older and outgrew my niche, I've been considering changing my username to something more relatable to me. My fear is that this could impact my brand deals but more importantly, my safety. \n\nShould I be worried? Tysm for u help  ",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1th5jw9/is_it_safe_to_use_my_first_name_and_middle_name/",
+    "author": "Pleasant-Tea392",
+    "score": 0,
+    "numComments": 3,
+    "createdAt": "2026-05-18T23:43:05.000Z"
+  },
+  {
+    "id": "1tfqf05",
+    "subreddit": "cybersecurity",
+    "title": "Will the analyst role become obsolete?",
+    "text": "After doom scrolling on this sub, it doesn’t give me any hope to pursue my goal of becoming an SOC Analyst. I’ve had this goal for a while. While completing my degree. But reading how companies have started to phase out the juniors to Claude and other ai, how are we supposed to make an entry? Should I even pursue CySa+ and CCDL1?",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tfqf05/will_the_analyst_role_become_obsolete/",
+    "author": "RAM-I-T",
+    "score": 69,
+    "numComments": 80,
+    "createdAt": "2026-05-17T14:02:09.000Z"
+  },
+  {
+    "id": "1tgle9j",
+    "subreddit": "cybersecurity",
+    "title": "Does buying local cybersecurity (services/products/etc) matter to you?",
+    "text": "Does buying local for cybersecurity solutions actually matter to you, or do you prefer established national vendors? Feels like the old 'nobody gets fired for picking IBM' logic doesn't hold up anymore when even the big names miss on delivery and teams still get cut anyway. Curious whether anyone here considers locality of their providers and makes an effort to use them. Do you believe the established vendors still provide meaningful risk reduction advantages or mainly reputational assurance at this point?",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgle9j/does_buying_local_cybersecurity/",
+    "author": "SecurityGandalf",
+    "score": 0,
+    "numComments": 4,
+    "createdAt": "2026-05-18T12:39:11.000Z"
   },
   {
     "id": "1tgchu6",
@@ -253,50 +440,6 @@
     "createdAt": "2026-05-18T05:00:17.000Z"
   },
   {
-    "id": "1tgfd1n",
-    "subreddit": "cybersecurity",
-    "title": "Feeling stuck in SOC want to moving toward Detection Engineering &amp; Cloud Security (need guidance &amp; cert roadmap)",
-    "text": "Hello everyone, I need advice. I have been working in cybersecurity for almost 2 years. I worked in SOC engineering and analysis, and in detection (but for a short time). Currently, I work as a deployment engineer dealing with parsers, collectors, implementations, and so on.\n\nI hold CDSA and AWS CCP.\n\nI want to go deeper into detection engineering and cloud security, but I feel stuck and overwhelmed. I don’t enjoy operational analysis anymore, so I am focusing more on engineering and deployment. What should I study next, and which certifications should I prepare for (not SANS)?\n\n\"my company works with azure not AWS\"\n\nThanks.",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgfd1n/feeling_stuck_in_soc_want_to_moving_toward/",
-    "author": "ZYADWALEED",
-    "score": 3,
-    "numComments": 7,
-    "createdAt": "2026-05-18T07:34:17.000Z"
-  },
-  {
-    "id": "1tghdhg",
-    "subreddit": "cybersecurity",
-    "title": "Direct external access to CyberArk PVWA vs. enforcing a VDI/Jump Box first?",
-    "text": "I’m currently reviewing the onboarding and remote access architecture for external vendors who require privileged access to our internal environment.\n\nRight now, our workflow allows external vendors to log directly into our CyberArk PVWA (Password Vault Web Access) portal via a browser from their own external corporate laptops (unmanaged by us). Once in the portal, they initiate their privileged sessions to target databases and servers.\n\nI want to get some industry perspective:\n\n1. Is it considered acceptable practice to allow direct PVWA portal access to unmanaged external endpoints? \n2. Is it a standard best practice to force vendors through a company-owned, hardened VDI (like Citrix/Horizon) or a corporate Jump Server *before* they can even access the CyberArk login page?\n\nHow does your organization handle third-party PAM access? Do you isolate the endpoint before letting them hit your PAM web portal, or do you rely on the PAM system's native isolation capabilities to mitigate the risk of a dirty endpoint?\n\nAppreciate any insights!",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tghdhg/direct_external_access_to_cyberark_pvwa_vs/",
-    "author": "Big-Razzmatazz3034",
-    "score": 2,
-    "numComments": 1,
-    "createdAt": "2026-05-18T09:28:57.000Z"
-  },
-  {
-    "id": "1tfqf05",
-    "subreddit": "cybersecurity",
-    "title": "Will the analyst role become obsolete?",
-    "text": "After doom scrolling on this sub, it doesn’t give me any hope to pursue my goal of becoming an SOC Analyst. I’ve had this goal for a while. While completing my degree. But reading how companies have started to phase out the juniors to Claude and other ai, how are we supposed to make an entry? Should I even pursue CySa+ and CCDL1?",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tfqf05/will_the_analyst_role_become_obsolete/",
-    "author": "RAM-I-T",
-    "score": 70,
-    "numComments": 75,
-    "createdAt": "2026-05-17T14:02:09.000Z"
-  },
-  {
-    "id": "1tgle9j",
-    "subreddit": "cybersecurity",
-    "title": "Does buying local cybersecurity (services/products/etc) matter to you?",
-    "text": "Does buying local for cybersecurity solutions actually matter to you, or do you prefer established national vendors? Feels like the old 'nobody gets fired for picking IBM' logic doesn't hold up anymore when even the big names miss on delivery and teams still get cut anyway. Curious whether anyone here considers locality of their providers and makes an effort to use them. Do you believe the established vendors still provide meaningful risk reduction advantages or mainly reputational assurance at this point?",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgle9j/does_buying_local_cybersecurity/",
-    "author": "SecurityGandalf",
-    "score": 1,
-    "numComments": 3,
-    "createdAt": "2026-05-18T12:39:11.000Z"
-  },
-  {
     "id": "1tgkysw",
     "subreddit": "cybersecurity",
     "title": "Detection Engineering AI Maturity Framework",
@@ -304,7 +447,7 @@
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgkysw/detection_engineering_ai_maturity_framework/",
     "author": "Grndchr00th",
     "score": 1,
-    "numComments": 0,
+    "numComments": 1,
     "createdAt": "2026-05-18T12:21:38.000Z"
   },
   {
@@ -315,7 +458,7 @@
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tfjx4a/this_article_about_ai_allucinations_written_by/",
     "author": "allexj",
     "score": 134,
-    "numComments": 23,
+    "numComments": 25,
     "createdAt": "2026-05-17T08:46:26.000Z"
   },
   {
@@ -325,9 +468,20 @@
     "text": " Currently only have Sec+ and just started as a SOC Analyst, wondering what certs to get next and someone told me after sec+ to get a cert focusing on your specific path you want. Did some research but figured to get more advice directly.",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tfs9nh/certs_to_go_into_security_engineerarchitect/",
     "author": "Interesting-Skill-70",
-    "score": 27,
-    "numComments": 23,
+    "score": 34,
+    "numComments": 29,
     "createdAt": "2026-05-17T15:13:16.000Z"
+  },
+  {
+    "id": "1tgyr14",
+    "subreddit": "cybersecurity",
+    "title": "Some opinion on North America cybersecurity market",
+    "text": "I recently researched about Cyber Security market. There is 60% enterprise is on North America facing high attacks everyday.. I saw some company but there's a problem too.. every company provide firewalls, but whats happening there? Nothing's new. All are weeks late threat intelligence. I found one company that's also not funded. So yeaaa thinking about that... And I was really impressed they are from Bangladesh...",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgyr14/some_opinion_on_north_america_cybersecurity_market/",
+    "author": "Andrewpaul46",
+    "score": 0,
+    "numComments": 2,
+    "createdAt": "2026-05-18T19:40:47.000Z"
   },
   {
     "id": "1tg33wc",
@@ -347,20 +501,9 @@
     "text": "I’m 17 and planning on going into cybersecurity, but I’m having trouble deciding between different military paths and how they’ll affect my future career.\n\nAt first, I wanted to do Air Force cyber (17C), but I missed the ASVAB requirement by 12 points (I still have all my senior year aswell to try to get a higher score). I’ve also I’ve been considering joining the Army National Guard as a 25B so I can have my college tuition paid for while still starting my civilian career earlier instead of spending too much extra time waiting around.\n\nI’m mainly trying to figure out:\n\n- Which path would help me more long-term for cybersecurity?\n- How can I start learning coding and cyber skills now before college?\n- What certifications, programming languages, or projects should I focus on as a beginner?\n- How do people transition military cyber/IT experience into civilian jobs?\n- What degree would be best for this field (Cybersecurity, Computer Science, IT, etc.)?\n- Would going for a master’s degree eventually be worth it in cybersecurity?\n\nI’d appreciate any advice from people in cybersecurity, the military, or anyone who started learning young.",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tfpsvh/best_path_into_cybersecurity_for_a_high_schooler/",
     "author": "Rare-Rain-7013",
-    "score": 15,
-    "numComments": 28,
+    "score": 17,
+    "numComments": 35,
     "createdAt": "2026-05-17T13:37:51.000Z"
-  },
-  {
-    "id": "1tgg25n",
-    "subreddit": "cybersecurity",
-    "title": "Why do some recovery workflows still require full wallet uploads?",
-    "text": "I came across a few discussions about how encrypted wallet recovery is handled, and something stood out to me.   \nIn some cases, users are asked to upload full wallet files or related data during the process. Even if everything is encrypted, that still feels like more exposure than necessary.   \nIt made me wonder if a more minimal approach would make sense instead. For example, keeping everything local and only using a small encrypted piece for verification, rather than sharing the full data.   \nIs there any general thinking around this from a security perspective? Or does it mostly depend on how each system is designed?",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgg25n/why_do_some_recovery_workflows_still_require_full/",
-    "author": "SadTower5281",
-    "score": 0,
-    "numComments": 3,
-    "createdAt": "2026-05-18T08:14:32.000Z"
   },
   {
     "id": "1tg1i99",
@@ -369,8 +512,8 @@
     "text": "**Hey There &amp; Thank You in Advance For Sharing Your Thoughts/Ideas**\n\nOne of my clients is one of the sponsors of a rather elite cybersecurity conference and I want to ensure we provide promotional items that will actually be used and/or appreciated, *i.e. won't end up in ad drawer or the trash.*\n\n**GOAL:**  \nRaise awareness and familiarity with our company, capabilities and solutions\n\n**QUESTION:**  \nWhat branded promotional items have you really appreciated and used at a conference and/or after a conference?\n\n\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\n\nI am not personally fond of \"branded\" promotional materials, but that defeats a promotional items' *'reason for being'* \\-- so, I'm going for very subtle when it comes to branding the items we choose.\n\n**WHAT I'M LOOKING AT:**\n\nSAGA BOLT ACTION PENS:  \nI've done considerable research and so far the SAGA brand seem to be really rugged, reliable and cost-effective enough such that everyone take 1-2 of these pens with them.  \nThe thought is go with a light gray with our typographic logo\" in a silver so it barely stands out.\n\nTACTILETURN BOLT ACTION PENS  \nThese TactileTurn pens are for the key decision makers, those run about $100+ each.  \nI'd like to personalize the clip with the name of the Person of Interest. They come in a box and I want to use these as a Post-Event gift, i.e. my client follows up after the've met and talked etc.\n\nSIGNATURE COIN MULTI-TOOL  \nI like the signature coin multi-tools as a giftie/giveaway at the dinner we're hosting.  \nThe tools can be as simple as a bottle opener to a multi-tool that includes screwdriver tips or the hex bit of a socket wrench and honestly apparently any other kind of tool that someone might find useful.  \nThey're made in 3D relief, and again, I want to go subtle with the brand name. I envision our mascot (which is a super cool creature!) coming up and out and our name on the other side.\n\nI WELCOME YOUR FEEDBACK AND THANK YOU!",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tg1i99/questions_about_promo_items_for_a_cybersecurity/",
     "author": "Jiminy_Cactus",
-    "score": 4,
-    "numComments": 18,
+    "score": 2,
+    "numComments": 19,
     "createdAt": "2026-05-17T20:53:04.000Z"
   },
   {
@@ -403,8 +546,19 @@
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgny9l/anthropics_new_mythos_ai_is_considered_such_a/",
     "author": "Present-Fold-3813",
     "score": 0,
-    "numComments": 1,
+    "numComments": 3,
     "createdAt": "2026-05-18T14:14:43.000Z"
+  },
+  {
+    "id": "1tgg25n",
+    "subreddit": "cybersecurity",
+    "title": "Why do some recovery workflows still require full wallet uploads?",
+    "text": "I came across a few discussions about how encrypted wallet recovery is handled, and something stood out to me.   \nIn some cases, users are asked to upload full wallet files or related data during the process. Even if everything is encrypted, that still feels like more exposure than necessary.   \nIt made me wonder if a more minimal approach would make sense instead. For example, keeping everything local and only using a small encrypted piece for verification, rather than sharing the full data.   \nIs there any general thinking around this from a security perspective? Or does it mostly depend on how each system is designed?",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tgg25n/why_do_some_recovery_workflows_still_require_full/",
+    "author": "SadTower5281",
+    "score": 0,
+    "numComments": 5,
+    "createdAt": "2026-05-18T08:14:32.000Z"
   },
   {
     "id": "1tg3qn6",
@@ -425,7 +579,7 @@
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgl27w/is_aigenerated_code_actually_making_websites_less/",
     "author": "ColleenReflectiz",
     "score": 0,
-    "numComments": 14,
+    "numComments": 17,
     "createdAt": "2026-05-18T12:25:31.000Z"
   },
   {
@@ -435,7 +589,7 @@
     "text": "Hey everyone, I aggregated and curated all public Grafana CVEs into a single, high-speed Python script to make testing mass targets easier for bug hunters and red teamers. Zero dependencies, clean terminal output, and ready for automation.",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tfvuxt/tool_grafana_final_scanner_mass_cve_testing/",
     "author": "Decent-Assistance-50",
-    "score": 3,
+    "score": 5,
     "numComments": 0,
     "createdAt": "2026-05-17T17:26:04.000Z"
   },
@@ -447,7 +601,7 @@
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgi2hp/suspicious_with_a_company_offer_letter/",
     "author": "Opposite-Evidence130",
     "score": 0,
-    "numComments": 10,
+    "numComments": 12,
     "createdAt": "2026-05-18T10:07:19.000Z"
   },
   {
@@ -457,9 +611,20 @@
     "text": "",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1teurgd/experts_confirm_the_fast16_malware_was_sabotaging/",
     "author": "rkhunter_",
-    "score": 292,
+    "score": 291,
     "numComments": 18,
     "createdAt": "2026-05-16T14:10:42.000Z"
+  },
+  {
+    "id": "1tfrl53",
+    "subreddit": "cybersecurity",
+    "title": "Transition from traditional penetration testing into AI security",
+    "text": "Hey everyone,\n\nI've been working as a penetration tester for eight years now. I'm about to transition from traditional pentesting to a more interesting field. Right now, there is huge potential (and hype) in AI and AI security as a whole, and I think in the near future there will be an emerging need for AI security engineers and professionals who understand the different system components around it. Do you think it's worth it in the long run? To prepare, I've already subscribed to some courses that focus on AI security and AI basics.\n\nRight now I feel that what I regularly do is ticket grinding in a senior role (however my projects are way more complex). The business doesn't really care how professional you are, they just want to clear the backlog and save some serious $$$ for the company. I'm a bit frustrated and bored in this role. I think I don't get recognition anymore, and I need to bring something new to the table to get promoted or rewarded. Earlier, I did a lot for the team to help with everyone's work, but I think I was exploited, and now I'm planning to adopt a gatekeeping mentality.",
+    "url": "https://www.reddit.com/r/cybersecurity/comments/1tfrl53/transition_from_traditional_penetration_testing/",
+    "author": "Horror_Problem9618",
+    "score": 4,
+    "numComments": 12,
+    "createdAt": "2026-05-17T14:47:48.000Z"
   },
   {
     "id": "1tgd5qs",
@@ -469,7 +634,7 @@
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tgd5qs/carrer_path_in_cybersecurity_for_a_btech_stud/",
     "author": "moonknigh0t",
     "score": 0,
-    "numComments": 2,
+    "numComments": 4,
     "createdAt": "2026-05-18T05:34:32.000Z"
   },
   {
@@ -495,17 +660,6 @@
     "createdAt": "2026-05-18T04:25:24.000Z"
   },
   {
-    "id": "1tfrl53",
-    "subreddit": "cybersecurity",
-    "title": "Transition from traditional penetration testing into AI security",
-    "text": "Hey everyone,\n\nI've been working as a penetration tester for eight years now. I'm about to transition from traditional pentesting to a more interesting field. Right now, there is huge potential (and hype) in AI and AI security as a whole, and I think in the near future there will be an emerging need for AI security engineers and professionals who understand the different system components around it. Do you think it's worth it in the long run? To prepare, I've already subscribed to some courses that focus on AI security and AI basics.\n\nRight now I feel that what I regularly do is ticket grinding in a senior role (however my projects are way more complex). The business doesn't really care how professional you are, they just want to clear the backlog and save some serious $$$ for the company. I'm a bit frustrated and bored in this role. I think I don't get recognition anymore, and I need to bring something new to the table to get promoted or rewarded. Earlier, I did a lot for the team to help with everyone's work, but I think I was exploited, and now I'm planning to adopt a gatekeeping mentality.",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tfrl53/transition_from_traditional_penetration_testing/",
-    "author": "Horror_Problem9618",
-    "score": 3,
-    "numComments": 11,
-    "createdAt": "2026-05-17T14:47:48.000Z"
-  },
-  {
     "id": "1tg9yq4",
     "subreddit": "cybersecurity",
     "title": "Are teams still finding AI API keys in public repos?",
@@ -523,7 +677,7 @@
     "text": "Managers and hiring panel in cyber. Do you conduct practical assessments when hiring for a role. What do your assessments look like, what are you looking for beyond assessment completion?",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tfbovd/interview_assessments/",
     "author": "ButterscotchBandiit",
-    "score": 16,
+    "score": 15,
     "numComments": 22,
     "createdAt": "2026-05-17T01:38:17.000Z"
   },
@@ -556,7 +710,7 @@
     "text": "Need some advice from people who create executive-level BPA/security assessment reports.\n\nI’m working on a CrowdStrike BPA report that will be reviewed mainly by the CISO and management team, not by SOC analysts/admins.\n\nThe challenge is around presenting unassigned detections.\n\nCurrent data after review:\n\nTotal detections: 281,159\n\nFalse positives: 261,629 detections caused by one custom IOA rule flagging fsquirt.exe (legitimate Windows process)\n\nRemaining detections after filtering false positives: 19,375\n\nUnassigned detections (last 90 days): 18,425\n\nSeverity breakdown:  \n867 Critical  \n1,150 High  \n653 Medium  \n201 Low  \n15,554 Informational\n\nThe question from leadership is:  \n“Are these detections real threats/true positives or not?”\n\nThe problem is:\n\nI have not individually investigated thousands of detections, so I cannot confidently classify them as true positives or false positives.\n\nAt the same time, doing detailed analysis for every alert would make the BPA report extremely large and too technical for executive readers.\n\nSo I’m trying to understand the best way to present this in a concise executive format.\n\nBasically, how do you present large volumes of unassigned detections in a BPA report without making it a SOC investigation document or a long technical story that leadership won’t read?\n\nWould appreciate examples or guidance from people who regularly build CISO-facing assessment reports.",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tf1xmt/how_do_you_report_large_volume_detections_to_a/",
     "author": "Only-Objective-6216",
-    "score": 31,
+    "score": 32,
     "numComments": 26,
     "createdAt": "2026-05-16T18:41:57.000Z"
   },
@@ -579,7 +733,7 @@
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tfyo3d/doisje_minquiéter/",
     "author": "DryClassic1277",
     "score": 0,
-    "numComments": 4,
+    "numComments": 5,
     "createdAt": "2026-05-17T19:07:57.000Z"
   },
   {
@@ -600,7 +754,7 @@
     "text": "",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1te9ma6/the_4th_linux_kernel_flaw_this_month_can_lead_to/",
     "author": "CackleRooster",
-    "score": 857,
+    "score": 859,
     "numComments": 61,
     "createdAt": "2026-05-15T21:21:58.000Z"
   },
@@ -612,7 +766,7 @@
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tfxrla/security_compliance_work_going_agentic/",
     "author": "Beautiful-Training93",
     "score": 0,
-    "numComments": 5,
+    "numComments": 13,
     "createdAt": "2026-05-17T18:35:28.000Z"
   },
   {
@@ -630,7 +784,7 @@
     "id": "1tfylff",
     "subreddit": "cybersecurity",
     "title": "I am dying to work abroad , rate my journey so far",
-    "text": "Hi, I will keep this short.\n\nI am a pentester from  with 4 years of experience working in consulting,  currently working at a multinational company .\n\n I have OSCP+ . Bug Bounty record in multiple platforms , its not a lot  but they are medium and critical bugs. \n\n 2 bugs on each platform , total 6 bugs so far, and a CVE at a famous product.\n\nI am dying for a remote job or a visa sponsored job. I know its hard and almost a dream now , I dunno which road to even take. \n\n1- Do I take money from my savings and take more certificates \n\n2-Bug bounty investment, unstable and a lot like gambling. \n\n3- Internal portal for my company have jobs from other branches as well , I am keeping an eye on it.\n\n4- what the hell I am suppose to do? \n\nI just wrote a writeup on a critical bug that I found and sent it to some people . \n\nI know competition is hard and many people would rather hire their own citizens. So I dunno what I am suppose to do? Countries I have in mind are UK, Ireland,or  any country with good human rights, actually where I can raise my children...\n\nI am not in EU obliviouly. Unfortunately, I am in Egypt. I get paid 50k Egyptian Pounds.  In Egypt that is kinda above average and good for a stable income . I am grateful for it . But its also 970 usd , which means I can't invest in more certificates,  I can buy a new car , I can't buy anything related to the USD or exported , which is almost everything. I can buy groceries and save up 20 every month , which is 300 USD . Besides i want to travel the world one day before i die. Yeah . Moreover the economy here is fucking trash and devaluation keeps happening to the currency every few months. \n\nI dunno what the he'll I am supposed to do. Any tips? ",
+    "text": "",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tfylff/i_am_dying_to_work_abroad_rate_my_journey_so_far/",
     "author": "ProcedureFar4995",
     "score": 0,
@@ -644,7 +798,7 @@
     "text": "",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tesp1q/funnel_builder_wordpress_plugin_bug_exploited_to/",
     "author": "Doug24",
-    "score": 27,
+    "score": 26,
     "numComments": 1,
     "createdAt": "2026-05-16T12:44:33.000Z"
   },
@@ -655,8 +809,8 @@
     "text": "",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1te4yjt/microsoft_exchange_windows_11_hacked_on_second/",
     "author": "rkhunter_",
-    "score": 637,
-    "numComments": 22,
+    "score": 639,
+    "numComments": 24,
     "createdAt": "2026-05-15T18:32:34.000Z"
   },
   {
@@ -666,7 +820,7 @@
     "text": "",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tf12st/cto_at_ncsc_summary_week_ending_may_17th/",
     "author": "digicat",
-    "score": 8,
+    "score": 6,
     "numComments": 0,
     "createdAt": "2026-05-16T18:09:21.000Z"
   },
@@ -677,8 +831,8 @@
     "text": "It's been four months, unemployed, several hundred applications submitted. A handful of interviews both over video or in-person. Then nothing..\n\nI'm not an entry level professional. I have 12+ years of military experience and 5 years of civilian experience within information technology and cyber security. I have certs and countless hours of continuing education. \n\nI'm honestly at my wits end here. Especially trying to raise two teenagers on my own. I understand the job market is crap but is it really that bad?! \n\nYes, I've had conversations with several recruiters at length. My resume is formatted perfectly, plenty of hands on experience, and aced countless mock interviews. \n\nSeriously though what's going on?! Does anyone have similar stories?\n\nEDIT: Thank you for those who reached out via DM or provided words of encouragement. I truly love this community and was overwhelmingly surprised by the amount of replies. Again, thank you. ",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1te5dah/lost_tempted_to_throw_in_the_towel/",
     "author": "mando_6",
-    "score": 485,
-    "numComments": 204,
+    "score": 494,
+    "numComments": 202,
     "createdAt": "2026-05-15T18:47:12.000Z"
   },
   {
@@ -699,8 +853,8 @@
     "text": "hey everyone!\n\nfor some of you who may have, or still have worked at a Security Operations Center, what kind of a SIEM platform is your fav one?\n\nfor me persoanlly, i've got to work with ArcSight and this kind of SIEM rocks",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tebfww/personal_favorite_siem_platform/",
     "author": "Rotem4421",
-    "score": 157,
-    "numComments": 125,
+    "score": 155,
+    "numComments": 130,
     "createdAt": "2026-05-15T22:34:18.000Z"
   },
   {
@@ -721,7 +875,7 @@
     "text": "I been noticing the more I post about cyber security and AI the more scammers try to talk me into doing things in private chats. My move is not to answer them at all and within a few days the account is deleted. Anyone else noticing this trend?",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tes6i1/scammer_targeting_posters/",
     "author": "truthsignals",
-    "score": 10,
+    "score": 11,
     "numComments": 16,
     "createdAt": "2026-05-16T12:21:44.000Z"
   },
@@ -776,7 +930,7 @@
     "text": "Hey everyone,    \nI’ll be travelling around Europe in September and looking for any free (or low-cost) cybersecurity conferences, meetups, BSides, hacker gatherings, DFIR/AppSec/CloudSec events, or local community events.\n\nMainly interested in:  \n\\- Italy    \n\\- France    \n\\- Albania    \n\\- Bosnia    \n\\- Greece    \n\\- but open to anywhere nearby in Europe as well.\n\nWould love recommendations for:  \n\\- community-driven events  \n\\- networking meetups  \n\\- OWASP / BSides chapters  \n\\- student-friendly events  \n\\- local cyber communities  \n\\- hidden gems people usually don’t know about\n\nThanks in advance!",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1teqgtd/looking_for_free_cybersecurity_conferences/",
     "author": "Impressive_Produce80",
-    "score": 7,
+    "score": 8,
     "numComments": 4,
     "createdAt": "2026-05-16T11:00:16.000Z"
   },
@@ -809,7 +963,7 @@
     "text": "I’ve always been interested in security (less using tools sense and more implementation and research) but due to it not being a junior position per se, I already liked and enjoyed DevOps so I went ahead with it.\n\nI’ve been a DevOps engineer for only a year and I am closer to a platform engineer than simple pipelines, and DevSecOps, while it seems like a valid entry point, isn’t much fun in my personal opinion.\n\nSo the simple question is, is this a valid jump and a normal path or does it require a mini career shift? And what are the possible roles that may open?",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tepgoj/can_a_background_in_devops_enter_the/",
     "author": "bdhd656",
-    "score": 7,
+    "score": 8,
     "numComments": 15,
     "createdAt": "2026-05-16T10:05:34.000Z"
   },
@@ -831,7 +985,7 @@
     "text": "I do a lot of pentest report reviews, sometimes as a second opinion before a company renews with their existing vendor, sometimes just because a friend asks me to look at one. The pattern is so consistent at this point that it's basically a tell.\n\nYou open the executive summary. 15 findings, looks impressive. Then you actually read it:\n\n* Missing X-Content-Type-Options header\n* Cookie missing Secure flag\n* Cookie missing HttpOnly flag\n* Missing HSTS\n* Server version disclosed in headers\n* HTML form autocomplete enabled\n* TLS 1.0 on some subdomain nobody remembers owning\n* Missing CSP\n* Cookie missing SameSite\n* Verbose error on /api/v1/health\n\nBy finding 12 you realize the whole thing could have come out of a free Nessus scan in half an hour. These aren't pentest findings. They're hardening recommendations. They belong in an appendix, not the body of the report.\n\nHere's the test I use for whether a pentest was actually a pentest: how many findings required a human to understand what the app does? An auth flow somebody had to walk through. A business logic edge case. A multi-step chain where the writeup says \"I tried X, then Y, then chained it with Z.\" If your last report has zero of those, you weren't pentested, you were scanned.\n\nThe reason this keeps happening is that most buyers can't tell the difference. The report looks professional, the findings have CVSS scores, the auditor accepts it for SOC 2, the CISO presents it to the board, everybody's happy. Meanwhile the actual bugs are still sitting there. The IDOR, the race condition, the privilege escalation, the auth bypass. Nobody looked because looking takes time and the vendor isn't being paid for time.\n\nNot every cheap pentest is junk. But if your 5-10k engagement found nothing but header issues, you bought a vuln scan with a nicer PDF.\n\nNext time you get a report, count the findings that required a human to think. If it's less than half, you have a coverage problem your vendor isn't telling you about.\n\nWhat's the worst inflated finding you've seen in a report?",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tdz9ko/most_pentest_reports_i_review_are_padded_with/",
     "author": "Putrid-Dragonfruit57",
-    "score": 210,
+    "score": 208,
     "numComments": 78,
     "createdAt": "2026-05-15T15:13:22.000Z"
   },
@@ -875,7 +1029,7 @@
     "text": "",
     "url": "https://www.reddit.com/r/cybersecurity/comments/1tekqmb/preparing_for_the_quantum_era_att_business_debuts/",
     "author": "donutloop",
-    "score": 12,
+    "score": 11,
     "numComments": 0,
     "createdAt": "2026-05-16T05:45:03.000Z"
   },
@@ -944,159 +1098,5 @@
     "score": 6,
     "numComments": 3,
     "createdAt": "2026-05-16T02:33:23.000Z"
-  },
-  {
-    "id": "1tel6wp",
-    "subreddit": "cybersecurity",
-    "title": "What are the widely accepted SaaS security accreditations/audits an app should seek in fintech",
-    "text": "",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tel6wp/what_are_the_widely_accepted_saas_security/",
-    "author": "PanicStil",
-    "score": 3,
-    "numComments": 2,
-    "createdAt": "2026-05-16T06:08:54.000Z"
-  },
-  {
-    "id": "1tf4gbn",
-    "subreddit": "cybersecurity",
-    "title": "Estudiar Ciberseguridad",
-    "text": "Estos días he estado considerando estudiar Ciberseguridad para poder empezar una carrera ahí. Mi pregunta es, actualmente que tan bueno es el campo? Cómo lo sería en digamos 2 años más? Me da miedo estudiar una carrera que el día de mañana pueda ser fácilmente reemplazada por la IA ",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tf4gbn/estudiar_ciberseguridad/",
-    "author": "BiLeaf98",
-    "score": 0,
-    "numComments": 5,
-    "createdAt": "2026-05-16T20:20:31.000Z"
-  },
-  {
-    "id": "1tdpntd",
-    "subreddit": "cybersecurity",
-    "title": "A fix for the previous Linux kernel critical exploit has seemingly introduced another critical local privilege escalation exploit, a third in two weeks.",
-    "text": "Security professionals are now frustrated with disclosures dropping without any embargoes for defenders to prepare.",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tdpntd/a_fix_for_the_previous_linux_kernel_critical/",
-    "author": "Cybernews_com",
-    "score": 158,
-    "numComments": 9,
-    "createdAt": "2026-05-15T08:04:27.000Z"
-  },
-  {
-    "id": "1tdjhjf",
-    "subreddit": "cybersecurity",
-    "title": "Interview for AI security engineer position at a fortune 500 company",
-    "text": "Just had an interview for an AI security engineer position for a large manufacturer. Here is what they are looking for.\n\nSecure RAG pipelines   \nAdversarial testing  \nMITRE Atlas framework  \nProjects  \nSecAI+ was respected.  \nDecent math foundation  \nThreat modeling exercises \n\nOne question I was asked that was math specific.\n\nSo imagine you have two vectors, say \\[1, 2, 3\\] and \\[2, 0, 1\\]. How would you measure how similar these two vectors are to each other?  \nWalk me through it.\n\nAfter I answered they hit me with; \n\nNow think about this in the context of a RAG pipeline. If an attacker knows roughly what kinds of questions users are asking, what does that similarity score mean for them? What could they do with that?\n\nGood luck out there guys!",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tdjhjf/interview_for_ai_security_engineer_position_at_a/",
-    "author": "Technical-Natural343",
-    "score": 397,
-    "numComments": 84,
-    "createdAt": "2026-05-15T02:48:39.000Z"
-  },
-  {
-    "id": "1teb0tg",
-    "subreddit": "cybersecurity",
-    "title": "Alternative for Qualys",
-    "text": "Hi all, \n\nany suggestion for Qualys alternatives, I am looking for:\n\n* Internal and external scans \n* Reporting \n* if possible equivalent of Qualys cloud agents\n* No excessive pricing",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1teb0tg/alternative_for_qualys/",
-    "author": "joe210565",
-    "score": 9,
-    "numComments": 27,
-    "createdAt": "2026-05-15T22:17:21.000Z"
-  },
-  {
-    "id": "1tei78g",
-    "subreddit": "cybersecurity",
-    "title": "Red Team Ops Ⅱ ( CRTL ) exam preparation",
-    "text": "Hi guys.\n\nI finished the CRTL training and took the exam, but I failed miserably—I couldn’t even get past the first beacon activation (bypassing WDAC/App Control Policy).\n\nI went over the training materials multiple times and consulted with the AI tools, but it still didn’t work out.\n\nI wonder if the people who passed needed resources beyond the training materials?\n\nI passed the CRTO using just the training materials, so I assumed Zero Point Security would design their exams the same way.\n\nIf you know of any good study strategies or resources, could you please let me know?",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tei78g/red_team_ops_ⅱ_crtl_exam_preparation/",
-    "author": "One-Culture6613",
-    "score": 5,
-    "numComments": 0,
-    "createdAt": "2026-05-16T03:37:18.000Z"
-  },
-  {
-    "id": "1te3rq9",
-    "subreddit": "cybersecurity",
-    "title": "I open-sourced a Docker security scanner I use to audit all my websites",
-    "text": "One command and you get the full picture: \n\n`docker exec web_audit_scanner_d13 sh /app/tools/scanner.sh` [`https://yoursite.com`](https://yoursite.com)\n\nGives you whois, DNS, open ports, SSL/TLS vulns, tech stack, hidden dirs, WAF detection, and headers.\n\n* Runs in a Debian Docker container\n* Timestamped logs per scan\n* Pick individual tools or run everything\n* Two files execute code. That's it. Glance at them and you know it's safe\n\nLink: [https://github.com/alvesandreiolv/web\\_audit\\_scanner\\_d13](https://github.com/alvesandreiolv/web_audit_scanner_d13)  \n  \nPlease be gentle, I'm not a super hacker expert like you guys.",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1te3rq9/i_opensourced_a_docker_security_scanner_i_use_to/",
-    "author": "IceCapZoneAct1",
-    "score": 23,
-    "numComments": 2,
-    "createdAt": "2026-05-15T17:51:09.000Z"
-  },
-  {
-    "id": "1te5nf3",
-    "subreddit": "cybersecurity",
-    "title": "Transferring from pen test consulting to application security?",
-    "text": "I’ve seen it said that penetration testers are able to transition to AppSec pretty well and it’s definitely what I’m most interested in and the consulting burn out is real. I don’t have a computer science background but I’m familiar with coding and scripting and code review. Setting aside the terrible job market at the moment are there any certs or things I can do to make me more appealing for an AppSec role? I was thinking about whipping up a portfolio web site of sorts that’s similar to a vuln app that shows secure and insecure implementations of various vulnerabilities. ",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1te5nf3/transferring_from_pen_test_consulting_to/",
-    "author": "Largerthanabreadbox",
-    "score": 11,
-    "numComments": 7,
-    "createdAt": "2026-05-15T18:57:18.000Z"
-  },
-  {
-    "id": "1tecsm3",
-    "subreddit": "cybersecurity",
-    "title": "AmEx Interview!",
-    "text": "Hey everyone,\n\nI’m preparing for an interview for a Technology Risk Management role focused on Vulnerability Management and Network Security oversight. I’d really appreciate any advice on the most important topics I should focus on, common interview questions, or real-world scenarios I should be prepared for.\n\nIf you’ve worked in TRM, cyber risk, GRC, SOC, vulnerability management, or network security, I’d be grateful for any tips, resources, certifications, or learning materials that helped you.\n\nThanks in advance!",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tecsm3/amex_interview/",
-    "author": "corporatebitch_",
-    "score": 6,
-    "numComments": 13,
-    "createdAt": "2026-05-15T23:30:11.000Z"
-  },
-  {
-    "id": "1tenctk",
-    "subreddit": "cybersecurity",
-    "title": "Avanzamento area Blue Team/SOC",
-    "text": "Ciao,\n\nsono un’analista di secondo livello all’interno di un SOC e contestualmente anche SIEM Engineering.  \nMi trovo in una situazione di stallo, dove non riesco a capire come e verso cosa puntare per il mio avanzamento in tale settore.\n\nSecondo voi su cosa dovrei concentrarmi per rimanere competitivo nel prossimo futuro sempre in area Soc?\n\nGrazie ",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tenctk/avanzamento_area_blue_teamsoc/",
-    "author": "Admirable_Branch_575",
-    "score": 1,
-    "numComments": 1,
-    "createdAt": "2026-05-16T08:06:26.000Z"
-  },
-  {
-    "id": "1ted7kx",
-    "subreddit": "cybersecurity",
-    "title": "Brovan: Binary user-mode emulator for x86_64",
-    "text": "After months of work, I’m excited to finally share [Brovan](https://github.com/AdvDebug/Brovan), my user-mode binary emulator.  \n  \nBrovan can emulate:  \n  \n\\* PE binaries  \n\\* ELF binaries  \n\\* Memory dumps  \n\\* Even partially unknown or unrecognized binaries  \n  \nThe goal is to make binary analysis, malware analysis and general binary research more flexible by giving full control over execution, memory, and runtime behavior in a contained environment.  \n  \nBuilding this involved a lot of work around emulation, syscall handling, memory management, binary loading and parsing, and there’s still much more to improve, but it’s finally at a stage where I’m happy to share it.",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1ted7kx/brovan_binary_usermode_emulator_for_x86_64/",
-    "author": "AhmedMinegames",
-    "score": 3,
-    "numComments": 0,
-    "createdAt": "2026-05-15T23:47:33.000Z"
-  },
-  {
-    "id": "1tehm4v",
-    "subreddit": "cybersecurity",
-    "title": "Recomendations",
-    "text": "Hello everyone\nI'm currently studying cybersecurity on my own and was following the TryHackMe path.\nI reached the paid version and I'm not sure if you recommend it. I really liked the free version I used, but I'd like to hear your opinions as professionals.\nTo clarify, it wouldn't be a huge expense and I could afford it, but I'm not sure if it's really worth it. I'd prefer to invest the money in other types of education on a different platform.\nThx",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tehm4v/recomendations/",
-    "author": "IIDaniel1092II",
-    "score": 2,
-    "numComments": 4,
-    "createdAt": "2026-05-16T03:08:56.000Z"
-  },
-  {
-    "id": "1tezrr5",
-    "subreddit": "cybersecurity",
-    "title": "Should I Reinstall Windows (Worried)",
-    "text": "Yo so I downloaded a Riot game from a site that I'm pretty sure is the official site but I can't verify it fully because I deleted my browsing history to log out. I remember copying two links in search results and verified that both were LEGIT but I'm worried I misclicked onto the wrong link after verifying somehow or something. I know it's dumb to think that but I'm quite paranoid of malware. I did a offline and full scan with Defenders and nothing. I also got this link from download history for the file in Chrome which is also apparently legit and clean in VirusTotal hxxps://valorant.secure.dyn.riotcdn.net/channels/public/x/installer/current/live.live.na.exe.\n\nI am worried cuz games crashed, screen had black screen moments and was slow 1 time. I know it's easy to just reinstall windows but my parents said if there is malware to bring to a shop (they don't trust me to do it) and I don't want to waste money if unnecessary.\n\nShould I be worried of malware? Will I be OK? ",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1tezrr5/should_i_reinstall_windows_worried/",
-    "author": "0zMosiss",
-    "score": 0,
-    "numComments": 8,
-    "createdAt": "2026-05-16T17:20:21.000Z"
-  },
-  {
-    "id": "1telhn4",
-    "subreddit": "cybersecurity",
-    "title": "CVE exploit chain",
-    "text": "Hi, would like to understand what teams are really interested on CVE to CVE exploit path connectivity for few Targeted CVEs , like 10-15 CVEs ?",
-    "url": "https://www.reddit.com/r/cybersecurity/comments/1telhn4/cve_exploit_chain/",
-    "author": "Sea_Cable_548",
-    "score": 0,
-    "numComments": 8,
-    "createdAt": "2026-05-16T06:24:56.000Z"
   }
 ]

@@ -109,9 +109,11 @@ const SimPriceChart = forwardRef<HTMLDivElement, SimPriceChartProps>(function Si
     el.addEventListener('contextmenu', onContextMenu);
     chartRefs.current = { chart, series };
 
-    const ro = new ResizeObserver(() => chart.applyOptions({ width: el.clientWidth }));
+    let disposed = false;
+    const ro = new ResizeObserver(() => { if (!disposed) chart.applyOptions({ width: el.clientWidth }); });
     ro.observe(el);
     return () => {
+      disposed = true;
       el.removeEventListener('contextmenu', onContextMenu);
       ro.disconnect();
       chart.remove();

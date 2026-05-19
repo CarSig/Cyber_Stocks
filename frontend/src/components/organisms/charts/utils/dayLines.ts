@@ -44,13 +44,17 @@ export function setupDayLines(
   const ts = chart.timeScale();
   ts.subscribeVisibleTimeRangeChange(draw);
 
+  let disposed = false;
   const ro = new ResizeObserver(() => {
-    chart.applyOptions({ width: containerEl.clientWidth });
-    draw();
+    if (!disposed) {
+      chart.applyOptions({ width: containerEl.clientWidth });
+      draw();
+    }
   });
   ro.observe(containerEl);
 
   return () => {
+    disposed = true;
     ts.unsubscribeVisibleTimeRangeChange(draw);
     ro.disconnect();
     overlayEl.innerHTML = '';

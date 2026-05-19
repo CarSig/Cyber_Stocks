@@ -103,9 +103,11 @@ const PortfolioChart = forwardRef<HTMLDivElement, PortfolioChartProps>(function 
 
     chart.timeScale().fitContent();
     const el = ref.current;
-    const ro = new ResizeObserver(() => chart.applyOptions({ width: el.clientWidth }));
+    let disposed = false;
+    const ro = new ResizeObserver(() => { if (!disposed) chart.applyOptions({ width: el.clientWidth }); });
     ro.observe(el);
     return () => {
+      disposed = true;
       ro.disconnect();
       chart.remove();
     };

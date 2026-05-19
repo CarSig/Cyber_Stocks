@@ -91,13 +91,15 @@ export default function MultiChart({ series, rangeFrom, rangeTo, onRangeChange }
       });
     }, 150);
 
-    const observer = attachResizeObserver(chart, containerRef);
+    const disposedRef = { current: false };
+    const observer = attachResizeObserver(chart, containerRef, disposedRef);
 
     return () => {
       clearTimeout(rangeTimer);
-      chartRef.current = null;
+      disposedRef.current = true;
       observer.disconnect();
       chart.remove();
+      chartRef.current = null;
     };
   }, [series, showAnalysis]); // eslint-disable-line react-hooks/exhaustive-deps
 

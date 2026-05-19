@@ -68,15 +68,17 @@ export function useChartInstance(
 
     if (compareQuotes?.length) addCompareOverlay(chart, compareQuotes);
 
+    let disposed = false;
     const observer = new ResizeObserver(() => {
-      if (containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
+      if (!disposed && containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
     });
     observer.observe(containerRef.current);
 
     return () => {
-      chartRef.current = null;
+      disposed = true;
       observer.disconnect();
       chart.remove();
+      chartRef.current = null;
     };
   }, [quotes, compareQuotes, type, analysis, showAnalysis]); // eslint-disable-line react-hooks/exhaustive-deps
 

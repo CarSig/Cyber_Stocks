@@ -21,6 +21,7 @@ export type IntradayEvent = {
   chart_date: string;
   chart_time: string;
   after_hours: boolean;
+  timing: 'pre-market' | 'post-market' | 'during';
 };
 
 export function getBars(ticker: string, date: string, timeframe = '1Min'): Promise<AlpacaBarsResponse> {

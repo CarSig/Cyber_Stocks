@@ -2,9 +2,13 @@ import type { IChartApi } from 'lightweight-charts';
 import type { RefObject } from 'react';
 import { daysAgoString, todayString } from './dates';
 
-export function attachResizeObserver(chart: IChartApi, containerRef: RefObject<HTMLElement | null>): ResizeObserver {
+export function attachResizeObserver(
+  chart: IChartApi,
+  containerRef: RefObject<HTMLElement | null>,
+  disposedRef: { current: boolean },
+): ResizeObserver {
   const observer = new ResizeObserver(() => {
-    if (containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
+    if (!disposedRef.current && containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
   });
   if (containerRef.current) observer.observe(containerRef.current);
   return observer;

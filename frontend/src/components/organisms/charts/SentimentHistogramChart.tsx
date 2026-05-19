@@ -152,13 +152,15 @@ export default function SentimentHistogramChart({
     }
 
     const rangeTimer = subscribeRangeChange(chart, skipRangeRef, { onRangeChange, onPeriodChange });
-    const observer = attachResizeObserver(chart, containerRef);
+    const disposedRef = { current: false };
+    const observer = attachResizeObserver(chart, containerRef, disposedRef);
 
     return () => {
       clearTimeout(rangeTimer);
-      chartRef.current = null;
+      disposedRef.current = true;
       observer.disconnect();
       chart.remove();
+      chartRef.current = null;
     };
   }, [articles, getSentiment, getDate, quoteBounds]); // eslint-disable-line react-hooks/exhaustive-deps
 

@@ -74,11 +74,14 @@ export const DateUtils = {
     });
   },
 
-  /** Convert a HH:MM ET time string + YYYY-MM-DD date to an ISO UTC string. Returns empty string if date is missing. */
+  /** Convert a HH:MM ET time string + YYYY-MM-DD date to an ISO UTC string. Handles DST correctly. Returns empty string if date is missing. */
   timeToIso(time: string, date: string): string {
     if (!date) return '';
     const [h, m] = time.split(':').map(Number);
-    return new Date(`${date}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00-05:00`).toISOString();
+    const localIso = `${date}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`;
+    const utcMs = new Date(localIso + 'Z').getTime();
+    const offsetSec = DateUtils.etOffsetSeconds(new Date(utcMs));
+    return new Date(utcMs - offsetSec * 1000).toISOString();
   },
 
   /** Compute the ET UTC offset in seconds for a given reference date. Used to shift bar timestamps so lightweight-charts displays ET labels. */

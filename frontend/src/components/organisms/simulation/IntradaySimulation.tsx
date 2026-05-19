@@ -1,7 +1,7 @@
 import { useEffect, useRef, useCallback, useMemo, useReducer, useState } from 'react';
 import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query';
-import { createChart, CandlestickSeries, LineSeries, AreaSeries } from 'lightweight-charts';
-import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
+import { LineSeries } from 'lightweight-charts';
+
 import { syncIntradayMarkers } from '@/components/organisms/charts/utils/markers';
 import { setupDayLines } from '@/components/organisms/charts/utils/dayLines';
 import { getBars, getIntradayEvents } from '@/api/alpaca';
@@ -19,10 +19,16 @@ import { intradayStrategy } from './reducers/baseStrategy';
 import { useApplyPreset } from './hooks/useApplyPreset';
 import { useAddManualAction } from './hooks/useAddManualAction';
 import { useExportSimPdf } from './hooks/useExportSimPdf';
-import { detectShortDirection, calcEntryTime } from './utils/intradaySimUtils';
-import { attachChartClick } from './utils/chartClick';
+import { usePriceChart } from './hooks/usePriceChart';
+import { useChartPopover } from './hooks/useChartPopover';
+import { useCrosshairTracker } from './hooks/useCrosshairTracker';
+
+import { useSimChartClick } from './hooks/useSimChartClick';
+import { parseIntradayText } from './utils/parseSimText';
+import { detectShortDirection, calcEntryDateTime, getExitTime } from './utils/intradaySimUtils';
 import ChartActionPopover from './components/ChartActionPopover';
 import { DateUtils } from '@/utils/date';
+import { useTimezone } from '@/context/TimezoneContext';
 import { PriceUtils } from '@/utils/price';
 
 const INTRADAY_SIM_PRESETS: Record<string, { time: string; side: 'buy' | 'sell'; value: number }[]> = {
@@ -40,50 +46,13 @@ const INTRADAY_SIM_PRESETS: Record<string, { time: string; side: 'buy' | 'sell';
   ],
 };
 
-import type { Side, Action, Transaction, SimResult } from '@/utils/sim';
+import type { Action, SimResult } from '@/utils/sim';
 import { runLongSimulation, runShortSimulation, buildSimStats } from '@/utils/sim';
 
-function parseIntradayText(raw: string, date: string): { parsedDate: string | null; actions: Action[] } {
-  const lines = raw
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean);
-  if (!lines.length) return { parsedDate: null, actions: [] };
-
-  let parsedDate: string | null = null;
-  let actionLines = lines;
-  if (/^\d{4}-\d{2}-\d{2}$/.test(lines[0] ?? '')) {
-    parsedDate = lines[0];
-    actionLines = lines.slice(1);
-  }
-
-  const effectiveDate = parsedDate ?? date;
-  let nextId = Date.now();
-  const actions: Action[] = [];
-  for (const line of actionLines) {
-    const parts = line.split(',').map((s) => s.trim());
-    if (parts.length !== 2) continue;
-    const [timeStr, numStr] = parts;
-    const num = Number(numStr);
-    if (isNaN(num) || num === 0) continue;
-    const [h, m] = timeStr.split(':').map(Number);
-    if (isNaN(h) || isNaN(m)) continue;
-    const side: Side = num > 0 ? 'buy' : 'sell';
-    const val = Math.min(side === 'sell' ? 100 : Infinity, Math.abs(num));
-    actions.push({
-      id: nextId++,
-      timestamp: DateUtils.timeToIso(timeStr, effectiveDate),
-      time: timeStr,
-      side,
-      value: val,
-    });
-  }
-  return { parsedDate, actions };
-}
-
-type ChartRef = { chart: IChartApi; series: ISeriesApi<SeriesType> } | null;
+const PEER_COLORS = ['#f59e0b', '#60a5fa', '#f472b6', '#34d399'];
 
 export default function IntradaySimulation() {
+  const { fmtTime, toChartTime } = useTimezone();
   const [s, dispatch] = useReducer(intradayReducer, undefined, initialIntradayState);
   const {
     date,
@@ -94,7 +63,6 @@ export default function IntradaySimulation() {
     value,
     startShares,
     manualTime,
-    textMode,
     textValue,
     chartType,
     tradeMode,
@@ -104,23 +72,22 @@ export default function IntradaySimulation() {
     simAllResults,
     simAllRunning,
     aiDelay,
+    exitAtClose,
   } = s;
+
+  const [tickerFilter, setTickerFilter] = useState<string | null>(null);
+  const [timingFilter, setTimingFilter] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
 
   const nextActionId = useRef(Math.max(0, ...s.actions.map((a) => a.id)) + 1);
 
-  const [popover, setPopover] = useState<{ iso: string; x: number; y: number; side: Side; value: string } | null>(null);
-  const [editPopover, setEditPopover] = useState<{ action: Action; x: number; y: number } | null>(null);
-  const actionsRef = useRef(actions);
-  useEffect(() => { actionsRef.current = actions; }, [actions]);
-
   const containerRef = useRef<HTMLDivElement>(null);
   const dayLinesRef = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<ChartRef>(null);
   const portfolioChartRef = useRef<HTMLDivElement>(null);
   const valueRef = useRef<string>(value);
   const tradeModeRef = useRef<'long' | 'short'>(tradeMode);
+  const actionsRef = useRef(actions);
   const tzOffsetRef = useRef<number>(0);
   useEffect(() => {
     valueRef.current = value;
@@ -128,12 +95,26 @@ export default function IntradaySimulation() {
   useEffect(() => {
     tradeModeRef.current = tradeMode;
   }, [tradeMode]);
+  useEffect(() => {
+    actionsRef.current = actions;
+  }, [actions]);
 
   const { data: eventsData } = useQuery<IntradayEvent[]>({
     queryKey: ['intraday-events'],
     queryFn: getIntradayEvents,
     staleTime: Infinity,
   });
+
+  const filteredEvents = useMemo(
+    () =>
+      eventsData?.filter(
+        (ev) =>
+          (!tickerFilter || ev.ticker.split('/')[0].trim() === tickerFilter) &&
+          (!timingFilter || ev.timing === timingFilter),
+      ) ?? [],
+    [eventsData, tickerFilter, timingFilter],
+  );
+  const isFiltered = !!(tickerFilter || timingFilter);
 
   const { data, isPending, error } = useQuery<{ symbol: string; bars: AlpacaBar[] }>({
     queryKey: ['alpaca-bars', query.ticker, query.date, query.timeframe],
@@ -170,8 +151,6 @@ export default function IntradaySimulation() {
     [showPeers, selectedEvent],
   );
 
-  const PEER_COLORS = ['#f59e0b', '#60a5fa', '#f472b6', '#34d399'];
-
   const peerQueryResults = useQueries({
     queries: peerTickers.map((t) => ({
       queryKey: ['alpaca-bars', t, query.date, query.timeframe] as const,
@@ -188,9 +167,9 @@ export default function IntradaySimulation() {
 
   const result = useMemo<SimResult | null>(() => {
     if (!bars.length || !actions.length) return null;
-    if (tradeMode === 'short') return runShortSimulation(bars, actions, DateUtils.fmtTime);
-    return runLongSimulation(bars, actions, DateUtils.fmtTime, Math.max(0, Number(startShares) || 0));
-  }, [bars, actions, startShares, tradeMode]);
+    if (tradeMode === 'short') return runShortSimulation(bars, actions, fmtTime);
+    return runLongSimulation(bars, actions, fmtTime, Math.max(0, Number(startShares) || 0));
+  }, [bars, actions, startShares, tradeMode, fmtTime]);
 
   const handleTextChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -236,139 +215,92 @@ export default function IntradaySimulation() {
     dispatch({ type: 'LOAD_BARS', ticker: query.ticker, date, timeframe });
   }
 
-  // Build price chart
-  useEffect(() => {
-    if (!containerRef.current || !bars.length) return;
-    const cv = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-    const chart = createChart(containerRef.current, {
-      height: 200,
-      layout: { background: { color: 'transparent' }, textColor: cv('--text-primary') || '#e5e7eb' },
-      grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
-      timeScale: {
-        timeVisible: true,
-        secondsVisible: false,
-        borderColor: 'rgba(255,255,255,0.1)',
-        fixLeftEdge: false,
-        fixRightEdge: false,
-        tickMarkFormatter: (time: number, tickMarkType: number) => {
-          const d = new Date(time * 1000);
-          const hh = String(d.getUTCHours()).padStart(2, '0');
-          const mm = String(d.getUTCMinutes()).padStart(2, '0');
-          // tickMarkType: 0=Year, 1=Month, 2=DayOfMonth, 3=Time, 4=TimeWithSeconds
-          if (tickMarkType <= 2) {
-            const day = d.getUTCDate();
-            const mon = d.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
-            return `${day} ${mon} ${hh}:${mm}`;
-          }
-          return `${hh}:${mm}`;
-        },
-      },
-      rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
-      crosshair: { mode: 1 },
-      handleScroll: true,
-      handleScale: true,
-    });
-
-    const offset = DateUtils.etOffsetSeconds(new Date(bars[0].t));
-    tzOffsetRef.current = offset;
-    const toTime = (b: AlpacaBar) => DateUtils.toEtChartTime(b.t, offset);
-
-    let series: ISeriesApi<SeriesType>;
-    if (chartType === 'candlestick') {
-      series = chart.addSeries(CandlestickSeries, {
-        upColor: '#22c55e',
-        downColor: '#ef4444',
-        borderUpColor: '#22c55e',
-        borderDownColor: '#ef4444',
-        wickUpColor: '#22c55e',
-        wickDownColor: '#ef4444',
-      });
-      series.setData(bars.map((b) => ({ time: toTime(b), open: b.o, high: b.h, low: b.l, close: b.c })));
-    } else if (chartType === 'area') {
-      series = chart.addSeries(AreaSeries, {
-        lineColor: '#22c55e',
-        topColor: '#22c55e55',
-        bottomColor: '#22c55e00',
-        lineWidth: 2,
-      });
-      series.setData(bars.map((b) => ({ time: toTime(b), value: b.c })));
-    } else {
-      series = chart.addSeries(LineSeries, { color: '#22c55e', lineWidth: 2 });
-      series.setData(bars.map((b) => ({ time: toTime(b), value: b.c })));
-    }
-
-    // Peer overlays — separate price scale per peer so different price ranges display cleanly
-    peerBars.forEach(({ ticker: peerTicker, bars: pb }, i) => {
-      if (!pb.length) return;
-      const color = PEER_COLORS[i % PEER_COLORS.length];
-      const scaleId = `peer_${i}`;
-      const peerSeries = chart.addSeries(LineSeries, { color, lineWidth: 1, priceScaleId: scaleId, title: peerTicker });
-      chart.priceScale(scaleId).applyOptions({ scaleMargins: { top: 0.1, bottom: 0.1 } });
-      peerSeries.setData(pb.map((b) => ({ time: toTime(b), value: b.c })));
-    });
-
-    chart.timeScale().fitContent();
-
-    const chartTimeToIso = (t: number) => new Date((t - offset) * 1000).toISOString();
-
-    let lastHoveredBar: { iso: string } | null = null;
-    chart.subscribeCrosshairMove((param) => {
-      if (!param.time) {
-        lastHoveredBar = null;
-        return;
+  // Price chart with timezone-aware time conversion and peer overlays
+  const chartRef = usePriceChart(containerRef, bars, chartType, {
+    toTime: (b) => {
+      const ref = new Date(bars[0]?.t ?? b.t);
+      const chartTime = toChartTime(b.t, ref);
+      // keep tzOffsetRef in sync for marker/crosshair inverse conversion
+      const utcSec = Math.floor(new Date(b.t).getTime() / 1000);
+      tzOffsetRef.current = (chartTime as unknown as number) - utcSec;
+      return chartTime;
+    },
+    timeVisible: true,
+    secondsVisible: false,
+    tickMarkFormatter: (time: number, tickMarkType: number) => {
+      const d = new Date(time * 1000);
+      const hh = String(d.getUTCHours()).padStart(2, '0');
+      const mm = String(d.getUTCMinutes()).padStart(2, '0');
+      if (tickMarkType <= 2) {
+        const day = d.getUTCDate();
+        const mon = d.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+        return `${day} ${mon} ${hh}:${mm}`;
       }
-      lastHoveredBar = { iso: chartTimeToIso(param.time as unknown as number) };
-    });
-    const el = containerRef.current!;
-    const cleanupClick = attachChartClick(el, {
-      chart,
-      getHoveredIso: () => lastHoveredBar?.iso ?? null,
-      onQuickAction: (iso, button) => {
-        if (actionsRef.current.find((a) => a.timestamp === iso)) return;
-        if (button === 0) {
-          const side: Side = tradeModeRef.current === 'short' ? 'short' : 'buy';
-          const val = Math.max(0.01, Number(valueRef.current) || 100);
-          dispatch({ type: 'ADD_ACTION', action: { id: nextActionId.current++, timestamp: iso, time: DateUtils.fmtTime(iso), side, value: val }, date: query.date });
-        } else {
-          const side: Side = tradeModeRef.current === 'short' ? 'cover' : 'sell';
-          const val = Math.min(100, Math.max(0.01, Number(valueRef.current) || 50));
-          dispatch({ type: 'ADD_ACTION', action: { id: nextActionId.current++, timestamp: iso, time: DateUtils.fmtTime(iso), side, value: val }, date: query.date });
-        }
-      },
-      onHoldStart: (iso, x, y, button) => {
-        const existing = actionsRef.current.find((a) => a.timestamp === iso);
-        if (existing) { setEditPopover({ action: existing, x, y }); return; }
-        const side: Side = button === 0
-          ? (tradeModeRef.current === 'short' ? 'short' : 'buy')
-          : (tradeModeRef.current === 'short' ? 'cover' : 'sell');
-        const val = button === 0
-          ? String(Math.max(0.01, Number(valueRef.current) || 100))
-          : String(Math.min(100, Math.max(0.01, Number(valueRef.current) || 50)));
-        setPopover({ iso, x, y, side, value: val });
-      },
-    });
-    chartRef.current = { chart, series };
-    syncIntradayMarkers(series, actions, selectedEvent, query.date, offset);
+      return `${hh}:${mm}`;
+    },
+    extraSeries: (chart, toTime) => {
+      return peerBars.map(({ ticker: peerTicker, bars: pb }, i) => {
+        if (!pb.length) return () => {};
+        const color = PEER_COLORS[i % PEER_COLORS.length];
+        const scaleId = `peer_${i}`;
+        const peerSeries = chart.addSeries(LineSeries, {
+          color,
+          lineWidth: 1,
+          priceScaleId: scaleId,
+          title: peerTicker,
+        });
+        chart.priceScale(scaleId).applyOptions({ scaleMargins: { top: 0.1, bottom: 0.1 } });
+        peerSeries.setData(pb.map((b) => ({ time: toTime(b), value: b.c })));
+        return () => chart.removeSeries(peerSeries);
+      });
+    },
+  });
 
-    const cleanupDayLines = dayLinesRef.current
-      ? setupDayLines(chart, dayLinesRef.current, el, bars, offset)
-      : () => {};
+  const popover = useChartPopover<Action>(
+    dispatch,
+    nextActionId,
+    query.date,
+    tradeMode,
+    fmtTime,
+    (id, iso, label, side, val) => ({ id, timestamp: iso, time: label, side, value: val }),
+  );
 
-    return () => {
-      cleanupClick();
-      cleanupDayLines();
-      chart.remove();
-      chartRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bars, chartType, peerBars]);
+  const intradayToIso = useCallback(
+    (t: unknown) => new Date(((t as number) - tzOffsetRef.current) * 1000).toISOString(),
+    [tzOffsetRef],
+  );
+  const getHoveredIso = useCrosshairTracker(chartRef, intradayToIso, [bars, chartType, peerBars]);
+
+  useSimChartClick(containerRef, chartRef, bars, chartType, {
+    actionsRef: actionsRef as React.MutableRefObject<Action[]>,
+    valueRef,
+    tradeModeRef,
+    nextIdRef: nextActionId,
+    dispatch,
+    date: query.date,
+    fmtLabel: fmtTime,
+    createAction: (id: number, iso: string, label: string, side: 'buy' | 'sell' | 'short' | 'cover', val: number) => ({ id, timestamp: iso, time: label, side, value: val }),
+    onPopoverOpen: popover.openAdd,
+    onEditPopoverOpen: popover.openEdit,
+    getHoveredIso,
+    onAfterAttach: () => {
+      const offset = tzOffsetRef.current;
+      if (chartRef.current) {
+        syncIntradayMarkers(chartRef.current.series, actions, selectedEvent, query.date, offset);
+      }
+      const cleanupDayLines = dayLinesRef.current
+        ? setupDayLines(chartRef.current!.chart, dayLinesRef.current, containerRef.current!, bars, offset)
+        : () => {};
+      return cleanupDayLines;
+    },
+  }, [peerBars]);
 
   // Sync action + event markers onto chart
   useEffect(() => {
     const ref = chartRef.current;
     if (!ref) return;
     syncIntradayMarkers(ref.series, actions, selectedEvent, query.date, tzOffsetRef.current);
-  }, [actions, selectedEvent, query.date]);
+  }, [actions, selectedEvent, query.date, chartRef]);
 
   const addManualAction = useAddManualAction(
     intradayStrategy,
@@ -381,57 +313,10 @@ export default function IntradaySimulation() {
     () => dispatch({ type: 'SET_MANUAL_TIME', time: '' }),
   );
 
-  const removeAction = useCallback(
-    (id: number) => dispatch({ type: 'REMOVE_ACTION', id, date: query.date }),
-    [query.date],
-  );
-
-  const updateAction = useCallback(
-    (id: number, field: 'side' | 'value', val: string) =>
-      dispatch({ type: 'UPDATE_ACTION', id, field, val, date: query.date }),
-    [query.date],
-  );
-
   const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS', date: query.date }), [query.date]);
 
-  const dismissPopover = useCallback(() => setPopover(null), []);
-  const confirmPopover = useCallback(
-    (side: Side, rawValue: string) => {
-      if (!popover) return;
-      const isExit = side === 'sell' || side === 'cover';
-      const val = isExit
-        ? Math.min(100, Math.max(0.01, Number(rawValue)))
-        : Math.max(0.01, Number(rawValue));
-      if (!isFinite(val) || val <= 0) { setPopover(null); return; }
-      dispatch({ type: 'ADD_ACTION', action: { id: nextActionId.current++, timestamp: popover.iso, time: DateUtils.fmtTime(popover.iso), side, value: val }, date: query.date });
-      setPopover(null);
-    },
-    [popover, query.date],
-  );
-
-  const dismissEditPopover = useCallback(() => setEditPopover(null), []);
-  const confirmEditPopover = useCallback(
-    (side: Side, rawValue: string) => {
-      if (!editPopover) return;
-      const isExit = side === 'sell' || side === 'cover';
-      const val = isExit
-        ? Math.min(100, Math.max(0.01, Number(rawValue)))
-        : Math.max(0.01, Number(rawValue));
-      if (!isFinite(val) || val <= 0) { setEditPopover(null); return; }
-      dispatch({ type: 'UPDATE_ACTION', id: editPopover.action.id, field: 'side', val: side, date: query.date });
-      dispatch({ type: 'UPDATE_ACTION', id: editPopover.action.id, field: 'value', val: String(val), date: query.date });
-      setEditPopover(null);
-    },
-    [editPopover, query.date],
-  );
-  const deleteFromEditPopover = useCallback(() => {
-    if (!editPopover) return;
-    dispatch({ type: 'REMOVE_ACTION', id: editPopover.action.id, date: query.date });
-    setEditPopover(null);
-  }, [editPopover, query.date]);
-
   const handleSimulateAll = useCallback(async () => {
-    if (!eventsData?.length) return;
+    if (!filteredEvents.length) return;
     dispatch({ type: 'SIM_ALL_START' });
 
     const simOne = async (ev: IntradayEvent): Promise<SimAllRow> => {
@@ -440,14 +325,23 @@ export default function IntradaySimulation() {
       const action = isShort ? ('short' as const) : ('buy' as const);
 
       try {
-        const { bars } = await queryClient.fetchQuery({
-          queryKey: ['alpaca-bars', primaryTicker, ev.chart_date, '5Min'],
-          queryFn: () => getBars(primaryTicker, ev.chart_date, '5Min'),
-          staleTime: Infinity,
-        });
-        const [ch, cm] = ev.chart_time.split(':').map(Number);
-        const isPreMarket = ch * 60 + cm < 9 * 60 + 30;
-        const entryTime = calcEntryTime(ev.chart_time, aiDelay, isPreMarket);
+        const { entryTime, entryDate, exitDate } = calcEntryDateTime(ev.chart_time, ev.chart_date, aiDelay, ev.timing, timeframe);
+        const exitTime = getExitTime(exitAtClose, timeframe);
+
+        const fetchBars = (date: string) =>
+          queryClient.fetchQuery({
+            queryKey: ['alpaca-bars', primaryTicker, date, timeframe],
+            queryFn: () => getBars(primaryTicker, date, timeframe),
+            staleTime: Infinity,
+          });
+
+        const { bars: entryBars } = await fetchBars(entryDate);
+        const extraBars = exitDate !== entryDate ? (await fetchBars(exitDate)).bars : [];
+        const bars = [...entryBars, ...extraBars].sort((a, b) => a.t.localeCompare(b.t));
+
+        const daysAfter = ev.timing !== 'during'
+          ? Math.round((new Date(exitDate).getTime() - new Date(ev.first_date).getTime()) / 86_400_000)
+          : null;
 
         if (!bars.length)
           return {
@@ -456,23 +350,30 @@ export default function IntradaySimulation() {
             event: ev.event,
             trade_idea: ev.trade_idea,
             action,
+            chartDate: ev.chart_date,
             chartTime: ev.chart_time,
-            preMarket: isPreMarket,
+            firstDate: ev.first_date,
+            firstTime: ev.first_time,
+            preMarket: false,
+            afterHours: ev.after_hours,
+            entryDate,
             entryTime,
+            exitDate,
+            daysAfter,
             profitPct: null,
             error: 'No data',
           };
 
-        const entryIso = DateUtils.timeToIso(entryTime, ev.chart_date);
-        const exitIso = DateUtils.timeToIso('15:45', ev.chart_date);
+        const entryIso = DateUtils.timeToIso(entryTime, entryDate);
+        const exitIso = DateUtils.timeToIso(exitTime, exitDate);
         const actions: Action[] = [
           { id: 1, timestamp: entryIso, time: entryTime, side: isShort ? 'short' : 'buy', value: 100 },
-          { id: 2, timestamp: exitIso, time: '15:45', side: isShort ? 'cover' : 'sell', value: 100 },
+          { id: 2, timestamp: exitIso, time: exitTime, side: isShort ? 'cover' : 'sell', value: 100 },
         ];
 
         const result = isShort
-          ? runShortSimulation(bars, actions, DateUtils.fmtTime)
-          : runLongSimulation(bars, actions, DateUtils.fmtTime, 0);
+          ? runShortSimulation(bars, actions, fmtTime)
+          : runLongSimulation(bars, actions, fmtTime, 0);
 
         return {
           rank: ev.rank,
@@ -480,9 +381,16 @@ export default function IntradaySimulation() {
           event: ev.event,
           trade_idea: ev.trade_idea,
           action,
+          chartDate: ev.chart_date,
           chartTime: ev.chart_time,
-          preMarket: isPreMarket,
+          firstDate: ev.first_date,
+          firstTime: ev.first_time,
+          preMarket: false,
+          afterHours: ev.after_hours,
+          entryDate,
           entryTime,
+          exitDate,
+          daysAfter,
           profitPct: result.profitPct,
         };
       } catch (err) {
@@ -492,9 +400,16 @@ export default function IntradaySimulation() {
           event: ev.event,
           trade_idea: ev.trade_idea,
           action,
+          chartDate: ev.chart_date,
           chartTime: ev.chart_time,
+          firstDate: ev.first_date,
+          firstTime: ev.first_time,
           preMarket: false,
-          entryTime: '09:30',
+          afterHours: ev.after_hours,
+          entryDate: ev.chart_date,
+          entryTime: '15:59',
+          exitDate: ev.chart_date,
+          daysAfter: null,
           profitPct: null,
           error: err instanceof Error ? err.message : 'Failed',
         };
@@ -504,38 +419,69 @@ export default function IntradaySimulation() {
     // Run in batches of 4 to avoid rate-limiting
     const BATCH = 4;
     const rows: SimAllRow[] = [];
-    for (let i = 0; i < eventsData.length; i += BATCH) {
-      const batch = eventsData.slice(i, i + BATCH);
+    for (let i = 0; i < filteredEvents.length; i += BATCH) {
+      const batch = filteredEvents.slice(i, i + BATCH);
       const results = await Promise.all(batch.map(simOne));
       rows.push(...results);
     }
 
     rows.sort((a, b) => (b.profitPct ?? -Infinity) - (a.profitPct ?? -Infinity));
     dispatch({ type: 'SIM_ALL_DONE', results: rows });
-  }, [eventsData, aiDelay, queryClient]);
+  }, [filteredEvents, aiDelay, exitAtClose, timeframe, fmtTime, queryClient]);
 
-  const handleAiSim = useCallback(() => {
+  const handleRowSelect = useCallback(
+    (row: SimAllRow) => {
+      const ev = eventsData?.find((e) => e.rank === row.rank);
+      if (!ev) return;
+      dispatch({ type: 'LOAD_EVENT', event: ev, timeframe });
+      const exitTime = getExitTime(exitAtClose, timeframe);
+      const entryIso = DateUtils.timeToIso(row.entryTime, row.entryDate);
+      const exitIso = DateUtils.timeToIso(exitTime, row.exitDate);
+      const newActions: Action[] = [
+        { id: nextActionId.current++, timestamp: entryIso, time: row.entryTime, side: row.action === 'short' ? 'short' : 'buy', value: 100 },
+        { id: nextActionId.current++, timestamp: exitIso, time: exitTime, side: row.action === 'short' ? 'cover' : 'sell', value: 100 },
+      ];
+      const mode = row.action === 'short' ? 'short' : 'long';
+      dispatch({ type: 'SET_TRADE_MODE', mode, date: row.entryDate });
+      dispatch({ type: 'SET_ACTIONS', actions: newActions, textValue: intradayStrategy.toText(row.entryDate, newActions) });
+    },
+    [eventsData, timeframe, exitAtClose],
+  );
+
+  const handleAiSim = useCallback(async () => {
     if (!selectedEvent) return;
     const primaryTicker = selectedEvent.ticker.split('/')[0].trim();
     const isShort = detectShortDirection(primaryTicker, selectedEvent.trade_idea);
 
     const chartDate = selectedEvent.chart_date;
-    const [ch, cm] = selectedEvent.chart_time.split(':').map(Number);
-    const isPreMarket = ch * 60 + cm < 9 * 60 + 30;
-    const entryTime = calcEntryTime(selectedEvent.chart_time, aiDelay, isPreMarket);
-    const exitTime = '15:45';
-    const entryIso = DateUtils.timeToIso(entryTime, chartDate);
-    const exitIso = DateUtils.timeToIso(exitTime, chartDate);
+    const { entryTime, entryDate, exitDate } = calcEntryDateTime(
+      selectedEvent.chart_time,
+      chartDate,
+      aiDelay,
+      selectedEvent.timing,
+      timeframe,
+    );
+    const exitTime = getExitTime(exitAtClose, timeframe);
+    const entryIso = DateUtils.timeToIso(entryTime, entryDate);
+    const exitIso = DateUtils.timeToIso(exitTime, exitDate);
 
     const newActions: Action[] = [
       { id: nextActionId.current++, timestamp: entryIso, time: entryTime, side: isShort ? 'short' : 'buy', value: 100 },
       { id: nextActionId.current++, timestamp: exitIso, time: exitTime, side: isShort ? 'cover' : 'sell', value: 100 },
     ];
 
+    if (entryDate !== exitDate) {
+      await queryClient.prefetchQuery({
+        queryKey: ['alpaca-bars', primaryTicker, exitDate, timeframe],
+        queryFn: () => getBars(primaryTicker, exitDate, timeframe),
+        staleTime: Infinity,
+      });
+    }
+
     const mode = isShort ? 'short' : 'long';
     dispatch({ type: 'SET_TRADE_MODE', mode, date: chartDate });
     dispatch({ type: 'SET_ACTIONS', actions: newActions, textValue: intradayStrategy.toText(chartDate, newActions) });
-  }, [selectedEvent, aiDelay]);
+  }, [selectedEvent, aiDelay, exitAtClose, timeframe, queryClient]);
 
   const handleExportPdf = useExportSimPdf(
     query.ticker,
@@ -572,19 +518,43 @@ export default function IntradaySimulation() {
         timeframe={timeframe}
         onTimeframeChange={(t) => dispatch({ type: 'SET_TIMEFRAME', timeframe: t })}
         eventSlot={
-          eventsData && eventsData.length > 0 ? (
-            <FilterSelect
-              value={selectedEvent?.event ?? null}
-              onChange={handleEventSelect}
-              placeholder="Events…"
-              showAll={false}
-              className="alpaca-input w-55"
-              options={eventsData.map((ev) => ({
-                value: ev.event,
-                label: `#${ev.rank} ${ev.ticker} — ${ev.event.slice(0, 40)}${ev.event.length > 40 ? '…' : ''}`,
-              }))}
-            />
-          ) : undefined
+          eventsData && eventsData.length > 0 ? (() => {
+            const tickers = [...new Set(eventsData.map((ev) => ev.ticker.split('/')[0].trim()))].sort();
+            const timings = [...new Set(eventsData.map((ev) => ev.timing))].sort();
+            return (
+              <>
+                <FilterSelect
+                  value={tickerFilter}
+                  onChange={(v) => { setTickerFilter(v || null); }}
+                  placeholder="Ticker…"
+                  showAll
+                  allLabel="All"
+                  className="alpaca-input w-28"
+                  options={tickers}
+                />
+                <FilterSelect
+                  value={timingFilter}
+                  onChange={(v) => { setTimingFilter(v || null); }}
+                  placeholder="Timing…"
+                  showAll
+                  allLabel="All"
+                  className="alpaca-input w-32"
+                  options={timings}
+                />
+                <FilterSelect
+                  value={selectedEvent?.event ?? null}
+                  onChange={handleEventSelect}
+                  placeholder="Events…"
+                  showAll={false}
+                  className="alpaca-input w-55"
+                  options={filteredEvents.map((ev) => ({
+                    value: ev.event,
+                    label: `#${ev.rank} ${ev.ticker} — ${ev.event.slice(0, 40)}${ev.event.length > 40 ? '…' : ''}`,
+                  }))}
+                />
+              </>
+            );
+          })() : undefined
         }
         onLoad={handleLoad}
         showTradeControls={bars.length > 0}
@@ -659,37 +629,48 @@ export default function IntradaySimulation() {
           }
           tradeMode={tradeMode}
           strategy={intradayStrategy}
-          presets={INTRADAY_SIM_PRESETS}
-          onPreset={applyPreset}
-          textMode={textMode}
-          onTextModeToggle={() => dispatch({ type: 'TOGGLE_TEXT_MODE', date: query.date })}
-          onExportPdf={handleExportPdf}
-          onClear={clear}
-          ai={{
-            onAiSim: handleAiSim,
-            aiSimDisabled: !selectedEvent,
-            onSimulateAll: eventsData?.length ? handleSimulateAll : undefined,
-            aiDelay,
-            onAiDelayChange: (d: number) => dispatch({ type: 'SET_AI_DELAY', delay: d }),
-          }}
-          nextSide={nextSide}
-          onNextSideChange={(s) => dispatch({ type: 'SET_NEXT_SIDE', side: s as Side })}
-          manualValue={value}
-          onManualValueChange={(v) => dispatch({ type: 'SET_VALUE', value: v })}
-          onAddManual={addManualAction}
-          manualInputType="time"
-          manualInputValue={manualTime}
-          onManualInputChange={(v) => dispatch({ type: 'SET_MANUAL_TIME', time: v })}
           textValue={textValue}
           onTextChange={handleTextChange}
-          actions={actions}
-          onUpdateAction={updateAction}
-          onRemoveAction={removeAction}
-          resultStats={result ? buildSimStats(result, tradeMode, PriceUtils.fmt) : null}
-          resultHistory={result?.portfolioHistory ?? []}
-          resultMarkers={portfolioMarkers}
-          resultTransactions={result?.transactions ?? null}
-          portfolioChartRef={portfolioChartRef}
+          toolbar={{
+            presets: INTRADAY_SIM_PRESETS,
+            onPreset: applyPreset,
+            textMode: s.textMode,
+            onTextModeToggle: () => dispatch({ type: 'TOGGLE_TEXT_MODE', date: query.date }),
+            onExportPdf: handleExportPdf,
+            onClear: clear,
+            ai: {
+              onAiSim: handleAiSim,
+              aiSimDisabled: !selectedEvent,
+              onSimulateAll: filteredEvents.length ? handleSimulateAll : undefined,
+              simulateAllLabel: isFiltered ? `Simulate Selected (${filteredEvents.length})` : 'Simulate All',
+              aiDelay,
+              onAiDelayChange: (d: number) => dispatch({ type: 'SET_AI_DELAY', delay: d }),
+              exitAtClose,
+              onExitAtCloseChange: (v: boolean) => dispatch({ type: 'SET_EXIT_AT_CLOSE', exitAtClose: v }),
+            },
+          }}
+          manual={{
+            inputType: 'time',
+            inputValue: s.manualTime,
+            onInputChange: (v) => dispatch({ type: 'SET_MANUAL_TIME', time: v }),
+            value: s.value,
+            onValueChange: (v) => dispatch({ type: 'SET_VALUE', value: v }),
+            onAdd: addManualAction,
+            nextSide: s.nextSide,
+            onNextSideChange: (side) => dispatch({ type: 'SET_NEXT_SIDE', side }),
+          }}
+          actions={{
+            list: s.actions,
+            onUpdate: (id, field, val) => dispatch({ type: 'UPDATE_ACTION', id, field, val, date: query.date }),
+            onRemove: (id) => dispatch({ type: 'REMOVE_ACTION', id, date: query.date }),
+          }}
+          result={{
+            stats: result ? buildSimStats(result, tradeMode, PriceUtils.fmt) : null,
+            history: result?.portfolioHistory ?? [],
+            markers: portfolioMarkers,
+            transactions: result?.transactions ?? null,
+            chartRef: portfolioChartRef,
+          }}
         />
       )}
 
@@ -701,31 +682,10 @@ export default function IntradaySimulation() {
         aiDelay={aiDelay}
         onAiDelayChange={(d) => dispatch({ type: 'SET_AI_DELAY', delay: d })}
         onReload={handleSimulateAll}
+        onRowSelect={handleRowSelect}
       />
-      {popover && (
-        <ChartActionPopover
-          x={popover.x}
-          y={popover.y}
-          initialSide={popover.side}
-          initialValue={popover.value}
-          tradeMode={tradeMode}
-          onConfirm={confirmPopover}
-          onDismiss={dismissPopover}
-        />
-      )}
-      {editPopover && (
-        <ChartActionPopover
-          mode="edit"
-          x={editPopover.x}
-          y={editPopover.y}
-          initialSide={editPopover.action.side}
-          initialValue={String(editPopover.action.value)}
-          tradeMode={tradeMode}
-          onConfirm={confirmEditPopover}
-          onDelete={deleteFromEditPopover}
-          onDismiss={dismissEditPopover}
-        />
-      )}
+      {popover.add && <ChartActionPopover popover={popover.add} tradeMode={tradeMode} />}
+      {popover.edit && <ChartActionPopover mode="edit" popover={popover.edit} tradeMode={tradeMode} />}
     </div>
   );
 }

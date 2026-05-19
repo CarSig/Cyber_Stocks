@@ -1,5 +1,57 @@
 import type { Side, Action } from '@/utils/sim';
 import { DateUtils } from '@/utils/date';
+import type { BaseSimState, BaseSimAction } from './baseReducer';
+
+// Prop object shapes — kept here so strategies can build them without circular imports
+export type ToolbarExtras = {
+  presets: Record<string, unknown> | undefined;
+  presetsLoading?: boolean;
+  presetsError?: Error | null;
+  onPreset: (name: string) => void;
+  onExportPdf: () => void;
+  onClear: () => void;
+  ai?: {
+    onAiSim: () => void;
+    aiSimDisabled?: boolean;
+    onSimulateAll?: () => void;
+    simulateAllLabel?: string;
+    aiDelay?: number;
+    onAiDelayChange?: (v: number) => void;
+    exitAtClose?: boolean;
+    onExitAtCloseChange?: (v: boolean) => void;
+  };
+};
+
+export type BuiltToolbar = ToolbarExtras & {
+  textMode: boolean;
+  onTextModeToggle: () => void;
+};
+
+export type ManualExtras = {
+  inputType: 'time' | 'date';
+  onAdd: () => void;
+  minDate?: string;
+  maxDate?: string;
+};
+
+export type BuiltManual = ManualExtras & {
+  inputValue: string;
+  onInputChange: (v: string) => void;
+  value: string;
+  onValueChange: (v: string) => void;
+  nextSide: string;
+  onNextSideChange: (s: string) => void;
+};
+
+export type ActionsExtras<A> = {
+  labelSlot?: (action: A, index: number) => React.ReactNode;
+};
+
+export type BuiltActions<A> = ActionsExtras<A> & {
+  list: A[];
+  onUpdate: (id: number, field: 'side' | 'value', val: string) => void;
+  onRemove: (id: number) => void;
+};
 
 export type SimStrategy<A> = {
   toText: (date: string, actions: A[]) => string;
@@ -8,13 +60,73 @@ export type SimStrategy<A> = {
   getLabel: (action: A) => string;
   getSortKey: (action: A) => string;
   defaultSide: (tradeMode: 'long' | 'short') => string;
-  /** Placeholder text for the textarea */
   getTextPlaceholder: () => string;
-  /** Number of rows for the textarea based on action count */
   getTextRows: (actionCount: number) => number;
-  /** Whether this is an intraday simulation (affects Results display) */
   isIntraday: boolean;
+  buildToolbar: <S extends BaseSimState<A>>(
+    s: S,
+    dispatch: React.Dispatch<BaseSimAction<A>>,
+    extras: ToolbarExtras,
+  ) => BuiltToolbar;
+  buildManual: <S extends BaseSimState<A>>(
+    s: S,
+    dispatch: React.Dispatch<BaseSimAction<A>>,
+    extras: ManualExtras,
+  ) => BuiltManual;
+  buildActions: <S extends BaseSimState<A>>(
+    s: S,
+    dispatch: React.Dispatch<BaseSimAction<A>>,
+    extras?: ActionsExtras<A>,
+  ) => BuiltActions<A>;
 };
+
+function stateDate<S>(s: S): string {
+  const st = s as unknown as { query?: { date: string }; date?: string };
+  return st.query?.date ?? st.date ?? '';
+}
+
+function buildToolbarImpl<A, S extends BaseSimState<A>>(
+  s: S,
+  dispatch: React.Dispatch<BaseSimAction<A>>,
+  extras: ToolbarExtras,
+): BuiltToolbar {
+  return {
+    ...extras,
+    textMode: s.textMode,
+    onTextModeToggle: () => dispatch({ type: 'TOGGLE_TEXT_MODE', date: stateDate(s) }),
+  };
+}
+
+function buildManualImpl<A, S extends BaseSimState<A>>(
+  s: S,
+  dispatch: React.Dispatch<BaseSimAction<A>>,
+  extras: ManualExtras,
+): BuiltManual {
+  return {
+    ...extras,
+    inputValue: s.manualTime,
+    onInputChange: (v: string) => dispatch({ type: 'SET_MANUAL_TIME', time: v }),
+    value: s.value,
+    onValueChange: (v: string) => dispatch({ type: 'SET_VALUE', value: v }),
+    nextSide: s.nextSide,
+    onNextSideChange: (side: string) => dispatch({ type: 'SET_NEXT_SIDE', side }),
+  };
+}
+
+function buildActionsImpl<A extends { id: number }, S extends BaseSimState<A>>(
+  s: S,
+  dispatch: React.Dispatch<BaseSimAction<A>>,
+  extras?: ActionsExtras<A>,
+): BuiltActions<A> {
+  const date = stateDate(s);
+  return {
+    list: s.actions,
+    labelSlot: extras?.labelSlot,
+    onUpdate: (id: number, field: 'side' | 'value', val: string) =>
+      dispatch({ type: 'UPDATE_ACTION', id, field, val, date }),
+    onRemove: (id: number) => dispatch({ type: 'REMOVE_ACTION', id, date }),
+  };
+}
 
 // Shared by DayTradeSimulation and IntradaySimulation (same Action type)
 export const intradayStrategy: SimStrategy<Action> = {
@@ -50,6 +162,9 @@ export const intradayStrategy: SimStrategy<Action> = {
   getTextPlaceholder: () => '09:30, 100\n10:15, -50',
   getTextRows: (count) => Math.max(3, count + 1),
   isIntraday: true,
+  buildToolbar: buildToolbarImpl,
+  buildManual: buildManualImpl,
+  buildActions: buildActionsImpl,
 };
 
 type LongTermAction = { id: number; date: string; side: 'buy' | 'sell' | 'short' | 'cover'; value: string };
@@ -74,4 +189,7 @@ export const longTermStrategy: SimStrategy<LongTermAction> = {
   getTextPlaceholder: () => '2025-01-15, 100\n2025-06-01, -50',
   getTextRows: (count) => Math.max(3, count + 1),
   isIntraday: false,
+  buildToolbar: buildToolbarImpl,
+  buildManual: buildManualImpl,
+  buildActions: buildActionsImpl,
 };

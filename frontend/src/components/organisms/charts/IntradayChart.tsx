@@ -4,6 +4,7 @@ import { createChart, CandlestickSeries, LineSeries, AreaSeries } from 'lightwei
 import type { ISeriesApi, SeriesType } from 'lightweight-charts';
 import { getTzOffsetSeconds, toTzTime } from './utils/dates';
 import { COMPARE_COLORS } from './utils/options';
+import { useTimezone } from '@/context/TimezoneContext';
 import type { AlpacaBar } from '@/types';
 
 type ChartWithSeriesRefs = {
@@ -47,11 +48,11 @@ export type CompareBarsEntry = { ticker: string; bars: AlpacaBar[] };
 export type IntradayChartProps = {
   bars: AlpacaBar[];
   compareBars: CompareBarsEntry[];
-  timezone: string;
   chartType: string;
 };
 
-export default function IntradayChart({ bars, compareBars, timezone, chartType }: IntradayChartProps) {
+export default function IntradayChart({ bars, compareBars, chartType }: IntradayChartProps) {
+  const { timezone } = useTimezone();
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ReturnType<typeof createChart> | null>(null);
 
@@ -70,12 +71,14 @@ export default function IntradayChart({ bars, compareBars, timezone, chartType }
 
     chartRef.current = chart;
 
+    let disposed = false;
     const ro = new ResizeObserver(() => {
-      if (containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
+      if (!disposed && containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
     });
     ro.observe(containerRef.current);
 
     return () => {
+      disposed = true;
       ro.disconnect();
       chart.remove();
       chartRef.current = null;

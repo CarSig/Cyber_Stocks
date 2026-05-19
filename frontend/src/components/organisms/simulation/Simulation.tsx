@@ -1,14 +1,14 @@
-import { useCallback, useRef, useEffect, useMemo, useReducer, useState } from 'react';
+import { useRef, useEffect, useMemo, useReducer, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getSimulationPresets } from '@/api/stock';
 import type { SimulationPreset } from '@/types';
 import { createChart, LineSeries, AreaSeries, CandlestickSeries, createSeriesMarkers } from 'lightweight-charts';
 import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
 import DatePicker from '@/components/atoms/DatePicker';
-import { Input } from '@/components/ui/input';
 import type { Quote } from '@/types';
 import SimEntryPanel from './components/entry-panel/SimEntryPanel';
 import ChartTypeToggle from './components/ChartTypeToggle';
+import TradeModeControls from './components/TradeModeControls';
 import ChartActionPopover from './components/ChartActionPopover';
 import { useExportSimPdf } from './hooks/useExportSimPdf';
 import { longTermReducer, initialLongTermState } from './reducers/longTermReducer';
@@ -18,8 +18,10 @@ import { useAddManualAction } from './hooks/useAddManualAction';
 import { simStatsToExportRows } from '@/utils/sim';
 import { DateUtils, safeOffsetDate } from '@/utils/date';
 import { attachChartClick } from './utils/chartClick';
+import { useCrosshairTracker } from './hooks/useCrosshairTracker';
 
 const { snapToWeekday } = DateUtils;
+const simToIso = (t: unknown) => t as string;
 
 type SimTransaction = {
   date: string;
@@ -239,7 +241,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
   const maxDate = dates.at(-1) ?? '';
 
   const [s, dispatch] = useReducer(longTermReducer, undefined, initialLongTermState);
-  const { actions, startShares, textMode, textValue, chartType, value: clickValue, tradeMode, nextSide } = s;
+  const { actions, startShares, textValue, chartType, value: clickValue, tradeMode } = s;
 
   const portfolioChartRef = useRef<HTMLDivElement>(null);
   const interactiveChartRef = useRef<HTMLDivElement>(null);
@@ -247,18 +249,32 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
   const clickValueRef = useRef(clickValue);
   const tradeModeRef = useRef(tradeMode);
   const actionsRef = useRef(actions);
-  useEffect(() => { clickValueRef.current = clickValue; }, [clickValue]);
-  useEffect(() => { tradeModeRef.current = tradeMode; }, [tradeMode]);
-  useEffect(() => { actionsRef.current = actions; }, [actions]);
+  useEffect(() => {
+    clickValueRef.current = clickValue;
+  }, [clickValue]);
+  useEffect(() => {
+    tradeModeRef.current = tradeMode;
+  }, [tradeMode]);
+  useEffect(() => {
+    actionsRef.current = actions;
+  }, [actions]);
 
-  const [manualDate, setManualDate] = useState('');
-  const [manualValue, setManualValue] = useState('100');
   const [popover, setPopover] = useState<{
-    date: string; x: number; y: number;
-    side: 'buy' | 'sell' | 'short' | 'cover'; value: string;
+    date: string;
+    x: number;
+    y: number;
+    side: 'buy' | 'sell' | 'short' | 'cover';
+    value: string;
+    confirm: (side: 'buy' | 'sell' | 'short' | 'cover', rawValue: string) => void;
+    dismiss: () => void;
   } | null>(null);
   const [editPopover, setEditPopover] = useState<{
-    action: LongTermAction; x: number; y: number;
+    action: LongTermAction;
+    x: number;
+    y: number;
+    confirm: (side: 'buy' | 'sell' | 'short' | 'cover', rawValue: string) => void;
+    dismiss: () => void;
+    delete: () => void;
   } | null>(null);
 
   type PresetsMap = Record<string, SimulationPreset[]>;
@@ -273,35 +289,32 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     retry: false,
   });
 
-  const applyPreset = useCallback(
-    (name: string) => {
-      if (!presets?.[name]) return;
-      const next = presets[name]
-        .map((item: SimulationPreset) => {
-          const num = Number(item.number);
-          if (!isFinite(num) || num === 0) return null;
-          return {
-            id: nextId.current++,
-            date: item.date,
-            side: (num > 0 ? 'buy' : 'sell') as LongTermAction['side'],
-            value: String(Math.abs(num)),
-          };
-        })
-        .filter((x): x is LongTermAction => x !== null);
-      dispatch({ type: 'SET_ACTIONS', actions: next, textValue: longTermStrategy.toText('', next) });
-    },
-    [presets],
-  );
+  const applyPreset = (name: string) => {
+    if (!presets?.[name]) return;
+    const next = presets[name]
+      .map((item: SimulationPreset) => {
+        const num = Number(item.number);
+        if (!isFinite(num) || num === 0) return null;
+        return {
+          id: nextId.current++,
+          date: item.date,
+          side: (num > 0 ? 'buy' : 'sell') as LongTermAction['side'],
+          value: String(Math.abs(num)),
+        };
+      })
+      .filter((x): x is LongTermAction => x !== null);
+    dispatch({ type: 'SET_ACTIONS', actions: next, textValue: longTermStrategy.toText('', next) });
+  };
 
   const addManualAction = useAddManualAction(
     longTermStrategy,
-    manualDate,
-    nextSide,
-    manualValue,
+    s.manualTime,
+    s.nextSide,
+    s.value,
     '',
     dispatch,
     nextId,
-    () => setManualDate(''),
+    () => dispatch({ type: 'SET_MANUAL_DATE', date: '' }),
   );
 
   const result = useMemo<SimResult | null>(() => {
@@ -314,55 +327,9 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     if (result) onResult?.(result);
   }, [result, onResult]);
 
-  const remove = useCallback((id: number) => dispatch({ type: 'REMOVE_ACTION', id, date: '' }), []);
-  const update = useCallback((id: number, field: keyof LongTermAction, val: string) => {
-    if (field === 'id' || field === 'date') return;
-    dispatch({ type: 'UPDATE_ACTION', id, field: field as 'side' | 'value', val, date: '' });
-  }, []);
-  const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS', date: '' }), []);
+  const clear = () => dispatch({ type: 'CLEAR_ACTIONS', date: '' });
 
-  const dismissPopover = useCallback(() => setPopover(null), []);
-  const confirmPopover = useCallback(
-    (side: 'buy' | 'sell' | 'short' | 'cover', rawValue: string) => {
-      if (!popover) return;
-      const isExit = side === 'sell' || side === 'cover';
-      const val = isExit ? Math.min(100, Math.max(0.01, Number(rawValue))) : Math.max(0.01, Number(rawValue));
-      if (!isFinite(val) || val <= 0) {
-        setPopover(null);
-        return;
-      }
-      dispatch({
-        type: 'ADD_ACTION',
-        action: { id: nextId.current++, date: popover.date, side, value: String(val) },
-        date: '',
-      });
-      setPopover(null);
-    },
-    [popover],
-  );
-
-  const dismissEditPopover = useCallback(() => setEditPopover(null), []);
-  const confirmEditPopover = useCallback(
-    (side: 'buy' | 'sell' | 'short' | 'cover', rawValue: string) => {
-      if (!editPopover) return;
-      const isExit = side === 'sell' || side === 'cover';
-      const val = isExit
-        ? Math.min(100, Math.max(0.01, Number(rawValue)))
-        : Math.max(0.01, Number(rawValue));
-      if (!isFinite(val) || val <= 0) { setEditPopover(null); return; }
-      const updated = actions.map((a) =>
-        a.id === editPopover.action.id ? { ...a, side, value: String(val) } : a,
-      );
-      dispatch({ type: 'SET_ACTIONS', actions: updated, textValue: longTermStrategy.toText('', updated) });
-      setEditPopover(null);
-    },
-    [editPopover, actions],
-  );
-  const deleteFromEditPopover = useCallback(() => {
-    if (!editPopover) return;
-    dispatch({ type: 'REMOVE_ACTION', id: editPopover.action.id, date: '' });
-    setEditPopover(null);
-  }, [editPopover]);
+  const getHoveredIso = useCrosshairTracker(interactiveRef, simToIso, [quotes, chartType]);
 
   // Interactive price chart
   useEffect(() => {
@@ -415,18 +382,10 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     }
     chart.timeScale().fitContent();
 
-    let lastHoveredDate: string | null = null;
-    chart.subscribeCrosshairMove((param) => {
-      if (!param.time) {
-        lastHoveredDate = null;
-        return;
-      }
-      lastHoveredDate = param.time as string;
-    });
     const el = interactiveChartRef.current!;
     const cleanupClick = attachChartClick(el, {
       chart,
-      getHoveredIso: () => (lastHoveredDate ? snapToWeekday(lastHoveredDate) : null),
+      getHoveredIso: () => { const iso = getHoveredIso(); return iso ? snapToWeekday(iso) : null; },
       onQuickAction: (date, button) => {
         const existing = actionsRef.current.find((a) => a.date === date);
         if (existing) {
@@ -446,29 +405,79 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       onHoldStart: (date, x, y, button) => {
         const existing = actionsRef.current.find((a) => a.date === date);
         if (existing) {
-          setEditPopover({ action: existing, x, y });
+          setEditPopover({
+            action: existing,
+            x,
+            y,
+            confirm: (side, rawValue) => {
+              const isExit = side === 'sell' || side === 'cover';
+              const val = isExit ? Math.min(100, Math.max(0.01, Number(rawValue))) : Math.max(0.01, Number(rawValue));
+              if (!isFinite(val) || val <= 0) {
+                setEditPopover(null);
+                return;
+              }
+              const updated = actionsRef.current.map((a) =>
+                a.id === existing.id ? { ...a, side, value: String(val) } : a,
+              );
+              dispatch({ type: 'SET_ACTIONS', actions: updated, textValue: longTermStrategy.toText('', updated) });
+              setEditPopover(null);
+            },
+            dismiss: () => setEditPopover(null),
+            delete: () => {
+              dispatch({ type: 'REMOVE_ACTION', id: existing.id, date: '' });
+              setEditPopover(null);
+            },
+          });
           return;
         }
         const side =
           button === 0
-            ? tradeModeRef.current === 'short' ? 'short' : 'buy'
-            : tradeModeRef.current === 'short' ? 'cover' : 'sell';
+            ? tradeModeRef.current === 'short'
+              ? 'short'
+              : 'buy'
+            : tradeModeRef.current === 'short'
+              ? 'cover'
+              : 'sell';
         const val =
           button === 0
             ? String(Math.max(0.01, Number(clickValueRef.current) || 100))
             : String(Math.min(100, Math.max(0.01, Number(clickValueRef.current) || 50)));
-        setPopover({ date, x, y, side, value: val });
+        setPopover({
+          date,
+          x,
+          y,
+          side,
+          value: val,
+          confirm: (s, rawValue) => {
+            const isExit = s === 'sell' || s === 'cover';
+            const v = isExit ? Math.min(100, Math.max(0.01, Number(rawValue))) : Math.max(0.01, Number(rawValue));
+            if (!isFinite(v) || v <= 0) {
+              setPopover(null);
+              return;
+            }
+            dispatch({
+              type: 'ADD_ACTION',
+              action: { id: nextId.current++, date, side: s, value: String(v) },
+              date: '',
+            });
+            setPopover(null);
+          },
+          dismiss: () => setPopover(null),
+        });
       },
     });
     interactiveRef.current = { chart, series };
-    const ro = new ResizeObserver(() => chart.applyOptions({ width: el.clientWidth }));
+    let disposed = false;
+    const ro = new ResizeObserver(() => { if (!disposed) chart.applyOptions({ width: el.clientWidth }); });
     ro.observe(el);
     return () => {
+      disposed = true;
       cleanupClick();
       ro.disconnect();
       chart.remove();
       interactiveRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quotes, chartType]);
 
   // Sync action markers onto interactive chart
@@ -529,7 +538,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     'Date',
   );
 
-  const handleTextChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const raw = e.target.value;
     let id = Date.now();
     const parsed: LongTermAction[] = [];
@@ -545,137 +554,68 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
       parsed.push({ id: id++, date: label, side: num > 0 ? 'buy' : 'sell', value: String(Math.abs(num)) });
     }
     dispatch({ type: 'SET_TEXT', raw, parsedActions: parsed.length ? parsed : undefined });
-  }, []);
+  };
 
   return (
     <div>
-      {quotes.length > 0 && (
-        <div className="sim-interactive-chart">
-          <div className="dtrade-order-controls" style={{ marginBottom: '0.5rem' }}>
-            <div className="dtrade-mode-toggle">
-              <button
-                className={`dtrade-mode-btn${tradeMode === 'long' ? ' active' : ''}`}
-                onClick={() => dispatch({ type: 'SET_TRADE_MODE', mode: 'long', date: '' })}
-                type="button"
-              >
-                Long
-              </button>
-              <button
-                className={`dtrade-mode-btn${tradeMode === 'short' ? ' active' : ''}`}
-                onClick={() => dispatch({ type: 'SET_TRADE_MODE', mode: 'short', date: '' })}
-                type="button"
-              >
-                Short
-              </button>
-            </div>
-            <div className="dtrade-next-side">
-              {tradeMode === 'long' ? (
-                <>
-                  <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Left click = Buy ($)</span>
-                  <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Right click = Sell (%)</span>
-                </>
-              ) : (
-                <>
-                  <span className="dtrade-side-btn dtrade-side-btn--short">▲ Left click = Short ($)</span>
-                  <span className="dtrade-side-btn dtrade-side-btn--cover">▼ Right click = Cover (%)</span>
-                </>
-              )}
-            </div>
-            {tradeMode === 'long' && (
-              <div className="dtrade-shares">
-                <span className="dtrade-label">Start shares:</span>
-                <Input
-                  type="number"
-                  min="0"
-                  step="any"
-                  value={startShares}
-                  onChange={(e) => dispatch({ type: 'SET_START_SHARES', startShares: e.target.value })}
-                  className="dtrade-shares-input"
-                />
-              </div>
-            )}
-            <div className="dtrade-shares">
-              <span className="dtrade-label">Value:</span>
-              <Input
-                type="number"
-                min="0"
-                step="any"
-                value={clickValue}
-                onChange={(e) => dispatch({ type: 'SET_VALUE', value: e.target.value })}
-                className="dtrade-shares-input"
-              />
-              <span className="dtrade-label">{tradeMode === 'short' ? '$ short / % cover' : '$ buy / % sell'}</span>
-            </div>
-          </div>
-          <ChartTypeToggle chartType={chartType} onChange={(t) => dispatch({ type: 'SET_CHART_TYPE', chartType: t })} />
-          <div className="dtrade-chart-hint">Left click to buy · Right click to sell · Hold 1s to configure</div>
-          <div ref={interactiveChartRef} />
-        </div>
-      )}
-      {popover && (
-        <ChartActionPopover
-          x={popover.x}
-          y={popover.y}
-          initialSide={popover.side}
-          initialValue={popover.value}
-          tradeMode={tradeMode}
-          onConfirm={confirmPopover}
-          onDismiss={dismissPopover}
-        />
-      )}
-      {editPopover && (
-        <ChartActionPopover
-          mode="edit"
-          x={editPopover.x}
-          y={editPopover.y}
-          initialSide={editPopover.action.side}
-          initialValue={editPopover.action.value}
-          tradeMode={tradeMode}
-          onConfirm={confirmEditPopover}
-          onDelete={deleteFromEditPopover}
-          onDismiss={dismissEditPopover}
-        />
-      )}
+      {popover && <ChartActionPopover popover={popover} tradeMode={tradeMode} />}
+      {editPopover && <ChartActionPopover mode="edit" popover={editPopover} tradeMode={tradeMode} />}
 
       <SimEntryPanel
+        topSlot={
+          quotes.length > 0 ? (
+            <>
+              <div className="dtrade-order-controls" style={{ marginBottom: '0.5rem' }}>
+                <TradeModeControls
+                  tradeMode={tradeMode}
+                  onTradeModeChange={(mode) => dispatch({ type: 'SET_TRADE_MODE', mode, date: '' })}
+                  startShares={startShares}
+                  onStartSharesChange={(v) => dispatch({ type: 'SET_START_SHARES', startShares: v })}
+                  value={clickValue}
+                  onValueChange={(v) => dispatch({ type: 'SET_VALUE', value: v })}
+                />
+              </div>
+              <ChartTypeToggle chartType={chartType} onChange={(t) => dispatch({ type: 'SET_CHART_TYPE', chartType: t })} />
+              <div className="dtrade-chart-hint">Left click to buy · Right click to sell · Hold 1s to configure</div>
+              <div ref={interactiveChartRef} />
+            </>
+          ) : null
+        }
         tradeMode={tradeMode}
         strategy={longTermStrategy}
-        presets={presets}
-        presetsLoading={presetsLoading}
-        presetsError={presetsError as Error | null}
-        onPreset={applyPreset}
-        textMode={textMode}
-        onTextModeToggle={() => dispatch({ type: 'TOGGLE_TEXT_MODE', date: '' })}
-        onExportPdf={handleExportPdf}
-        onClear={clear}
-        nextSide={nextSide}
-        onNextSideChange={(s) => dispatch({ type: 'SET_NEXT_SIDE', side: s })}
-        manualValue={manualValue}
-        onManualValueChange={setManualValue}
-        onAddManual={addManualAction}
-        manualInputType="date"
-        manualInputValue={manualDate}
-        onManualInputChange={(v) => setManualDate(v ? snapToWeekday(v) : '')}
-        manualMinDate={minDate}
-        manualMaxDate={maxDate}
         textValue={textValue}
         onTextChange={handleTextChange}
-        actions={actions}
-        actionLabelSlot={(a, i) => (
-          <DatePicker
-            value={a.date as string}
-            min={safeOffsetDate(actions[i - 1]?.date, 86400000) ?? minDate}
-            max={safeOffsetDate(actions[i + 1]?.date, -86400000) ?? maxDate}
-            onChange={(v) => update(a.id, 'date', v ? snapToWeekday(v) : '')}
-          />
-        )}
-        onUpdateAction={(id, field, val) => update(id, field, val)}
-        onRemoveAction={remove}
-        resultStats={result ? simStatsToExportRows(result) : null}
-        resultHistory={result?.portfolioHistory.map((p) => ({ time: p.date, value: p.value })) ?? []}
-        resultMarkers={portfolioMarkers}
-        resultTransactions={result?.transactions ?? null}
-        portfolioChartRef={portfolioChartRef}
+        toolbar={longTermStrategy.buildToolbar(s, dispatch, {
+          presets,
+          presetsLoading,
+          presetsError: presetsError as Error | null,
+          onPreset: applyPreset,
+          onExportPdf: handleExportPdf,
+          onClear: clear,
+        })}
+        manual={longTermStrategy.buildManual(s, dispatch, {
+          inputType: 'date',
+          onAdd: addManualAction,
+          minDate,
+          maxDate,
+        })}
+        actions={longTermStrategy.buildActions(s, dispatch, {
+          labelSlot: (a, i) => (
+            <DatePicker
+              value={a.date as string}
+              min={safeOffsetDate(actions[i - 1]?.date, 86400000) ?? minDate}
+              max={safeOffsetDate(actions[i + 1]?.date, -86400000) ?? maxDate}
+              onChange={(v) => dispatch({ type: 'UPDATE_ACTION', id: a.id, field: 'date' as never, val: v ? snapToWeekday(v) : '', date: '' })}
+            />
+          ),
+        })}
+        result={{
+          stats: result ? simStatsToExportRows(result) : null,
+          history: result?.portfolioHistory.map((p) => ({ time: p.date, value: p.value })) ?? [],
+          markers: portfolioMarkers,
+          transactions: result?.transactions ?? null,
+          chartRef: portfolioChartRef,
+        }}
       />
     </div>
   );
