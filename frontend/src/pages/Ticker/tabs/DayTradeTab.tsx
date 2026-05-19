@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getBars } from '@/api/alpaca';
 import type { AlpacaBar } from '@/types';
-import { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from '@/components/organisms/charts/utils/options';
+import { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from '@/features/charts/utils';
 import { useTimezone } from '@/context/TimezoneContext';
-import IntradayChart from '@/components/organisms/charts/IntradayChart';
+import { IntradayChart } from '@/features/charts/components';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);

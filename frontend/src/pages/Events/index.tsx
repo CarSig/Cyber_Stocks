@@ -1,5 +1,5 @@
-import Page from '@/components/atoms/Page';
-import EventSimulation from '@/components/organisms/simulation/EventSimulation';
+import Page from '@/components/common/Page';
+import EventSimulation from '@/features/simulations/EventSimulation';
 
 export default function Events() {
   return (

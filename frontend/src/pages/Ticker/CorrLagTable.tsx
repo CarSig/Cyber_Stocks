@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { pearsonLag, corrColor, LAG_COLS } from './tickerUtils';
+import { pearsonLag, corrColor, LAG_COLS } from '@/features/correlations/utils';
 
 type SparklineEntry = {
   closes252?: number[];

@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { getAuditLog, triggerJob } from '@/api/admin';
 import { Button } from '@/components/ui/button';
-import Page from '@/components/atoms/Page';
+import Page from '@/components/common/Page';
 
 const JOBS = ['populate', 'news', 'trump', 'reddit', 'threatintel'] as const;
 

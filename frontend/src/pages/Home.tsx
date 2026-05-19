@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import StateHandler from '@/components/organisms/shared/StateHandler';
+import StateHandler from '@/components/common/StateHandler';
 import { getCompanies, getTicker } from '@/api/stock';
-import MultiChart from '@/components/organisms/charts/MultiChart';
-import CorrelationMatrix from '@/components/organisms/correlation/CorrelationMatrix';
-import Toggle from '@/components/molecules/shared/Toggle';
-import Page from '@/components/atoms/Page';
+import { MultiChart } from '@/features/charts/components';
+import { CorrelationMatrix } from '@/features/correlations/components';
+import Toggle from '@/components/common/Toggle';
+import Page from '@/components/common/Page';
 
 const MAX = 10;
 

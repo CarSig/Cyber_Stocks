@@ -1,15 +1,15 @@
 import { useIntelligencePage } from '@/hooks/useIntelligencePage';
-import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
-import { CorrelationSelector, ViewToggle } from '@/components/shared/CorrelationControls';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { CorrelationSelector, ViewToggle } from '@/features/correlations/ui';
 import { URGENCY_CONFIG } from '@/utils/urgencyUtils';
-import CountBadge from '@/components/atoms/CountBadge';
-import EntityDetailPanel from '@/components/organisms/intelligence/EntityDetailPanel';
-import EntityCard from '@/components/organisms/cards/entity/EntityCard';
-import EntityListRow from '@/components/molecules/intelligence/EntityListRow';
-import SignalSidebar from '@/components/molecules/intelligence/SignalSidebar';
-import ExpandableFilterSection from '@/components/molecules/shared/ExpandableFilterSection';
+import CountBadge from '@/components/common/CountBadge';
+import EntityDetailPanel from '@/features/intelligence/components/EntityDetailPanel';
+import EntityCard from '@/features/intelligence/components/EntityCard';
+import EntityListRow from '@/features/intelligence/components/EntityListRow';
+import SignalSidebar from '@/features/intelligence/components/SignalSidebar';
+import ExpandableFilterSection from '@/components/common/ExpandableFilterSection';
 import './Intelligence.css';
-import Page from '@/components/atoms/Page';
+import Page from '@/components/common/Page';
 import type { UrgencyKey, CorrelationResult } from '@/types';
 
 export default function Intelligence() {

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import ThreatIntelShell from '@/components/organisms/layout/ThreatIntelShell';
+import ThreatIntelShell from '@/components/layout/ThreatIntelShell';
 import useFilterWithPageReset from '@/hooks/useFilterWithPageReset';
-import NvdFilters from '@/components/molecules/threat-intel/nvd/NvdFilters';
-import NvdTable from '@/components/molecules/threat-intel/nvd/NvdTable';
+import NvdFilters from '@/features/threat-intel/components/NvdFilters';
+import NvdTable from '@/features/threat-intel/components/NvdTable';
 import { usePaginatedThreatIntel } from '@/hooks/usePaginatedThreatIntel';
 
 export default function ThreatIntelNvd() {

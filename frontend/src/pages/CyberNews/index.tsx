@@ -1,11 +1,11 @@
-import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
-import { CorrelationSelector, ViewToggle } from '@/components/shared/CorrelationControls';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { CorrelationSelector, ViewToggle } from '@/features/correlations/ui';
 import { useCyberNewsPage } from '@/hooks/useCyberNewsPage';
-import TickerCard from '@/components/organisms/cards/ticker/TickerCard';
-import TickerListRow from '@/components/molecules/cyber-news/TickerListRow';
-import TickerDetailPanel from '@/components/organisms/cyber-news/TickerDetailPanel';
+import TickerCard from '@/features/news/components/TickerCard';
+import TickerListRow from '@/features/news/components/TickerListRow';
+import TickerDetailPanel from '@/features/news/components/TickerDetailPanel';
 import './CyberNews.css';
-import Page from '@/components/atoms/Page';
+import Page from '@/components/common/Page';
 import type { CorrelationResult } from '@/types';
 
 export default function CyberNews() {

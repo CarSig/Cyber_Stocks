@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
-import { getTzOffsetSeconds, toTzTime } from '@/components/organisms/charts/utils/dates';
+import { getTzOffsetSeconds, toTzTime } from '@/features/charts/utils';
 import type { Time } from 'lightweight-charts';
 
 type TimezoneContextValue = {

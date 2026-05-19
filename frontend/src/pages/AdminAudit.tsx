@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import StateHandler from '@/components/organisms/shared/StateHandler';
+import StateHandler from '@/components/common/StateHandler';
 import { getAuditLog } from '@/api/admin';
-import FilterSelect from '@/components/molecules/shared/FilterSelect';
-import Pagination from '@/components/molecules/shared/Pagination';
-import Page from '@/components/atoms/Page';
+import FilterSelect from '@/components/common/FilterSelect';
+import Pagination from '@/components/common/Pagination';
+import Page from '@/components/common/Page';
 import type { AuditEntry as AuditLogEntry } from '@algo/shared';
 
 const ACTION_LABELS: Record<string, string> = {

@@ -1,5 +1,5 @@
-import ThreatIntelShell from '@/components/organisms/layout/ThreatIntelShell';
-import MispTable from '@/components/molecules/threat-intel/misp/MispTable';
+import ThreatIntelShell from '@/components/layout/ThreatIntelShell';
+import MispTable from '@/features/threat-intel/components/MispTable';
 import { usePaginatedThreatIntel } from '@/hooks/usePaginatedThreatIntel';
 
 export default function ThreatIntelMisp() {

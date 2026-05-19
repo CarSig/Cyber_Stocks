@@ -1,0 +1,1 @@
+export { useTrump } from './useTrump';

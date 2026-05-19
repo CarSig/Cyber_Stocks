@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import Summary from '@/components/organisms/ticker/Summary';
+import Summary from '@/features/tickers/components/Summary';
 import type { TickerSummary, ResearchSection } from '@/types';
 
 type ResearchState = {

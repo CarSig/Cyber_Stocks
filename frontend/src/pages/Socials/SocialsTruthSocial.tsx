@@ -4,8 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { createChart, HistogramSeries } from 'lightweight-charts';
 import { getPosts } from '@/api/trump';
 import { getCompanies } from '@/api/stock';
-import Page from '@/components/atoms/Page';
-import FilterSelect from '@/components/molecules/shared/FilterSelect';
+import Page from '@/components/common/Page';
+import FilterSelect from '@/components/common/FilterSelect';
 import type { TrumpPost } from '@/types';
 
 type TrumpPostWithExtras = TrumpPost & {

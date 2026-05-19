@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useMemo, useEffect } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic cross-domain cast for buildChatContext
 type AnyRecord = Record<string, any>;
-import StateHandler from '@/components/organisms/shared/StateHandler';
+import StateHandler from '@/components/common/StateHandler';
 import { useStock, useCorrelation } from '@/hooks/useStock';
 import { useEntityIntelligence } from '@/hooks/useIntelligence';
 import { useTrump } from '@/hooks/useTrump';

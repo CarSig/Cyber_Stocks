@@ -1,13 +1,6 @@
 export { clerkAuth as apiClerkAuth } from './auth';
-export {
-  getCompanies,
-  getTicker,
-  getSparklines,
-  runSimulation,
-  getSimulationPresets,
-  getCorrelationMatrix,
-  getCorrelation,
-} from './stock';
+export { getCompanies, getTicker, getSparklines, runSimulation, getSimulationPresets } from '../features/tickers/api';
+export { getCorrelationMatrix, getCorrelation } from '../features/correlations/api';
 export { triggerJob, getAuditLog } from './admin';
 export { streamResearch } from './research';
 export {
@@ -15,7 +8,7 @@ export {
   getPostsForTicker as getTrumpPostsForTicker,
   getCorrelation as getTrumpCorrelation,
   getLagImpact as getTrumpLagImpact,
-} from './trump';
+} from '../features/social/api';
 export { getPosts as getRedditPosts, getComments as getRedditComments } from './reddit';
 export {
   getStatus as getThreatIntelStatus,
@@ -25,15 +18,15 @@ export {
   getMisp,
   getList as getThreatIntelList,
   getCorrelation as getThreatIntelCorrelation,
-} from './threat-intel';
-export { getAnalysis as getNewsAnalysis, analyze as analyzeNews, getCorrelation as getNewsCorrelation } from './news';
+} from '../features/threat-intel/api';
+export { getAnalysis as getNewsAnalysis, analyze as analyzeNews, getCorrelation as getNewsCorrelation } from '../features/news/api';
 export {
   getEntityArticles as getIntelligenceEntityArticles,
   getEntitySummary as getIntelligenceEntitySummary,
   getSignals as getIntelligenceSignals,
   getEntities as getIntelligenceEntities,
   getSentimentCorrelations as getIntelligenceSentimentCorrelations,
-} from './intelligence';
+} from '../features/intelligence/api';
 export {
   getTickers as getCyberNewsTickers,
   getSummary as getCyberNewsSummary,
@@ -41,5 +34,5 @@ export {
   getTopics as getCyberNewsTopics,
   getRecent as getCyberNewsRecent,
   getCorrelations as getCyberNewsCorrelations,
-} from './cyber-news';
-export { getBars as getAlpacaBars } from './alpaca';
+} from '../features/news/api/cyber-news';
+export { getBars as getAlpacaBars, getIntradayEvents } from '../features/charts/api';

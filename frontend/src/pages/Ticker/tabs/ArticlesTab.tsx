@@ -1,4 +1,4 @@
-import NewsSection from '@/components/organisms/ticker/NewsSection';
+import NewsSection from '@/features/news/components/NewsSection';
 import type { NewsArticle } from '@/types';
 
 type ArticlesTabProps = {

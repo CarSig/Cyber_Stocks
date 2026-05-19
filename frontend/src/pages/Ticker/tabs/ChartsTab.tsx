@@ -1,11 +1,9 @@
-import FilterSelect from '@/components/molecules/shared/FilterSelect';
-import ChartCard from '@/components/molecules/shared/ChartCard';
+import FilterSelect from '@/components/common/FilterSelect';
+import { ChartCard } from '@/features/charts/ui';
 import { useTickerContext } from '@/context/TickerContext';
-import StockChart from '@/components/organisms/charts/StockChart';
-import VolatilityChart from '@/components/organisms/charts/VolatilityChart';
-import SentimentHistogramChart from '@/components/organisms/charts/SentimentHistogramChart';
-import PeriodButtons from '@/components/molecules/shared/PeriodButtons';
-import Analysis from '@/components/organisms/ticker/Analysis';
+import { StockChart, VolatilityChart, SentimentHistogramChart } from '@/features/charts/components';
+import { PeriodButtons } from '@/features/charts/ui';
+import Analysis from '@/features/tickers/components/Analysis';
 import TickerKPI from '@/pages/Ticker/TickerKPI';
 import type { Quote, TickerSummary, NewsArticle, NewsAnalysisMap } from '@/types';
 

@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import ThreatIntelShell from '@/components/organisms/layout/ThreatIntelShell';
+import ThreatIntelShell from '@/components/layout/ThreatIntelShell';
 import useFilterWithPageReset from '@/hooks/useFilterWithPageReset';
-import FilterSelect from '@/components/molecules/shared/FilterSelect';
-import OtxPulseTable from '@/components/molecules/threat-intel/otx/OtxPulseTable';
+import FilterSelect from '@/components/common/FilterSelect';
+import OtxPulseTable from '@/features/threat-intel/components/OtxPulseTable';
 import { usePaginatedThreatIntel } from '@/hooks/usePaginatedThreatIntel';
 
 export default function ThreatIntelOtx() {

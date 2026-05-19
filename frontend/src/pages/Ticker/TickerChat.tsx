@@ -1,4 +1,4 @@
-import Chat from '@/components/organisms/ticker/Chat';
+import Chat from '@/features/tickers/components/Chat';
 
 type TickerChatProps = {
   showChat: boolean;

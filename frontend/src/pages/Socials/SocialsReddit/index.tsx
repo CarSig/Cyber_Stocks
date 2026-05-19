@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import StateHandler from '@/components/organisms/shared/StateHandler';
-import Page from '@/components/atoms/Page';
+import StateHandler from '@/components/common/StateHandler';
+import Page from '@/components/common/Page';
 import { getPosts } from '@/api/reddit';
 import { Input } from '@/components/ui/input';
-import FilterSelect from '@/components/molecules/shared/FilterSelect';
-import RedditPost from '@/components/organisms/socials/RedditPost';
+import FilterSelect from '@/components/common/FilterSelect';
+import RedditPost from '@/features/social/components/RedditPost';
 import { SUBREDDITS, SEARCH_FIELDS, filterPosts } from './constants';
 import type { RedditPost as RedditPostType } from '@/types';
 

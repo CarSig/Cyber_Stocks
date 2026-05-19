@@ -1,14 +1,14 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import InspectHighlight from './components/atoms/InspectHighlight';
+import InspectHighlight from './components/common/InspectHighlight';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { TimezoneProvider } from './context/TimezoneContext';
-import Navbar from './components/organisms/layout/Navbar';
-import ProtectedRoute from './components/molecules/routes/ProtectedRoute';
-import AdminRoute from './components/molecules/routes/AdminRoute';
+import Navbar from './components/layout/Navbar';
+import ProtectedRoute from './components/routes/ProtectedRoute';
+import AdminRoute from './components/routes/AdminRoute';
 
 const Home = lazy(() => import('./pages/Home'));
 const Ticker = lazy(() => import('./pages/Ticker/index'));

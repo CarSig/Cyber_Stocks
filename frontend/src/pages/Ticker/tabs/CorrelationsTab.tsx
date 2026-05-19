@@ -1,8 +1,8 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import FilterSelect from '@/components/molecules/shared/FilterSelect';
+import FilterSelect from '@/components/common/FilterSelect';
 import { useTickerContext } from '@/context/TickerContext';
-import CorrelationBox from '@/components/organisms/correlation/CorrelationBox';
+import { CorrelationBox } from '@/features/correlations/components';
 import CorrLagTable from '@/pages/Ticker/CorrLagTable';
 import type { CorrelationResult } from '@/types';
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import LongSimulation from '@/components/organisms/simulation/LongSimulation';
-import DayTradeSimulation from '@/components/organisms/simulation/DayTradeSimulation';
+import LongSimulation from '@/features/simulations/LongSimulation';
+import DayTradeSimulation from '@/features/simulations/DayTradeSimulation';
 import type { Quote, SimulationResult } from '@/types';
 
 type SimulationTabProps = {
