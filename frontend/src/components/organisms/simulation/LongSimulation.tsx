@@ -17,7 +17,7 @@ import { longTermStrategy } from './reducers/baseStrategy';
 import { useAddManualAction } from './hooks/useAddManualAction';
 import { simStatsToExportRows } from '@/utils/sim';
 import { DateUtils, safeOffsetDate } from '@/utils/date';
-import { attachChartClick } from './utils/chartClick';
+import { attachChartClick } from './utils';
 import { useCrosshairTracker } from './hooks/useCrosshairTracker';
 
 const { snapToWeekday } = DateUtils;
@@ -235,7 +235,7 @@ type SimulationProps = {
   onResult?: (result: SimResult | Record<string, unknown>) => void;
 };
 
-export default function Simulation({ ticker, quotes = [], onResult }: SimulationProps) {
+export default function LongSimulation({ ticker, quotes = [], onResult }: SimulationProps) {
   const dates = useMemo(() => quotes.map((q) => q.date.slice(0, 10)).sort(), [quotes]);
   const minDate = dates[0] ?? '';
   const maxDate = dates.at(-1) ?? '';
@@ -385,7 +385,10 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     const el = interactiveChartRef.current!;
     const cleanupClick = attachChartClick(el, {
       chart,
-      getHoveredIso: () => { const iso = getHoveredIso(); return iso ? snapToWeekday(iso) : null; },
+      getHoveredIso: () => {
+        const iso = getHoveredIso();
+        return iso ? snapToWeekday(iso) : null;
+      },
       onQuickAction: (date, button) => {
         const existing = actionsRef.current.find((a) => a.date === date);
         if (existing) {
@@ -468,7 +471,9 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
     });
     interactiveRef.current = { chart, series };
     let disposed = false;
-    const ro = new ResizeObserver(() => { if (!disposed) chart.applyOptions({ width: el.clientWidth }); });
+    const ro = new ResizeObserver(() => {
+      if (!disposed) chart.applyOptions({ width: el.clientWidth });
+    });
     ro.observe(el);
     return () => {
       disposed = true;
@@ -506,7 +511,7 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
   }, [actions]);
 
   const portfolioMarkers = useMemo(
-    () => result?.transactions.map((t) => ({ time: t.date, side: t.side, value: t.value, shares: t.shares })) ?? [],
+    () => result?.transactions.map((t) => ({ timestamp: t.date, side: t.side, value: t.value, shares: t.shares })) ?? [],
     [result],
   );
 
@@ -575,7 +580,10 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
                   onValueChange={(v) => dispatch({ type: 'SET_VALUE', value: v })}
                 />
               </div>
-              <ChartTypeToggle chartType={chartType} onChange={(t) => dispatch({ type: 'SET_CHART_TYPE', chartType: t })} />
+              <ChartTypeToggle
+                chartType={chartType}
+                onChange={(t) => dispatch({ type: 'SET_CHART_TYPE', chartType: t })}
+              />
               <div className="dtrade-chart-hint">Left click to buy · Right click to sell · Hold 1s to configure</div>
               <div ref={interactiveChartRef} />
             </>
@@ -605,7 +613,15 @@ export default function Simulation({ ticker, quotes = [], onResult }: Simulation
               value={a.date as string}
               min={safeOffsetDate(actions[i - 1]?.date, 86400000) ?? minDate}
               max={safeOffsetDate(actions[i + 1]?.date, -86400000) ?? maxDate}
-              onChange={(v) => dispatch({ type: 'UPDATE_ACTION', id: a.id, field: 'date' as never, val: v ? snapToWeekday(v) : '', date: '' })}
+              onChange={(v) =>
+                dispatch({
+                  type: 'UPDATE_ACTION',
+                  id: a.id,
+                  field: 'date' as never,
+                  val: v ? snapToWeekday(v) : '',
+                  date: '',
+                })
+              }
             />
           ),
         })}

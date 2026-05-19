@@ -43,6 +43,26 @@ export type BuiltManual = ManualExtras & {
   onNextSideChange: (s: string) => void;
 };
 
+export type OrderControlsExtras = {
+  maxDate: string;
+  onLoad: (e: React.FormEvent) => void;
+  eventSlot?: React.ReactNode;
+  showTradeControls: boolean;
+};
+
+export type BuiltOrderControls = OrderControlsExtras & {
+  tradeMode: 'long' | 'short';
+  onTradeModeChange: (mode: 'long' | 'short') => void;
+  startShares: string;
+  onStartSharesChange: (v: string) => void;
+  value: string;
+  onValueChange: (v: string) => void;
+  date: string;
+  onDateChange: (d: string) => void;
+  timeframe: string;
+  onTimeframeChange: (t: string) => void;
+};
+
 export type ActionsExtras<A> = {
   labelSlot?: (action: A, index: number) => React.ReactNode;
 };
@@ -78,11 +98,41 @@ export type SimStrategy<A> = {
     dispatch: React.Dispatch<BaseSimAction<A>>,
     extras?: ActionsExtras<A>,
   ) => BuiltActions<A>;
+  buildOrderControls: <S extends BaseSimState<A>>(
+    s: S,
+    dispatch: React.Dispatch<BaseSimAction<A>>,
+    extras: OrderControlsExtras,
+  ) => BuiltOrderControls;
 };
 
 function stateDate<S>(s: S): string {
   const st = s as unknown as { query?: { date: string }; date?: string };
   return st.query?.date ?? st.date ?? '';
+}
+
+function stateTimeframe<S>(s: S): string {
+  return (s as unknown as { timeframe?: string }).timeframe ?? '';
+}
+
+function buildOrderControlsImpl<A, S extends BaseSimState<A>>(
+  s: S,
+  dispatch: React.Dispatch<BaseSimAction<A>>,
+  extras: OrderControlsExtras,
+): BuiltOrderControls {
+  const date = stateDate(s);
+  return {
+    ...extras,
+    tradeMode: s.tradeMode,
+    onTradeModeChange: (mode) => dispatch({ type: 'SET_TRADE_MODE', mode, date }),
+    startShares: s.startShares,
+    onStartSharesChange: (v) => dispatch({ type: 'SET_START_SHARES', startShares: v }),
+    value: s.value,
+    onValueChange: (v) => dispatch({ type: 'SET_VALUE', value: v }),
+    date,
+    onDateChange: (d) => dispatch({ type: 'SET_DATE', date: d }),
+    timeframe: stateTimeframe(s),
+    onTimeframeChange: (t) => dispatch({ type: 'SET_TIMEFRAME', timeframe: t }),
+  };
 }
 
 function buildToolbarImpl<A, S extends BaseSimState<A>>(
@@ -128,7 +178,7 @@ function buildActionsImpl<A extends { id: number }, S extends BaseSimState<A>>(
   };
 }
 
-// Shared by DayTradeSimulation and IntradaySimulation (same Action type)
+// Shared by DayTradeSimulation and EventSimulation (same Action type)
 export const intradayStrategy: SimStrategy<Action> = {
   toText: (date, actions) =>
     [
@@ -165,6 +215,7 @@ export const intradayStrategy: SimStrategy<Action> = {
   buildToolbar: buildToolbarImpl,
   buildManual: buildManualImpl,
   buildActions: buildActionsImpl,
+  buildOrderControls: buildOrderControlsImpl,
 };
 
 type LongTermAction = { id: number; date: string; side: 'buy' | 'sell' | 'short' | 'cover'; value: string };
@@ -192,4 +243,5 @@ export const longTermStrategy: SimStrategy<LongTermAction> = {
   buildToolbar: buildToolbarImpl,
   buildManual: buildManualImpl,
   buildActions: buildActionsImpl,
+  buildOrderControls: buildOrderControlsImpl,
 };

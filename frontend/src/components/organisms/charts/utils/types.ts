@@ -5,6 +5,6 @@ export type QuoteAnalysis = {
   biggestNextDayDiff: [Quote, Quote, string];
 } | null;
 
-export type MarkerPoint = { time: string; side: string; value: number; shares: number };
+export type MarkerPoint = { timestamp: string; side: string; value: number; shares: number };
 
 export type HistoryPoint = { time: string; value: number };

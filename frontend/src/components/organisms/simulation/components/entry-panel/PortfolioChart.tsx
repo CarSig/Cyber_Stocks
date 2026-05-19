@@ -91,7 +91,7 @@ const PortfolioChart = forwardRef<HTMLDivElement, PortfolioChartProps>(function 
     if (markers.length) {
       const ms = markers
         .map((m) => ({
-          time: toTime(m.time, intraday, offset),
+          time: toTime(m.timestamp, intraday, offset),
           position: m.side === 'buy' ? ('belowBar' as const) : ('aboveBar' as const),
           color: m.side === 'buy' ? '#22c55e' : '#ef4444',
           shape: m.side === 'buy' ? ('arrowUp' as const) : ('arrowDown' as const),
@@ -104,7 +104,9 @@ const PortfolioChart = forwardRef<HTMLDivElement, PortfolioChartProps>(function 
     chart.timeScale().fitContent();
     const el = ref.current;
     let disposed = false;
-    const ro = new ResizeObserver(() => { if (!disposed) chart.applyOptions({ width: el.clientWidth }); });
+    const ro = new ResizeObserver(() => {
+      if (!disposed) chart.applyOptions({ width: el.clientWidth });
+    });
     ro.observe(el);
     return () => {
       disposed = true;

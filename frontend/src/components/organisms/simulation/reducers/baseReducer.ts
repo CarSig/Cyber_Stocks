@@ -25,7 +25,9 @@ export type BaseSimAction<A> =
   | { type: 'SET_VALUE'; value: string }
   | { type: 'SET_START_SHARES'; startShares: string }
   | { type: 'SET_NEXT_SIDE'; side: string }
-  | { type: 'SET_MANUAL_TIME'; time: string };
+  | { type: 'SET_MANUAL_TIME'; time: string }
+  | { type: 'SET_DATE'; date: string }
+  | { type: 'SET_TIMEFRAME'; timeframe: string };
 
 export function makeSimReducer<A extends { id: number }>(strategy: SimStrategy<A>) {
   return function baseSimReducer<S extends BaseSimState<A>>(state: S, action: BaseSimAction<A>): S {

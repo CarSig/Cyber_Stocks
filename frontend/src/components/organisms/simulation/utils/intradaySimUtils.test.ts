@@ -26,7 +26,7 @@ describe('calcEntryDateTime — pre-market', () => {
     const r = calcEntryDateTime('07:00', '2024-07-24', 0, 'pre-market');
     expect(r.entryTime).toBe('15:59');
     expect(r.entryDate).toBe('2024-07-23'); // Tuesday
-    expect(r.exitDate).toBe('2024-07-24');  // Wednesday
+    expect(r.exitDate).toBe('2024-07-24'); // Wednesday
   });
 
   it('skips Sunday when stepping back from Monday', () => {
@@ -63,7 +63,7 @@ describe('calcEntryDateTime — post-market', () => {
     const r = calcEntryDateTime('16:30', '2024-07-24', 0, 'post-market', '1Min');
     expect(r.entryTime).toBe('15:59');
     expect(r.entryDate).toBe('2024-07-23'); // Tuesday — event day close
-    expect(r.exitDate).toBe('2024-07-24');  // Wednesday — reaction day
+    expect(r.exitDate).toBe('2024-07-24'); // Wednesday — reaction day
   });
 
   it('entry is 15:30 on chart_date with 30Min timeframe', () => {
@@ -76,14 +76,14 @@ describe('calcEntryDateTime — post-market', () => {
     const r = calcEntryDateTime('16:30', '2024-07-24', 0, 'post-market');
     expect(r.entryTime).toBe('15:59');
     expect(r.entryDate).toBe('2024-07-23'); // Tuesday — event day
-    expect(r.exitDate).toBe('2024-07-24');  // Wednesday — reaction day
+    expect(r.exitDate).toBe('2024-07-24'); // Wednesday — reaction day
   });
 
   it('skips weekend: chart_date=Monday → entry Friday (event day)', () => {
     // chart_date=Monday (reaction day); event was Friday after-close
     const r = calcEntryDateTime('17:00', '2024-07-22', 0, 'post-market'); // Monday chart_date
     expect(r.entryDate).toBe('2024-07-19'); // Friday — event day
-    expect(r.exitDate).toBe('2024-07-22');  // Monday — reaction day
+    expect(r.exitDate).toBe('2024-07-22'); // Monday — reaction day
   });
 
   it('delay is ignored for post-market', () => {
@@ -154,13 +154,13 @@ describe('calcEntryDateTime — weekend boundaries', () => {
   it('post-market chart_date=Thursday → entry Wednesday, exit Thursday', () => {
     const r = calcEntryDateTime('17:00', '2024-07-18', 0, 'post-market'); // Thursday chart_date
     expect(r.entryDate).toBe('2024-07-17'); // Wednesday
-    expect(r.exitDate).toBe('2024-07-18');  // Thursday
+    expect(r.exitDate).toBe('2024-07-18'); // Thursday
   });
 
   it('post-market on Saturday chart_date → entry Friday, exit Saturday skipped to Monday (edge case)', () => {
     const r = calcEntryDateTime('17:00', '2024-07-20', 0, 'post-market'); // Saturday chart_date
     expect(r.entryDate).toBe('2024-07-19'); // Friday
-    expect(r.exitDate).toBe('2024-07-20');  // Saturday (chart_date as-is)
+    expect(r.exitDate).toBe('2024-07-20'); // Saturday (chart_date as-is)
   });
 
   it('pre-market on Sunday would go back to Friday (edge case)', () => {

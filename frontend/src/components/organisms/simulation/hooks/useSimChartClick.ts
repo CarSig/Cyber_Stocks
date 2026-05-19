@@ -3,7 +3,7 @@ import type { Dispatch, MutableRefObject, RefObject } from 'react';
 import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
 import type { AlpacaBar } from '@/types';
 import type { BaseSimAction } from '../reducers/baseReducer';
-import { attachSimChartClick } from '../utils/chartClickHandlers';
+import { attachSimChartClick } from '../utils';
 
 type ChartRef = { chart: IChartApi; series: ISeriesApi<SeriesType> };
 

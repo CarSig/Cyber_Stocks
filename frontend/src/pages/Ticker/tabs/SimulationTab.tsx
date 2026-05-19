@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Simulation from '@/components/organisms/simulation/Simulation';
+import LongSimulation from '@/components/organisms/simulation/LongSimulation';
 import DayTradeSimulation from '@/components/organisms/simulation/DayTradeSimulation';
 import type { Quote, SimulationResult } from '@/types';
 
@@ -33,10 +33,10 @@ export default function SimulationTab({ ticker, allQuotes, onResult }: Simulatio
       </div>
 
       {subtab === 'longterm' && (
-        <Simulation
+        <LongSimulation
           ticker={ticker}
           quotes={allQuotes}
-          onResult={onResult as Parameters<typeof Simulation>[0]['onResult']}
+          onResult={onResult as Parameters<typeof LongSimulation>[0]['onResult']}
         />
       )}
 

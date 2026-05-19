@@ -1,10 +1,10 @@
 import Page from '@/components/atoms/Page';
-import IntradaySimulation from '@/components/organisms/simulation/IntradaySimulation';
+import EventSimulation from '@/components/organisms/simulation/EventSimulation';
 
 export default function Events() {
   return (
     <Page>
-      <IntradaySimulation />
+      <EventSimulation />
     </Page>
   );
 }

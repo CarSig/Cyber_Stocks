@@ -110,7 +110,9 @@ const SimPriceChart = forwardRef<HTMLDivElement, SimPriceChartProps>(function Si
     chartRefs.current = { chart, series };
 
     let disposed = false;
-    const ro = new ResizeObserver(() => { if (!disposed) chart.applyOptions({ width: el.clientWidth }); });
+    const ro = new ResizeObserver(() => {
+      if (!disposed) chart.applyOptions({ width: el.clientWidth });
+    });
     ro.observe(el);
     return () => {
       disposed = true;

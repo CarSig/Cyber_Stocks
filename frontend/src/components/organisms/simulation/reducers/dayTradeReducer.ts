@@ -8,9 +8,7 @@ export type DayTradeSimState = ReturnType<typeof initialDayTradeState>;
 
 export type DayTradeSimAction =
   | BaseSimAction<Action>
-  | { type: 'LOAD_BARS'; date: string; timeframe: string }
-  | { type: 'SET_DATE'; date: string }
-  | { type: 'SET_TIMEFRAME'; timeframe: string };
+  | { type: 'LOAD_BARS'; date: string; timeframe: string };
 
 const baseReducer = makeSimReducer(intradayStrategy);
 

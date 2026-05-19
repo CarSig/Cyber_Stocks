@@ -4,7 +4,7 @@ import type { IntradayEvent } from '@/api/alpaca';
 import { makeSimReducer, initialBaseSimState } from './baseReducer';
 import type { BaseSimAction } from './baseReducer';
 import { intradayStrategy } from './baseStrategy';
-import { prevWeekday, nextWeekday } from '../utils/intradaySimUtils';
+import { prevWeekday, nextWeekday } from '../utils';
 
 export type SimAllRow = {
   rank: number;
@@ -32,9 +32,6 @@ export type IntradaySimAction =
   | BaseSimAction<Action>
   | { type: 'LOAD_EVENT'; event: IntradayEvent; timeframe: string }
   | { type: 'LOAD_BARS'; ticker: string; date: string; timeframe: string }
-  | { type: 'SET_DATE'; date: string }
-  | { type: 'SET_TIMEFRAME'; timeframe: string }
-  | { type: 'TOGGLE_PEERS' }
   | { type: 'ADD_EXTRA_DATE'; date: string }
   | { type: 'RESET_EXTRA_DATES' }
   | { type: 'SET_AI_DELAY'; delay: number }
@@ -64,7 +61,6 @@ export function initialIntradayState() {
     timeframe: '5Min',
     query: { ticker: 'CRWD', date, timeframe: '5Min' },
     selectedEvent: null as IntradayEvent | null,
-    showPeers: false,
     extraDates: [] as string[],
     simAllResults: null as SimAllRow[] | null,
     simAllRunning: false,
@@ -109,8 +105,6 @@ export function intradayReducer(
       };
     case 'SET_TIMEFRAME':
       return { ...state, timeframe: action.timeframe };
-    case 'TOGGLE_PEERS':
-      return { ...state, showPeers: !state.showPeers };
     case 'ADD_EXTRA_DATE':
       return { ...state, extraDates: [...new Set([...state.extraDates, action.date])] };
     case 'RESET_EXTRA_DATES':

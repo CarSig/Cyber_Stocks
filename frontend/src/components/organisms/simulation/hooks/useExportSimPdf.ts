@@ -1,5 +1,5 @@
 import { useCallback, type RefObject } from 'react';
-import { exportSimPdf } from '../utils/exportPdf';
+import { exportSimPdf } from '../utils';
 import { simResultToExportArgs } from '@/utils/sim';
 import type { SimResult } from '@/utils/sim';
 

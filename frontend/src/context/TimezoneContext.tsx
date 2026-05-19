@@ -17,9 +17,7 @@ const TimezoneContext = createContext<TimezoneContextValue | null>(null);
 const DEFAULT_TZ = 'America/New_York';
 
 export function TimezoneProvider({ children }: { children: ReactNode }) {
-  const [timezone, setTimezoneState] = useState<string>(
-    () => localStorage.getItem('timezone') ?? DEFAULT_TZ,
-  );
+  const [timezone, setTimezoneState] = useState<string>(() => localStorage.getItem('timezone') ?? DEFAULT_TZ);
 
   function setTimezone(tz: string) {
     localStorage.setItem('timezone', tz);

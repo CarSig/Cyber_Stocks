@@ -165,7 +165,10 @@ export default function AllDialog({
                   <tr
                     key={row.rank}
                     style={{ cursor: 'pointer' }}
-                    onClick={() => { onRowSelect(row); onClose(); }}
+                    onClick={() => {
+                      onRowSelect(row);
+                      onClose();
+                    }}
                   >
                     <td style={{ color: 'var(--text-faint)', fontSize: 11 }}>{row.rank}</td>
                     <td style={{ fontWeight: 600 }}>{row.ticker}</td>
@@ -214,9 +217,7 @@ export default function AllDialog({
                     >
                       {row.action.toUpperCase()}
                     </td>
-                    <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: 'var(--text-faint)' }}>
-                      {row.entryTime}
-                    </td>
+                    <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: 'var(--text-faint)' }}>{row.entryTime}</td>
                     <td style={{ fontSize: 12, whiteSpace: 'nowrap', color: 'var(--text-faint)' }}>
                       {row.daysAfter != null ? `+${row.daysAfter}d` : '—'}
                     </td>

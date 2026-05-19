@@ -107,6 +107,11 @@ export const DateUtils = {
     return (parse(fmt(ET)).getTime() - parse(fmt('UTC')).getTime()) / 1000;
   },
 
+  /** Convert a unix-seconds chart timestamp to an ISO string. */
+  unixSecondsToIso(t: unknown): string {
+    return new Date((t as number) * 1000).toISOString();
+  },
+
   /** Convert an ISO UTC bar timestamp to a lightweight-charts Time value shifted to ET. */
   toEtChartTime(isoUtc: string, offset: number): import('lightweight-charts').Time {
     return (Math.floor(new Date(isoUtc).getTime() / 1000) + offset) as unknown as import('lightweight-charts').Time;

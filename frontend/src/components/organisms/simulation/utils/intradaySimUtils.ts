@@ -28,7 +28,11 @@ export function nextWeekday(dateStr: string): string {
 /** Returns the last bar open time for a given timeframe (16:00 minus one bar width). */
 export function lastBarTime(timeframe: string): string {
   const minutes: Record<string, number> = {
-    '1Min': 1, '5Min': 5, '15Min': 15, '30Min': 30, '1Hour': 60,
+    '1Min': 1,
+    '5Min': 5,
+    '15Min': 15,
+    '30Min': 30,
+    '1Hour': 60,
   };
   const barMinutes = minutes[timeframe] ?? 1;
   const total = 16 * 60 - barMinutes; // 960 - barMinutes

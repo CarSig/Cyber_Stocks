@@ -1,0 +1,19 @@
+import { useCallback } from 'react';
+import type { Dispatch } from 'react';
+import { parseIntradayText } from '../utils';
+
+export function useTextChange(date: string, dispatch: Dispatch<any>) {
+  return useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const raw = e.target.value;
+      const { parsedDate, actions: parsed } = parseIntradayText(raw, date);
+      dispatch({
+        type: 'SET_TEXT',
+        raw,
+        parsedDate: parsedDate ?? undefined,
+        parsedActions: parsed.length ? parsed : undefined,
+      });
+    },
+    [date, dispatch],
+  );
+}
