@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import type { Dispatch } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { getBars } from '@/api/alpaca';
-import type { IntradayEvent } from '@/api/alpaca';
+import { getBars } from '@/features/charts/api';
+import type { IntradayEvent } from '@/features/charts/api';
 import type { Action } from '@/utils/sim';
 import { runLongSimulation, runShortSimulation } from '@/utils/sim';
 import { DateUtils } from '@/utils/date';
@@ -58,11 +58,23 @@ export function useSimulateAll({ filteredEvents, aiDelay, exitAtClose, timeframe
 
         if (!bars.length)
           return {
-            rank: ev.rank, ticker: primaryTicker, event: ev.event, trade_idea: ev.trade_idea,
-            action, chartDate: ev.chart_date, chartTime: ev.chart_time,
-            firstDate: ev.first_date, firstTime: ev.first_time, preMarket: false,
-            afterHours: ev.after_hours, entryDate, entryTime, exitDate, daysAfter,
-            profitPct: null, error: 'No data',
+            rank: ev.rank,
+            ticker: primaryTicker,
+            event: ev.event,
+            trade_idea: ev.trade_idea,
+            action,
+            chartDate: ev.chart_date,
+            chartTime: ev.chart_time,
+            firstDate: ev.first_date,
+            firstTime: ev.first_time,
+            preMarket: false,
+            afterHours: ev.after_hours,
+            entryDate,
+            entryTime,
+            exitDate,
+            daysAfter,
+            profitPct: null,
+            error: 'No data',
           };
 
         const entryIso = DateUtils.timeToIso(entryTime, entryDate);
@@ -77,19 +89,41 @@ export function useSimulateAll({ filteredEvents, aiDelay, exitAtClose, timeframe
           : runLongSimulation(bars, actions, fmtTime, 0);
 
         return {
-          rank: ev.rank, ticker: primaryTicker, event: ev.event, trade_idea: ev.trade_idea,
-          action, chartDate: ev.chart_date, chartTime: ev.chart_time,
-          firstDate: ev.first_date, firstTime: ev.first_time, preMarket: false,
-          afterHours: ev.after_hours, entryDate, entryTime, exitDate, daysAfter,
+          rank: ev.rank,
+          ticker: primaryTicker,
+          event: ev.event,
+          trade_idea: ev.trade_idea,
+          action,
+          chartDate: ev.chart_date,
+          chartTime: ev.chart_time,
+          firstDate: ev.first_date,
+          firstTime: ev.first_time,
+          preMarket: false,
+          afterHours: ev.after_hours,
+          entryDate,
+          entryTime,
+          exitDate,
+          daysAfter,
           profitPct: result.profitPct,
         };
       } catch (err) {
         return {
-          rank: ev.rank, ticker: primaryTicker, event: ev.event, trade_idea: ev.trade_idea,
-          action, chartDate: ev.chart_date, chartTime: ev.chart_time,
-          firstDate: ev.first_date, firstTime: ev.first_time, preMarket: false,
-          afterHours: ev.after_hours, entryDate: ev.chart_date, entryTime: '15:59',
-          exitDate: ev.chart_date, daysAfter: null, profitPct: null,
+          rank: ev.rank,
+          ticker: primaryTicker,
+          event: ev.event,
+          trade_idea: ev.trade_idea,
+          action,
+          chartDate: ev.chart_date,
+          chartTime: ev.chart_time,
+          firstDate: ev.first_date,
+          firstTime: ev.first_time,
+          preMarket: false,
+          afterHours: ev.after_hours,
+          entryDate: ev.chart_date,
+          entryTime: '15:59',
+          exitDate: ev.chart_date,
+          daysAfter: null,
+          profitPct: null,
           error: err instanceof Error ? err.message : 'Failed',
         };
       }

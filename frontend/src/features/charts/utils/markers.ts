@@ -201,13 +201,37 @@ export function buildNewsMarkers(
       const s = snapped ? '*' : '';
       return [
         ...(pos
-          ? [{ time: time as Time, position: 'aboveBar' as const, color: '#22c55e', shape: 'arrowUp' as const, text: `${pos}${s}` }]
+          ? [
+              {
+                time: time as Time,
+                position: 'aboveBar' as const,
+                color: '#22c55e',
+                shape: 'arrowUp' as const,
+                text: `${pos}${s}`,
+              },
+            ]
           : []),
         ...(neg
-          ? [{ time: time as Time, position: 'belowBar' as const, color: '#ef4444', shape: 'arrowDown' as const, text: `${neg}${s}` }]
+          ? [
+              {
+                time: time as Time,
+                position: 'belowBar' as const,
+                color: '#ef4444',
+                shape: 'arrowDown' as const,
+                text: `${neg}${s}`,
+              },
+            ]
           : []),
         ...(neu
-          ? [{ time: time as Time, position: neg ? ('aboveBar' as const) : ('belowBar' as const), color: '#eab308', shape: 'circle' as const, text: `${neu}${s}` }]
+          ? [
+              {
+                time: time as Time,
+                position: neg ? ('aboveBar' as const) : ('belowBar' as const),
+                color: '#eab308',
+                shape: 'circle' as const,
+                text: `${neu}${s}`,
+              },
+            ]
           : []),
       ];
     })
@@ -221,9 +245,17 @@ export function buildOverlayMarkers(
   showAnalysis: boolean,
 ): Marker[] {
   const {
-    trumpPostsRef, showTrumpRef, nvdVulnsRef, showNvdRef,
-    otxPulsesRef, showOtxRef, kevItemsRef, showKevRef,
-    newsArticlesRef, newsAnalysisRef, showNewsRef,
+    trumpPostsRef,
+    showTrumpRef,
+    nvdVulnsRef,
+    showNvdRef,
+    otxPulsesRef,
+    showOtxRef,
+    kevItemsRef,
+    showKevRef,
+    newsArticlesRef,
+    newsAnalysisRef,
+    showNewsRef,
   } = overlayRefs;
   return [
     ...(showAnalysis ? buildMarkers(analysis) : []),
@@ -231,12 +263,20 @@ export function buildOverlayMarkers(
     ...(showNvdRef.current ? buildNvdMarkers(nvdVulnsRef.current) : []),
     ...(showOtxRef.current
       ? buildCountMarkers(otxPulsesRef.current as Array<Record<string, unknown>> | undefined, {
-          dateField: 'created', position: 'belowBar', color: '#3b82f6', shape: 'circle', label: 'OTX',
+          dateField: 'created',
+          position: 'belowBar',
+          color: '#3b82f6',
+          shape: 'circle',
+          label: 'OTX',
         })
       : []),
     ...(showKevRef.current
       ? buildCountMarkers(kevItemsRef.current as Array<Record<string, unknown>> | undefined, {
-          dateField: 'dateAdded', position: 'belowBar', color: '#f97316', shape: 'arrowDown', label: 'KEV',
+          dateField: 'dateAdded',
+          position: 'belowBar',
+          color: '#f97316',
+          shape: 'arrowDown',
+          label: 'KEV',
         })
       : []),
     ...(showNewsRef.current ? buildNewsMarkers(newsArticlesRef.current, newsAnalysisRef.current, quotes) : []),
@@ -272,12 +312,23 @@ export function syncIntradayMarkers(
       };
     });
 
-  const eventMarkers: { time: Time; position: 'aboveBar'; color: string; shape: 'circle'; size: number; text: string }[] = [];
+  const eventMarkers: {
+    time: Time;
+    position: 'aboveBar';
+    color: string;
+    shape: 'circle';
+    size: number;
+    text: string;
+  }[] = [];
 
   if (selectedEvent) {
     eventMarkers.push({
       time: t(DateUtils.timeToIso(selectedEvent.chart_time, queryDate)),
-      position: 'aboveBar', color: '#3b82f6', shape: 'circle', size: 2, text: '',
+      position: 'aboveBar',
+      color: '#3b82f6',
+      shape: 'circle',
+      size: 2,
+      text: '',
     });
     const srcTime = parseMarkerTime(selectedEvent.source_time);
     const srcDate = selectedEvent.after_hours ? queryDate : selectedEvent.source_date;
@@ -286,7 +337,14 @@ export function syncIntradayMarkers(
       const blueT = t(DateUtils.timeToIso(selectedEvent.chart_time, queryDate));
       const validOrder = selectedEvent.after_hours || (yellowT as unknown as number) >= (blueT as unknown as number);
       if (validOrder) {
-        eventMarkers.push({ time: yellowT, position: 'aboveBar', color: '#eab308', shape: 'circle', size: 2, text: '' });
+        eventMarkers.push({
+          time: yellowT,
+          position: 'aboveBar',
+          color: '#eab308',
+          shape: 'circle',
+          size: 2,
+          text: '',
+        });
       }
     }
   }

@@ -37,6 +37,16 @@ export class NewsController {
     return this.newsAnalysisService.readAnalysis(r.name);
   }
 
+  @Get("analysis/:ticker/paginated")
+  async getAnalysisPaginated(
+    @Param("ticker") ticker: string,
+    @Query("cursor") cursor?: string,
+    @Query("limit") limit?: string,
+  ) {
+    const r = resolveTicker(ticker);
+    return this.newsAnalysisService.readAnalysisPaginated(r.name, cursor, limit ? parseInt(limit, 10) : 50);
+  }
+
   @Post("analyze/:ticker")
   @Throttle({ strict: { ttl: 60_000, limit: 10 } })
   @AnalyzeDoc()

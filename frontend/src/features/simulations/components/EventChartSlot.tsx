@@ -15,8 +15,15 @@ type Props = {
 };
 
 export default function EventChartSlot({
-  chartType, tradeMode, value, containerRef, dayLinesRef,
-  prevDate, nextDate, extraDates, dispatch,
+  chartType,
+  tradeMode,
+  value,
+  containerRef,
+  dayLinesRef,
+  prevDate,
+  nextDate,
+  extraDates,
+  dispatch,
 }: Props) {
   return (
     <>
@@ -40,11 +47,7 @@ export default function EventChartSlot({
               + Day after ({nextDate})
             </button>
             {extraDates.length > 0 && (
-              <button
-                className="sim-chart-btn"
-                onClick={() => dispatch({ type: 'RESET_EXTRA_DATES' })}
-                type="button"
-              >
+              <button className="sim-chart-btn" onClick={() => dispatch({ type: 'RESET_EXTRA_DATES' })} type="button">
                 Reset days
               </button>
             )}

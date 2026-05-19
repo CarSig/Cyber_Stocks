@@ -3,9 +3,16 @@ export { sentimentScoreStyle, sentimentToColor } from './colors';
 export { getTzOffsetSeconds, toTzTime, daysAgoString, todayString } from './dates';
 export { setupDayLines } from './dayLines';
 export {
-  dedupeMarkers, buildMarkers, buildCountMarkers, buildNvdMarkers,
-  buildTrumpMarkers, buildNewsMarkers, buildOverlayMarkers, syncIntradayMarkers,
-  SENTIMENT_COLORS, NVD_SEVERITY_COLORS,
+  dedupeMarkers,
+  buildMarkers,
+  buildCountMarkers,
+  buildNvdMarkers,
+  buildTrumpMarkers,
+  buildNewsMarkers,
+  buildOverlayMarkers,
+  syncIntradayMarkers,
+  SENTIMENT_COLORS,
+  NVD_SEVERITY_COLORS,
 } from './markers';
 export { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from './options';
 export { PERIODS } from './periods';

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { streamResearch } from '@/api/research';
+import { streamResearch } from '../api';
 import type { ResearchSection } from '@/types';
 
 export function useResearch(ticker: string) {

@@ -5,7 +5,6 @@ import type { SingleLagImpact, CorrelationBoxProps } from '../types';
 import { GROUPED_SENTIMENT_COLORS } from '../constants';
 import { fmtPct } from '../utils';
 
-
 export default function CorrelationBox({
   correlation,
   lagImpact,

@@ -1,4 +1,4 @@
-import { useCyberNewsSummary } from '@/hooks/useCyberNews';
+import { useCyberNewsSummary } from '@/features/news/hooks/useCyberNews';
 import { useCorrelationMetrics } from '@/features/correlations/hooks';
 import BaseCard from '@/components/common/BaseCard';
 import CardHeader from '@/components/common/CardHeader';

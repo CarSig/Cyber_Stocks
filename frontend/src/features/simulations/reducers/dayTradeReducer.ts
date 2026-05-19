@@ -6,9 +6,7 @@ import { intradayStrategy } from './baseStrategy';
 
 export type DayTradeSimState = ReturnType<typeof initialDayTradeState>;
 
-export type DayTradeSimAction =
-  | BaseSimAction<Action>
-  | { type: 'LOAD_BARS'; date: string; timeframe: string };
+export type DayTradeSimAction = BaseSimAction<Action> | { type: 'LOAD_BARS'; date: string; timeframe: string };
 
 const baseReducer = makeSimReducer(intradayStrategy);
 

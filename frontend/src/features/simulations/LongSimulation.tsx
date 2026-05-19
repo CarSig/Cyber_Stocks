@@ -1,6 +1,6 @@
 import { useRef, useEffect, useMemo, useReducer, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getSimulationPresets } from '@/api/stock';
+import { getSimulationPresets } from '@/features/tickers/api';
 import type { SimulationPreset } from '@/types';
 import { createChart, LineSeries, AreaSeries, CandlestickSeries, createSeriesMarkers } from 'lightweight-charts';
 import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
@@ -511,7 +511,8 @@ export default function LongSimulation({ ticker, quotes = [], onResult }: Simula
   }, [actions]);
 
   const portfolioMarkers = useMemo(
-    () => result?.transactions.map((t) => ({ timestamp: t.date, side: t.side, value: t.value, shares: t.shares })) ?? [],
+    () =>
+      result?.transactions.map((t) => ({ timestamp: t.date, side: t.side, value: t.value, shares: t.shares })) ?? [],
     [result],
   );
 

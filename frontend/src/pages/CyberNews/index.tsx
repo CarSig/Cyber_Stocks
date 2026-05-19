@@ -1,6 +1,6 @@
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CorrelationSelector, ViewToggle } from '@/features/correlations/ui';
-import { useCyberNewsPage } from '@/hooks/useCyberNewsPage';
+import { useCyberNewsPage } from '@/features/news/hooks/useCyberNewsPage';
 import TickerCard from '@/features/news/components/TickerCard';
 import TickerListRow from '@/features/news/components/TickerListRow';
 import TickerDetailPanel from '@/features/news/components/TickerDetailPanel';

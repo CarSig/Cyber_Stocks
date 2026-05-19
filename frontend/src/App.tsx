@@ -9,6 +9,7 @@ import { TimezoneProvider } from './context/TimezoneContext';
 import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import AdminRoute from './components/routes/AdminRoute';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 const Home = lazy(() => import('./pages/Home'));
 const Ticker = lazy(() => import('./pages/Ticker/index'));
@@ -37,6 +38,7 @@ export default function App() {
               <InspectHighlight />
               <Navbar />
               <main className="app-main">
+                <ErrorBoundary>
                 <Suspense>
                   <Routes>
                     <Route
@@ -170,6 +172,7 @@ export default function App() {
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </Suspense>
+              </ErrorBoundary>
               </main>
             </BrowserRouter>
           </NotificationProvider>

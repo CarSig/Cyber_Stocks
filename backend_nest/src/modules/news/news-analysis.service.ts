@@ -39,6 +39,32 @@ export class NewsAnalysisService {
     return Object.fromEntries(rows.map((r) => [r.article_url, r]));
   }
 
+  async readAnalysisPaginated(
+    companyName: string,
+    cursor?: string,
+    limit = 50,
+  ): Promise<{ data: ({ article_url: string } & ArticleScores)[]; nextCursor: string | null }> {
+    const cap = Math.min(limit, 200);
+    const { rows } = cursor
+      ? await this.db.pool.query<{ article_url: string; analyzed_at: Date } & ArticleScores>(
+          `SELECT article_url, sentiment, importance, relevance, summary, topics, catalyst, timeframe, entities, model, analyzed_at
+           FROM news_analysis WHERE company_name = $1 AND analyzed_at < $2
+           ORDER BY analyzed_at DESC LIMIT $3`,
+          [companyName, new Date(cursor), cap + 1],
+        )
+      : await this.db.pool.query<{ article_url: string; analyzed_at: Date } & ArticleScores>(
+          `SELECT article_url, sentiment, importance, relevance, summary, topics, catalyst, timeframe, entities, model, analyzed_at
+           FROM news_analysis WHERE company_name = $1
+           ORDER BY analyzed_at DESC LIMIT $2`,
+          [companyName, cap + 1],
+        );
+
+    const hasMore = rows.length > cap;
+    const data = hasMore ? rows.slice(0, cap) : rows;
+    const nextCursor = hasMore ? data[data.length - 1].analyzed_at.toISOString() : null;
+    return { data, nextCursor };
+  }
+
   async clearQueued(companyName: string, link: string): Promise<void> {
     await this.db.pool.query(
       `UPDATE news_analysis_queue SET status = 'done', processed_at = now()

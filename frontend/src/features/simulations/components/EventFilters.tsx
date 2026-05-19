@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { IntradayEvent } from '@/api/alpaca';
+import type { IntradayEvent } from '@/features/charts/api';
 import FilterSelect from '@/components/common/FilterSelect';
 
 type EventFiltersProps = {

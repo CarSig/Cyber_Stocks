@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { IntradayEvent } from '@/api/alpaca';
+import type { IntradayEvent } from '@/features/charts/api';
 
 export function useEventFilters(eventsData: IntradayEvent[] | undefined) {
   const [tickerFilter, setTickerFilter] = useState<string | null>(null);

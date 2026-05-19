@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import FilterSelect from '@/components/common/FilterSelect';
 import ThreatIntelShell from '@/components/layout/ThreatIntelShell';
-import { usePaginatedThreatIntel } from '@/hooks/usePaginatedThreatIntel';
-import useFilterWithPageReset from '@/hooks/useFilterWithPageReset';
+import { usePaginatedThreatIntel } from '@/features/threat-intel/hooks/usePaginatedThreatIntel';
+import useFilterWithPageReset from '@/features/threat-intel/hooks/useFilterWithPageReset';
 import { DateUtils } from '@/utils/date';
 
 export default function ThreatIntelKev() {

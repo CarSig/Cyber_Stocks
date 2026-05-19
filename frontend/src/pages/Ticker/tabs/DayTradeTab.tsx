@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getBars } from '@/api/alpaca';
+import { getBars } from '@/features/charts/api';
 import type { AlpacaBar } from '@/types';
 import { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from '@/features/charts/utils';
 import { useTimezone } from '@/context/TimezoneContext';

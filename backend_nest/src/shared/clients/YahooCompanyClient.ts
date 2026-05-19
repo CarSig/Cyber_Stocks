@@ -4,10 +4,11 @@ import companies from "@/data/companies";
 import { logger } from "../logger";
 import { publishNewArticles } from "../mq/producers/newsProducer";
 import type { Quote } from "../../types/index";
+import type { CacheService } from "../cache.service";
+
+const HISTORY_TTL_S = 24 * 60 * 60;
 
 type HistoryResult = { meta: Record<string, unknown>; quotes: Quote[] };
-const historyCache = new Map<string, { data: HistoryResult; expiresAt: number }>();
-const HISTORY_TTL_MS = 24 * 60 * 60 * 1000;
 
 type AlpacaBar = {
   t: string;
@@ -118,8 +119,6 @@ class CybersecurityClient {
 
     const newNews = await this.#upsertNews((search as { news?: NewsArticle[] }).news ?? []);
 
-    if (newQuoteCount > 0) historyCache.delete(this.companyName);
-
     logger.debug({ ticker: this.ticker, newQuotes: newQuoteCount, newNews: newNews.length }, `populated ${this.companyName}`);
     await publishNewArticles(this.companyName, this.ticker, newNews as Record<string, unknown>[]);
   }
@@ -180,41 +179,41 @@ class CybersecurityConsumer {
   companyName: string;
   ticker: string;
   private pool: Pool;
+  private cache: CacheService | null;
 
-  constructor(companyName: string, pool: Pool) {
+  constructor(companyName: string, pool: Pool, cache: CacheService | null = null) {
     if (!companies[companyName]) {
       throw new Error(`Unknown company: "${companyName}". Available: ${Object.keys(companies).join(", ")}`);
     }
     this.companyName = companyName;
     this.ticker = companies[companyName];
     this.pool = pool;
+    this.cache = cache;
   }
 
   async history(): Promise<HistoryResult> {
-    const cached = historyCache.get(this.companyName);
-    if (cached && cached.expiresAt > Date.now()) return cached.data;
+    const fetch = async (): Promise<HistoryResult> => {
+      const { rows } = await this.pool.query<{
+        date: string; open: number | null; high: number | null; low: number | null;
+        close: number | null; adjclose: number | null; volume: number | null;
+      }>(
+        `SELECT date::text, open, high, low, close, adjclose, volume FROM stock_quotes WHERE ticker = $1 ORDER BY date ASC`,
+        [this.ticker],
+      );
+      const quotes: Quote[] = rows.map((r) => ({
+        date: r.date,
+        open: r.open ?? 0,
+        high: r.high ?? 0,
+        low: r.low ?? 0,
+        close: r.close ?? 0,
+        adjclose: r.adjclose ?? undefined,
+        volume: r.volume ?? undefined,
+      }));
+      return { meta: {}, quotes };
+    };
 
-    const { rows } = await this.pool.query<{
-      date: string; open: number | null; high: number | null; low: number | null;
-      close: number | null; adjclose: number | null; volume: number | null;
-    }>(
-      `SELECT date::text, open, high, low, close, adjclose, volume FROM stock_quotes WHERE ticker = $1 ORDER BY date ASC`,
-      [this.ticker],
-    );
-
-    const quotes: Quote[] = rows.map((r) => ({
-      date: r.date,
-      open: r.open ?? 0,
-      high: r.high ?? 0,
-      low: r.low ?? 0,
-      close: r.close ?? 0,
-      adjclose: r.adjclose ?? undefined,
-      volume: r.volume ?? undefined,
-    }));
-
-    const data: HistoryResult = { meta: {}, quotes };
-    historyCache.set(this.companyName, { data, expiresAt: Date.now() + HISTORY_TTL_MS });
-    return data;
+    if (this.cache) return this.cache.getOrSet(`history:${this.companyName}`, HISTORY_TTL_S, fetch);
+    return fetch();
   }
 
   async news(): Promise<{ news: NewsArticle[]; count: number }> {

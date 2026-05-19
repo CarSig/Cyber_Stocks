@@ -1,5 +1,5 @@
 import { correlationStrength } from '@/utils/sentimentUtils';
-import { useAllSentimentCorrelations } from '@/hooks/useIntelligence';
+import { useAllSentimentCorrelations } from '@/features/intelligence/hooks/useIntelligence';
 import type { CorrelationResult } from '@/types';
 
 type EntityCorrelationProps = {

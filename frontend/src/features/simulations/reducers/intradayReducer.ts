@@ -1,6 +1,6 @@
 import { DateUtils } from '@/utils/date';
 import type { Action } from '@/utils/sim';
-import type { IntradayEvent } from '@/api/alpaca';
+import type { IntradayEvent } from '@/features/charts/api';
 import { makeSimReducer, initialBaseSimState } from './baseReducer';
 import type { BaseSimAction } from './baseReducer';
 import { intradayStrategy } from './baseStrategy';

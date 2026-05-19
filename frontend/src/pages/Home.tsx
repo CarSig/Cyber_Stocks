@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import StateHandler from '@/components/common/StateHandler';
-import { getCompanies, getTicker } from '@/api/stock';
+import { getCompanies, getTicker } from '@/features/tickers/api';
 import { MultiChart } from '@/features/charts/components';
 import { CorrelationMatrix } from '@/features/correlations/components';
 import Toggle from '@/components/common/Toggle';

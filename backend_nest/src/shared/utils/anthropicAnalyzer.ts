@@ -15,19 +15,15 @@ const TOPIC_OPTIONS = [
   "competition", "market-share", "sector",
 ];
 
-const PROMPT = (text: string, companyName: string) =>
-  `Analyze the following news article about ${companyName} stock. Return ONLY a JSON object with these fields:
+const SYSTEM_PROMPT = `Analyze news articles about stocks. Return ONLY a JSON object with these fields:
 - "sentiment": float from -1.0 (very negative for stock price) to 1.0 (very positive), 0 for neutral
 - "importance": integer 1-10, how significant for the company (10 = earnings/acquisition/major breach)
-- "relevance": integer 1-10, how directly about ${companyName} (10 = directly about the company)
+- "relevance": integer 1-10, how directly about the company (10 = directly about the company)
 - "summary": one sentence summary of the key point
 - "topics": array of relevant topic strings from this list: ${TOPIC_OPTIONS.join(", ")}
 - "catalyst": boolean, true if this is likely to move the stock price today
 - "timeframe": "short" (days/weeks), "long" (months/years), or "both"
-- "entities": array of key company names or people mentioned (max 5)
-
-Article:
-${text}`;
+- "entities": array of key company names or people mentioned (max 5)`;
 
 export async function analyzeArticleWithAnthropic(text: string, companyName: string) {
   const anthropic = new Anthropic();
@@ -35,14 +31,22 @@ export async function analyzeArticleWithAnthropic(text: string, companyName: str
   const msg = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 512,
-    messages: [{ role: "user", content: PROMPT(text, companyName) }],
+    system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+    messages: [{ role: "user", content: `Company: ${companyName}\n\nArticle:\n${text}` }],
   });
   endTimer();
 
   llmTokensTotal.inc({ model: msg.model, type: "input" }, msg.usage.input_tokens);
   llmTokensTotal.inc({ model: msg.model, type: "output" }, msg.usage.output_tokens);
   const raw = msg.content.find((b) => b.type === "text")?.text ?? "{}";
-  logger.debug({ model: msg.model, input: msg.usage.input_tokens, output: msg.usage.output_tokens }, "anthropic response");
+  const usage = msg.usage as typeof msg.usage & { cache_creation_input_tokens?: number; cache_read_input_tokens?: number };
+  logger.debug({
+    model: msg.model,
+    input: msg.usage.input_tokens,
+    output: msg.usage.output_tokens,
+    cache_write: usage.cache_creation_input_tokens ?? 0,
+    cache_read: usage.cache_read_input_tokens ?? 0,
+  }, "anthropic response");
 
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
   const parsed = JSON.parse(jsonMatch?.[0] ?? "{}") as Record<string, unknown>;

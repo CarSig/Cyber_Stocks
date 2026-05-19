@@ -2,7 +2,7 @@ import { useEffect, useRef, useMemo, useReducer, useCallback } from 'react';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { syncIntradayMarkers } from '@/features/charts/utils';
 import { setupDayLines } from '@/features/charts/utils';
-import { getBars, getIntradayEvents } from '@/api/alpaca';
+import { getBars, getIntradayEvents } from '@/features/charts/api';
 import type { AlpacaBar } from '@/types';
 import SimEntryPanel from './components/entry-panel/SimEntryPanel';
 import EventFilters from './components/EventFilters';
@@ -13,9 +13,18 @@ import AllDialog from './components/intraday/AllDialog';
 import { intradayReducer, initialIntradayState } from './reducers/intradayReducer';
 import { intradayStrategy } from './reducers/baseStrategy';
 import {
-  useApplyPreset, useAddManualAction, useExportSimPdf, useSimRefs, useTextChange,
-  usePortfolioMarkers, useSimResult, useIntradayChart, useEventFilters,
-  useAiSim, useSimulateAll, useRowSelect,
+  useApplyPreset,
+  useAddManualAction,
+  useExportSimPdf,
+  useSimRefs,
+  useTextChange,
+  usePortfolioMarkers,
+  useSimResult,
+  useIntradayChart,
+  useEventFilters,
+  useAiSim,
+  useSimulateAll,
+  useRowSelect,
 } from './hooks';
 import { buildIntradayChartConfig } from './utils';
 import { DateUtils } from '@/utils/date';
@@ -28,9 +37,23 @@ export default function EventSimulation() {
   const { fmtTime, toChartTime } = useTimezone();
   const [s, dispatch] = useReducer(intradayReducer, undefined, initialIntradayState);
   const {
-    date, timeframe, query, actions, value, startShares,
-    manualTime, nextSide, textValue, chartType, tradeMode,
-    selectedEvent, extraDates, simAllResults, simAllRunning, aiDelay, exitAtClose,
+    date,
+    timeframe,
+    query,
+    actions,
+    value,
+    startShares,
+    manualTime,
+    nextSide,
+    textValue,
+    chartType,
+    tradeMode,
+    selectedEvent,
+    extraDates,
+    simAllResults,
+    simAllRunning,
+    aiDelay,
+    exitAtClose,
   } = s;
 
   const nextActionId = useRef(Math.max(0, ...s.actions.map((a) => a.id)) + 1);
@@ -58,7 +81,10 @@ export default function EventSimulation() {
 
   const allDates = useMemo(() => Array.from(new Set([query.date, ...extraDates])).sort(), [query.date, extraDates]);
   const prevDate = useMemo(() => DateUtils.prevWeekday(allDates[0] ?? query.date), [allDates, query.date]);
-  const nextDate = useMemo(() => DateUtils.nextWeekday(allDates[allDates.length - 1] ?? query.date), [allDates, query.date]);
+  const nextDate = useMemo(
+    () => DateUtils.nextWeekday(allDates[allDates.length - 1] ?? query.date),
+    [allDates, query.date],
+  );
 
   const extraQueries = useQueries({
     queries: extraDates.map((d) => ({
@@ -85,12 +111,20 @@ export default function EventSimulation() {
   const intradayChartConfig = useMemo(() => buildIntradayChartConfig(bars, toChartTime), [bars, toChartTime]);
 
   const { chartRef, popoverNodes } = useIntradayChart({
-    containerRef, bars, chartType,
+    containerRef,
+    bars,
+    chartType,
     chartConfig: intradayChartConfig,
     toIso: (t: unknown) => new Date(((t as number) - tzOffsetRef.current) * 1000).toISOString(),
     actionsRef: actionsRef as React.MutableRefObject<Action[]>,
-    valueRef, tradeModeRef, nextIdRef: nextActionId,
-    dispatch, date: query.date, tradeMode, fmtTime, actions,
+    valueRef,
+    tradeModeRef,
+    nextIdRef: nextActionId,
+    dispatch,
+    date: query.date,
+    tradeMode,
+    fmtTime,
+    actions,
     onAfterAttach: () => {
       const offset = tzOffsetRef.current;
       if (chartRef.current) {
@@ -115,11 +149,20 @@ export default function EventSimulation() {
   const applyPreset = useApplyPreset(
     INTRADAY_SIM_PRESETS,
     (p, id) => ({ id, timestamp: DateUtils.timeToIso(p.time, query.date), time: p.time, side: p.side, value: p.value }),
-    intradayStrategy, query.date, dispatch, nextActionId,
+    intradayStrategy,
+    query.date,
+    dispatch,
+    nextActionId,
   );
 
   const addManualAction = useAddManualAction(
-    intradayStrategy, manualTime, nextSide, value, query.date, dispatch, nextActionId,
+    intradayStrategy,
+    manualTime,
+    nextSide,
+    value,
+    query.date,
+    dispatch,
+    nextActionId,
     () => dispatch({ type: 'SET_MANUAL_TIME', time: '' }),
   );
 
@@ -133,13 +176,25 @@ export default function EventSimulation() {
     [eventsData, timeframe],
   );
 
-  const handleAiSim = useAiSim({ selectedEvent: selectedEvent ?? null, aiDelay, exitAtClose, timeframe, dispatch, nextActionId });
+  const handleAiSim = useAiSim({
+    selectedEvent: selectedEvent ?? null,
+    aiDelay,
+    exitAtClose,
+    timeframe,
+    dispatch,
+    nextActionId,
+  });
   const handleSimulateAll = useSimulateAll({ filteredEvents, aiDelay, exitAtClose, timeframe, fmtTime, dispatch });
   const handleRowSelect = useRowSelect({ eventsData, timeframe, exitAtClose, dispatch, nextActionId });
-  const handleExportPdf = useExportSimPdf(query.ticker, result, [
-    { ref: containerRef, label: 'Price Chart' },
-    { ref: portfolioChartRef, label: 'Portfolio Value' },
-  ], 'Time (ET)');
+  const handleExportPdf = useExportSimPdf(
+    query.ticker,
+    result,
+    [
+      { ref: containerRef, label: 'Price Chart' },
+      { ref: portfolioChartRef, label: 'Portfolio Value' },
+    ],
+    'Time (ET)',
+  );
 
   const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS', date: query.date }), [query.date]);
 
@@ -151,7 +206,10 @@ export default function EventSimulation() {
       <OrderControls
         {...intradayStrategy.buildOrderControls(s, dispatch, {
           maxDate: DateUtils.lastWeekday(DateUtils.todayStr()),
-          onLoad: (e) => { e.preventDefault(); dispatch({ type: 'LOAD_BARS', ticker: query.ticker, date, timeframe }); },
+          onLoad: (e) => {
+            e.preventDefault();
+            dispatch({ type: 'LOAD_BARS', ticker: query.ticker, date, timeframe });
+          },
           showTradeControls: bars.length > 0,
           eventSlot: eventsData?.length ? (
             <EventFilters
@@ -174,9 +232,14 @@ export default function EventSimulation() {
         <SimEntryPanel
           topSlot={
             <EventChartSlot
-              chartType={chartType} tradeMode={tradeMode} value={value}
-              containerRef={containerRef} dayLinesRef={dayLinesRef}
-              prevDate={prevDate} nextDate={nextDate} extraDates={extraDates}
+              chartType={chartType}
+              tradeMode={tradeMode}
+              value={value}
+              containerRef={containerRef}
+              dayLinesRef={dayLinesRef}
+              prevDate={prevDate}
+              nextDate={nextDate}
+              extraDates={extraDates}
               dispatch={dispatch}
             />
           }

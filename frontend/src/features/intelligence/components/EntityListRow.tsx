@@ -1,4 +1,4 @@
-import { useEntityIntelligence } from '@/hooks/useIntelligence';
+import { useEntityIntelligence } from '@/features/intelligence/hooks/useIntelligence';
 import { useCorrelationMetrics } from '@/features/correlations/hooks';
 import type { IntelligenceEntity, CorrelationResult, SentimentLabel } from '@/types';
 

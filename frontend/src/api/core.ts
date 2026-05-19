@@ -11,7 +11,7 @@ export function authHeader(): Record<string, string> {
 export async function apiFetch<T = unknown>(path: string, opts: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...opts,
-    headers: { ...authHeader(), 'ngrok-skip-browser-warning': '1', ...opts.headers },
+    headers: { ...authHeader(), ...opts.headers },
   });
   if (res.status === 401) throw new Error('Unauthorized');
   if (!res.ok) {

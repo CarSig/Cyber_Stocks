@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import StateHandler from '@/components/common/StateHandler';
-import { getComments } from '@/api/reddit';
+import { getRedditComments } from '../api';
 import CountBadge from '@/components/common/CountBadge';
 import TagBadge from '@/components/common/TagBadge';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ type CommentsProps = { subreddit: string; postId: string };
 function Comments({ subreddit, postId }: CommentsProps) {
   const { data, isPending, error } = useQuery({
     queryKey: ['reddit-comments', subreddit, postId],
-    queryFn: () => getComments(subreddit, postId),
+    queryFn: () => getRedditComments(subreddit, postId),
     staleTime: 5 * 60 * 1000,
   });
 

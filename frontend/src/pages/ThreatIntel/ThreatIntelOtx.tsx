@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import ThreatIntelShell from '@/components/layout/ThreatIntelShell';
-import useFilterWithPageReset from '@/hooks/useFilterWithPageReset';
+import useFilterWithPageReset from '@/features/threat-intel/hooks/useFilterWithPageReset';
 import FilterSelect from '@/components/common/FilterSelect';
 import OtxPulseTable from '@/features/threat-intel/components/OtxPulseTable';
-import { usePaginatedThreatIntel } from '@/hooks/usePaginatedThreatIntel';
+import { usePaginatedThreatIntel } from '@/features/threat-intel/hooks/usePaginatedThreatIntel';
 
 export default function ThreatIntelOtx() {
   const [company, setCompany] = useState('');

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { IntradayEvent } from '@/api/alpaca';
+import type { IntradayEvent } from '@/features/charts/api';
 
 function SeverityBar({ severity }: { severity: number }) {
   return (

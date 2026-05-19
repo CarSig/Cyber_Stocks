@@ -1,6 +1,6 @@
 import { useRef, useCallback, useMemo, useReducer } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getBars } from '@/api/alpaca';
+import { getBars } from '@/features/charts/api';
 import type { AlpacaBar } from '@/types';
 
 import SimEntryPanel from './components/entry-panel/SimEntryPanel';
@@ -9,15 +9,20 @@ import OrderControls from './components/OrderControls';
 import { dayTradeReducer, initialDayTradeState } from './reducers/dayTradeReducer';
 import { intradayStrategy } from './reducers/baseStrategy';
 import {
-  useExportSimPdf, useApplyPreset, useAddManualAction, useSimRefs,
-  useTextChange, usePortfolioMarkers, useSimResult, useIntradayChart,
+  useExportSimPdf,
+  useApplyPreset,
+  useAddManualAction,
+  useSimRefs,
+  useTextChange,
+  usePortfolioMarkers,
+  useSimResult,
+  useIntradayChart,
 } from './hooks';
 import { DateUtils } from '@/utils/date';
 import { DAYTRADE_PRESETS } from './dayTradePresets';
 import { PriceUtils } from '@/utils/price';
 import type { Side, Action } from '@/utils/sim';
 import { buildSimStats } from '@/utils/sim';
-
 
 const chartConfig = {
   toTime: (b: { t: string }) =>
@@ -28,7 +33,8 @@ const chartConfig = {
 
 export default function DayTradeSimulation({ ticker }: { ticker: string }) {
   const [s, dispatch] = useReducer(dayTradeReducer, undefined, initialDayTradeState);
-  const { date, timeframe, query, actions, nextSide, value, startShares, manualTime, textValue, chartType, tradeMode } = s;
+  const { date, timeframe, query, actions, nextSide, value, startShares, manualTime, textValue, chartType, tradeMode } =
+    s;
 
   const nextActionId = useRef(Math.max(0, ...s.actions.map((a) => a.id)) + 1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,28 +52,58 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
   const result = useSimResult(bars, actions, startShares, tradeMode, DateUtils.fmtTime);
 
   const { popoverNodes } = useIntradayChart({
-    containerRef, bars, chartType, chartConfig, toIso: DateUtils.unixSecondsToIso,
+    containerRef,
+    bars,
+    chartType,
+    chartConfig,
+    toIso: DateUtils.unixSecondsToIso,
     actionsRef: actionsRef as React.MutableRefObject<Action[]>,
-    valueRef, tradeModeRef, nextIdRef: nextActionId,
-    dispatch, date: query.date, tradeMode, fmtTime: DateUtils.fmtTime, actions,
+    valueRef,
+    tradeModeRef,
+    nextIdRef: nextActionId,
+    dispatch,
+    date: query.date,
+    tradeMode,
+    fmtTime: DateUtils.fmtTime,
+    actions,
   });
 
   const applyPreset = useApplyPreset(
     DAYTRADE_PRESETS,
-    (p, id) => ({ id, timestamp: DateUtils.timeToIso(p.time, query.date), time: p.time, side: p.side as Side, value: p.value }),
-    intradayStrategy, query.date, dispatch, nextActionId,
+    (p, id) => ({
+      id,
+      timestamp: DateUtils.timeToIso(p.time, query.date),
+      time: p.time,
+      side: p.side as Side,
+      value: p.value,
+    }),
+    intradayStrategy,
+    query.date,
+    dispatch,
+    nextActionId,
   );
 
   const addManualAction = useAddManualAction(
-    intradayStrategy, manualTime, nextSide, value, query.date, dispatch, nextActionId,
+    intradayStrategy,
+    manualTime,
+    nextSide,
+    value,
+    query.date,
+    dispatch,
+    nextActionId,
     () => dispatch({ type: 'SET_MANUAL_TIME', time: '' }),
   );
 
   const clear = useCallback(() => dispatch({ type: 'CLEAR_ACTIONS', date: query.date }), [query.date]);
-  const handleExportPdf = useExportSimPdf(ticker, result, [
-    { ref: containerRef, label: 'Price Chart' },
-    { ref: portfolioChartRef, label: 'Portfolio Value' },
-  ], 'Time (ET)');
+  const handleExportPdf = useExportSimPdf(
+    ticker,
+    result,
+    [
+      { ref: containerRef, label: 'Price Chart' },
+      { ref: portfolioChartRef, label: 'Portfolio Value' },
+    ],
+    'Time (ET)',
+  );
   const portfolioMarkers = usePortfolioMarkers(result);
   const handleTextChange = useTextChange(query.date, dispatch);
 
@@ -79,14 +115,25 @@ export default function DayTradeSimulation({ ticker }: { ticker: string }) {
       <OrderControls
         {...intradayStrategy.buildOrderControls(s, dispatch, {
           maxDate: DateUtils.lastWeekday(DateUtils.todayStr()),
-          onLoad: (e) => { e.preventDefault(); dispatch({ type: 'LOAD_BARS', date, timeframe }); },
+          onLoad: (e) => {
+            e.preventDefault();
+            dispatch({ type: 'LOAD_BARS', date, timeframe });
+          },
           showTradeControls: bars.length > 0,
         })}
       />
 
       {bars.length > 0 && (
         <SimEntryPanel
-          topSlot={<DayTradeChartSlot chartType={chartType} tradeMode={tradeMode} value={value} containerRef={containerRef} dispatch={dispatch} />}
+          topSlot={
+            <DayTradeChartSlot
+              chartType={chartType}
+              tradeMode={tradeMode}
+              value={value}
+              containerRef={containerRef}
+              dispatch={dispatch}
+            />
+          }
           tradeMode={tradeMode}
           strategy={intradayStrategy}
           textValue={textValue}

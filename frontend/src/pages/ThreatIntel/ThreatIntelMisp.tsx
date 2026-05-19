@@ -1,6 +1,6 @@
 import ThreatIntelShell from '@/components/layout/ThreatIntelShell';
 import MispTable from '@/features/threat-intel/components/MispTable';
-import { usePaginatedThreatIntel } from '@/hooks/usePaginatedThreatIntel';
+import { usePaginatedThreatIntel } from '@/features/threat-intel/hooks/usePaginatedThreatIntel';
 
 export default function ThreatIntelMisp() {
   const { page, setPage, data, isPending, error, totalPages } = usePaginatedThreatIntel('misp', {});

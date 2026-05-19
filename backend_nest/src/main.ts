@@ -1,4 +1,6 @@
-console.log("[startup] main.ts loaded");
+import { Logger as NestLogger } from "@nestjs/common";
+const startupLogger = new NestLogger("Bootstrap");
+startupLogger.log("main.ts loaded");
 import "./tracing";
 import "reflect-metadata";
 import { EventEmitter } from "events";
@@ -25,9 +27,7 @@ import { AppModule } from "./app.module";
 import { setupSwagger } from "./config/swagger";
 
 async function bootstrap() {
-  console.log("Bootstrapping NestJS app...");
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
-  console.log("App module initialized, attaching logger...");
   app.useLogger(app.get(Logger));
   app.use(compression());
   app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
@@ -38,7 +38,7 @@ async function bootstrap() {
   app.enableCors({
     origin: allowedOrigins.length === 1 ? allowedOrigins[0] : allowedOrigins,
     methods: ["GET", "POST", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "ngrok-skip-browser-warning"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     maxAge: 86400,
   });
 
@@ -46,13 +46,12 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   const port = Number(process.env.PORT ?? 3000);
-  console.log(`Starting server on port ${port}...`);
   await app.listen(port);
-  console.log(`Server running on http://localhost:${port}`);
-  console.log(`API docs at http://localhost:${port}/api-docs`);
+  startupLogger.log(`Server running on http://localhost:${port}`);
+  startupLogger.log(`API docs at http://localhost:${port}/api-docs`);
 }
 
 bootstrap().catch((err: unknown) => {
-  console.error("Failed to start:", err);
+  startupLogger.error(`Failed to start: ${(err as Error).message}`);
   process.exit(1);
 });

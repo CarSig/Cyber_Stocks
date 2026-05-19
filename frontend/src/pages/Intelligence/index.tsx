@@ -1,4 +1,4 @@
-import { useIntelligencePage } from '@/hooks/useIntelligencePage';
+import { useIntelligencePage } from '@/features/intelligence/hooks/useIntelligencePage';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CorrelationSelector, ViewToggle } from '@/features/correlations/ui';
 import { URGENCY_CONFIG } from '@/utils/urgencyUtils';

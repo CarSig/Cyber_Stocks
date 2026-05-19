@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import type { Dispatch, MutableRefObject } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { getBars } from '@/api/alpaca';
-import type { IntradayEvent } from '@/api/alpaca';
+import { getBars } from '@/features/charts/api';
+import type { IntradayEvent } from '@/features/charts/api';
 import type { Action } from '@/utils/sim';
 import { DateUtils } from '@/utils/date';
 import { detectShortDirection, calcEntryDateTime, getExitTime } from '../utils';

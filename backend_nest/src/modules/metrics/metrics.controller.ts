@@ -1,10 +1,10 @@
-import { Controller, Get, Req, Res } from "@nestjs/common";
+import { Controller, Get, Req, Res, VERSION_NEUTRAL } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { registry } from "@/shared/metrics";
 import { Public } from "@/common/decorators/public.decorator";
 import { AppError } from "@/shared/errors";
 
-@Controller("metrics")
+@Controller({ path: "metrics", version: VERSION_NEUTRAL })
 export class MetricsController {
   @Get()
   @Public()

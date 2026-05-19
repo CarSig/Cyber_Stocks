@@ -20,9 +20,17 @@ export function useChartClickHandler(
   useEffect(() => {
     if (!chartRef.current) return;
     const {
-      trumpPostsRef, showTrumpRef, nvdVulnsRef, showNvdRef,
-      otxPulsesRef, showOtxRef, kevItemsRef, showKevRef,
-      newsArticlesRef, newsAnalysisRef, showNewsRef,
+      trumpPostsRef,
+      showTrumpRef,
+      nvdVulnsRef,
+      showNvdRef,
+      otxPulsesRef,
+      showOtxRef,
+      kevItemsRef,
+      showKevRef,
+      newsArticlesRef,
+      newsAnalysisRef,
+      showNewsRef,
     } = overlayRefs;
 
     chartRef.current.subscribeClick((param) => {
@@ -53,14 +61,30 @@ export function useChartClickHandler(
         type: string;
         filter: (item: unknown) => boolean;
       }> = [
-        { showRef: showTrumpRef, dataRef: trumpPostsRef as RefObject<unknown[] | undefined>, type: 'trump',
-          filter: (p) => (p as TrumpPost).created_at?.slice(0, 10) === date },
-        { showRef: showNvdRef, dataRef: nvdVulnsRef as RefObject<unknown[] | undefined>, type: 'nvd',
-          filter: (v) => (v as ThreatIntelItem & { published?: string }).published?.slice(0, 10) === date },
-        { showRef: showOtxRef, dataRef: otxPulsesRef as RefObject<unknown[] | undefined>, type: 'otx',
-          filter: (p) => (p as ThreatIntelItem & { created?: string }).created?.slice(0, 10) === date },
-        { showRef: showKevRef, dataRef: kevItemsRef as RefObject<unknown[] | undefined>, type: 'kev',
-          filter: (v) => (v as ThreatIntelItem & { dateAdded?: string }).dateAdded === date },
+        {
+          showRef: showTrumpRef,
+          dataRef: trumpPostsRef as RefObject<unknown[] | undefined>,
+          type: 'trump',
+          filter: (p) => (p as TrumpPost).created_at?.slice(0, 10) === date,
+        },
+        {
+          showRef: showNvdRef,
+          dataRef: nvdVulnsRef as RefObject<unknown[] | undefined>,
+          type: 'nvd',
+          filter: (v) => (v as ThreatIntelItem & { published?: string }).published?.slice(0, 10) === date,
+        },
+        {
+          showRef: showOtxRef,
+          dataRef: otxPulsesRef as RefObject<unknown[] | undefined>,
+          type: 'otx',
+          filter: (p) => (p as ThreatIntelItem & { created?: string }).created?.slice(0, 10) === date,
+        },
+        {
+          showRef: showKevRef,
+          dataRef: kevItemsRef as RefObject<unknown[] | undefined>,
+          type: 'kev',
+          filter: (v) => (v as ThreatIntelItem & { dateAdded?: string }).dateAdded === date,
+        },
       ];
       for (const { showRef, dataRef, type: t, filter } of overlays) {
         if (!showRef.current) continue;

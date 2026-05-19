@@ -1,4 +1,4 @@
-import { useCyberNewsSummary } from '@/hooks/useCyberNews';
+import { useCyberNewsSummary } from '@/features/news/hooks/useCyberNews';
 import { sentimentLabel, correlationStrength } from '@/utils/sentimentUtils';
 import TickerStats from './TickerStats';
 import type { CyberNewsTicker, CorrelationResult } from '@/types';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { IntradayEvent } from '@/api/alpaca';
+import type { IntradayEvent } from '@/features/charts/api';
 import { DateUtils } from '@/utils/date';
 import type { Side, Action } from '@/utils/sim';
 

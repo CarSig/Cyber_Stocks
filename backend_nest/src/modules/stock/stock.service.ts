@@ -2,36 +2,11 @@ import { Injectable } from "@nestjs/common";
 import companies from "@/data/companies";
 import { CybersecurityConsumer } from "@/shared/clients/YahooCompanyClient";
 import { analyzeHistory } from "@/shared/utils/analysis";
-import { correlate } from "@/shared/utils/stockCorrelation";
+import { correlate, pearsonLag } from "@/shared/utils/stockCorrelation";
 import { CoreDbService } from "@/shared/core-db.service";
 import { CacheService } from "@/shared/cache.service";
 
 type SparklineEntry = { closes: number[]; closes90: number[]; closes252: number[]; dates: string[]; latestPrice: number | null; changePct: number | null };
-
-function pearsonLag(a: number[], b: number[], lag: number): number | null {
-  const n = Math.min(a.length, b.length) - Math.abs(lag);
-  if (n < 5) return null;
-  const sa = lag >= 0 ? a.slice(lag) : a.slice(0, a.length + lag);
-  const sb = lag >= 0 ? b.slice(0, b.length - lag) : b.slice(-lag);
-  const len = Math.min(sa.length, sb.length);
-  const ra: number[] = [], rb: number[] = [];
-  for (let i = 1; i < len; i++) {
-    if (sa[i] > 0 && sa[i - 1] > 0) ra.push(Math.log(sa[i] / sa[i - 1]));
-    if (sb[i] > 0 && sb[i - 1] > 0) rb.push(Math.log(sb[i] / sb[i - 1]));
-  }
-  const l = Math.min(ra.length, rb.length);
-  if (l < 5) return null;
-  const ma = ra.slice(0, l).reduce((s, v) => s + v, 0) / l;
-  const mb = rb.slice(0, l).reduce((s, v) => s + v, 0) / l;
-  let num = 0, va = 0, vb = 0;
-  for (let i = 0; i < l; i++) {
-    num += (ra[i] - ma) * (rb[i] - mb);
-    va  += (ra[i] - ma) ** 2;
-    vb  += (rb[i] - mb) ** 2;
-  }
-  const denom = Math.sqrt(va * vb);
-  return denom === 0 ? null : num / denom;
-}
 
 @Injectable()
 export class StockService {
@@ -39,7 +14,7 @@ export class StockService {
 
   async getTickerData(name: string) {
     return this.cache.getOrSet(`ticker:${name}`, 600, async () => {
-      const consumer = new CybersecurityConsumer(name, this.db.pool);
+      const consumer = new CybersecurityConsumer(name, this.db.pool, this.cache);
       const history = await consumer.history();
       const { news } = await consumer.news();
       const ticker = companies[name];
@@ -56,7 +31,7 @@ export class StockService {
 
   async sparkline(name: string): Promise<SparklineEntry> {
     return this.cache.getOrSet(`sparkline:${name}`, 86400, async () => {
-      const consumer = new CybersecurityConsumer(name, this.db.pool);
+      const consumer = new CybersecurityConsumer(name, this.db.pool, this.cache);
       const history = await consumer.history();
       const quotes = (history.quotes ?? []).slice().sort((a, b) => a.date.localeCompare(b.date));
       const last252 = quotes.slice(-252);
@@ -82,7 +57,7 @@ export class StockService {
     return this.cache.getOrSet(cacheKey, ttl, async () => {
       const names = Object.keys(companies);
       const histories = await Promise.all(
-        names.map((n) => new CybersecurityConsumer(n, this.db.pool).history()),
+        names.map((n) => new CybersecurityConsumer(n, this.db.pool, this.cache).history()),
       );
 
       const closes: Record<string, number[]> = {};
@@ -126,8 +101,8 @@ export class StockService {
   async correlate(nameA: string, nameB: string, windowDays?: number | null, lagDays = 0) {
     return this.cache.getOrSet(`corr:${nameA}:${nameB}:stock:${windowDays ?? "all"}:${lagDays}`, 1800, async () => {
       const [historyA, historyB] = await Promise.all([
-        new CybersecurityConsumer(nameA, this.db.pool).history(),
-        new CybersecurityConsumer(nameB, this.db.pool).history(),
+        new CybersecurityConsumer(nameA, this.db.pool, this.cache).history(),
+        new CybersecurityConsumer(nameB, this.db.pool, this.cache).history(),
       ]);
       const sortedA = [...historyA.quotes].sort((a, b) => a.date.localeCompare(b.date));
       const sortedB = [...historyB.quotes].sort((a, b) => a.date.localeCompare(b.date));

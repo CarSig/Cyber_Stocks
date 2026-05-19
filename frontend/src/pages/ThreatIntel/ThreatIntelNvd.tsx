@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import ThreatIntelShell from '@/components/layout/ThreatIntelShell';
-import useFilterWithPageReset from '@/hooks/useFilterWithPageReset';
+import useFilterWithPageReset from '@/features/threat-intel/hooks/useFilterWithPageReset';
 import NvdFilters from '@/features/threat-intel/components/NvdFilters';
 import NvdTable from '@/features/threat-intel/components/NvdTable';
-import { usePaginatedThreatIntel } from '@/hooks/usePaginatedThreatIntel';
+import { usePaginatedThreatIntel } from '@/features/threat-intel/hooks/usePaginatedThreatIntel';
 
 export default function ThreatIntelNvd() {
   const [search, setSearch] = useState('');
