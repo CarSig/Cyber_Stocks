@@ -7,8 +7,8 @@ export type FilingImpact = {
   accession: string;
   date: string;
   form: string;
-  baselineClose: number;  // last close BEFORE filing date (pre-filing baseline)
-  lagClose: number;       // close N trading days after filing date
+  baselineClose: number; // last close BEFORE filing date (pre-filing baseline)
+  lagClose: number; // close N trading days after filing date
   changePct: number;
   swing: number;
 };

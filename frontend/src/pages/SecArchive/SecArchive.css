@@ -609,8 +609,12 @@
   font-weight: 600;
 }
 
-.sec-impact-positive { color: var(--color-green, #22c55e); }
-.sec-impact-negative { color: var(--color-red, #ef4444); }
+.sec-impact-positive {
+  color: var(--color-green, #22c55e);
+}
+.sec-impact-negative {
+  color: var(--color-red, #ef4444);
+}
 
 .sec-impact-filing-date {
   padding-left: 2.25rem;

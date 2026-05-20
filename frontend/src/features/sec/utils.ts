@@ -1,13 +1,9 @@
-import { FORM_COLORS } from './constants';
+import { FORM_PATTERNS } from './constants';
 import type { SecFileListing } from './api';
 import type { SeriesMarker, Time } from 'lightweight-charts';
 
-function filingColor(form?: string): string {
-  return FORM_COLORS.find((f) => f.pattern.test(form ?? ''))?.color ?? '#888';
-}
-
-function filingLabel(form?: string): string {
-  return FORM_COLORS.find((f) => f.pattern.test(form ?? ''))?.label ?? form ?? '?';
+export function getFormStyle(form?: string): { label: string; color: string } {
+  return FORM_PATTERNS.find((p) => p.pattern.test(form ?? '')) ?? { label: form ?? '?', color: '#888' };
 }
 
 export function buildFilingMarkers(filings: SecFileListing[]): SeriesMarker<Time>[] {
@@ -16,9 +12,9 @@ export function buildFilingMarkers(filings: SecFileListing[]): SeriesMarker<Time
     .map((f) => ({
       time: f.date! as Time,
       position: 'aboveBar' as const,
-      color: filingColor(f.form),
+      color: getFormStyle(f.form).color,
       shape: 'circle' as const,
-      text: filingLabel(f.form),
+      text: getFormStyle(f.form).label,
     }))
     .sort((a, b) => (a.time < b.time ? -1 : 1));
 }

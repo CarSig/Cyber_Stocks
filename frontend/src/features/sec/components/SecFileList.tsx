@@ -35,7 +35,11 @@ export default function SecFileList({ ticker }: Props) {
   function toggle(acc: string) {
     setExpanded((prev) => {
       const next = new Set(prev);
-      next.has(acc) ? next.delete(acc) : next.add(acc);
+      if (next.has(acc)) {
+        next.delete(acc);
+      } else {
+        next.add(acc);
+      }
       return next;
     });
   }

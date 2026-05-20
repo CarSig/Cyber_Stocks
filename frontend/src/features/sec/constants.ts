@@ -1,7 +1,7 @@
 type OtherForm = { label: string; color: string | null; desc: string };
 type OtherCategory = { tab: string; forms: OtherForm[] };
 
-export const FORM_COLORS: { pattern: RegExp; color: string; label: string }[] = [
+export const FORM_PATTERNS: { pattern: RegExp; color: string; label: string }[] = [
   // Earnings
   { pattern: /^10-K/i, color: '#4f8ef7', label: '10-K' },
   { pattern: /^10-Q/i, color: '#7c6af7', label: '10-Q' },
