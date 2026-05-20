@@ -31,9 +31,7 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) return this.props.fallback;
       return (
         <div style={{ padding: '2rem', textAlign: 'center' }}>
-          <p style={{ color: 'var(--destructive)' }}>
-            {this.state.error?.message ?? 'Something went wrong'}
-          </p>
+          <p style={{ color: 'var(--destructive)' }}>{this.state.error?.message ?? 'Something went wrong'}</p>
           <button onClick={this.handleRetry}>Retry</button>
         </div>
       );

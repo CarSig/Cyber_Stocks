@@ -8,10 +8,13 @@ const STORAGE = path.join(BACKEND_ROOT, "storage");
 const SOCIALS = path.join(STORAGE, "socials");
 const THREAT_INTEL = path.join(STORAGE, "threat-intel");
 
+const SEC_ARCHIVE = path.join(STORAGE, "SEC_Archive");
+
 export const PATHS = {
   redditPosts: (subreddit: string) => path.join(SOCIALS, `reddit_${subreddit}.json`),
   kev: path.join(THREAT_INTEL, "kev.json"),
   nvd: path.join(THREAT_INTEL, "nvd.json"),
   otx: path.join(THREAT_INTEL, "otx.json"),
   misp: path.join(THREAT_INTEL, "misp.json"),
+  secArchive: (ticker: string) => path.join(SEC_ARCHIVE, ticker),
 };

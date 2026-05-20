@@ -8,7 +8,10 @@ import {
   AreaSeries,
   BaselineSeries,
   type IChartApi,
+  type ISeriesApi,
+  type SeriesType,
   type Time,
+  type SeriesMarker,
 } from 'lightweight-charts';
 import { makeChartOptions } from '../utils/theme';
 import { toSortedOHLC, addCompareOverlay } from '../utils/series';
@@ -38,20 +41,24 @@ type UseChartInstanceOpts = {
   analysis: QuoteAnalysis;
   showAnalysis: boolean;
   overlayRefs: OverlayRefs;
+  extraMarkers?: SeriesMarker<Time>[];
 };
 
 export function useChartInstance(
   containerRef: RefObject<HTMLElement | null>,
-  { quotes, compareQuotes, type, analysis, showAnalysis, overlayRefs }: UseChartInstanceOpts,
+  { quotes, compareQuotes, type, analysis, showAnalysis, overlayRefs, extraMarkers }: UseChartInstanceOpts,
 ): RefObject<IChartApi | null> {
   const chartRef = useRef<IChartApi | null>(null);
+  const primaryRef = useRef<ISeriesApi<SeriesType> | null>(null);
 
+  // Create/recreate chart when data or type changes — NOT when extraMarkers changes
   useEffect(() => {
     if (!containerRef.current) return;
     const chart = createChart(containerRef.current, makeChartOptions(containerRef.current));
     chartRef.current = chart;
 
     const primary = chart.addSeries(SERIES_MAP[type]);
+    primaryRef.current = primary;
     const sorted = toSortedOHLC(quotes);
     primary.setData(sorted);
 
@@ -59,12 +66,13 @@ export function useChartInstance(
     const maxDate = sorted[sorted.length - 1]?.time;
     const inRange = (m: { time: Time }) =>
       (!minDate || String(m.time) >= String(minDate)) && (!maxDate || String(m.time) <= String(maxDate));
-    const markers = dedupeMarkers(
+
+    const baseMarkers = dedupeMarkers(
       buildOverlayMarkers(overlayRefs, quotes, analysis, showAnalysis)
         .filter(inRange)
         .sort((a, b) => (a.time < b.time ? -1 : 1)),
     );
-    if (markers.length) createSeriesMarkers(primary, markers);
+    if (baseMarkers.length) createSeriesMarkers(primary, baseMarkers);
 
     if (compareQuotes?.length) addCompareOverlay(chart, compareQuotes);
 
@@ -76,11 +84,18 @@ export function useChartInstance(
 
     return () => {
       disposed = true;
+      primaryRef.current = null;
       observer.disconnect();
       chart.remove();
       chartRef.current = null;
     };
   }, [quotes, compareQuotes, type, analysis, showAnalysis]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update extra markers without recreating the chart
+  useEffect(() => {
+    if (!primaryRef.current) return;
+    createSeriesMarkers(primaryRef.current, extraMarkers ?? []);
+  }, [extraMarkers]);
 
   return chartRef;
 }

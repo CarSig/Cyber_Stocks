@@ -1,5 +1,4 @@
 import BaseCard from '@/components/common/BaseCard';
-import '@/components/organisms/cards/TopicsSidebar.css';
 
 type TopicEntry = { topic: string; count: number };
 type TopicsSidebarProps = { selectedTopic: string | null; data?: TopicEntry[] };

@@ -8,7 +8,12 @@ import { LAG_WINDOW_OPTS, MATRIX_LAG_OPTS, MATRIX_DATA_START } from '../constant
 
 const today = new Date().toISOString().slice(0, 10);
 
-export default function CorrelationMatrix() {
+type Props = {
+  highlightTickers?: string[];
+};
+
+export default function CorrelationMatrix({ highlightTickers }: Props) {
+  const highlightSet = highlightTickers && highlightTickers.length > 0 ? new Set(highlightTickers) : null;
   const [lagDays, setLagDays] = useState(0);
   const [windowDays, setWindowDays] = useState(90);
   const [startDate, setStartDate] = useState('');
@@ -148,33 +153,40 @@ export default function CorrelationMatrix() {
                   }}
                 >
                   <div className="corr-cell" />
-                  {data.tickers.map((t, i) => (
-                    <div
-                      key={t}
-                      className="corr-cell corr-head"
-                      style={{ color: thinTickers.has(data.names[i]) ? 'var(--text-faint)' : undefined }}
-                    >
-                      {t}
-                    </div>
-                  ))}
+                  {data.tickers.map((t, i) => {
+                    const muted = highlightSet && !highlightSet.has(t);
+                    return (
+                      <div
+                        key={t}
+                        className={`corr-cell corr-head${muted ? ' corr-head--muted' : ''}`}
+                        style={{ color: thinTickers.has(data.names[i]) ? 'var(--text-faint)' : undefined }}
+                      >
+                        {t}
+                      </div>
+                    );
+                  })}
                   {data.names.map((a) => {
                     const ai = data.names.indexOf(a);
+                    const rowTicker = data.tickers[ai];
                     return (
                       <>
                         <div
                           key={`lbl-${a}`}
-                          className="corr-cell corr-lbl"
+                          className={`corr-cell corr-lbl${highlightSet && !highlightSet.has(rowTicker) ? ' corr-lbl--muted' : ''}`}
                           style={{ color: thinTickers.has(a) ? 'var(--text-faint)' : undefined }}
                         >
-                          {data.tickers[ai]}
+                          {rowTicker}
                         </div>
                         {data.names.map((b) => {
+                          const bi = data.names.indexOf(b);
+                          const colTicker = data.tickers[bi];
+                          const muted = highlightSet && !highlightSet.has(rowTicker) && !highlightSet.has(colTicker);
                           const v = data.matrix[a]?.[b];
                           const isDiag = a === b;
                           return (
                             <div
                               key={b}
-                              className="corr-cell"
+                              className={`corr-cell${muted ? ' corr-cell--muted' : ''}`}
                               style={{
                                 background: isDiag ? 'transparent' : corrColor(v),
                                 color: isDiag ? 'var(--text-faint)' : v == null ? 'var(--text-faint)' : 'white',

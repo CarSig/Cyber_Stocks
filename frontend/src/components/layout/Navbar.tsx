@@ -18,7 +18,7 @@ export default function Navbar() {
   const isTicker =
     segments.length === 1 &&
     /^[A-Z]{1,5}$/.test(segments[0].toUpperCase()) &&
-    !['ADMIN'].includes(segments[0].toUpperCase());
+    !['ADMIN', 'GRAPH', 'THREAT-INTEL', 'SOCIALS', 'INTELLIGENCE', 'CYBER-NEWS', 'EVENTS', 'SEC-ARCHIVE', 'RESEARCH'].includes(segments[0].toUpperCase());
   const ticker = isTicker ? segments[0].toUpperCase() : null;
 
   const closeMenu = () => setMenuOpen(false);
@@ -69,6 +69,11 @@ export default function Navbar() {
         {user && (
           <Link to="/events" className="navbar-nav-link" onClick={closeMenu}>
             Events
+          </Link>
+        )}
+        {user && (
+          <Link to="/sec-archive" className="navbar-nav-link" onClick={closeMenu}>
+            SEC Archive
           </Link>
         )}
         {user && (

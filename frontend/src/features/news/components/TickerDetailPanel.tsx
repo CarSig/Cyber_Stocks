@@ -2,7 +2,6 @@ import { useCyberNewsArticles, useCyberNewsSummary } from '../hooks/useCyberNews
 import StatsCard from './StatsCard';
 import ArticleCard from './ArticleCard';
 import DetailPanelOverlay from '@/components/common/DetailPanelOverlay';
-import '@/components/organisms/cyber-news/TickerDetailPanel.css';
 
 type TickerDetailPanelProps = { ticker: string; company: string; onClose: () => void; topic?: string };
 

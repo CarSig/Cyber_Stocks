@@ -6,7 +6,6 @@ import SentimentBar from '@/components/common/SentimentBar';
 import ArticleMeta from './ArticleMeta';
 import ArticleHeader from './ArticleHeader';
 import type { NewsArticle, SentimentAnalysis } from '@/types';
-import '@/components/organisms/cards/article/ArticleCard.css';
 
 type ArticleAnalysisProps = { analysis: SentimentAnalysis };
 

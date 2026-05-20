@@ -42,9 +42,17 @@ export function streamResearch(
     if (msg.section) onSection(msg.section);
     else if (msg.text) onText(msg.text);
     else if (msg.sectionDone) onText('\n\n');
-    else if (msg.done) { onDone(); es.close(); }
-    else if (msg.error) { onError(msg.error); es.close(); }
+    else if (msg.done) {
+      onDone();
+      es.close();
+    } else if (msg.error) {
+      onError(msg.error);
+      es.close();
+    }
   };
-  es.onerror = () => { onError('Connection error'); es.close(); };
+  es.onerror = () => {
+    onError('Connection error');
+    es.close();
+  };
   return () => es.close();
 }

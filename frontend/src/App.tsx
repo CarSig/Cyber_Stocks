@@ -27,6 +27,15 @@ const SocialsReddit = lazy(() => import('./pages/Socials/SocialsReddit/index'));
 const Intelligence = lazy(() => import('./pages/Intelligence/index'));
 const CyberNews = lazy(() => import('./pages/CyberNews/index'));
 const Events = lazy(() => import('./pages/Events/index'));
+const SecArchive = lazy(() => import('./pages/SecArchive/index'));
+const Research = lazy(() => import('./pages/Research/index'));
+const InsiderIntel = lazy(() => import('./pages/InsiderIntel/index'));
+const EdgarUses = lazy(() => import('./pages/Research/EdgarUses'));
+const EdgarDeeper = lazy(() => import('./pages/Research/EdgarDeeper'));
+const EdgarEntities = lazy(() => import('./pages/Research/EdgarEntities'));
+const GovContracts = lazy(() => import('./pages/Research/GovContracts'));
+const UsaSpending = lazy(() => import('./pages/Research/UsaSpending'));
+const GraphPage = lazy(() => import('./pages/GraphPage'));
 
 export default function App() {
   return (
@@ -39,140 +48,212 @@ export default function App() {
               <Navbar />
               <main className="app-main">
                 <ErrorBoundary>
-                <Suspense>
-                  <Routes>
-                    <Route
-                      path="/"
-                      element={
-                        <ProtectedRoute>
-                          <Home />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin"
-                      element={
-                        <AdminRoute>
-                          <AdminDashboard />
-                        </AdminRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin/audit"
-                      element={
-                        <AdminRoute>
-                          <AdminAudit />
-                        </AdminRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin/feedback"
-                      element={
-                        <AdminRoute>
-                          <AdminFeedback />
-                        </AdminRoute>
-                      }
-                    />
-                    <Route
-                      path="/threat-intel"
-                      element={
-                        <ProtectedRoute>
-                          <ThreatIntel />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/threat-intel/list/kev"
-                      element={
-                        <ProtectedRoute>
-                          <ThreatIntelKev />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/threat-intel/list/nvd"
-                      element={
-                        <ProtectedRoute>
-                          <ThreatIntelNvd />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/threat-intel/list/otx"
-                      element={
-                        <ProtectedRoute>
-                          <ThreatIntelOtx />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/threat-intel/list/misp"
-                      element={
-                        <ProtectedRoute>
-                          <ThreatIntelMisp />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/socials"
-                      element={
-                        <ProtectedRoute>
-                          <Socials />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/socials/truth-social"
-                      element={
-                        <ProtectedRoute>
-                          <SocialsTruthSocial />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/socials/reddit"
-                      element={
-                        <ProtectedRoute>
-                          <SocialsReddit />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/intelligence"
-                      element={
-                        <ProtectedRoute>
-                          <Intelligence />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/cyber-news"
-                      element={
-                        <ProtectedRoute>
-                          <CyberNews />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/events"
-                      element={
-                        <ProtectedRoute>
-                          <Events />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/:ticker"
-                      element={
-                        <ProtectedRoute>
-                          <Ticker />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </Suspense>
-              </ErrorBoundary>
+                  <Suspense>
+                    <Routes>
+                      <Route
+                        path="/"
+                        element={
+                          <ProtectedRoute>
+                            <Home />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin"
+                        element={
+                          <AdminRoute>
+                            <AdminDashboard />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/audit"
+                        element={
+                          <AdminRoute>
+                            <AdminAudit />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/admin/feedback"
+                        element={
+                          <AdminRoute>
+                            <AdminFeedback />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/threat-intel"
+                        element={
+                          <ProtectedRoute>
+                            <ThreatIntel />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/threat-intel/list/kev"
+                        element={
+                          <ProtectedRoute>
+                            <ThreatIntelKev />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/threat-intel/list/nvd"
+                        element={
+                          <ProtectedRoute>
+                            <ThreatIntelNvd />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/threat-intel/list/otx"
+                        element={
+                          <ProtectedRoute>
+                            <ThreatIntelOtx />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/threat-intel/list/misp"
+                        element={
+                          <ProtectedRoute>
+                            <ThreatIntelMisp />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/socials"
+                        element={
+                          <ProtectedRoute>
+                            <Socials />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/socials/truth-social"
+                        element={
+                          <ProtectedRoute>
+                            <SocialsTruthSocial />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/socials/reddit"
+                        element={
+                          <ProtectedRoute>
+                            <SocialsReddit />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/intelligence"
+                        element={
+                          <ProtectedRoute>
+                            <Intelligence />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/cyber-news"
+                        element={
+                          <ProtectedRoute>
+                            <CyberNews />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/events"
+                        element={
+                          <ProtectedRoute>
+                            <Events />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/sec-archive"
+                        element={
+                          <ProtectedRoute>
+                            <SecArchive />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/research"
+                        element={
+                          <AdminRoute>
+                            <Research />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/research/insider-intel"
+                        element={
+                          <AdminRoute>
+                            <InsiderIntel />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/research/edgar-uses"
+                        element={
+                          <AdminRoute>
+                            <EdgarUses />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/research/edgar-deeper"
+                        element={
+                          <AdminRoute>
+                            <EdgarDeeper />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/research/edgar-entities"
+                        element={
+                          <AdminRoute>
+                            <EdgarEntities />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/research/gov-contracts"
+                        element={
+                          <AdminRoute>
+                            <GovContracts />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/research/usa-spending"
+                        element={
+                          <AdminRoute>
+                            <UsaSpending />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/graph"
+                        element={
+                          <AdminRoute>
+                            <GraphPage />
+                          </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/:ticker"
+                        element={
+                          <ProtectedRoute>
+                            <Ticker />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                  </Suspense>
+                </ErrorBoundary>
               </main>
             </BrowserRouter>
           </NotificationProvider>

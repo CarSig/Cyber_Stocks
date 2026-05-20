@@ -1,0 +1,125 @@
+.research-back {
+  display: inline-block;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  margin-bottom: 1.25rem;
+}
+
+.research-back:hover {
+  color: var(--foreground);
+}
+
+.insider-link {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.insider-link:hover {
+  text-decoration: underline;
+}
+
+.insider-intro {
+  margin-bottom: 2rem;
+}
+
+.insider-subtitle {
+  font-size: 0.9375rem;
+  color: var(--muted-foreground);
+  border-left: 3px solid var(--primary);
+  padding-left: 0.875rem;
+  margin: 0;
+}
+
+.insider-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.insider-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+}
+
+.insider-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0 0 0.875rem;
+}
+
+.insider-section p {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  line-height: 1.65;
+  margin: 0 0 0.625rem;
+}
+
+.insider-section p:last-child {
+  margin-bottom: 0;
+}
+
+.insider-section strong {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.insider-section em {
+  color: var(--foreground);
+  font-style: italic;
+}
+
+.insider-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.insider-list li {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  line-height: 1.55;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.insider-list li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--primary);
+}
+
+.insider-forms {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.insider-form-card {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.insider-form-label {
+  display: inline-block;
+  font-family: monospace;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.insider-form-card p {
+  font-size: 0.8125rem;
+  margin: 0;
+}

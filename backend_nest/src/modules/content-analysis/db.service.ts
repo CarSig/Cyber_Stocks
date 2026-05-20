@@ -6,11 +6,16 @@ export class DbService implements OnApplicationBootstrap, OnApplicationShutdown 
   readonly pool: Pool;
 
   constructor() {
-    this.pool = new Pool({ connectionString: process.env.CONTENT_ANALYSIS_DATABASE_URL });
+    this.pool = new Pool({
+      connectionString: process.env.CONTENT_ANALYSIS_DATABASE_URL,
+      connectionTimeoutMillis: 5000,
+    });
   }
 
   async onApplicationBootstrap(): Promise<void> {
-    await this.pool.query(`CREATE EXTENSION IF NOT EXISTS vector`);
+    if (process.env.SKIP_MIGRATIONS === "true") return;
+    try {
+      await this.pool.query(`CREATE EXTENSION IF NOT EXISTS vector`);
 
     await this.pool.query(`
       CREATE TABLE IF NOT EXISTS articles (
@@ -97,6 +102,9 @@ export class DbService implements OnApplicationBootstrap, OnApplicationShutdown 
         signal_type TEXT NOT NULL
       )
     `);
+    } catch (err) {
+      console.error(`[DbService] content-analysis DB unavailable on startup: ${(err as Error).message}`);
+    }
   }
 
   async onApplicationShutdown(): Promise<void> {

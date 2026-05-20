@@ -15,7 +15,12 @@ export class CoreDbService implements OnApplicationBootstrap {
   });
 
   async onApplicationBootstrap() {
-    await this.runMigrations();
+    if (process.env.SKIP_MIGRATIONS !== "true") {
+      await this.runMigrations();
+    }
+    if (process.env.NODE_ENV !== "PROD") {
+      setInterval(() => this.pool.query("SELECT 1").catch(() => {}), 4 * 60 * 1000);
+    }
   }
 
   private async runMigrations() {

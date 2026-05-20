@@ -1,7 +1,8 @@
 import { INestApplication } from "@nestjs/common";
-import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 
 export function setupSwagger(app: INestApplication) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { SwaggerModule, DocumentBuilder } = require("@nestjs/swagger") as typeof import("@nestjs/swagger");
   const config = new DocumentBuilder()
     .setTitle("Cyber Stock Intelligence API")
     .setDescription("REST + SSE API for cyber-security stock intelligence. All protected routes require a Bearer JWT. SSE routes accept `?token=` instead of the Authorization header.")

@@ -15,8 +15,10 @@ export async function apiFetch<T = unknown>(path: string, opts: RequestInit = {}
   });
   if (res.status === 401) throw new Error('Unauthorized');
   if (!res.ok) {
-    const body = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(body.error ?? `Request failed: ${res.status}`);
+    const body = (await res.json().catch(() => ({}))) as { error?: string | { message?: string; code?: string } };
+    const err = body.error;
+    const msg = typeof err === 'string' ? err : (err?.message ?? `Request failed: ${res.status}`);
+    throw new Error(msg);
   }
   return res.json() as Promise<T>;
 }

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  NODE_ENV:        z.enum(["development", "production", "test"]).default("development"),
+  NODE_ENV:        z.enum(["development", "production", "test", "PROD"]).default("development"),
   PORT:            z.coerce.number().default(3000),
   DATABASE_URL:    z.string().min(1),
   JWT_SECRET:      z.string().min(32),
@@ -16,6 +16,7 @@ const envSchema = z.object({
   ANTHROPIC_API_KEY:   z.string().optional(),
   SENTRY_DSN:          z.string().optional(),
   LOG_LEVEL:           z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
+  SKIP_MIGRATIONS:     z.enum(["true", "false"]).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

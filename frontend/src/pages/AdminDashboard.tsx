@@ -101,6 +101,8 @@ export default function AdminDashboard() {
           to="/admin/audit"
         />
         <AdminCard icon="💬" label="DOM Feedback" subtitle="Element inspect reports" to="/admin/feedback" />
+        <AdminCard icon="🔬" label="Research & Strategy" subtitle="EDGAR, contracts, spending" to="/research" />
+        <AdminCard icon="🗺️" label="App Map" subtitle="Page graph & data flows" to="/graph" />
         <AdminCard icon="🤖" label="AI Credits" subtitle="console.anthropic.com ↗" to={ANTHROPIC_CONSOLE_URL} />
         <AdminCard icon="📊" label="Prometheus" subtitle="localhost:9090 ↗" to={PROMETHEUS_URL} />
         <AdminCard icon="📈" label="Grafana" subtitle="localhost:3001 ↗" to={GRAFANA_URL} />
