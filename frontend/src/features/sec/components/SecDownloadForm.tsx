@@ -30,14 +30,17 @@ export default function SecDownloadForm({
   function run(force: boolean) {
     if (!selectedTicker) return;
     setLastResult(null);
-    mutate(
-      { ticker: selectedTicker, dateFrom, dateTo, force },
-      { onSuccess: (res) => setLastResult(res) },
-    );
+    mutate({ ticker: selectedTicker, dateFrom, dateTo, force }, { onSuccess: (res) => setLastResult(res) });
   }
 
   return (
-    <form onSubmit={(e) => { e.preventDefault(); run(false); }} className="sec-download-form">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        run(false);
+      }}
+      className="sec-download-form"
+    >
       <div className="sec-form-row">
         <div className="sec-form-field">
           <Label>Ticker</Label>
@@ -47,7 +50,9 @@ export default function SecDownloadForm({
             </SelectTrigger>
             <SelectContent>
               {tickers.map((t) => (
-                <SelectItem key={t} value={t}>{t}</SelectItem>
+                <SelectItem key={t} value={t}>
+                  {t}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

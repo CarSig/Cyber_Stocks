@@ -4,7 +4,8 @@ import path from "path";
 // At runtime (tsx dev):   __dirname = backend_nest/src/shared/
 // Walk up 3 levels to reach backend_nest/
 const BACKEND_ROOT = path.resolve(__dirname, "../../..");
-const STORAGE = path.join(BACKEND_ROOT, "storage");
+const PROJECT_ROOT = path.resolve(BACKEND_ROOT, "..");
+const STORAGE = path.join(PROJECT_ROOT, "storage");
 const SOCIALS = path.join(STORAGE, "socials");
 const THREAT_INTEL = path.join(STORAGE, "threat-intel");
 

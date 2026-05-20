@@ -71,7 +71,7 @@ function SecArchiveContent({ ticker, onTickerChange }: { ticker: string; onTicke
           onRangeChange={handleRangeChange}
         />
       )}
-      <SecTimeline ticker={ticker} visibleRange={visibleRange} />
+      <SecTimeline ticker={ticker} visibleRange={visibleRange} onRangeChange={handleRangeChange} />
       <SecFilingImpactTable ticker={ticker} />
     </>
   );

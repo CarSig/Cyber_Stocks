@@ -107,9 +107,10 @@ type Tooltip = { x: number; seg: Segment } | null;
 type Props = {
   ticker: string | null;
   visibleRange: { from: string; to: string } | null;
+  onRangeChange?: (range: { from: string; to: string }) => void;
 };
 
-export default function SecTimeline({ ticker, visibleRange }: Props) {
+export default function SecTimeline({ ticker, visibleRange, onRangeChange }: Props) {
   const { data: coverage } = useSecCoverage(ticker);
   const { data: files = [] } = useSecFiles(ticker);
   const [tooltip, setTooltip] = useState<Tooltip>(null);
@@ -181,6 +182,7 @@ export default function SecTimeline({ ticker, visibleRange }: Props) {
               background: seg.color,
               border: seg.state === 'gap' ? '1px solid var(--border)' : 'none',
             }}
+            onClick={() => onRangeChange?.({ from: seg.from, to: seg.to })}
             onMouseEnter={(e) => {
               const rect = (e.currentTarget.closest('.sec-timeline-bar') as HTMLElement).getBoundingClientRect();
               setTooltip({ x: e.clientX - rect.left, seg });
