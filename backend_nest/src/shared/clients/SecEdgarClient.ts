@@ -35,7 +35,20 @@ function shouldSkipFile(name: string): boolean {
 const SUBMISSIONS_BASE = "https://data.sec.gov/submissions";
 const EDGAR_ARCHIVES = "https://www.sec.gov/Archives/edgar/data";
 
-const DEFAULT_FORM_TYPES = ["10-K", "10-Q", "8-K", "8-K/A", "DEF 14A", "DEFA14A", "SC 13G", "SC 13D"];
+const DEFAULT_FORM_TYPES = [
+  // Earnings & operations
+  "10-K", "10-Q", "8-K", "8-K/A",
+  // Proxy
+  "DEF 14A", "DEFA14A", "DEFM14A",
+  // Insider
+  "3", "4", "5",
+  // Ownership
+  "SC 13G", "SC 13D", "SC 13D/A",
+  // M&A
+  "425", "SC TO-T", "SC TO-I", "S-4",
+  // Capital raises
+  "S-3", "424B4", "FWP", "S-1",
+];
 
 // ── Coverage index ────────────────────────────────────────────────────────────
 // Stored at <tickerDir>/coverage.json — single source of truth for which date
@@ -172,6 +185,7 @@ export class SecEdgarClient {
     dateFrom?: string,
     dateTo?: string,
     formTypes: string[] = DEFAULT_FORM_TYPES,
+    force = false,
   ): Promise<SyncResult> {
     const cik = getCik(ticker);
     if (!cik) throw new Error(`Unknown ticker: ${ticker}`);
@@ -208,7 +222,7 @@ export class SecEdgarClient {
       const accNoDashes = accDashes.replace(/-/g, "");
       const destDir = path.join(PATHS.secArchive(ticker), accDashes);
 
-      if (fs.existsSync(destDir) && fs.readdirSync(destDir).length > 0) {
+      if (!force && fs.existsSync(destDir) && fs.readdirSync(destDir).length > 0) {
         skippedFilings++;
         continue;
       }

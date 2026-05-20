@@ -29,7 +29,8 @@ export const RAW_NODES: GraphNode[] = [
     route: '/',
     category: 'root',
     auth: 'protected',
-    description: 'Multi-company overview with sparkline cards, a full Pearson correlation matrix across all tracked companies, and navigation to individual ticker pages.',
+    description:
+      'Multi-company overview with sparkline cards, a full Pearson correlation matrix across all tracked companies, and navigation to individual ticker pages.',
     apis: ['GET /', 'GET /sparklines', 'GET /correlation-matrix'],
     features: ['charts', 'correlations', 'tickers'],
     dataFlows: ['stock-price-sync', 'stock-to-stock-correlation'],
@@ -40,7 +41,8 @@ export const RAW_NODES: GraphNode[] = [
     route: '/:ticker',
     category: 'hub',
     auth: 'protected',
-    description: 'Deep-dive page for a single ticker: OHLCV chart, pairwise correlations, news sentiment, Trump post correlation, threat intel correlation, AI research stream, chat, and trade simulation.',
+    description:
+      'Deep-dive page for a single ticker: OHLCV chart, pairwise correlations, news sentiment, Trump post correlation, threat intel correlation, AI research stream, chat, and trade simulation.',
     apis: [
       'GET /:ticker',
       'GET /correlate/:tickerA/:tickerB',
@@ -74,7 +76,8 @@ export const RAW_NODES: GraphNode[] = [
     route: '/threat-intel',
     category: 'hub',
     auth: 'protected',
-    description: 'Hub for cybersecurity threat intelligence feeds. Shows sync status for KEV, NVD, OTX, and MISP sources.',
+    description:
+      'Hub for cybersecurity threat intelligence feeds. Shows sync status for KEV, NVD, OTX, and MISP sources.',
     apis: ['GET /threat-intel/status'],
     features: ['threat-intel'],
     dataFlows: ['threat-intel-correlation'],
@@ -162,7 +165,8 @@ export const RAW_NODES: GraphNode[] = [
     route: '/intelligence',
     category: 'hub',
     auth: 'protected',
-    description: 'Entity-level news intelligence: NLP-extracted entities, sentiment signals, and urgency classification across all ingested articles.',
+    description:
+      'Entity-level news intelligence: NLP-extracted entities, sentiment signals, and urgency classification across all ingested articles.',
     apis: [],
     features: ['intelligence'],
     dataFlows: ['news-intelligence'],
@@ -195,7 +199,8 @@ export const RAW_NODES: GraphNode[] = [
     route: '/sec-archive',
     category: 'leaf',
     auth: 'protected',
-    description: 'Browse and sync SEC EDGAR filings (10-K, 10-Q, 8-K, DEF 14A, SC 13G/D) for tracked companies. Shows per-ticker coverage ranges.',
+    description:
+      'Browse and sync SEC EDGAR filings (10-K, 10-Q, 8-K, DEF 14A, SC 13G/D) for tracked companies. Shows per-ticker coverage ranges.',
     apis: [
       'GET /api/v1/sec/tickers',
       'POST /api/v1/sec/sync',
@@ -211,7 +216,8 @@ export const RAW_NODES: GraphNode[] = [
     route: '/research',
     category: 'admin',
     auth: 'protected',
-    description: 'Research hub with links to specialized analysis tools: insider trading intel, SEC EDGAR deep-dives, entity extraction, gov contracts, and USA spending data.',
+    description:
+      'Research hub with links to specialized analysis tools: insider trading intel, SEC EDGAR deep-dives, entity extraction, gov contracts, and USA spending data.',
     apis: [],
     features: [],
     dataFlows: ['market-research-stream'],
@@ -255,7 +261,8 @@ export const RAW_NODES: GraphNode[] = [
     route: '/research/edgar-entities',
     category: 'leaf',
     auth: 'protected',
-    description: 'Entity extraction from EDGAR filings — identify companies, people, and relationships mentioned in filings.',
+    description:
+      'Entity extraction from EDGAR filings — identify companies, people, and relationships mentioned in filings.',
     apis: [],
     features: [],
     dataFlows: [],
@@ -330,27 +337,27 @@ export const RAW_NODES: GraphNode[] = [
 
 export const RAW_EDGES: GraphEdge[] = [
   // Parent → child (structural hierarchy)
-  { id: 'e-home-ticker',         source: '/',               target: '/:ticker',                      type: 'parent-child' },
-  { id: 'e-ti-kev',             source: '/threat-intel',   target: '/threat-intel/list/kev',         type: 'parent-child' },
-  { id: 'e-ti-nvd',             source: '/threat-intel',   target: '/threat-intel/list/nvd',         type: 'parent-child' },
-  { id: 'e-ti-otx',             source: '/threat-intel',   target: '/threat-intel/list/otx',         type: 'parent-child' },
-  { id: 'e-ti-misp',            source: '/threat-intel',   target: '/threat-intel/list/misp',        type: 'parent-child' },
-  { id: 'e-soc-truth',          source: '/socials',        target: '/socials/truth-social',          type: 'parent-child' },
-  { id: 'e-soc-reddit',         source: '/socials',        target: '/socials/reddit',                type: 'parent-child' },
-  { id: 'e-res-insider',        source: '/research',       target: '/research/insider-intel',        type: 'parent-child' },
-  { id: 'e-res-uses',           source: '/research',       target: '/research/edgar-uses',           type: 'parent-child' },
-  { id: 'e-res-deeper',         source: '/research',       target: '/research/edgar-deeper',         type: 'parent-child' },
-  { id: 'e-res-entities',       source: '/research',       target: '/research/edgar-entities',       type: 'parent-child' },
-  { id: 'e-res-gov',            source: '/research',       target: '/research/gov-contracts',        type: 'parent-child' },
-  { id: 'e-res-usa',            source: '/research',       target: '/research/usa-spending',         type: 'parent-child' },
-  { id: 'e-admin-audit',        source: '/admin',          target: '/admin/audit',                   type: 'parent-child' },
-  { id: 'e-admin-feedback',     source: '/admin',          target: '/admin/feedback',                type: 'parent-child' },
-  { id: 'e-admin-research',     source: '/admin',          target: '/research',                      type: 'parent-child' },
-  { id: 'e-admin-graph',        source: '/admin',          target: '/graph',                         type: 'parent-child' },
+  { id: 'e-home-ticker', source: '/', target: '/:ticker', type: 'parent-child' },
+  { id: 'e-ti-kev', source: '/threat-intel', target: '/threat-intel/list/kev', type: 'parent-child' },
+  { id: 'e-ti-nvd', source: '/threat-intel', target: '/threat-intel/list/nvd', type: 'parent-child' },
+  { id: 'e-ti-otx', source: '/threat-intel', target: '/threat-intel/list/otx', type: 'parent-child' },
+  { id: 'e-ti-misp', source: '/threat-intel', target: '/threat-intel/list/misp', type: 'parent-child' },
+  { id: 'e-soc-truth', source: '/socials', target: '/socials/truth-social', type: 'parent-child' },
+  { id: 'e-soc-reddit', source: '/socials', target: '/socials/reddit', type: 'parent-child' },
+  { id: 'e-res-insider', source: '/research', target: '/research/insider-intel', type: 'parent-child' },
+  { id: 'e-res-uses', source: '/research', target: '/research/edgar-uses', type: 'parent-child' },
+  { id: 'e-res-deeper', source: '/research', target: '/research/edgar-deeper', type: 'parent-child' },
+  { id: 'e-res-entities', source: '/research', target: '/research/edgar-entities', type: 'parent-child' },
+  { id: 'e-res-gov', source: '/research', target: '/research/gov-contracts', type: 'parent-child' },
+  { id: 'e-res-usa', source: '/research', target: '/research/usa-spending', type: 'parent-child' },
+  { id: 'e-admin-audit', source: '/admin', target: '/admin/audit', type: 'parent-child' },
+  { id: 'e-admin-feedback', source: '/admin', target: '/admin/feedback', type: 'parent-child' },
+  { id: 'e-admin-research', source: '/admin', target: '/research', type: 'parent-child' },
+  { id: 'e-admin-graph', source: '/admin', target: '/graph', type: 'parent-child' },
 
   // Data-flow cross-edges
-  { id: 'df-ti-ticker',         source: '/threat-intel',   target: '/:ticker',                      type: 'data-flow' },
-  { id: 'df-truth-ticker',      source: '/socials/truth-social', target: '/:ticker',               type: 'data-flow' },
-  { id: 'df-ticker-cybernews',  source: '/:ticker',        target: '/cyber-news',                   type: 'data-flow' },
-  { id: 'df-ticker-intel',      source: '/:ticker',        target: '/intelligence',                 type: 'data-flow' },
+  { id: 'df-ti-ticker', source: '/threat-intel', target: '/:ticker', type: 'data-flow' },
+  { id: 'df-truth-ticker', source: '/socials/truth-social', target: '/:ticker', type: 'data-flow' },
+  { id: 'df-ticker-cybernews', source: '/:ticker', target: '/cyber-news', type: 'data-flow' },
+  { id: 'df-ticker-intel', source: '/:ticker', target: '/intelligence', type: 'data-flow' },
 ];

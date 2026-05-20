@@ -27,11 +27,21 @@
   color: var(--muted-foreground);
 }
 
-.graph-legend-root  { border-left-color: var(--color-blue, #3b82f6); }
-.graph-legend-hub   { border-left-color: var(--accent-color, #a855f7); }
-.graph-legend-leaf  { border-left-color: var(--color-green, #22c55e); }
-.graph-legend-auth  { border-left-color: var(--muted-foreground, #71717a); }
-.graph-legend-admin { border-left-color: var(--color-amber, #f59e0b); }
+.graph-legend-root {
+  border-left-color: var(--color-blue, #3b82f6);
+}
+.graph-legend-hub {
+  border-left-color: var(--accent-color, #a855f7);
+}
+.graph-legend-leaf {
+  border-left-color: var(--color-green, #22c55e);
+}
+.graph-legend-auth {
+  border-left-color: var(--muted-foreground, #71717a);
+}
+.graph-legend-admin {
+  border-left-color: var(--color-amber, #f59e0b);
+}
 
 .graph-legend-hint {
   font-size: 11px;
@@ -42,12 +52,10 @@
 
 .graph-legend-dataflow {
   border-left-color: var(--color-amber, #f59e0b);
-  background: repeating-linear-gradient(
-    90deg,
-    var(--color-amber, #f59e0b) 0 6px,
-    transparent 6px 9px
-  ) left center / 40px 1.5px no-repeat,
-  var(--muted);
+  background:
+    repeating-linear-gradient(90deg, var(--color-amber, #f59e0b) 0 6px, transparent 6px 9px) left center / 40px 1.5px
+      no-repeat,
+    var(--muted);
 }
 
 .graph-canvas-wrapper {

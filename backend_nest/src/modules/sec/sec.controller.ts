@@ -20,7 +20,7 @@ export class SecController {
   @ApiOperation({ summary: "Download SEC filings for a ticker within a date range" })
   @ApiResponse({ status: 201, type: SecSyncResultDto })
   async sync(@Body() dto: SecSyncDto): Promise<SecSyncResultDto> {
-    return this.sec.sync(dto.ticker, dto.dateFrom, dto.dateTo);
+    return this.sec.sync(dto.ticker, dto.dateFrom, dto.dateTo, dto.formTypes, dto.force);
   }
 
   @Get("files/:ticker")

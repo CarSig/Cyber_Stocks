@@ -31,8 +31,14 @@ export function getSecFiles(ticker: string): Promise<SecFileListing[]> {
   return apiFetch<SecFileListing[]>(`/sec/files/${ticker}`);
 }
 
-export function syncSec(ticker: string, dateFrom?: string, dateTo?: string): Promise<SecSyncResult> {
-  return postJson<SecSyncResult>('/sec/sync', { ticker, dateFrom, dateTo });
+export function syncSec(
+  ticker: string,
+  dateFrom?: string,
+  dateTo?: string,
+  formTypes?: string[],
+  force?: boolean,
+): Promise<SecSyncResult> {
+  return postJson<SecSyncResult>('/sec/sync', { ticker, dateFrom, dateTo, formTypes, force });
 }
 
 export function getSecCoverage(ticker: string): Promise<CoverageIndex> {

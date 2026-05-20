@@ -3,7 +3,7 @@ import Page from '@/components/common/Page';
 import SecDownloadForm from '@/features/sec/components/SecDownloadForm';
 import SecPriceChart from '@/features/sec/components/SecPriceChart';
 import SecTimeline from '@/features/sec/components/SecTimeline';
-import SecFileList from '@/features/sec/components/SecFileList';
+import SecFilingImpactTable from '@/features/sec/components/SecFilingImpactTable';
 import { useSecCoverage } from '@/features/sec/hooks/useSecData';
 import { useStock } from '@/features/tickers/hooks/useStock';
 import VolatilityChart from '@/features/charts/components/VolatilityChart';
@@ -72,7 +72,7 @@ function SecArchiveContent({ ticker, onTickerChange }: { ticker: string; onTicke
         />
       )}
       <SecTimeline ticker={ticker} visibleRange={visibleRange} />
-      <SecFileList ticker={ticker} />
+      <SecFilingImpactTable ticker={ticker} />
     </>
   );
 }

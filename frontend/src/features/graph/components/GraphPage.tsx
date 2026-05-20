@@ -44,10 +44,7 @@ export function GraphPage() {
 
   const hiddenIds = useMemo(() => getHiddenIds(collapsedIds), [collapsedIds]);
 
-  const { nodes, edges } = useMemo(
-    () => applyDagreLayout(RAW_NODES, RAW_EDGES, hiddenIds),
-    [hiddenIds],
-  );
+  const { nodes, edges } = useMemo(() => applyDagreLayout(RAW_NODES, RAW_EDGES, hiddenIds), [hiddenIds]);
 
   const handleToggleCollapse = useCallback((nodeId: string) => {
     setCollapsedIds((prev) => {
@@ -61,12 +58,9 @@ export function GraphPage() {
     });
   }, []);
 
-  const handleNodeSelect = useCallback(
-    (node: GraphNode | null) => {
-      setSelectedNode(node);
-    },
-    [],
-  );
+  const handleNodeSelect = useCallback((node: GraphNode | null) => {
+    setSelectedNode(node);
+  }, []);
 
   // Augment node data with collapse metadata so GraphNodeComponent can render the indicator
   const augmentedNodes = useMemo(
@@ -96,9 +90,7 @@ export function GraphPage() {
       </div>
       <div className="graph-canvas-wrapper">
         <GraphCanvas nodes={augmentedNodes} edges={edges} onNodeSelect={handleNodeSelect} />
-        {selectedNode && (
-          <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />
-        )}
+        {selectedNode && <NodeDetailPanel node={selectedNode} onClose={() => setSelectedNode(null)} />}
       </div>
     </div>
   );

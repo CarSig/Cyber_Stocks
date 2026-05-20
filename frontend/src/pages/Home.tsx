@@ -27,11 +27,8 @@ function ViewList({ companies, sparklines }: ViewListProps) {
         const sp = sparklines[ticker];
         const changePct = sp?.changePct ?? null;
         const isUp = changePct != null && changePct >= 0;
-        const sparkColor = changePct == null
-          ? 'var(--text-faint)'
-          : isUp
-            ? 'var(--color-green, #22c55e)'
-            : 'var(--color-red, #ef4444)';
+        const sparkColor =
+          changePct == null ? 'var(--text-faint)' : isUp ? 'var(--color-green, #22c55e)' : 'var(--color-red, #ef4444)';
 
         return (
           <li key={ticker} className="company-item">
@@ -41,12 +38,13 @@ function ViewList({ companies, sparklines }: ViewListProps) {
                 <span className="company-item-name">{name}</span>
               </div>
               <div className="company-item-data">
-                {sp?.latestPrice != null && (
-                  <span className="company-item-price">${sp.latestPrice.toFixed(2)}</span>
-                )}
+                {sp?.latestPrice != null && <span className="company-item-price">${sp.latestPrice.toFixed(2)}</span>}
                 {changePct != null && (
-                  <span className={`company-item-change${isUp ? ' company-item-change--up' : ' company-item-change--down'}`}>
-                    {isUp ? '+' : ''}{changePct.toFixed(2)}%
+                  <span
+                    className={`company-item-change${isUp ? ' company-item-change--up' : ' company-item-change--down'}`}
+                  >
+                    {isUp ? '+' : ''}
+                    {changePct.toFixed(2)}%
                   </span>
                 )}
                 {(sp?.closes?.length ?? 0) > 1 && (
@@ -83,7 +81,10 @@ function CompareList({ companies, toggled, onToggle }: CompareListProps) {
         const on = toggled.has(ticker);
         const disabled = !on && toggled.size >= MAX;
         return (
-          <li key={ticker} className={`company-pill${on ? ' company-pill--on' : ''}${disabled ? ' company-pill--disabled' : ''}`}>
+          <li
+            key={ticker}
+            className={`company-pill${on ? ' company-pill--on' : ''}${disabled ? ' company-pill--disabled' : ''}`}
+          >
             <button className="company-pill-btn" onClick={() => toggle(ticker)} disabled={disabled}>
               <span className="company-pill-ticker">{ticker}</span>
               <span className="company-pill-name">{name}</span>
@@ -103,7 +104,11 @@ export default function Home() {
   const [rangeFrom, setRangeFrom] = useState<string | null>(null);
   const [rangeTo, setRangeTo] = useState<string | null>(null);
 
-  const { data: companies, error, isPending } = useQuery<Record<string, string>>({
+  const {
+    data: companies,
+    error,
+    isPending,
+  } = useQuery<Record<string, string>>({
     queryKey: ['companies'],
     queryFn: getCompanies,
   });

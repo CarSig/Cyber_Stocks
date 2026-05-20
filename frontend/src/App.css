@@ -1291,9 +1291,15 @@
   justify-self: end;
   padding-right: 4px;
 }
-.corr-cell--muted { opacity: 0.2; }
-.corr-head--muted { opacity: 0.2; }
-.corr-lbl--muted  { opacity: 0.2; }
+.corr-cell--muted {
+  opacity: 0.2;
+}
+.corr-head--muted {
+  opacity: 0.2;
+}
+.corr-lbl--muted {
+  opacity: 0.2;
+}
 .corr-sel {
   outline: 1.5px solid var(--primary);
   outline-offset: -1.5px;
@@ -1609,7 +1615,9 @@
   border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--card);
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 .company-item:hover {
   background: var(--muted);
@@ -1662,8 +1670,12 @@
   min-width: 52px;
   text-align: right;
 }
-.company-item-change--up   { color: var(--color-green, #22c55e); }
-.company-item-change--down { color: var(--color-red, #ef4444); }
+.company-item-change--up {
+  color: var(--color-green, #22c55e);
+}
+.company-item-change--down {
+  color: var(--color-red, #ef4444);
+}
 
 /* ── Home mode switcher ─────────────────────────────────────── */
 .home-mode-bar {
@@ -1684,12 +1696,14 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 .home-mode-btn--active {
   background: var(--card);
   color: var(--foreground);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* ── Compare layout ─────────────────────────────────────────── */
@@ -1729,7 +1743,10 @@
   background: var(--card);
   color: var(--foreground);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -1745,7 +1762,7 @@
   color: #fff;
 }
 .company-pill--on .company-pill-name {
-  color: rgba(255,255,255,0.75);
+  color: rgba(255, 255, 255, 0.75);
 }
 .company-pill--disabled .company-pill-btn {
   opacity: 0.35;

@@ -24,11 +24,19 @@ export function useSecCoverage(ticker: string | null) {
   });
 }
 
+type SyncVars = {
+  ticker: string;
+  dateFrom?: string;
+  dateTo?: string;
+  formTypes?: string[];
+  force?: boolean;
+};
+
 export function useSecSync() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ ticker, dateFrom, dateTo }: { ticker: string; dateFrom?: string; dateTo?: string }) =>
-      syncSec(ticker, dateFrom, dateTo),
+    mutationFn: ({ ticker, dateFrom, dateTo, formTypes, force }: SyncVars) =>
+      syncSec(ticker, dateFrom, dateTo, formTypes, force),
     onSuccess: (_data, vars) => {
       qc.invalidateQueries({ queryKey: ['sec-sessions', vars.ticker] });
       qc.invalidateQueries({ queryKey: ['sec-files', vars.ticker] });

@@ -11,10 +11,10 @@ export class SecService {
     return Object.keys(COMPANY_CIK);
   }
 
-  async sync(ticker: string, dateFrom?: string, dateTo?: string) {
+  async sync(ticker: string, dateFrom?: string, dateTo?: string, formTypes?: string[], force?: boolean) {
     const upper = ticker.toUpperCase();
     if (!COMPANY_CIK[upper]) throw notFound(`Unknown ticker: ${upper}`);
-    return this.client.sync(upper, dateFrom, dateTo);
+    return this.client.sync(upper, dateFrom, dateTo, formTypes, force);
   }
 
   files(ticker: string) {

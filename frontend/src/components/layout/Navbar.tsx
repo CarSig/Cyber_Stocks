@@ -18,7 +18,17 @@ export default function Navbar() {
   const isTicker =
     segments.length === 1 &&
     /^[A-Z]{1,5}$/.test(segments[0].toUpperCase()) &&
-    !['ADMIN', 'GRAPH', 'THREAT-INTEL', 'SOCIALS', 'INTELLIGENCE', 'CYBER-NEWS', 'EVENTS', 'SEC-ARCHIVE', 'RESEARCH'].includes(segments[0].toUpperCase());
+    ![
+      'ADMIN',
+      'GRAPH',
+      'THREAT-INTEL',
+      'SOCIALS',
+      'INTELLIGENCE',
+      'CYBER-NEWS',
+      'EVENTS',
+      'SEC-ARCHIVE',
+      'RESEARCH',
+    ].includes(segments[0].toUpperCase());
   const ticker = isTicker ? segments[0].toUpperCase() : null;
 
   const closeMenu = () => setMenuOpen(false);

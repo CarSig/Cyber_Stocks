@@ -27,7 +27,9 @@
   min-width: 140px;
 }
 
-.sec-submit-btn {
+.sec-form-buttons {
+  display: flex;
+  gap: 0.5rem;
   align-self: flex-end;
 }
 
@@ -521,4 +523,164 @@
 .sec-coverage-range {
   font-family: monospace;
   color: var(--foreground);
+}
+
+/* ── Filing → Price Impact table ───────────────────────────────────────────── */
+
+.sec-impact-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sec-impact-head-row {
+  background: var(--muted);
+}
+
+.sec-impact-th {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted-foreground);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.sec-impact-th--num {
+  text-align: right;
+}
+
+.sec-impact-th--count {
+  text-align: center;
+  width: 3rem;
+}
+
+.sec-impact-group-row {
+  cursor: pointer;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+
+.sec-impact-group-row:hover {
+  background: var(--muted);
+}
+
+.sec-impact-filing-row {
+  background: color-mix(in srgb, var(--muted) 40%, var(--card));
+  border-bottom: 1px solid var(--border);
+}
+
+.sec-impact-filing-row:last-child {
+  border-bottom: none;
+}
+
+.sec-impact-td {
+  padding: 0.45rem 0.75rem;
+  vertical-align: middle;
+}
+
+.sec-impact-chevron {
+  font-size: 0.6rem;
+  color: var(--muted-foreground);
+  margin-right: 0.5rem;
+}
+
+.sec-impact-count {
+  text-align: center;
+  color: var(--muted-foreground);
+  font-family: monospace;
+}
+
+.sec-impact-swing {
+  text-align: right;
+  font-family: monospace;
+  color: var(--foreground);
+}
+
+.sec-impact-signed {
+  text-align: right;
+  font-family: monospace;
+  font-weight: 600;
+}
+
+.sec-impact-positive { color: var(--color-green, #22c55e); }
+.sec-impact-negative { color: var(--color-red, #ef4444); }
+
+.sec-impact-filing-date {
+  padding-left: 2.25rem;
+}
+
+.sec-impact-date {
+  font-family: monospace;
+  color: var(--foreground);
+  margin-right: 0.75rem;
+}
+
+.sec-impact-accession {
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+}
+
+.sec-impact-filing-row--clickable {
+  cursor: pointer;
+}
+
+.sec-impact-filing-row--clickable:hover {
+  background: color-mix(in srgb, var(--muted) 60%, var(--card));
+}
+
+.sec-impact-chevron--sm {
+  font-size: 0.55rem;
+  margin-right: 0.35rem;
+}
+
+.sec-impact-file-badge {
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+}
+
+.sec-impact-files-row {
+  background: var(--background);
+}
+
+.sec-impact-files-cell {
+  padding: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.sec-impact-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.sec-impact-header .sec-section-title {
+  margin-bottom: 0;
+}
+
+.sec-impact-lag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sec-impact-lag-label {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+
+.sec-impact-lag-input {
+  width: 4rem;
+  text-align: center;
+  padding: 0.25rem 0.5rem;
+  height: auto;
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -27,15 +27,17 @@ export default function SecDownloadForm({
   const [lastResult, setLastResult] = useState<SecSyncResult | null>(null);
   const { mutate, isPending, error } = useSecSync();
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function run(force: boolean) {
     if (!selectedTicker) return;
     setLastResult(null);
-    mutate({ ticker: selectedTicker, dateFrom, dateTo }, { onSuccess: (res) => setLastResult(res) });
+    mutate(
+      { ticker: selectedTicker, dateFrom, dateTo, force },
+      { onSuccess: (res) => setLastResult(res) },
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="sec-download-form">
+    <form onSubmit={(e) => { e.preventDefault(); run(false); }} className="sec-download-form">
       <div className="sec-form-row">
         <div className="sec-form-field">
           <Label>Ticker</Label>
@@ -45,9 +47,7 @@ export default function SecDownloadForm({
             </SelectTrigger>
             <SelectContent>
               {tickers.map((t) => (
-                <SelectItem key={t} value={t}>
-                  {t}
-                </SelectItem>
+                <SelectItem key={t} value={t}>{t}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -63,12 +63,23 @@ export default function SecDownloadForm({
           <Input type="date" value={dateTo} onChange={(e) => onDateToChange(e.target.value)} />
         </div>
 
-        <Button type="submit" disabled={!selectedTicker || isPending} className="sec-submit-btn">
-          {isPending ? 'Downloading…' : 'Download Filings'}
-        </Button>
+        <div className="sec-form-buttons">
+          <Button type="submit" disabled={!selectedTicker || isPending}>
+            {isPending ? 'Downloading…' : 'Download'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={!selectedTicker || isPending}
+            onClick={() => run(true)}
+            title="Re-download all filings in range, even if already saved"
+          >
+            Re-download
+          </Button>
+        </div>
       </div>
 
-      {error && <pre className="sec-error">{JSON.stringify({ message: (error as Error).message }, null, 2)}</pre>}
+      {error && <p className="sec-error">{(error as Error).message}</p>}
 
       {lastResult && (
         <p className="sec-result">

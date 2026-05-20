@@ -25,6 +25,14 @@ export class SecSyncDto {
   @IsOptional()
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: "dateTo must be YYYY-MM-DD" })
   dateTo?: string;
+
+  @ApiPropertyOptional({ description: "If true, re-download filings even if already present locally." })
+  @IsOptional()
+  force?: boolean;
+
+  @ApiPropertyOptional({ description: "Form types to sync. Defaults to standard set." })
+  @IsOptional()
+  formTypes?: string[];
 }
 
 export class SecSyncResultDto {
