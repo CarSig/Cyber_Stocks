@@ -4,6 +4,8 @@ export { default as IntradayChart } from './IntradayChart';
 export { default as SimPriceChart } from './SimPriceChart';
 export { default as VolatilityChart } from './VolatilityChart';
 export { default as SentimentHistogramChart } from './SentimentHistogramChart';
+export { default as VolumeChart } from './VolumeChart';
+export { default as TradeCountChart } from './TradeCountChart';
 export { default as ChartModal } from './ChartModal';
 export type { CompareBarsEntry, IntradayChartProps } from './IntradayChart';
 export type { SimPriceChartProps } from './SimPriceChart';

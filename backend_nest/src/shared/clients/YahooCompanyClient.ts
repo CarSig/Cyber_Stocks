@@ -1,10 +1,10 @@
-import YahooFinance from "yahoo-finance2";
-import { Pool } from "pg";
-import companies from "@/data/companies";
-import { logger } from "../logger";
-import { publishNewArticles } from "../mq/producers/newsProducer";
-import type { Quote } from "../../types/index";
-import type { CacheService } from "../cache.service";
+import YahooFinance from 'yahoo-finance2';
+import { Pool } from 'pg';
+import companies from '@/data/companies';
+import { logger } from '../logger';
+import { publishNewArticles } from '../mq/producers/newsProducer';
+import type { Quote } from '../../types/index';
+import type { CacheService } from '../cache.service';
 
 const HISTORY_TTL_S = 24 * 60 * 60;
 
@@ -17,6 +17,7 @@ type AlpacaBar = {
   l: number;
   c: number;
   v: number;
+  n: number;
   vw: number;
 };
 
@@ -32,12 +33,12 @@ type NewsArticle = {
   [key: string]: unknown;
 };
 
-const ALPACA_BASE = "https://data.alpaca.markets/v2";
+const ALPACA_BASE = 'https://data.alpaca.markets/v2';
 
 function alpacaHeaders() {
   return {
-    "APCA-API-KEY-ID": process.env.ALPACA_API_KEY ?? "",
-    "APCA-API-SECRET-KEY": process.env.ALPACA_SECRET_KEY ?? "",
+    'APCA-API-KEY-ID': process.env.ALPACA_API_KEY ?? '',
+    'APCA-API-SECRET-KEY': process.env.ALPACA_SECRET_KEY ?? '',
   };
 }
 
@@ -49,11 +50,13 @@ class CybersecurityClient {
 
   constructor(companyName: string, pool: Pool) {
     if (!companies[companyName]) {
-      throw new Error(`Unknown company: "${companyName}". Available: ${Object.keys(companies).join(", ")}`);
+      throw new Error(
+        `Unknown company: "${companyName}". Available: ${Object.keys(companies).join(', ')}`,
+      );
     }
     this.companyName = companyName;
     this.ticker = companies[companyName];
-    this.yahooClient = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
+    this.yahooClient = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
     this.pool = pool;
   }
 
@@ -65,28 +68,41 @@ class CybersecurityClient {
     return `CybersecurityClient(${this.companyName} → ${this.ticker})`;
   }
 
-  async #fetchAlpacaDailyBars(start: string, end: string): Promise<AlpacaBar[]> {
-    const url = new URL(`${ALPACA_BASE}/stocks/${encodeURIComponent(this.ticker)}/bars`);
-    url.searchParams.set("timeframe", "1Day");
-    url.searchParams.set("start", start);
-    url.searchParams.set("end", end);
-    url.searchParams.set("adjustment", "all");
-    url.searchParams.set("feed", "iex");
-    url.searchParams.set("limit", "10000");
+  async #fetchAlpacaDailyBars(
+    start: string,
+    end: string,
+  ): Promise<AlpacaBar[]> {
+    const url = new URL(
+      `${ALPACA_BASE}/stocks/${encodeURIComponent(this.ticker)}/bars`,
+    );
+    url.searchParams.set('timeframe', '1Day');
+    url.searchParams.set('start', start);
+    url.searchParams.set('end', end);
+    url.searchParams.set('adjustment', 'all');
+    url.searchParams.set('feed', 'iex');
+    url.searchParams.set('limit', '10000');
 
     const bars: AlpacaBar[] = [];
     let nextPageToken: string | null = null;
 
     do {
-      if (nextPageToken) url.searchParams.set("page_token", nextPageToken);
-      else url.searchParams.delete("page_token");
+      if (nextPageToken) url.searchParams.set('page_token', nextPageToken);
+      else url.searchParams.delete('page_token');
 
       const res = await fetch(url.toString(), { headers: alpacaHeaders() });
       if (!res.ok) {
-        const body = await res.json().catch(() => ({})) as Record<string, string>;
-        throw new Error(`Alpaca daily bars error ${res.status}: ${body.message ?? "unknown"}`);
+        const body = (await res.json().catch(() => ({}))) as Record<
+          string,
+          string
+        >;
+        throw new Error(
+          `Alpaca daily bars error ${res.status}: ${body.message ?? 'unknown'}`,
+        );
       }
-      const data = await res.json() as { bars: AlpacaBar[] | null; next_page_token: string | null };
+      const data = (await res.json()) as {
+        bars: AlpacaBar[] | null;
+        next_page_token: string | null;
+      };
       if (data.bars) bars.push(...data.bars);
       nextPageToken = data.next_page_token ?? null;
     } while (nextPageToken);
@@ -101,14 +117,20 @@ class CybersecurityClient {
     );
     const maxDate = maxRows[0]?.max ?? null;
     const historyStart = maxDate
-      ? (() => { const d = new Date(maxDate); d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); })()
-      : "2024-01-01";
+      ? (() => {
+          const d = new Date(maxDate);
+          d.setDate(d.getDate() + 1);
+          return d.toISOString().slice(0, 10);
+        })()
+      : '2024-01-01';
 
     const today = new Date().toISOString().slice(0, 10);
     const historyUpToDate = historyStart >= today;
 
     const [bars, search] = await Promise.all([
-      historyUpToDate ? Promise.resolve([]) : this.#fetchAlpacaDailyBars(historyStart, today),
+      historyUpToDate
+        ? Promise.resolve([])
+        : this.#fetchAlpacaDailyBars(historyStart, today),
       this.search(),
     ]);
 
@@ -117,17 +139,39 @@ class CybersecurityClient {
       newQuoteCount = await this.#upsertBars(bars);
     }
 
-    const newNews = await this.#upsertNews((search as { news?: NewsArticle[] }).news ?? []);
+    const newNews = await this.#upsertNews(
+      (search as { news?: NewsArticle[] }).news ?? [],
+    );
 
-    logger.debug({ ticker: this.ticker, newQuotes: newQuoteCount, newNews: newNews.length }, `populated ${this.companyName}`);
-    await publishNewArticles(this.companyName, this.ticker, newNews as Record<string, unknown>[]);
+    logger.debug(
+      {
+        ticker: this.ticker,
+        newQuotes: newQuoteCount,
+        newNews: newNews.length,
+      },
+      `populated ${this.companyName}`,
+    );
+    await publishNewArticles(
+      this.companyName,
+      this.ticker,
+      newNews as Record<string, unknown>[],
+    );
   }
 
   async populateNews(): Promise<number> {
     const search = await this.search();
-    const newArticles = await this.#upsertNews((search as { news?: NewsArticle[] }).news ?? []);
-    logger.debug({ ticker: this.ticker, newNews: newArticles.length }, `news updated ${this.companyName}`);
-    await publishNewArticles(this.companyName, this.ticker, newArticles as Record<string, unknown>[]);
+    const newArticles = await this.#upsertNews(
+      (search as { news?: NewsArticle[] }).news ?? [],
+    );
+    logger.debug(
+      { ticker: this.ticker, newNews: newArticles.length },
+      `news updated ${this.companyName}`,
+    );
+    await publishNewArticles(
+      this.companyName,
+      this.ticker,
+      newArticles as Record<string, unknown>[],
+    );
     return newArticles.length;
   }
 
@@ -159,10 +203,12 @@ class CybersecurityClient {
           crypto.randomUUID(),
           this.ticker,
           this.companyName,
-          a.title ?? "",
+          a.title ?? '',
           a.link,
           a.publisher ?? null,
-          a.providerPublishTime ? new Date(a.providerPublishTime as string) : null,
+          a.providerPublishTime
+            ? new Date(a.providerPublishTime as string)
+            : null,
           a.type ?? null,
           a.thumbnail ? JSON.stringify(a.thumbnail) : null,
           a.relatedTickers ?? [],
@@ -181,9 +227,15 @@ class CybersecurityConsumer {
   private pool: Pool;
   private cache: CacheService | null;
 
-  constructor(companyName: string, pool: Pool, cache: CacheService | null = null) {
+  constructor(
+    companyName: string,
+    pool: Pool,
+    cache: CacheService | null = null,
+  ) {
     if (!companies[companyName]) {
-      throw new Error(`Unknown company: "${companyName}". Available: ${Object.keys(companies).join(", ")}`);
+      throw new Error(
+        `Unknown company: "${companyName}". Available: ${Object.keys(companies).join(', ')}`,
+      );
     }
     this.companyName = companyName;
     this.ticker = companies[companyName];
@@ -194,8 +246,13 @@ class CybersecurityConsumer {
   async history(): Promise<HistoryResult> {
     const fetch = async (): Promise<HistoryResult> => {
       const { rows } = await this.pool.query<{
-        date: string; open: number | null; high: number | null; low: number | null;
-        close: number | null; adjclose: number | null; volume: number | null;
+        date: string;
+        open: number | null;
+        high: number | null;
+        low: number | null;
+        close: number | null;
+        adjclose: number | null;
+        volume: number | null;
       }>(
         `SELECT date::text, open, high, low, close, adjclose, volume FROM stock_quotes WHERE ticker = $1 ORDER BY date ASC`,
         [this.ticker],
@@ -212,7 +269,12 @@ class CybersecurityConsumer {
       return { meta: {}, quotes };
     };
 
-    if (this.cache) return this.cache.getOrSet(`history:${this.companyName}`, HISTORY_TTL_S, fetch);
+    if (this.cache)
+      return this.cache.getOrSet(
+        `history:${this.companyName}`,
+        HISTORY_TTL_S,
+        fetch,
+      );
     return fetch();
   }
 

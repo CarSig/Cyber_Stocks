@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSecCoverage, useSecFiles } from '../hooks/useSecData';
 import type { SecFileListing } from '../api';
+import { getFormStyle } from '../utils';
 
 const FORM_COLORS: { pattern: RegExp; color: string; label: string }[] = [
   { pattern: /^10-K/i, color: '#4f8ef7', label: '10-K' },
@@ -12,16 +13,6 @@ const FORM_COLORS: { pattern: RegExp; color: string; label: string }[] = [
   { pattern: /^SC\s?13G/i, color: '#a0f74f', label: 'SC 13G' },
   { pattern: /^SC\s?13D/i, color: '#f74f4f', label: 'SC 13D' },
 ];
-
-function formColor(form?: string): string | null {
-  if (!form) return null;
-  return FORM_COLORS.find((f) => f.pattern.test(form))?.color ?? null;
-}
-
-function formLabel(form?: string): string {
-  if (!form) return '';
-  return FORM_COLORS.find((f) => f.pattern.test(form))?.label ?? form;
-}
 
 function addDays(dateStr: string, n: number): string {
   const d = new Date(dateStr);
@@ -78,7 +69,11 @@ function buildSegments(
     const covered = coveredSet.has(date);
 
     const state: Segment['state'] = filing ? 'filing' : covered ? 'covered' : 'gap';
-    const color = filing ? (formColor(filing.form) ?? '#4f8ef7') : covered ? 'rgba(74,222,128,0.3)' : 'transparent';
+    const color = filing
+      ? (getFormStyle(filing.form).color ?? '#4f8ef7')
+      : covered
+        ? 'rgba(74,222,128,0.3)'
+        : 'transparent';
 
     let j = i + 1;
     while (j < totalDays) {
@@ -87,7 +82,7 @@ function buildSegments(
       const nextCovered = coveredSet.has(next);
       const nextState: Segment['state'] = nextFiling ? 'filing' : nextCovered ? 'covered' : 'gap';
       const nextColor = nextFiling
-        ? (formColor(nextFiling.form) ?? '#4f8ef7')
+        ? (getFormStyle(nextFiling.form).color ?? '#4f8ef7')
         : nextCovered
           ? 'rgba(74,222,128,0.3)'
           : 'transparent';
@@ -196,7 +191,7 @@ export default function SecTimeline({ ticker, visibleRange, onRangeChange }: Pro
             {tooltip.seg.state === 'filing' && (
               <span className="sec-timeline-tooltip-form" style={{ color: tooltip.seg.color }}>
                 {' '}
-                {formLabel(tooltip.seg.form)}
+                {getFormStyle(tooltip.seg.form).label}
               </span>
             )}
             {tooltip.seg.state === 'gap' && <span className="sec-timeline-tooltip-gap"> (not downloaded)</span>}

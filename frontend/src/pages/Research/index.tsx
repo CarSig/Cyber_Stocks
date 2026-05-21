@@ -36,6 +36,14 @@ const PLANS = [
     tag: 'reference',
   },
   {
+    to: '/research/edgar-8k-items',
+    title: 'SEC EDGAR — 8-K Items',
+    subtitle: 'Item 1.01–9.01 · Implementation plan · Signal priority',
+    description:
+      'Complete inventory of all standardized 8-K items (Regulation S-K Item 1–9 series). Priority-ranked for parsing implementation: breach disclosures, executive changes, material agreements, auditor switches, and more.',
+    tag: 'planned',
+  },
+  {
     to: '/research/gov-contracts',
     title: 'Government Contracts',
     subtitle: 'SAM.gov · FedRAMP · SBIR · IDIQ vehicles · CMMC',

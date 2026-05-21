@@ -4,7 +4,7 @@ import { getBars } from '@/features/charts/api';
 import type { AlpacaBar } from '@/types';
 import { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from '@/features/charts/utils';
 import { useTimezone } from '@/context/TimezoneContext';
-import { IntradayChart } from '@/features/charts/components';
+import { IntradayChart, VolumeChart, TradeCountChart } from '@/features/charts/components';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -193,6 +193,8 @@ export default function DayTradeTab({ ticker, companies }: DayTradeTabProps) {
             <>
               <BarStats bars={data.bars} />
               <IntradayChart bars={data.bars} compareBars={compareBars} chartType={chartType} />
+              <VolumeChart alpacaBars={data.bars} />
+              <TradeCountChart alpacaBars={data.bars} />
             </>
           ) : (
             <p className="alpaca-status">No bars returned — market may have been closed on this date.</p>

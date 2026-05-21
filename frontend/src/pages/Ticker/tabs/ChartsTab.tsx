@@ -1,7 +1,13 @@
 import FilterSelect from '@/components/common/FilterSelect';
 import { ChartCard } from '@/features/charts/ui';
 import { useTickerContext } from '@/context/TickerContext';
-import { StockChart, VolatilityChart, SentimentHistogramChart } from '@/features/charts/components';
+import {
+  StockChart,
+  VolatilityChart,
+  SentimentHistogramChart,
+  VolumeChart,
+  TradeCountChart,
+} from '@/features/charts/components';
 import { PeriodButtons } from '@/features/charts/ui';
 import Analysis from '@/features/tickers/components/Analysis';
 import TickerKPI from '@/pages/Ticker/TickerKPI';
@@ -89,6 +95,25 @@ export default function ChartsTab({
           visibleRange={visibleRange}
           onRangeChange={setVisibleRange}
           overlays={overlays as Parameters<typeof StockChart>[0]['overlays']}
+        />
+      </ChartCard>
+
+      <ChartCard title="Volume">
+        <VolumeChart
+          quotes={allQuotes ?? []}
+          period={period}
+          onPeriodChange={setPeriod}
+          visibleRange={visibleRange}
+          onRangeChange={setVisibleRange}
+        />
+      </ChartCard>
+
+      <ChartCard title="Trade Count">
+        <TradeCountChart
+          period={period}
+          onPeriodChange={setPeriod}
+          visibleRange={visibleRange}
+          onRangeChange={setVisibleRange}
         />
       </ChartCard>
 

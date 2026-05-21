@@ -5,16 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSecTickers, useSecSync } from '../hooks/useSecData';
 import type { SecSyncResult } from '../api';
-
-type Props = {
-  selectedTicker: string | null;
-  onTickerChange: (t: string) => void;
-  dateFrom: string;
-  dateTo: string;
-  onDateFromChange: (v: string) => void;
-  onDateToChange: (v: string) => void;
-};
-
+import type { DownloadProps } from '../types';
 export default function SecDownloadForm({
   selectedTicker,
   onTickerChange,
@@ -22,7 +13,7 @@ export default function SecDownloadForm({
   dateTo,
   onDateFromChange,
   onDateToChange,
-}: Props) {
+}: DownloadProps) {
   const { data: tickers = [] } = useSecTickers();
   const [lastResult, setLastResult] = useState<SecSyncResult | null>(null);
   const { mutate, isPending, error } = useSecSync();

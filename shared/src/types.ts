@@ -5,7 +5,7 @@
 export type User = {
   id: string;
   username: string;
-  role: 'user' | 'admin';
+  role: "user" | "admin";
   email?: string;
 };
 
@@ -87,7 +87,7 @@ export type CorrelationWithImpact = {
 
 export type SimulationAction = {
   date: string;
-  type: 'buy' | 'sell';
+  type: "buy" | "sell";
   value: number;
 };
 
@@ -101,7 +101,7 @@ export type SimulationPresets = Record<string, SimulationPresetEntry[]>;
 
 export type SimulationTransaction = {
   date: string;
-  type: 'buy' | 'sell';
+  type: "buy" | "sell";
   shares: number;
   price: number;
   value: number;
@@ -145,7 +145,7 @@ export type SentimentAnalysis = {
 
 export type NewsAnalysisMap = Record<string, SentimentAnalysis>;
 
-export type UrgencyKey = 'now' | 'today' | 'recent' | 'future_short' | 'future_long' | 'past';
+export type UrgencyKey = "now" | "today" | "recent" | "future_short" | "future_long" | "past";
 
 export type NewsArticle = {
   id?: string;
@@ -395,6 +395,8 @@ export type AlpacaBar = {
   l: number;
   c: number;
   v: number;
+  n: number;
+  vw: number;
 };
 
 export type AlpacaBarsResponse = {
@@ -412,7 +414,7 @@ export type ResearchSection = {
 };
 
 export type ChatMessage = {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
 };
 

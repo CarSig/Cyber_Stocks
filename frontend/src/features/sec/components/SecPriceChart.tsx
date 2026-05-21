@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { SeriesMarker, Time } from 'lightweight-charts';
 import { useChartInstance } from '@/features/charts/hooks/useChartInstance';
 import { useChartRange } from '@/features/charts/hooks/useChartRange';
@@ -18,10 +18,6 @@ type Props = {
   showVolatility: boolean;
   onVolatilityToggle: () => void;
 };
-
-const MIN_HEIGHT = 120;
-const DEFAULT_HEIGHT = 320;
-const MAX_HEIGHT = 700;
 
 function FilingsLegendModal({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<'base' | string>('base');
@@ -98,10 +94,6 @@ export default function SecPriceChart({
   const [visible, setVisible] = useState(true);
   const [showFilings, setShowFilings] = useState(false);
   const [showLegend, setShowLegend] = useState(false);
-  const [height, setHeight] = useState(DEFAULT_HEIGHT);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const dragStartY = useRef<number | null>(null);
-  const dragStartH = useRef<number>(DEFAULT_HEIGHT);
 
   const { allQuotes } = useStock(ticker ?? '', {});
   const { data: filings = [] } = useSecFiles(ticker);
@@ -109,51 +101,18 @@ export default function SecPriceChart({
 
   const extraMarkers = useMemo(() => (showFilings ? buildFilingMarkers(filings) : []), [showFilings, filings]);
 
-  const chartRef = useChartInstance(containerRef, {
+  const { chartRef, containerRef, height, onHandleWheel, onHandleMouseDown } = useChartInstance({
     quotes: ticker ? allQuotes : [],
     type: 'Area' as ChartType,
     analysis: null,
     showAnalysis: false,
     overlayRefs,
     extraMarkers,
+    resize: { enabled: true },
   });
 
   const effectiveRange = visibleRange ?? defaultRange;
   useChartRange(chartRef, { visibleRange: effectiveRange, onRangeChange });
-
-  function onHandleWheel(e: React.WheelEvent) {
-    e.preventDefault();
-    setHeight((h) => Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, h - e.deltaY * 0.5)));
-  }
-
-  function onHandleMouseDown(e: React.MouseEvent) {
-    dragStartY.current = e.clientY;
-    dragStartH.current = height;
-    e.preventDefault();
-  }
-
-  useEffect(() => {
-    function onMouseMove(e: MouseEvent) {
-      if (dragStartY.current === null) return;
-      const delta = e.clientY - dragStartY.current;
-      setHeight(Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, dragStartH.current + delta)));
-    }
-    function onMouseUp() {
-      dragStartY.current = null;
-    }
-    window.addEventListener('mousemove', onMouseMove);
-    window.addEventListener('mouseup', onMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mouseup', onMouseUp);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (chartRef.current && containerRef.current) {
-      chartRef.current.applyOptions({ height, width: containerRef.current.clientWidth });
-    }
-  }, [height, chartRef]);
 
   if (!ticker) return null;
 

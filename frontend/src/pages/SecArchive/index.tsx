@@ -7,6 +7,8 @@ import SecFilingImpactTable from '@/features/sec/components/SecFilingImpactTable
 import { useSecCoverage } from '@/features/sec/hooks/useSecData';
 import { useStock } from '@/features/tickers/hooks/useStock';
 import VolatilityChart from '@/features/charts/components/VolatilityChart';
+import VolumeChart from '@/features/charts/components/VolumeChart';
+import TradeCountChart from '@/features/charts/components/TradeCountChart';
 import './SecArchive.css';
 
 function defaultDate(daysBack: number): string {
@@ -63,6 +65,10 @@ function SecArchiveContent({ ticker, onTickerChange }: { ticker: string; onTicke
         showVolatility={showVolatility}
         onVolatilityToggle={() => setShowVolatility((v) => !v)}
       />
+      <VolumeChart quotes={allQuotes} period={null} visibleRange={visibleRange} onRangeChange={handleRangeChange} />
+
+      <TradeCountChart period={null} visibleRange={visibleRange} onRangeChange={handleRangeChange} />
+
       {showVolatility && (
         <VolatilityChart
           quotes={allQuotes}

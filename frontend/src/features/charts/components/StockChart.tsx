@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import './charts.css';
 import { useOverlayRefs } from '../hooks/useOverlayRefs';
 import { useChartInstance } from '../hooks/useChartInstance';
@@ -165,13 +165,12 @@ export default function StockChart({
   overlays = {},
 }: StockChartProps) {
   const { trump = {}, nvd = {}, otx = {}, kev = {}, news = {} } = overlays;
-  const containerRef = useRef<HTMLDivElement>(null);
   const [type, setType] = useState<ChartType>('Area');
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [markerModal, setMarkerModal] = useState<MarkerModalState | null>(null);
 
   const overlayRefs = useOverlayRefs({ trump, nvd, otx, kev, news });
-  const chartRef = useChartInstance(containerRef, {
+  const { chartRef, containerRef } = useChartInstance({
     quotes,
     compareQuotes,
     type,
