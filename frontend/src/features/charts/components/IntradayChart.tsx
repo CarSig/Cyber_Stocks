@@ -3,7 +3,7 @@ import './charts.css';
 import { createChart, CandlestickSeries, LineSeries, AreaSeries } from 'lightweight-charts';
 import type { ISeriesApi, SeriesType } from 'lightweight-charts';
 import { getTzOffsetSeconds, toTzTime } from '../utils/dates';
-import { COMPARE_COLORS } from '../utils/options';
+import { COMPARE_COLORS } from '@/features/charts/options';
 import { useTimezone } from '@/context/TimezoneContext';
 import type { AlpacaBar } from '@/types';
 

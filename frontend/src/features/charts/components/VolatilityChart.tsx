@@ -4,7 +4,7 @@ import { createChart, LineSeries, AreaSeries, type IChartApi } from 'lightweight
 import { cssVar, makeChartOptions } from '../utils/theme';
 import { toSortedOHLC, calcHV, calcATR } from '../utils/series';
 import { daysAgoString, todayString } from '../utils/dates';
-import { CHART_TYPES } from '../utils/options';
+import { CHART_TYPES } from '../constants';
 import { attachResizeObserver, subscribeRangeChange, applyRange } from '../utils/chartSetup';
 import ChartToggleButton from '../ui/ChartToggleButton';
 import ChartSep from '../ui/ChartSep';

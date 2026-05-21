@@ -14,7 +14,7 @@ export {
   SENTIMENT_COLORS,
   NVD_SEVERITY_COLORS,
 } from './markers';
-export { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from './options';
+export { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from '../options';
 export { PERIODS } from './periods';
 export type { Period } from './periods';
 export { toSortedOHLC, toSortedClose, calcHV, calcATR, addCompareOverlay } from './series';
