@@ -11,7 +11,7 @@ import { sentimentScoreStyle } from '../utils/colors';
 import { NVD_SEVERITY_COLORS, SENTIMENT_COLORS } from '../utils/markers';
 import type { Quote, TrumpPost, ThreatIntelItem, NewsArticle, NewsAnalysisMap } from '@/types';
 import type { ChartType } from '../hooks/useChartInstance';
-import { CHART_TYPES } from '../utils/options';
+import { CHART_TYPES } from '../constants';
 import type { QuoteAnalysis } from '../types';
 
 type TrumpOverlay = { posts?: TrumpPost[]; show?: boolean; onToggle?: (v: boolean) => void };
