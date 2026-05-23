@@ -69,6 +69,13 @@ export type ChartPlugin = {
   label?: string;
   /** Initial enabled state. Defaults to true. */
   defaultEnabled?: boolean;
+  /** Optional version key. When the plugin closes over data (e.g. quotes,
+   *  markers, articles) that can change at runtime, set this to a value that
+   *  changes when the data changes — the engine will unmount + remount the
+   *  plugin so the new closure takes effect. Cheap stable choices:
+   *  `quotes.length`, `articles.length`, `JSON.stringify(idsArray)`, or
+   *  any hash you compute. Omit for plugins with truly static data. */
+  version?: string | number;
   /** Called once the chart + primary series exist and plugin is enabled. */
   mount: (ctrl: ChartController) => PluginHandle;
   /** Called on every chart click. Return a MarkerClickResult to open a modal;

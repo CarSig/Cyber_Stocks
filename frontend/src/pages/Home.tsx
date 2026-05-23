@@ -3,11 +3,15 @@ import { useQuery, useQueries } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import StateHandler from '@/components/common/StateHandler';
 import { getCompanies, getTicker, getSparklines } from '@/features/tickers/api';
-import { MultiChart } from '@/features/charts/components';
+import { ChartAuto, compareOverlay, type ChartPlugin } from '@/features/charts/core';
+import { toSortedClose } from '@/features/charts/utils/series';
+import { cssVar } from '@/features/charts/utils/theme';
+import DatePicker from '@/components/common/DatePicker';
 import { CorrelationMatrix } from '@/features/correlations/components';
 import Page from '@/components/common/Page';
 import WatchlistSparkline from './Ticker/WatchlistSparkline';
 import type { SparklineMap } from '@algo/shared';
+import type { Quote } from '@/types';
 
 const MAX = 10;
 
@@ -140,9 +144,32 @@ export default function Home() {
     .filter((q) => q.data)
     .map((q, i) => ({
       ticker: toggledArr[i],
-      quotes: (q.data as { history: { quotes: unknown[] } }).history?.quotes ?? [],
-      analysis: (q.data as { analysis?: unknown }).analysis,
+      quotes: ((q.data as { history: { quotes: Quote[] } }).history?.quotes ?? []) as Quote[],
     }));
+
+  // All tickers are compareOverlay plugins on a stable empty-primary chart.
+  // This avoids the "first ticker = primary" problem where adding/removing
+  // the first ticker swaps the primary series and trips the engine's
+  // closure-capture limit on plugin data (see useChart.ts WARNING).
+  const SERIES_COLOR_VARS = [
+    '--series-1', '--series-2', '--series-3', '--series-4', '--series-5',
+    '--series-6', '--series-7', '--series-8', '--series-9', '--series-10',
+  ];
+  const seriesColor = (i: number) => cssVar(SERIES_COLOR_VARS[i % SERIES_COLOR_VARS.length]);
+  // Primary is intentionally empty — lightweight-charts hides series with no data.
+  const primaryData: ReturnType<typeof toSortedClose> = [];
+  const comparePlugins: ChartPlugin[] = series.map((s, idx) =>
+    compareOverlay({
+      id: `compare-${s.ticker}`,
+      label: s.ticker,
+      defaultEnabled: true,
+      quotes: s.quotes,
+      color: seriesColor(idx),
+      priceScaleId: 'right',
+    }),
+  );
+
+  const visibleRange = rangeFrom && rangeTo ? { from: rangeFrom, to: rangeTo } : null;
 
   return (
     <StateHandler isPending={isPending} error={error}>
@@ -181,11 +208,38 @@ export default function Home() {
             <div className="home-compare-main">
               {toggled.size > 0 ? (
                 <>
-                  <MultiChart
-                    series={series as Parameters<typeof MultiChart>[0]['series']}
-                    rangeFrom={rangeFrom}
-                    rangeTo={rangeTo}
-                    onRangeChange={handleRangeChange}
+                  <ChartAuto
+                    data={primaryData}
+                    defaultType="Line"
+                    availableTypes={['Line']}
+                    hideTypeControls
+                    plugins={comparePlugins}
+                    visibleRange={visibleRange}
+                    onRangeChange={(r) => handleRangeChange(r.from, r.to)}
+                    toolbarExtras={
+                      <>
+                        {series.map(({ ticker }, i) => (
+                          <span key={ticker} style={{ color: seriesColor(i) }} className="chart-series-label">
+                            ● {ticker}
+                          </span>
+                        ))}
+                        <DatePicker
+                          value={rangeFrom ?? ''}
+                          placeholder="From"
+                          onChange={(v) => handleRangeChange(v, rangeTo)}
+                        />
+                        <DatePicker
+                          value={rangeTo ?? ''}
+                          placeholder="To"
+                          onChange={(v) => handleRangeChange(rangeFrom, v)}
+                        />
+                        {(rangeFrom || rangeTo) && (
+                          <button className="btn btn-ghost" onClick={() => handleRangeChange(null, null)}>
+                            Clear
+                          </button>
+                        )}
+                      </>
+                    }
                   />
                   <CorrelationMatrix highlightTickers={[...toggled]} />
                 </>

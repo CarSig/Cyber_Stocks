@@ -1,5 +1,4 @@
 export { default as StockChart } from './StockChart';
-export { default as MultiChart } from './MultiChart';
 export { default as IntradayChart } from './IntradayChart';
 export { default as SimPriceChart } from './SimPriceChart';
 export { default as VolatilityChart } from './VolatilityChart';

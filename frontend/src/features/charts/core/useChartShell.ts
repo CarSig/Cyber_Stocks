@@ -15,6 +15,12 @@ export type ChartShellOpts = {
   onPeriodChange?: (days: number) => void;
   availablePeriods: number[];
   plugins: ChartPlugin[];
+  /** Explicit visible-range override. When set, takes precedence over
+   *  `selectedPeriod`. Use for date-picker driven views (e.g. Home compare). */
+  visibleRange?: { from: string; to: string } | null;
+  /** Fired when the user pans/zooms the chart, AND for synthetic range
+   *  changes when buttons or pickers update the range. */
+  onRangeChange?: (range: { from: string; to: string }) => void;
 };
 
 export type ChartShell = {
@@ -44,7 +50,16 @@ export function useChartShell(opts: ChartShellOpts): ChartShell {
     plugins: opts.plugins,
     enabled,
   });
-  useChartRange(chartRef, { period: opts.selectedPeriod, onPeriodChange: opts.onPeriodChange }, primarySeriesRef);
+  useChartRange(
+    chartRef,
+    {
+      period: opts.selectedPeriod,
+      visibleRange: opts.visibleRange,
+      onPeriodChange: opts.onPeriodChange,
+      onRangeChange: opts.onRangeChange,
+    },
+    primarySeriesRef,
+  );
   const [modal, closeModal] = usePluginClickModal(controllerRef, opts.plugins, enabled);
 
   // React Compiler memoizes this implicitly.

@@ -36,14 +36,11 @@ type UseChartOpts = {
   type: ChartType;
   /** Plugins. Identity matters: adding/removing entries mounts/unmounts.
    *
-   *  WARNING — live data inside plugins is NOT supported:
-   *  The engine keys plugin re-mounts on `plugin.id` only (see pluginsKey below).
-   *  If you mutate a plugin's internal data (e.g. `trumpPlugin(newPosts)` with the
-   *  same id), the engine will NOT pick it up. Today this is fine — all consumers
-   *  pass static snapshots. If you ever need live-updating plugin data, options are:
-   *    - give the plugin a new id when data changes (forces remount), or
-   *    - have the plugin take a ref/subscription and update its own series imperatively, or
-   *    - add a `version` field to ChartPlugin and include it in the remount key. */
+   *  Live data: when a plugin's data changes at runtime, set its `version`
+   *  field (e.g. `quotes.length` or any hash that changes with the data).
+   *  The engine includes `version` in the remount key, so the plugin will
+   *  be unmounted and re-mounted with the new closure. See
+   *  ChartPlugin.version in types.ts. */
   plugins?: ChartPlugin[];
   /** Optional enabled-state map keyed by plugin.id. If omitted, defaultEnabled is used. */
   enabled?: Record<string, boolean>;
@@ -155,11 +152,13 @@ export function useChart({ data, type, plugins = [], enabled }: UseChartOpts): U
   // Keyed on plugin identity array + enabled map. We compute a string key so
   // callers can pass a fresh array each render without thrash, as long as
   // contents are stable.
-  // Fast path: join ids into a string for cheap dep comparison.
+  // Fast path: join ids (and versions) into a string for cheap dep comparison.
   // TODO: if two plugins ever share an id, this silently treats them as one.
   // Add a dev-mode duplicate check (Set size !== array length) before this
   // ships to more consumers. Trusting callers for now.
-  const pluginsKey = plugins.map((p) => p.id).join('|');
+  // `version` lets a plugin force a remount when its internal data changes —
+  // see ChartPlugin.version in types.ts.
+  const pluginsKey = plugins.map((p) => `${p.id}@${p.version ?? ''}`).join('|');
   const enabledKey = plugins
     .map((p) => `${p.id}:${enabled?.[p.id] ?? p.defaultEnabled ?? true}`)
     .join('|');

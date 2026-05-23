@@ -25,9 +25,20 @@ type ChartAutoProps = {
   /** Plugins. See WARNING on useChart's `plugins` prop re: live data. */
   plugins?: ChartPlugin[];
 
+  /** Explicit visible-range override. Takes precedence over selectedPeriod. */
+  visibleRange?: { from: string; to: string } | null;
+  /** Fired when the user pans/zooms the chart. */
+  onRangeChange?: (range: { from: string; to: string }) => void;
+
   /** Free-form JSX rendered alongside the auto-generated toolbar contents
    *  (e.g. a `● TickerName` compare-label, or a custom legend chip). */
   toolbarExtras?: ReactNode;
+  /** Hide the auto-rendered period buttons. Use when the consumer renders
+   *  its own period UI (e.g. external PeriodButtons component on the page). */
+  hidePeriodControls?: boolean;
+  /** Hide the auto-rendered type buttons. Use when there's only one valid
+   *  type (e.g. a Histogram-only chart). */
+  hideTypeControls?: boolean;
 };
 
 const DEFAULT_TYPES: ChartType[] = ['Candlestick', 'Bar', 'Line', 'Area'];
@@ -48,7 +59,11 @@ export function ChartAuto({
   onPeriodChange,
   availablePeriods = DEFAULT_PERIODS,
   plugins = [],
+  visibleRange,
+  onRangeChange,
   toolbarExtras,
+  hidePeriodControls,
+  hideTypeControls,
 }: ChartAutoProps) {
   const { ctx, containerRef, modal, closeModal } = useChartShell({
     data,
@@ -58,14 +73,16 @@ export function ChartAuto({
     onPeriodChange,
     availablePeriods,
     plugins,
+    visibleRange,
+    onRangeChange,
   });
 
   return (
     <ChartContext.Provider value={ctx}>
       <div>
         <div className="chart-toolbar">
-          <TypeControls />
-          {onPeriodChange && <PeriodControls />}
+          {!hideTypeControls && <TypeControls />}
+          {!hidePeriodControls && onPeriodChange && <PeriodControls />}
           <AutoToggles />
           {toolbarExtras}
         </div>

@@ -23,6 +23,11 @@ type ChartManualProps = {
   /** Plugins. See WARNING on useChart's `plugins` prop re: live data. */
   plugins?: ChartPlugin[];
 
+  /** Explicit visible-range override. Takes precedence over selectedPeriod. */
+  visibleRange?: { from: string; to: string } | null;
+  /** Fired when the user pans/zooms the chart. */
+  onRangeChange?: (range: { from: string; to: string }) => void;
+
   /** Render-prop: full control over toolbar layout. Receives the sub-components
    *  ready to use, so the consumer just composes them. */
   children?: (parts: ChartManualParts) => ReactNode;
@@ -65,6 +70,8 @@ export function ChartManual({
   onPeriodChange,
   availablePeriods = DEFAULT_PERIODS,
   plugins = [],
+  visibleRange,
+  onRangeChange,
   children,
 }: ChartManualProps) {
   const { ctx, containerRef, modal, closeModal } = useChartShell({
@@ -75,6 +82,8 @@ export function ChartManual({
     onPeriodChange,
     availablePeriods,
     plugins,
+    visibleRange,
+    onRangeChange,
   });
 
   return (
