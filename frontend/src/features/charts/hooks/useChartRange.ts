@@ -1,7 +1,24 @@
 import { useEffect, useRef, type RefObject } from 'react';
-import type { IChartApi } from 'lightweight-charts';
-import { daysAgoString, todayString } from '../utils/dates';
+import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
+import { todayString } from '../utils/dates';
 import { useSyncRef } from './useOverlayRefs';
+
+/** Right-anchor for period buttons = the last data point on the primary
+ *  series. "1M" always means "last 30 days of data", regardless of where
+ *  the user has panned. Falls back to today if no series ref / no data. */
+function chartAnchorDate(series: ISeriesApi<SeriesType> | null): string {
+  if (!series) return todayString();
+  const data = series.data();
+  const last = data[data.length - 1];
+  if (!last) return todayString();
+  return String(last.time);
+}
+
+function daysBefore(anchor: string, days: number): string {
+  const d = new Date(anchor);
+  d.setDate(d.getDate() - days);
+  return d.toISOString().slice(0, 10);
+}
 
 type UseChartRangeOpts = {
   period?: number | null;
@@ -13,6 +30,7 @@ type UseChartRangeOpts = {
 export function useChartRange(
   chartRef: RefObject<IChartApi | null>,
   { period, visibleRange, onPeriodChange, onRangeChange }: UseChartRangeOpts,
+  primarySeriesRef?: RefObject<ISeriesApi<SeriesType> | null>,
 ): void {
   const skipRangeRef = useRef(false);
   const periodRef = useSyncRef(period);
@@ -53,9 +71,10 @@ export function useChartRange(
       chartRef.current.timeScale().fitContent();
     } else {
       try {
+        const anchor = chartAnchorDate(primarySeriesRef?.current ?? null);
         chartRef.current.timeScale().setVisibleRange({
-          from: daysAgoString(periodRef.current),
-          to: todayString(),
+          from: daysBefore(anchor, periodRef.current),
+          to: anchor,
         } as Parameters<ReturnType<IChartApi['timeScale']>['setVisibleRange']>[0]);
       } catch {
         chartRef.current.timeScale().fitContent();

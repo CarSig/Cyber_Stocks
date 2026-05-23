@@ -1,0 +1,68 @@
+import { useState } from 'react';
+import { useChart } from './useChart';
+import { useChartRange } from '../hooks/useChartRange';
+import { usePluginClickModal, type ModalState } from './usePluginClickModal';
+import type { ChartContextValue } from './ChartContext';
+import type { ChartPlugin, ChartType } from './types';
+
+type PrimaryDatum = Parameters<typeof useChart>[0]['data'][number];
+
+export type ChartShellOpts = {
+  data: PrimaryDatum[];
+  defaultType: ChartType;
+  availableTypes: ChartType[];
+  selectedPeriod: number | null | undefined;
+  onPeriodChange?: (days: number) => void;
+  availablePeriods: number[];
+  plugins: ChartPlugin[];
+};
+
+export type ChartShell = {
+  ctx: ChartContextValue;
+  containerRef: ReturnType<typeof useChart>['containerRef'];
+  modal: ModalState | null;
+  closeModal: () => void;
+};
+
+/**
+ * Shared wiring for ChartAuto and ChartManual. Owns chart state (type, enabled
+ * map), wires the engine, range hook, and click-modal hook, and assembles the
+ * ChartContextValue exposed to controls.
+ *
+ * Both Chart variants differ ONLY in how they lay out their toolbar — all the
+ * stateful plumbing lives here so it can't drift between them.
+ */
+export function useChartShell(opts: ChartShellOpts): ChartShell {
+  const [type, setType] = useState<ChartType>(opts.defaultType);
+  const [enabled, setEnabled] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(opts.plugins.map((p) => [p.id, p.defaultEnabled ?? true])),
+  );
+
+  const { containerRef, chartRef, primarySeriesRef, controllerRef } = useChart({
+    data: opts.data,
+    type,
+    plugins: opts.plugins,
+    enabled,
+  });
+  useChartRange(chartRef, { period: opts.selectedPeriod, onPeriodChange: opts.onPeriodChange }, primarySeriesRef);
+  const [modal, closeModal] = usePluginClickModal(controllerRef, opts.plugins, enabled);
+
+  // React Compiler memoizes this implicitly.
+  const ctx: ChartContextValue = {
+    type,
+    setType,
+    availableTypes: opts.availableTypes,
+    selectedPeriod: opts.selectedPeriod,
+    onPeriodChange: opts.onPeriodChange,
+    availablePeriods: opts.availablePeriods,
+    plugins: opts.plugins,
+    enabled,
+    toggle: (id, next) =>
+      setEnabled((prev) => ({
+        ...prev,
+        [id]: next ?? !(prev[id] ?? opts.plugins.find((p) => p.id === id)?.defaultEnabled ?? true),
+      })),
+  };
+
+  return { ctx, containerRef, modal, closeModal };
+}
