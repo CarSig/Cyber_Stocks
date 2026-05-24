@@ -1,26 +1,26 @@
-import React from 'react';
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 import './BaseCard.css';
 
-type BaseCardProps = {
-  variant?: string;
+type BaseCardOwnProps<E extends ElementType> = {
+  variant?: 'stats' | 'article' | 'interactive';
   disabled?: boolean;
-  as?: React.ElementType;
+  as?: E;
   className?: string;
-  style?: React.CSSProperties;
-  children?: React.ReactNode;
-  [key: string]: unknown;
+  children?: ReactNode;
 };
 
-export default function BaseCard({
+type BaseCardProps<E extends ElementType> = BaseCardOwnProps<E> &
+  Omit<ComponentPropsWithoutRef<E>, keyof BaseCardOwnProps<E>>;
+
+export default function BaseCard<E extends ElementType = 'div'>({
   variant,
   disabled,
-  as: Tag = 'div',
+  as,
   className = '',
-
-  style,
   children,
   ...props
-}: BaseCardProps) {
+}: BaseCardProps<E>) {
+  const Tag = (as ?? 'div') as ElementType;
   const classes = [
     'base-card',
     variant ? `base-card--${variant}` : null,
@@ -31,7 +31,7 @@ export default function BaseCard({
     .join(' ');
 
   return (
-    <Tag className={classes} style={style} {...props}>
+    <Tag className={classes} {...props}>
       {children}
     </Tag>
   );

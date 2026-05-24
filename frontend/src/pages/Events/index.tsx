@@ -1,10 +1,10 @@
 import Page from '@/components/common/Page';
-import EventSimulation from '@/features/simulations/EventSimulation';
+import IntradaySimulation from '@/features/simulations/IntradaySimulation';
 
 export default function Events() {
   return (
     <Page>
-      <EventSimulation />
+      <IntradaySimulation mode="event" />
     </Page>
   );
 }

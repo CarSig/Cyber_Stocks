@@ -5,6 +5,7 @@ export { useAiSim } from './useAiSim';
 export { useApplyPreset } from './useApplyPreset';
 export { useChartPopover } from './useChartPopover';
 export { useCrosshairTracker } from './useCrosshairTracker';
+export { useDailyChart } from './useDailyChart';
 export { useEventFilters } from './useEventFilters';
 export { useExportSimPdf } from './useExportSimPdf';
 export { useIntradayChart } from './useIntradayChart';

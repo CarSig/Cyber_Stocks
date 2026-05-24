@@ -9,7 +9,7 @@ type MarkerAction = {
   time?: string;
   date?: string;
   side: Side;
-  value: number;
+  value: number | string;
 };
 
 /**
@@ -38,7 +38,7 @@ export function useActionMarkers(
           color:
             a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#60a5fa',
           shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
-          text: fmtMarkerText(a.side, a.value),
+          text: fmtMarkerText(a.side, Number(a.value)),
         };
       })
       .sort((a, b) => (a.time < b.time ? -1 : 1));

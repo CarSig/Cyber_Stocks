@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import LongSimulation from '@/features/simulations/LongSimulation';
-import DayTradeSimulation from '@/features/simulations/DayTradeSimulation';
+import IntradaySimulation from '@/features/simulations/IntradaySimulation';
 import type { Quote, SimulationResult } from '@/types';
 
 type SimulationTabProps = {
@@ -40,7 +40,7 @@ export default function SimulationTab({ ticker, allQuotes, onResult }: Simulatio
         />
       )}
 
-      {subtab === 'daytrade' && <DayTradeSimulation ticker={ticker} />}
+      {subtab === 'daytrade' && <IntradaySimulation mode="daytrade" ticker={ticker} />}
     </section>
   );
 }

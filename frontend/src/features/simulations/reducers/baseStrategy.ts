@@ -178,7 +178,6 @@ function buildActionsImpl<A extends { id: number }, S extends BaseSimState<A>>(
   };
 }
 
-// Shared by DayTradeSimulation and EventSimulation (same Action type)
 export const intradayStrategy: SimStrategy<Action> = {
   toText: (date, actions) =>
     [

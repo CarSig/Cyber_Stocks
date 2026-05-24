@@ -1,28 +1,23 @@
 import { useState } from 'react';
+import BaseCard from '@/components/common/BaseCard';
 import type { IntradayEvent } from '@/features/charts/api';
+
+function severityColor(active: boolean, severity: number): string | undefined {
+  if (!active) return undefined;
+  if (severity >= 9) return '#ef4444';
+  if (severity >= 7) return '#f59e0b';
+  return '#22c55e';
+}
 
 function SeverityBar({ severity }: { severity: number }) {
   return (
-    <div style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
-      {Array.from({ length: 10 }).map((_, i) => (
-        <div
-          key={i}
-          style={{
-            width: 8,
-            height: 12,
-            borderRadius: 2,
-            background:
-              i < severity
-                ? severity >= 9
-                  ? '#ef4444'
-                  : severity >= 7
-                    ? '#f59e0b'
-                    : '#22c55e'
-                : 'rgba(255,255,255,0.1)',
-          }}
-        />
-      ))}
-      <span style={{ marginLeft: 6, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{severity}/10</span>
+    <div className="severity-bar">
+      {Array.from({ length: 10 }).map((_, i) => {
+        const active = i < severity;
+        const color = severityColor(active, severity);
+        return <div key={i} className="severity-bar-cell" style={color ? { background: color } : undefined} />;
+      })}
+      <span className="severity-bar-readout">{severity}/10</span>
     </div>
   );
 }
@@ -34,12 +29,12 @@ export default function IntradayEventCard({ event }: Props) {
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="intraday-event-card">
-      <div className="iec-header" style={{ cursor: 'pointer' }} onClick={() => setOpen((v) => !v)}>
+    <BaseCard variant="article">
+      <div className="iec-header" onClick={() => setOpen((v) => !v)}>
         <span className="iec-rank">#{event.rank}</span>
         <span className="iec-ticker">{event.ticker}</span>
         <span className="iec-title">{event.event}</span>
-        <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-faint)' }}>{open ? '▲' : '▼'}</span>
+        <span className="iec-header-toggle">{open ? '▲' : '▼'}</span>
       </div>
 
       {open && (
@@ -92,6 +87,6 @@ export default function IntradayEventCard({ event }: Props) {
           </div>
         </>
       )}
-    </div>
+    </BaseCard>
   );
 }

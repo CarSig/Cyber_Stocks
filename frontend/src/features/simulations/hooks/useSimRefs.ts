@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'react';
-import type { Action } from '@/utils/sim';
 
-export function useSimRefs(value: string, tradeMode: 'long' | 'short', actions: Action[]) {
+export function useSimRefs<A>(value: string, tradeMode: 'long' | 'short', actions: A[]) {
   const valueRef = useRef(value);
   const tradeModeRef = useRef(tradeMode);
   const actionsRef = useRef(actions);

@@ -2474,7 +2474,7 @@
   color: var(--muted-foreground);
   margin: 1rem 0 0.5rem;
 }
-/* ── TickerListRow ────────────────────────────────────────────────────────── */
+/* ── SummaryListRow (generic) ─────────────────────────────────────────────── */
 .list-row-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -2489,19 +2489,19 @@
 .list-row-card.loading {
   opacity: 0.6;
 }
-.ticker-list-row {
+.summary-list-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
-.ticker-list-row-info {
+.summary-list-row-info {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
   min-width: 0;
 }
-.ticker-list-row-company {
+.summary-list-row-title {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--foreground);
@@ -2509,12 +2509,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ticker-list-row-ticker {
+.summary-list-row-subtitle {
   font-size: 0.75rem;
   font-family: monospace;
   color: var(--muted-foreground);
 }
-.ticker-list-row-empty {
+.summary-list-row-empty {
   font-size: 0.8125rem;
   color: var(--muted-foreground);
 }
@@ -3030,21 +3030,28 @@
 }
 
 /* ── Intraday Event Card ─────────────────────────────────────────────────── */
-.intraday-event-card {
-  background: var(--surface-1);
-  border: 1px solid var(--border-input);
-  border-radius: 8px;
-  padding: 14px 16px;
-  margin-bottom: 12px;
+.severity-bar {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  gap: 2px;
+  align-items: center;
+}
+.severity-bar-cell {
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.severity-bar-readout {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
 }
 .iec-header {
   display: flex;
   align-items: baseline;
   gap: 10px;
   flex-wrap: wrap;
+  cursor: pointer;
 }
 .iec-rank {
   font-size: 0.75rem;
@@ -3063,6 +3070,11 @@
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.3;
+}
+.iec-header-toggle {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-faint);
 }
 .iec-grid {
   display: grid;

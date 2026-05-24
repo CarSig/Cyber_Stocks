@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import BaseCard from '@/components/common/BaseCard';
 import { getCorrelationMatrix } from '../api';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { CorrelationMatrixData } from '@/types';
@@ -71,14 +72,12 @@ export default function CorrelationMatrix({ highlightTickers }: Props) {
   })();
 
   return (
-    <section className="chart-card">
-      <div className="chart-card-header">
-        <span className="chart-card-title">
-          Stock Correlation Matrix
-          <span className="chart-card-subtitle" style={{ marginLeft: 8 }}>
-            {isCustom ? customLabel : `${windowDays}d`} · log-returns
-            {isFetching && !isPending ? ' · refreshing…' : ''}
-          </span>
+    <BaseCard as="section" variant="article">
+      <div className="chart-title-row">
+        <h3 className="chart-title">Stock Correlation Matrix</h3>
+        <span className="chart-card-subtitle" style={{ marginLeft: 8 }}>
+          {isCustom ? customLabel : `${windowDays}d`} · log-returns
+          {isFetching && !isPending ? ' · refreshing…' : ''}
         </span>
       </div>
 
@@ -278,6 +277,6 @@ export default function CorrelationMatrix({ highlightTickers }: Props) {
           </div>
         </DialogContent>
       </Dialog>
-    </section>
+    </BaseCard>
   );
 }

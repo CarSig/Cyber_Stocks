@@ -1,11 +1,12 @@
-import React from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 type StatSectionProps = {
-  label?: React.ReactNode;
-  value?: React.ReactNode;
+  label?: ReactNode;
+  value?: ReactNode;
+  /** Dynamic color (e.g. derived from sentiment/correlation strength). Stays inline. */
   valueColor?: string;
-  subtitle?: React.ReactNode;
-  children?: React.ReactNode;
+  subtitle?: ReactNode;
+  children?: ReactNode;
   minWidth?: number;
 };
 
@@ -17,10 +18,11 @@ export default function StatSection({
   children,
   minWidth = 170,
 }: StatSectionProps) {
+  const valueStyle: CSSProperties | undefined = valueColor ? { color: valueColor } : undefined;
   return (
     <div className="stat-section" style={{ minWidth }}>
       <div className="stat-section-label">{label}</div>
-      <div className="stat-section-value" style={{ color: valueColor }}>
+      <div className="stat-section-value" style={valueStyle}>
         {value}
       </div>
       {subtitle && <div className="stat-section-subtitle">{subtitle}</div>}

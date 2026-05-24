@@ -109,13 +109,6 @@
 .chart-container {
   width: 100%;
 }
-.chart-card {
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-}
 .chart-title-row {
   display: flex;
   align-items: center;

@@ -6,7 +6,7 @@ import type { ChartClickHandlers } from './chartClick';
 
 type Side = 'buy' | 'sell' | 'short' | 'cover';
 
-export type ChartClickHandlerOptions<A extends { id: number }> = {
+export type ChartClickHandlerOptions<A extends { id: number; timestamp?: string; date?: string }> = {
   chart: IChartApi;
   getHoveredIso: () => string | null;
   actionsRef: React.MutableRefObject<A[]>;
@@ -25,7 +25,7 @@ export type ChartClickHandlerOptions<A extends { id: number }> = {
  * Creates the onQuickAction and onHoldStart handlers for attachChartClick,
  * factoring out the duplicated side-determination and value-clamping logic.
  */
-export function makeChartClickHandlers<A extends { id: number }>(
+export function makeChartClickHandlers<A extends { id: number; timestamp?: string; date?: string }>(
   opts: ChartClickHandlerOptions<A>,
 ): ChartClickHandlers {
   const {
@@ -47,8 +47,7 @@ export function makeChartClickHandlers<A extends { id: number }>(
     chart,
     getHoveredIso,
     onQuickAction: (iso, button) => {
-      if (actionsRef.current.find((a) => ('timestamp' in a ? (a as any).timestamp === iso : (a as any).date === iso)))
-        return;
+      if (actionsRef.current.find((a) => ('timestamp' in a ? a.timestamp === iso : a.date === iso))) return;
       if (button === 0) {
         const side: Side = tradeModeRef.current === 'short' ? 'short' : 'buy';
         const val = Math.max(0.01, Number(valueRef.current) || 100);
@@ -69,7 +68,7 @@ export function makeChartClickHandlers<A extends { id: number }>(
     },
     onHoldStart: (iso, x, y, button) => {
       const existing = actionsRef.current.find((a) =>
-        'timestamp' in a ? (a as any).timestamp === iso : (a as any).date === iso,
+        'timestamp' in a ? a.timestamp === iso : a.date === iso,
       );
       if (existing) {
         onEditPopoverOpen(existing, x, y);
@@ -96,7 +95,7 @@ export function makeChartClickHandlers<A extends { id: number }>(
  * Convenience: attaches chart click handlers using makeChartClickHandlers + attachChartClick.
  * Returns a cleanup function.
  */
-export function attachSimChartClick<A extends { id: number }>(
+export function attachSimChartClick<A extends { id: number; timestamp?: string; date?: string }>(
   el: HTMLElement,
   opts: ChartClickHandlerOptions<A>,
 ): () => void {

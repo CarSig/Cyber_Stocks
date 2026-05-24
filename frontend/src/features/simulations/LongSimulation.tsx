@@ -1,27 +1,23 @@
-import { useRef, useEffect, useMemo, useReducer, useState } from 'react';
+import { useRef, useEffect, useMemo, useReducer } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getSimulationPresets } from '@/features/tickers/api';
 import type { SimulationPreset } from '@/types';
-import { createChart, LineSeries, AreaSeries, CandlestickSeries, createSeriesMarkers } from 'lightweight-charts';
-import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
 import DatePicker from '@/components/common/DatePicker';
 import type { Quote } from '@/types';
 import SimEntryPanel from './components/entry-panel/SimEntryPanel';
 import ChartTypeToggle from './components/ChartTypeToggle';
 import TradeModeControls from './components/TradeModeControls';
-import ChartActionPopover from './components/ChartActionPopover';
 import { useExportSimPdf } from './hooks/useExportSimPdf';
 import { longTermReducer, initialLongTermState } from './reducers/longTermReducer';
 import type { LongTermAction } from './reducers/longTermReducer';
 import { longTermStrategy } from './reducers/baseStrategy';
 import { useAddManualAction } from './hooks/useAddManualAction';
+import { useDailyChart } from './hooks/useDailyChart';
+import { useSimRefs } from './hooks/useSimRefs';
 import { simStatsToExportRows } from '@/utils/sim';
 import { DateUtils, safeOffsetDate } from '@/utils/date';
-import { attachChartClick } from './utils';
-import { useCrosshairTracker } from './hooks/useCrosshairTracker';
 
 const { snapToWeekday } = DateUtils;
-const simToIso = (t: unknown) => t as string;
 
 type SimTransaction = {
   date: string;
@@ -245,37 +241,7 @@ export default function LongSimulation({ ticker, quotes = [], onResult }: Simula
 
   const portfolioChartRef = useRef<HTMLDivElement>(null);
   const interactiveChartRef = useRef<HTMLDivElement>(null);
-  const interactiveRef = useRef<{ chart: IChartApi; series: ISeriesApi<SeriesType> } | null>(null);
-  const clickValueRef = useRef(clickValue);
-  const tradeModeRef = useRef(tradeMode);
-  const actionsRef = useRef(actions);
-  useEffect(() => {
-    clickValueRef.current = clickValue;
-  }, [clickValue]);
-  useEffect(() => {
-    tradeModeRef.current = tradeMode;
-  }, [tradeMode]);
-  useEffect(() => {
-    actionsRef.current = actions;
-  }, [actions]);
-
-  const [popover, setPopover] = useState<{
-    date: string;
-    x: number;
-    y: number;
-    side: 'buy' | 'sell' | 'short' | 'cover';
-    value: string;
-    confirm: (side: 'buy' | 'sell' | 'short' | 'cover', rawValue: string) => void;
-    dismiss: () => void;
-  } | null>(null);
-  const [editPopover, setEditPopover] = useState<{
-    action: LongTermAction;
-    x: number;
-    y: number;
-    confirm: (side: 'buy' | 'sell' | 'short' | 'cover', rawValue: string) => void;
-    dismiss: () => void;
-    delete: () => void;
-  } | null>(null);
+  const { valueRef, tradeModeRef, actionsRef } = useSimRefs(clickValue, tradeMode, actions);
 
   type PresetsMap = Record<string, SimulationPreset[]>;
   const {
@@ -329,186 +295,19 @@ export default function LongSimulation({ ticker, quotes = [], onResult }: Simula
 
   const clear = () => dispatch({ type: 'CLEAR_ACTIONS', date: '' });
 
-  const getHoveredIso = useCrosshairTracker(interactiveRef, simToIso, [quotes, chartType]);
-
-  // Interactive price chart
-  useEffect(() => {
-    if (!interactiveChartRef.current || !quotes.length) return;
-    const cv = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-    const chart = createChart(interactiveChartRef.current, {
-      width: interactiveChartRef.current.clientWidth,
-      height: 200,
-      layout: { background: { color: cv('--surface-0') }, textColor: cv('--text-primary') },
-      grid: { vertLines: { color: cv('--surface-3') }, horzLines: { color: cv('--surface-3') } },
-      timeScale: { timeVisible: false },
-    });
-
-    const priceData = quotes
-      .filter((q) => q.close != null)
-      .map((q) => ({ time: q.date.slice(0, 10) as `${number}-${number}-${number}`, value: q.adjclose ?? q.close }));
-
-    let series: ISeriesApi<SeriesType>;
-    if (chartType === 'area') {
-      series = chart.addSeries(AreaSeries, {
-        lineColor: cv('--color-green'),
-        topColor: cv('--color-green') + '55',
-        bottomColor: cv('--color-green') + '00',
-        lineWidth: 2,
-      });
-      series.setData(priceData);
-    } else if (chartType === 'candlestick') {
-      series = chart.addSeries(CandlestickSeries, {
-        upColor: '#22c55e',
-        downColor: '#ef4444',
-        borderUpColor: '#22c55e',
-        borderDownColor: '#ef4444',
-        wickUpColor: '#22c55e',
-        wickDownColor: '#ef4444',
-      });
-      series.setData(
-        quotes
-          .filter((q) => q.open != null && q.close != null)
-          .map((q) => ({
-            time: q.date.slice(0, 10) as `${number}-${number}-${number}`,
-            open: q.open,
-            high: q.high ?? q.close,
-            low: q.low ?? q.close,
-            close: q.close,
-          })),
-      );
-    } else {
-      series = chart.addSeries(LineSeries, { color: cv('--color-green'), lineWidth: 2 });
-      series.setData(priceData);
-    }
-    chart.timeScale().fitContent();
-
-    const el = interactiveChartRef.current!;
-    const cleanupClick = attachChartClick(el, {
-      chart,
-      getHoveredIso: () => {
-        const iso = getHoveredIso();
-        return iso ? snapToWeekday(iso) : null;
-      },
-      onQuickAction: (date, button) => {
-        const existing = actionsRef.current.find((a) => a.date === date);
-        if (existing) {
-          // placeholder coords — edit popover opened via hold; quick click on marker does nothing extra
-          return;
-        }
-        if (button === 0) {
-          const val = Math.max(0.01, Number(clickValueRef.current) || 100);
-          const side = tradeModeRef.current === 'short' ? 'short' : 'buy';
-          dispatch({ type: 'ADD_ACTION', action: { id: nextId.current++, date, side, value: String(val) }, date: '' });
-        } else {
-          const val = Math.min(100, Math.max(0.01, Number(clickValueRef.current) || 50));
-          const side = tradeModeRef.current === 'short' ? 'cover' : 'sell';
-          dispatch({ type: 'ADD_ACTION', action: { id: nextId.current++, date, side, value: String(val) }, date: '' });
-        }
-      },
-      onHoldStart: (date, x, y, button) => {
-        const existing = actionsRef.current.find((a) => a.date === date);
-        if (existing) {
-          setEditPopover({
-            action: existing,
-            x,
-            y,
-            confirm: (side, rawValue) => {
-              const isExit = side === 'sell' || side === 'cover';
-              const val = isExit ? Math.min(100, Math.max(0.01, Number(rawValue))) : Math.max(0.01, Number(rawValue));
-              if (!isFinite(val) || val <= 0) {
-                setEditPopover(null);
-                return;
-              }
-              const updated = actionsRef.current.map((a) =>
-                a.id === existing.id ? { ...a, side, value: String(val) } : a,
-              );
-              dispatch({ type: 'SET_ACTIONS', actions: updated, textValue: longTermStrategy.toText('', updated) });
-              setEditPopover(null);
-            },
-            dismiss: () => setEditPopover(null),
-            delete: () => {
-              dispatch({ type: 'REMOVE_ACTION', id: existing.id, date: '' });
-              setEditPopover(null);
-            },
-          });
-          return;
-        }
-        const side =
-          button === 0
-            ? tradeModeRef.current === 'short'
-              ? 'short'
-              : 'buy'
-            : tradeModeRef.current === 'short'
-              ? 'cover'
-              : 'sell';
-        const val =
-          button === 0
-            ? String(Math.max(0.01, Number(clickValueRef.current) || 100))
-            : String(Math.min(100, Math.max(0.01, Number(clickValueRef.current) || 50)));
-        setPopover({
-          date,
-          x,
-          y,
-          side,
-          value: val,
-          confirm: (s, rawValue) => {
-            const isExit = s === 'sell' || s === 'cover';
-            const v = isExit ? Math.min(100, Math.max(0.01, Number(rawValue))) : Math.max(0.01, Number(rawValue));
-            if (!isFinite(v) || v <= 0) {
-              setPopover(null);
-              return;
-            }
-            dispatch({
-              type: 'ADD_ACTION',
-              action: { id: nextId.current++, date, side: s, value: String(v) },
-              date: '',
-            });
-            setPopover(null);
-          },
-          dismiss: () => setPopover(null),
-        });
-      },
-    });
-    interactiveRef.current = { chart, series };
-    let disposed = false;
-    const ro = new ResizeObserver(() => {
-      if (!disposed) chart.applyOptions({ width: el.clientWidth });
-    });
-    ro.observe(el);
-    return () => {
-      disposed = true;
-      cleanupClick();
-      ro.disconnect();
-      chart.remove();
-      interactiveRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quotes, chartType]);
-
-  // Sync action markers onto interactive chart
-  useEffect(() => {
-    const ref = interactiveRef.current;
-    if (!ref) return;
-    createSeriesMarkers(
-      ref.series,
-      actions
-        .filter((a) => a.date)
-        .map((a) => {
-          const isEntry = a.side === 'buy' || a.side === 'short';
-          const color =
-            a.side === 'buy' ? '#22c55e' : a.side === 'sell' ? '#ef4444' : a.side === 'short' ? '#f97316' : '#3b82f6';
-          const prefix = a.side === 'buy' ? 'B' : a.side === 'sell' ? 'S' : a.side === 'short' ? 'SH' : 'C';
-          return {
-            time: a.date as `${number}-${number}-${number}`,
-            position: isEntry ? ('belowBar' as const) : ('aboveBar' as const),
-            color,
-            shape: isEntry ? ('arrowUp' as const) : ('arrowDown' as const),
-            text: isEntry ? `${prefix} $${a.value}` : `${prefix} ${a.value}%`,
-          };
-        })
-        .sort((a, b) => (a.time < b.time ? -1 : 1)),
-    );
-  }, [actions]);
+  const { popoverNodes } = useDailyChart({
+    containerRef: interactiveChartRef,
+    quotes,
+    chartType,
+    actionsRef,
+    valueRef,
+    tradeModeRef,
+    nextIdRef: nextId,
+    dispatch,
+    date: '',
+    tradeMode,
+    actions,
+  });
 
   const portfolioMarkers = useMemo(
     () =>
@@ -564,8 +363,7 @@ export default function LongSimulation({ ticker, quotes = [], onResult }: Simula
 
   return (
     <div>
-      {popover && <ChartActionPopover popover={popover} tradeMode={tradeMode} />}
-      {editPopover && <ChartActionPopover mode="edit" popover={editPopover} tradeMode={tradeMode} />}
+      {popoverNodes}
 
       <SimEntryPanel
         topSlot={

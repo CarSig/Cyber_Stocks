@@ -1,5 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import BaseCard from '@/components/common/BaseCard';
 import FilterSelect from '@/components/common/FilterSelect';
 import { useTickerContext } from '@/context/TickerContext';
 import { CorrelationBox } from '@/features/correlations/components';
@@ -54,13 +55,13 @@ export default function CorrelationsTab({
   return (
     <section>
       {sparklinesData && (
-        <div className="chart-card">
+        <BaseCard variant="article">
           <div className="chart-title-row">
             <h3 className="chart-title">Lag Correlation Table</h3>
             <span className="chart-card-subtitle">all stocks · 1y history · base leads</span>
           </div>
           <CorrLagTable ticker={ticker} sparklinesData={sparklinesData} companies={companies} />
-        </div>
+        </BaseCard>
       )}
 
       <div className="compare-row compare-row-mt">

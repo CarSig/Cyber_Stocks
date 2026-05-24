@@ -115,7 +115,6 @@ export default function ChartsTab({
       analysisMarkersOverlay({ analysis: (periodAnalysis as QuoteAnalysis) ?? null }),
     ];
     return list.filter((p): p is ChartPlugin => p !== null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     compareQuotes,
     compareTicker,

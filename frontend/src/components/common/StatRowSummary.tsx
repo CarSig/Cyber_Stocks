@@ -1,4 +1,4 @@
-import React from 'react';
+import type { CSSProperties } from 'react';
 
 type Summary = {
   articleCount?: number;
@@ -17,7 +17,7 @@ type Labels = {
 type StatRowSummaryProps = {
   summary?: Summary | null;
   labels?: Labels;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 };
 
 export default function StatRowSummary({ summary, labels, style }: StatRowSummaryProps) {
@@ -38,15 +38,11 @@ export default function StatRowSummary({ summary, labels, style }: StatRowSummar
         <div className="ti-stat-label">{l.articles}</div>
       </div>
       <div className="ti-stat">
-        <div className="ti-stat-value" style={{ color: 'var(--color-green, #22c55e)' }}>
-          {positiveCount}
-        </div>
+        <div className="ti-stat-value text-positive">{positiveCount}</div>
         <div className="ti-stat-label">{l.positive}</div>
       </div>
       <div className="ti-stat">
-        <div className="ti-stat-value" style={{ color: 'var(--color-red, #ef4444)' }}>
-          {negativeCount}
-        </div>
+        <div className="ti-stat-value text-negative">{negativeCount}</div>
         <div className="ti-stat-label">{l.negative}</div>
       </div>
       {neutralCount !== undefined && (
