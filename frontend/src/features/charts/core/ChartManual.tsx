@@ -77,7 +77,13 @@ export function ChartManual({
   resize,
   children,
 }: ChartManualProps) {
-  const { ctx, containerRef, modal, closeModal, resize: r } = useChartShell({
+  const {
+    ctx,
+    containerRef,
+    modal,
+    closeModal,
+    resize: r,
+  } = useChartShell({
     data,
     defaultType,
     availableTypes,
@@ -94,11 +100,7 @@ export function ChartManual({
     <ChartContext.Provider value={ctx}>
       <div>
         {children?.(PARTS)}
-        <div
-          ref={containerRef}
-          className="chart-container"
-          style={r.enabled ? { height: r.height } : undefined}
-        />
+        <div ref={containerRef} className="chart-container" style={r.enabled ? { height: r.height } : undefined} />
         {r.enabled && (
           <div
             className="sec-price-chart-resize-handle"

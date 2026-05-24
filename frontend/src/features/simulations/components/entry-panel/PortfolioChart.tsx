@@ -28,10 +28,7 @@ const PortfolioChart = forwardRef<HTMLDivElement, PortfolioChartProps>(function 
     else if (outerRef) outerRef.current = el;
   }
 
-  const offset = useMemo(
-    () => (intraday && history.length ? etOffset(history[0].time) : 0),
-    [intraday, history],
-  );
+  const offset = useMemo(() => (intraday && history.length ? etOffset(history[0].time) : 0), [intraday, history]);
 
   const data = useMemo(
     () =>

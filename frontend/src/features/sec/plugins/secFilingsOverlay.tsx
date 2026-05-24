@@ -72,13 +72,7 @@ export function secFilingsOverlay({
                 </>
               );
               return url ? (
-                <a
-                  key={f.accession}
-                  href={url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="sec-filings-modal-row"
-                >
+                <a key={f.accession} href={url} target="_blank" rel="noreferrer" className="sec-filings-modal-row">
                   {inner}
                 </a>
               ) : (

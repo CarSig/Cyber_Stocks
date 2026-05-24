@@ -159,9 +159,7 @@ export function useChart({ data, type, plugins = [], enabled }: UseChartOpts): U
   // `version` lets a plugin force a remount when its internal data changes —
   // see ChartPlugin.version in types.ts.
   const pluginsKey = plugins.map((p) => `${p.id}@${p.version ?? ''}`).join('|');
-  const enabledKey = plugins
-    .map((p) => `${p.id}:${enabled?.[p.id] ?? p.defaultEnabled ?? true}`)
-    .join('|');
+  const enabledKey = plugins.map((p) => `${p.id}:${enabled?.[p.id] ?? p.defaultEnabled ?? true}`).join('|');
 
   useEffect(() => {
     if (!ready || !controllerRef.current) return;

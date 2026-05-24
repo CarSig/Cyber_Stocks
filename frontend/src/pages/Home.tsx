@@ -152,8 +152,16 @@ export default function Home() {
   // the first ticker swaps the primary series and trips the engine's
   // closure-capture limit on plugin data (see useChart.ts WARNING).
   const SERIES_COLOR_VARS = [
-    '--series-1', '--series-2', '--series-3', '--series-4', '--series-5',
-    '--series-6', '--series-7', '--series-8', '--series-9', '--series-10',
+    '--series-1',
+    '--series-2',
+    '--series-3',
+    '--series-4',
+    '--series-5',
+    '--series-6',
+    '--series-7',
+    '--series-8',
+    '--series-9',
+    '--series-10',
   ];
   const seriesColor = (i: number) => cssVar(SERIES_COLOR_VARS[i % SERIES_COLOR_VARS.length]);
   // Primary is intentionally empty — lightweight-charts hides series with no data.

@@ -28,10 +28,7 @@ export type ChartController = {
    *  series registry. Plugins manage their own series handles for now.
    *  Revisit if we get plugins that need to coordinate updates across
    *  each other's series. */
-  addSeries: <T extends SeriesType>(
-    def: SeriesDefinition<T>,
-    data: SeriesDataItemTypeMap[T][],
-  ) => ISeriesApi<T>;
+  addSeries: <T extends SeriesType>(def: SeriesDefinition<T>, data: SeriesDataItemTypeMap[T][]) => ISeriesApi<T>;
   /** Replace markers for a logical group. Pass [] to clear. Multiple plugins
    *  can own different groups; the controller merges and applies them. */
   setMarkers: (groupId: string, markers: SeriesMarker<Time>[]) => void;

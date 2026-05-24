@@ -1,4 +1,4 @@
-type ChartType = 'line' | 'area' | 'candlestick';
+export type ChartType = 'line' | 'area' | 'candlestick';
 
 type ChartTypeToggleProps = {
   chartType: ChartType;

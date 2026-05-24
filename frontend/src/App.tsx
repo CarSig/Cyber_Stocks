@@ -36,7 +36,6 @@ const EdgarEntities = lazy(() => import('./pages/Research/EdgarEntities'));
 const Edgar8kItems = lazy(() => import('./pages/Research/Edgar8kItems'));
 const GovContracts = lazy(() => import('./pages/Research/GovContracts'));
 const UsaSpending = lazy(() => import('./pages/Research/UsaSpending'));
-const GraphPage = lazy(() => import('./pages/GraphPage'));
 
 export default function App() {
   return (
@@ -243,14 +242,7 @@ export default function App() {
                           </AdminRoute>
                         }
                       />
-                      <Route
-                        path="/graph"
-                        element={
-                          <AdminRoute>
-                            <GraphPage />
-                          </AdminRoute>
-                        }
-                      />
+
                       <Route
                         path="/:ticker"
                         element={

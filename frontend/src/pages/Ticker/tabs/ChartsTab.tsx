@@ -163,9 +163,7 @@ export default function ChartsTab({
           visibleRange={visibleRange}
           onRangeChange={setVisibleRange}
           plugins={pricePlugins}
-          toolbarExtras={
-            compareTicker ? <span className="chart-compare-label">● {compareTicker}</span> : null
-          }
+          toolbarExtras={compareTicker ? <span className="chart-compare-label">● {compareTicker}</span> : null}
         />
       </ChartCard>
 

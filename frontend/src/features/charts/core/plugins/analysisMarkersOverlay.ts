@@ -15,10 +15,7 @@ type AnalysisMarkersOverlayOpts = {
  * Reuses the existing `buildMarkers` helper so visuals match the legacy
  * StockChart exactly.
  */
-export function analysisMarkersOverlay({
-  analysis,
-  defaultEnabled = false,
-}: AnalysisMarkersOverlayOpts): ChartPlugin {
+export function analysisMarkersOverlay({ analysis, defaultEnabled = false }: AnalysisMarkersOverlayOpts): ChartPlugin {
   // Cheap version key: any time `analysis` becomes truthy/falsy or its key
   // dates change, the plugin remounts with the new closure.
   const same = analysis?.biggestSameDayDiff;

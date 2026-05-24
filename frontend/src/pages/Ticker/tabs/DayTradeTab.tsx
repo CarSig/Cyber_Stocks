@@ -32,10 +32,7 @@ type IntradayChartProps = {
 
 function IntradayPriceChart({ bars, compareBars }: IntradayChartProps) {
   const { timezone } = useTimezone();
-  const tzOffset = useMemo(
-    () => (bars[0] ? getTzOffsetSeconds(timezone, new Date(bars[0].t)) : 0),
-    [bars, timezone],
-  );
+  const tzOffset = useMemo(() => (bars[0] ? getTzOffsetSeconds(timezone, new Date(bars[0].t)) : 0), [bars, timezone]);
 
   // OHLC + value on a single record set covers every framework series type.
   const data = useMemo(
@@ -253,7 +250,6 @@ export default function DayTradeTab({ ticker, companies }: DayTradeTabProps) {
             Load
           </button>
         </form>
-
       </div>
 
       {otherTickers.length > 0 && (

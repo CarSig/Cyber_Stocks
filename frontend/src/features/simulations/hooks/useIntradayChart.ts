@@ -8,11 +8,12 @@ import { useActionPopovers } from './useActionPopovers';
 import { useCrosshairTracker } from './useCrosshairTracker';
 import { useSimChartClick } from './useSimChartClick';
 import { useActionMarkers } from './useActionMarkers';
+import type { ChartType } from '../components/ChartTypeToggle';
 
 type Opts = {
   containerRef: RefObject<HTMLDivElement | null>;
   bars: AlpacaBar[];
-  chartType: string;
+  chartType: ChartType;
   chartConfig: ChartSeriesConfig;
   toIso: (t: unknown) => string;
   actionsRef: MutableRefObject<Action[]>;

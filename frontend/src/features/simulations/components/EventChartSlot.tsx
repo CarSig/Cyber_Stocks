@@ -1,9 +1,9 @@
 import type { RefObject, Dispatch } from 'react';
-import ChartTypeToggle from './ChartTypeToggle';
+import ChartTypeToggle, { type ChartType } from './ChartTypeToggle';
 import type { IntradaySimAction } from '../reducers/intradayReducer';
 
 type Props = {
-  chartType: string;
+  chartType: ChartType;
   tradeMode: 'long' | 'short';
   value: string;
   containerRef: RefObject<HTMLDivElement | null>;

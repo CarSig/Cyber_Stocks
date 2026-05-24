@@ -1,12 +1,12 @@
 import type { RefObject } from 'react';
-import ChartTypeToggle from './ChartTypeToggle';
+import ChartTypeToggle, { type ChartType } from './ChartTypeToggle';
 
 type Props = {
-  chartType: string;
+  chartType: ChartType;
   tradeMode: 'long' | 'short';
   value: string;
   containerRef: RefObject<HTMLDivElement | null>;
-  dispatch: (action: { type: 'SET_CHART_TYPE'; chartType: string }) => void;
+  dispatch: (action: { type: 'SET_CHART_TYPE'; chartType: ChartType }) => void;
 };
 
 export default function DayTradeChartSlot({ chartType, tradeMode, value, containerRef, dispatch }: Props) {

@@ -35,7 +35,7 @@ export default function SecDownloadForm({
       <div className="sec-form-row">
         <div className="sec-form-field">
           <Label>Ticker</Label>
-          <Select value={selectedTicker ?? ''} onValueChange={onTickerChange}>
+          <Select value={selectedTicker ?? ''} onValueChange={(v) => onTickerChange(v ?? '')}>
             <SelectTrigger className="sec-select">
               <SelectValue placeholder="Select ticker" />
             </SelectTrigger>

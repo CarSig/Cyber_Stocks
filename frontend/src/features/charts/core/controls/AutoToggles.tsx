@@ -13,11 +13,7 @@ export function AutoToggles() {
       {plugins
         .filter((p) => p.label)
         .map((p) => (
-          <ChartToggleButton
-            key={p.id}
-            active={enabled[p.id] ?? p.defaultEnabled ?? true}
-            onClick={() => toggle(p.id)}
-          >
+          <ChartToggleButton key={p.id} active={enabled[p.id] ?? p.defaultEnabled ?? true} onClick={() => toggle(p.id)}>
             {p.label}
           </ChartToggleButton>
         ))}

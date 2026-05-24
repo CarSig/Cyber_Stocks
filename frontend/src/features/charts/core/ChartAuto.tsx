@@ -70,7 +70,13 @@ export function ChartAuto({
   hideTypeControls,
   resize,
 }: ChartAutoProps) {
-  const { ctx, containerRef, modal, closeModal, resize: r } = useChartShell({
+  const {
+    ctx,
+    containerRef,
+    modal,
+    closeModal,
+    resize: r,
+  } = useChartShell({
     data,
     defaultType,
     availableTypes,
@@ -92,11 +98,7 @@ export function ChartAuto({
           <AutoToggles />
           {toolbarExtras}
         </div>
-        <div
-          ref={containerRef}
-          className="chart-container"
-          style={r.enabled ? { height: r.height } : undefined}
-        />
+        <div ref={containerRef} className="chart-container" style={r.enabled ? { height: r.height } : undefined} />
         {r.enabled && (
           <div
             className="sec-price-chart-resize-handle"

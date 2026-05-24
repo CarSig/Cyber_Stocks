@@ -81,11 +81,7 @@ function buildMarkersForVariant(variant: Variant, items: ThreatIntelItem[] | nul
   });
 }
 
-function filterForDate(
-  variant: Variant,
-  items: ThreatIntelItem[] | null | undefined,
-  date: string,
-): ThreatIntelItem[] {
+function filterForDate(variant: Variant, items: ThreatIntelItem[] | null | undefined, date: string): ThreatIntelItem[] {
   if (!items?.length) return [];
   if (variant === 'nvd') {
     return items.filter((v) => {
