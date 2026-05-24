@@ -67,9 +67,7 @@ export function makeChartClickHandlers<A extends { id: number; timestamp?: strin
       }
     },
     onHoldStart: (iso, x, y, button) => {
-      const existing = actionsRef.current.find((a) =>
-        'timestamp' in a ? a.timestamp === iso : a.date === iso,
-      );
+      const existing = actionsRef.current.find((a) => ('timestamp' in a ? a.timestamp === iso : a.date === iso));
       if (existing) {
         onEditPopoverOpen(existing, x, y);
         return;

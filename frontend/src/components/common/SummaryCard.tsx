@@ -30,11 +30,7 @@ export default function SummaryCard({
   const { corrResult, hasCorrelation, strength, sentimentInfo } = useCorrelationMetrics(correlation, summary);
 
   return (
-    <BaseCard
-      variant="interactive"
-      style={{ cursor: 'pointer', opacity: isPending ? 0.6 : 1 }}
-      onClick={onClick}
-    >
+    <BaseCard variant="interactive" style={{ cursor: 'pointer', opacity: isPending ? 0.6 : 1 }} onClick={onClick}>
       <CardHeader title={title} titleClassName={titleClassName}>
         {headerExtra}
       </CardHeader>

@@ -381,7 +381,9 @@ code {
   color: var(--text-faint);
   font-size: 11px;
   padding: 0;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
 }
 
 .left-sidebar-toggle:hover {

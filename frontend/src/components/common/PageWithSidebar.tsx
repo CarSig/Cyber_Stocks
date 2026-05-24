@@ -16,10 +16,7 @@ export default function PageWithSidebar({
   return (
     <div className="page-with-sidebar">
       {sidebar}
-      <div
-        className="page-with-sidebar-main"
-        style={{ paddingRight: rightPanelOpen ? rightPanelWidth : 0 }}
-      >
+      <div className="page-with-sidebar-main" style={{ paddingRight: rightPanelOpen ? rightPanelWidth : 0 }}>
         {children}
       </div>
     </div>
