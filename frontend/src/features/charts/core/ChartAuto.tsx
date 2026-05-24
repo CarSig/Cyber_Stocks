@@ -6,8 +6,8 @@ import { TypeControls } from './controls/TypeControls';
 import { PeriodControls } from './controls/PeriodControls';
 import { AutoToggles } from './controls/AutoToggles';
 import { ChartModalHost } from './ChartModalHost';
-import type { ChartPlugin, ChartType } from './types';
-import '../components/charts.css';
+import type { ChartPlugin, ChartType, ResizeConfig } from './types';
+import './charts.css';
 
 type PrimaryDatum = Parameters<typeof useChart>[0]['data'][number];
 
@@ -39,6 +39,10 @@ type ChartAutoProps = {
   /** Hide the auto-rendered type buttons. Use when there's only one valid
    *  type (e.g. a Histogram-only chart). */
   hideTypeControls?: boolean;
+  /** Drag/scroll-to-resize support. When `enabled`, renders a small handle
+   *  below the chart that the user can drag (or wheel-scroll) to change
+   *  chart height. */
+  resize?: ResizeConfig;
 };
 
 const DEFAULT_TYPES: ChartType[] = ['Candlestick', 'Bar', 'Line', 'Area'];
@@ -64,8 +68,9 @@ export function ChartAuto({
   toolbarExtras,
   hidePeriodControls,
   hideTypeControls,
+  resize,
 }: ChartAutoProps) {
-  const { ctx, containerRef, modal, closeModal } = useChartShell({
+  const { ctx, containerRef, modal, closeModal, resize: r } = useChartShell({
     data,
     defaultType,
     availableTypes,
@@ -75,6 +80,7 @@ export function ChartAuto({
     plugins,
     visibleRange,
     onRangeChange,
+    resize,
   });
 
   return (
@@ -86,7 +92,19 @@ export function ChartAuto({
           <AutoToggles />
           {toolbarExtras}
         </div>
-        <div ref={containerRef} className="chart-container" />
+        <div
+          ref={containerRef}
+          className="chart-container"
+          style={r.enabled ? { height: r.height } : undefined}
+        />
+        {r.enabled && (
+          <div
+            className="sec-price-chart-resize-handle"
+            onMouseDown={r.onHandleMouseDown}
+            onWheel={r.onHandleWheel}
+            title="Drag or scroll to resize"
+          />
+        )}
         <ChartModalHost modal={modal} onClose={closeModal} />
       </div>
     </ChartContext.Provider>

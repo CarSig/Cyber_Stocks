@@ -1,5 +1,7 @@
+import type { LineData, Time } from 'lightweight-charts';
 import { cssVar } from '../../utils/theme';
 import { toSortedClose } from '../../utils/series';
+import { lineSeriesOverlay } from './lineSeriesOverlay';
 import type { ChartPlugin } from '../types';
 import type { Quote } from '@/types';
 
@@ -21,8 +23,8 @@ type CompareOverlayOpts = {
  * Adds a secondary line series on its own price scale ('compare') so the
  * compared symbol shares the x-axis but not the y-axis with the primary series.
  *
- * Live data: NOT supported. Pass a new id (or unmount/remount the chart) if
- * `quotes` changes. See WARNING on useChart's `plugins` prop.
+ * Live data: the engine remounts on `version` changes — the content hash below
+ * catches "ticker swapped, same id" or "quotes refetched".
  */
 export function compareOverlay({
   id = 'compare',
@@ -32,40 +34,20 @@ export function compareOverlay({
   color,
   priceScaleId,
 }: CompareOverlayOpts): ChartPlugin {
-  const scaleId = priceScaleId ?? id;
-  // Cheap content hash: first+last date+close, plus length. Catches the
-  // common case of "ticker swapped, same id" or "quotes refetched".
   const first = quotes[0];
   const last = quotes[quotes.length - 1];
   const version = `${quotes.length}|${first?.date ?? ''}|${first?.close ?? ''}|${last?.date ?? ''}|${last?.close ?? ''}`;
-  return {
+  const data: LineData<Time>[] = toSortedClose(quotes).map((p) => ({
+    time: p.time as Time,
+    value: p.value ?? 0,
+  }));
+  return lineSeriesOverlay({
     id,
     label,
     defaultEnabled,
     version,
-    mount: (ctrl) => {
-      const series = ctrl.addSeries(
-        {
-          type: 'Line',
-          options: {
-            color: color ?? cssVar('--color-amber'),
-            lineWidth: 2,
-            priceScaleId: scaleId,
-          },
-        },
-        toSortedClose(quotes),
-      );
-      // Only nudge scaleMargins if this overlay owns its scale; shared scales
-      // (e.g. 'right') are configured by the primary series' makeChartOptions.
-      if (scaleId !== 'right' && scaleId !== 'left') {
-        ctrl.chart.priceScale(scaleId).applyOptions({ scaleMargins: { top: 0.1, bottom: 0.1 } });
-      }
-
-      return {
-        unmount: () => {
-          ctrl.chart.removeSeries(series);
-        },
-      };
-    },
-  };
+    data,
+    color: color ?? cssVar('--color-amber'),
+    priceScaleId,
+  });
 }

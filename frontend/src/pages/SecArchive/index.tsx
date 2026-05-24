@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Page from '@/components/common/Page';
 import SecDownloadForm from '@/features/sec/components/SecDownloadForm';
 import SecPriceChart from '@/features/sec/components/SecPriceChart';
@@ -6,9 +6,7 @@ import SecTimeline from '@/features/sec/components/SecTimeline';
 import SecFilingImpactTable from '@/features/sec/components/SecFilingImpactTable';
 import { useSecCoverage } from '@/features/sec/hooks/useSecData';
 import { useStock } from '@/features/tickers/hooks/useStock';
-import VolatilityChart from '@/features/charts/components/VolatilityChart';
-import VolumeChart from '@/features/charts/components/VolumeChart';
-import TradeCountChart from '@/features/charts/components/TradeCountChart';
+import { ChartAuto, hvOverlay, atrOverlay, type ChartPlugin } from '@/features/charts/core';
 import './SecArchive.css';
 
 function defaultDate(daysBack: number): string {
@@ -43,6 +41,23 @@ function SecArchiveContent({ ticker, onTickerChange }: { ticker: string; onTicke
     setDateTo(to);
   }
 
+  const volatilityPlugins: ChartPlugin[] = useMemo(
+    () => [hvOverlay({ quotes: allQuotes ?? [] }), atrOverlay({ quotes: allQuotes ?? [] })],
+    [allQuotes],
+  );
+
+  const volumeData = useMemo(
+    () =>
+      (allQuotes ?? [])
+        .filter((q) => q.volume != null)
+        .map((q) => ({
+          time: q.date.slice(0, 10) as `${number}-${number}-${number}`,
+          value: Number(q.volume),
+          color: '#3b82f6',
+        })),
+    [allQuotes],
+  );
+
   const defaultRange = coverage?.ranges.length
     ? { from: coverage.ranges[0].from, to: coverage.ranges[coverage.ranges.length - 1].to }
     : null;
@@ -65,16 +80,28 @@ function SecArchiveContent({ ticker, onTickerChange }: { ticker: string; onTicke
         showVolatility={showVolatility}
         onVolatilityToggle={() => setShowVolatility((v) => !v)}
       />
-      <VolumeChart quotes={allQuotes} period={null} visibleRange={visibleRange} onRangeChange={handleRangeChange} />
-
-      <TradeCountChart period={null} visibleRange={visibleRange} onRangeChange={handleRangeChange} />
+      <ChartAuto
+        data={volumeData}
+        defaultType="Histogram"
+        availableTypes={['Histogram']}
+        hideTypeControls
+        hidePeriodControls
+        visibleRange={visibleRange}
+        onRangeChange={handleRangeChange}
+        resize={{ enabled: true }}
+        toolbarExtras={<span className="chart-series-label chart-series-label-ml">Yahoo Volume</span>}
+      />
 
       {showVolatility && (
-        <VolatilityChart
-          quotes={allQuotes}
-          period={null}
+        <ChartAuto
+          data={[]}
+          defaultType="Line"
+          availableTypes={['Line']}
+          hideTypeControls
+          hidePeriodControls
           visibleRange={visibleRange}
           onRangeChange={handleRangeChange}
+          plugins={volatilityPlugins}
         />
       )}
       <SecTimeline ticker={ticker} visibleRange={visibleRange} onRangeChange={handleRangeChange} />

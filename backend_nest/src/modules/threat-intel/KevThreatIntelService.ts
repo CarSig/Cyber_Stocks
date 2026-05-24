@@ -57,7 +57,8 @@ export class KevThreatIntelService extends ThreatIntelSource<
   list({ limit = 50, offset = 0, search = "", ransomware = "", company = "" } = {}): KevListResult {
     const data = this.read();
     if (!data) return { total: 0, items: [], syncedAt: null };
-    const cutoff = new Date("2022-01-01").getTime();
+    // Rolling 5-year window — we don't surface entries older than this.
+    const cutoff = Date.now() - 5 * 365 * 24 * 60 * 60 * 1000;
     let items = (data.vulnerabilities as KevVuln[])
       .filter((v) => new Date(v.dateAdded ?? 0).getTime() >= cutoff)
       .sort((a, b) => new Date(b.dateAdded ?? 0).getTime() - new Date(a.dateAdded ?? 0).getTime());

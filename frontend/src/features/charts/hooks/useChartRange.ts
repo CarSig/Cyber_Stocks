@@ -1,7 +1,7 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import type { IChartApi, ISeriesApi, SeriesType } from 'lightweight-charts';
 import { todayString } from '../utils/dates';
-import { useSyncRef } from './useOverlayRefs';
+import { useSyncRef } from './useSyncRef';
 
 /** Right-anchor for period buttons = the last data point on the primary
  *  series. "1M" always means "last 30 days of data", regardless of where

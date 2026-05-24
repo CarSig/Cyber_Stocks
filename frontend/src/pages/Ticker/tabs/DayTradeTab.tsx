@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getBars } from '@/features/charts/api';
 import type { AlpacaBar } from '@/types';
 import { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from '@/features/charts/utils';
 import { useTimezone } from '@/context/TimezoneContext';
-import { IntradayChart, VolumeChart, TradeCountChart } from '@/features/charts/components';
+import { ChartAuto, lineSeriesOverlay, type ChartPlugin, type ChartType } from '@/features/charts/core';
+import { getTzOffsetSeconds, toTzTime } from '@/features/charts/utils/dates';
+import type { Time } from 'lightweight-charts';
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -22,6 +24,122 @@ function useAlpacaBars(ticker: string | undefined, date: string, timeframe: stri
 type BarStatsProps = {
   bars: AlpacaBar[];
 };
+
+type IntradayChartProps = {
+  bars: AlpacaBar[];
+  compareBars: { ticker: string; bars: AlpacaBar[] }[];
+};
+
+function IntradayPriceChart({ bars, compareBars }: IntradayChartProps) {
+  const { timezone } = useTimezone();
+  const tzOffset = useMemo(
+    () => (bars[0] ? getTzOffsetSeconds(timezone, new Date(bars[0].t)) : 0),
+    [bars, timezone],
+  );
+
+  // OHLC + value on a single record set covers every framework series type.
+  const data = useMemo(
+    () =>
+      bars.map((b) => ({
+        time: toTzTime(b.t, tzOffset) as unknown as Time,
+        open: b.o,
+        high: b.h,
+        low: b.l,
+        close: b.c,
+        value: b.c,
+      })),
+    [bars, tzOffset],
+  );
+
+  // Each compare ticker → a Line overlay on its own price scale.
+  // Intraday bars are already ordered, so we don't resort by date.
+  const plugins: ChartPlugin[] = useMemo(
+    () =>
+      compareBars
+        .filter((c) => c.bars.length > 0)
+        .map((c, i) => {
+          const cTzOffset = getTzOffsetSeconds(timezone, new Date(c.bars[0].t));
+          const compareData = c.bars.map((b) => ({
+            time: toTzTime(b.t, cTzOffset) as unknown as Time,
+            value: b.c,
+          }));
+          const version = `${compareData.length}|${compareData[0]?.value ?? ''}|${compareData[compareData.length - 1]?.value ?? ''}`;
+          return lineSeriesOverlay({
+            id: `compare_${c.ticker}`,
+            label: c.ticker,
+            defaultEnabled: true,
+            version,
+            data: compareData,
+            color: COMPARE_COLORS[i % COMPARE_COLORS.length],
+            title: c.ticker,
+          });
+        }),
+    [compareBars, timezone],
+  );
+
+  return (
+    <ChartAuto
+      data={data}
+      defaultType="Candlestick"
+      availableTypes={CHART_TYPES.General as unknown as ChartType[]}
+      plugins={plugins}
+      hidePeriodControls
+      resize={{ enabled: true }}
+    />
+  );
+}
+
+function AlpacaVolumeAndTradeCount({ bars }: { bars: AlpacaBar[] }) {
+  const volumeData = useMemo(
+    () =>
+      bars
+        .filter((b) => b.v != null)
+        .map((b) => ({
+          time: Math.floor(new Date(b.t).getTime() / 1000) as unknown as Time,
+          value: Number(b.v),
+          color: '#3b82f6',
+        })),
+    [bars],
+  );
+  const tradeCountData = useMemo(
+    () =>
+      bars
+        .filter((b) => b.n != null)
+        .map((b) => ({
+          time: Math.floor(new Date(b.t).getTime() / 1000) as unknown as Time,
+          value: Number(b.n),
+          color: '#a855f7',
+        })),
+    [bars],
+  );
+  const hasTradeCount = tradeCountData.length > 0;
+  return (
+    <>
+      <ChartAuto
+        data={volumeData}
+        defaultType="Histogram"
+        availableTypes={['Histogram']}
+        hideTypeControls
+        hidePeriodControls
+        resize={{ enabled: true }}
+        toolbarExtras={<span className="chart-series-label chart-series-label-ml">Alpaca Volume (v)</span>}
+      />
+      <ChartAuto
+        data={tradeCountData}
+        defaultType="Histogram"
+        availableTypes={['Histogram']}
+        hideTypeControls
+        hidePeriodControls
+        resize={{ enabled: true }}
+        toolbarExtras={
+          <span className="chart-series-label chart-series-label-ml">
+            {hasTradeCount ? 'Alpaca Trade Count (n)' : 'Trade Count (n) — N/A'}
+          </span>
+        }
+      />
+    </>
+  );
+}
 
 function BarStats({ bars }: BarStatsProps) {
   const open = bars[0].o;
@@ -79,7 +197,6 @@ export default function DayTradeTab({ ticker, companies }: DayTradeTabProps) {
   const [date, setDate] = useState(todayStr());
   const [timeframe, setTimeframe] = useState('1Min');
   const { timezone } = useTimezone();
-  const [chartType, setChartType] = useState('Candlestick');
   const [query, setQuery] = useState({ date: todayStr(), timeframe: '1Min' });
   const [compareTickers, setCompareTickers] = useState<string[]>([]);
   const [compareBarsMap, setCompareBarsMap] = useState<Record<string, AlpacaBar[]>>({});
@@ -137,18 +254,6 @@ export default function DayTradeTab({ ticker, companies }: DayTradeTabProps) {
           </button>
         </form>
 
-        <div className="alpaca-chart-type-btns">
-          {CHART_TYPES.General.map((ct) => (
-            <button
-              key={ct}
-              className={`alpaca-type-btn${chartType === ct ? ' alpaca-type-btn--active' : ''}`}
-              onClick={() => setChartType(ct)}
-              type="button"
-            >
-              {ct}
-            </button>
-          ))}
-        </div>
       </div>
 
       {otherTickers.length > 0 && (
@@ -192,9 +297,8 @@ export default function DayTradeTab({ ticker, companies }: DayTradeTabProps) {
           {data.bars?.length > 0 ? (
             <>
               <BarStats bars={data.bars} />
-              <IntradayChart bars={data.bars} compareBars={compareBars} chartType={chartType} />
-              <VolumeChart alpacaBars={data.bars} />
-              <TradeCountChart alpacaBars={data.bars} />
+              <IntradayPriceChart bars={data.bars} compareBars={compareBars} />
+              <AlpacaVolumeAndTradeCount bars={data.bars} />
             </>
           ) : (
             <p className="alpaca-status">No bars returned — market may have been closed on this date.</p>

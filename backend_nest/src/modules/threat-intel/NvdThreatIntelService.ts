@@ -92,16 +92,23 @@ export class NvdThreatIntelService extends ThreatIntelSource<
   list({ limit = 50, offset = 0, search = "", severity = "", company = "" } = {}): NvdListResult {
     const data = this.read();
     if (!data) return { total: 0, items: [], syncedAt: null };
-    const cutoff = new Date("2022-01-01").getTime();
+    // Rolling 5-year window — we don't surface vulns older than this.
+    const cutoff = Date.now() - 5 * 365 * 24 * 60 * 60 * 1000;
     let items = ((data.vulnerabilities ?? []) as NvdVuln[])
       .filter((v) => new Date(v.cve?.published ?? 0).getTime() >= cutoff)
       .sort((a, b) => new Date(b.cve?.published ?? 0).getTime() - new Date(a.cve?.published ?? 0).getTime());
     if (severity) items = items.filter((v) => severityOf(v) === severity.toUpperCase());
     if (company) {
       const kw = vendorKeyword(company);
+      const cpe = cpeKeyword(company);
       items = items.filter((v) => {
         const desc = v.cve?.descriptions?.find((d) => d.lang === "en")?.value?.toLowerCase() ?? "";
-        return desc.includes(kw);
+        if (desc.includes(kw)) return true;
+        return (v.cve?.configurations ?? []).some((cfg) =>
+          (cfg.nodes ?? []).some((node) =>
+            (node.cpeMatch ?? []).some((c) => c.criteria?.toLowerCase().includes(cpe))
+          )
+        );
       });
     }
     if (search) {

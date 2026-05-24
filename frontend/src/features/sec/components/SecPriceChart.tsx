@@ -1,13 +1,9 @@
-import { useState, useMemo } from 'react';
-import type { SeriesMarker, Time } from 'lightweight-charts';
-import { useChartInstance } from '@/features/charts/hooks/useChartInstance';
-import { useChartRange } from '@/features/charts/hooks/useChartRange';
+import { useMemo, useState } from 'react';
 import { useStock } from '@/features/tickers/hooks/useStock';
-import { useOverlayRefs } from '@/features/charts/hooks/useOverlayRefs';
+import { ChartAuto, type ChartPlugin } from '@/features/charts/core';
+import { toSortedOHLC } from '@/features/charts/utils/series';
 import { useSecFiles } from '../hooks/useSecData';
-import type { ChartType } from '@/features/charts/hooks/useChartInstance';
-import type { SecFileListing } from '../api';
-import { buildFilingMarkers } from '../utils';
+import { secFilingsOverlay } from '../plugins/secFilingsOverlay';
 import { OTHER_CATEGORIES, BASE_FORM_DESCRIPTIONS } from '../constants';
 
 type Props = {
@@ -97,24 +93,18 @@ export default function SecPriceChart({
 
   const { allQuotes } = useStock(ticker ?? '', {});
   const { data: filings = [] } = useSecFiles(ticker);
-  const overlayRefs = useOverlayRefs({});
 
-  const extraMarkers = useMemo(() => (showFilings ? buildFilingMarkers(filings) : []), [showFilings, filings]);
+  const priceData = useMemo(() => toSortedOHLC(allQuotes ?? []), [allQuotes]);
 
-  const { chartRef, containerRef, height, onHandleWheel, onHandleMouseDown } = useChartInstance({
-    quotes: ticker ? allQuotes : [],
-    type: 'Area' as ChartType,
-    analysis: null,
-    showAnalysis: false,
-    overlayRefs,
-    extraMarkers,
-    resize: { enabled: true },
-  });
-
-  const effectiveRange = visibleRange ?? defaultRange;
-  useChartRange(chartRef, { visibleRange: effectiveRange, onRangeChange });
+  // Filings plugin is included only when toggled on, so the toggle drives
+  // the chart's marker visibility AND the click-modal behavior together.
+  const plugins: ChartPlugin[] = useMemo(
+    () => (showFilings ? [secFilingsOverlay({ filings, defaultEnabled: true })] : []),
+    [showFilings, filings],
+  );
 
   if (!ticker) return null;
+  const effectiveRange = visibleRange ?? defaultRange;
 
   return (
     <div className="sec-price-chart-wrap">
@@ -147,15 +137,16 @@ export default function SecPriceChart({
       </div>
 
       {visible && (
-        <>
-          <div ref={containerRef} className="chart-container sec-price-chart-canvas" style={{ height }} />
-          <div
-            className="sec-price-chart-resize-handle"
-            onMouseDown={onHandleMouseDown}
-            onWheel={onHandleWheel}
-            title="Drag or scroll to resize"
-          />
-        </>
+        <ChartAuto
+          data={priceData}
+          defaultType="Area"
+          availableTypes={['Candlestick', 'Bar', 'Line', 'Area', 'Baseline']}
+          visibleRange={effectiveRange}
+          onRangeChange={onRangeChange}
+          hidePeriodControls
+          plugins={plugins}
+          resize={{ enabled: true }}
+        />
       )}
       {showLegend && <FilingsLegendModal onClose={() => setShowLegend(false)} />}
     </div>

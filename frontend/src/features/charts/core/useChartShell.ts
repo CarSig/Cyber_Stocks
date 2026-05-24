@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useChart } from './useChart';
 import { useChartRange } from '../hooks/useChartRange';
+import { useChartResize } from '../hooks/useChartResize';
 import { usePluginClickModal, type ModalState } from './usePluginClickModal';
 import type { ChartContextValue } from './ChartContext';
-import type { ChartPlugin, ChartType } from './types';
+import type { ChartPlugin, ChartType, ResizeConfig } from './types';
 
 type PrimaryDatum = Parameters<typeof useChart>[0]['data'][number];
 
@@ -21,6 +22,9 @@ export type ChartShellOpts = {
   /** Fired when the user pans/zooms the chart, AND for synthetic range
    *  changes when buttons or pickers update the range. */
   onRangeChange?: (range: { from: string; to: string }) => void;
+  /** Drag/scroll-to-resize support. When `enabled`, the consumer should
+   *  render the returned resize handle below the chart container. */
+  resize?: ResizeConfig;
 };
 
 export type ChartShell = {
@@ -28,6 +32,13 @@ export type ChartShell = {
   containerRef: ReturnType<typeof useChart>['containerRef'];
   modal: ModalState | null;
   closeModal: () => void;
+  /** Resize handle wiring. `height` is undefined unless `resize.enabled`. */
+  resize: {
+    enabled: boolean;
+    height: number | undefined;
+    onHandleWheel: (e: React.WheelEvent) => void;
+    onHandleMouseDown: (e: React.MouseEvent) => void;
+  };
 };
 
 /**
@@ -61,6 +72,8 @@ export function useChartShell(opts: ChartShellOpts): ChartShell {
     primarySeriesRef,
   );
   const [modal, closeModal] = usePluginClickModal(controllerRef, opts.plugins, enabled);
+  const { height, onHandleWheel, onHandleMouseDown } = useChartResize(opts.resize, chartRef, containerRef);
+  const resizeEnabled = opts.resize?.enabled ?? false;
 
   // React Compiler memoizes this implicitly.
   const ctx: ChartContextValue = {
@@ -79,5 +92,16 @@ export function useChartShell(opts: ChartShellOpts): ChartShell {
       })),
   };
 
-  return { ctx, containerRef, modal, closeModal };
+  return {
+    ctx,
+    containerRef,
+    modal,
+    closeModal,
+    resize: {
+      enabled: resizeEnabled,
+      height: resizeEnabled ? height : undefined,
+      onHandleWheel,
+      onHandleMouseDown,
+    },
+  };
 }

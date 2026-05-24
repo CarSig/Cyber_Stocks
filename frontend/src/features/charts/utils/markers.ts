@@ -2,7 +2,7 @@ import type { SeriesMarker, Time, ISeriesApi, SeriesType } from 'lightweight-cha
 import { createSeriesMarkers } from 'lightweight-charts';
 import { cssVar } from './theme';
 import type { Quote, TrumpPost, ThreatIntelItem, NewsArticle, NewsAnalysisMap } from '@/types';
-import type { OverlayRefs } from '../hooks/useOverlayRefs';
+import type { OverlayRefs } from '../hooks/legacy/useOverlayRefs';
 import type { Action } from '@/utils/sim';
 import { fmtMarkerText } from '@/utils/sim';
 import { DateUtils } from '@/utils/date';

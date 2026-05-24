@@ -6,8 +6,8 @@ import { TypeControls } from './controls/TypeControls';
 import { PeriodControls } from './controls/PeriodControls';
 import { Toggle } from './controls/Toggle';
 import { ChartModalHost } from './ChartModalHost';
-import type { ChartPlugin, ChartType } from './types';
-import '../components/charts.css';
+import type { ChartPlugin, ChartType, ResizeConfig } from './types';
+import './charts.css';
 
 type PrimaryDatum = Parameters<typeof useChart>[0]['data'][number];
 
@@ -27,6 +27,8 @@ type ChartManualProps = {
   visibleRange?: { from: string; to: string } | null;
   /** Fired when the user pans/zooms the chart. */
   onRangeChange?: (range: { from: string; to: string }) => void;
+  /** Drag/scroll-to-resize support. */
+  resize?: ResizeConfig;
 
   /** Render-prop: full control over toolbar layout. Receives the sub-components
    *  ready to use, so the consumer just composes them. */
@@ -72,9 +74,10 @@ export function ChartManual({
   plugins = [],
   visibleRange,
   onRangeChange,
+  resize,
   children,
 }: ChartManualProps) {
-  const { ctx, containerRef, modal, closeModal } = useChartShell({
+  const { ctx, containerRef, modal, closeModal, resize: r } = useChartShell({
     data,
     defaultType,
     availableTypes,
@@ -84,13 +87,26 @@ export function ChartManual({
     plugins,
     visibleRange,
     onRangeChange,
+    resize,
   });
 
   return (
     <ChartContext.Provider value={ctx}>
       <div>
         {children?.(PARTS)}
-        <div ref={containerRef} className="chart-container" />
+        <div
+          ref={containerRef}
+          className="chart-container"
+          style={r.enabled ? { height: r.height } : undefined}
+        />
+        {r.enabled && (
+          <div
+            className="sec-price-chart-resize-handle"
+            onMouseDown={r.onHandleMouseDown}
+            onWheel={r.onHandleWheel}
+            title="Drag or scroll to resize"
+          />
+        )}
         <ChartModalHost modal={modal} onClose={closeModal} />
       </div>
     </ChartContext.Provider>

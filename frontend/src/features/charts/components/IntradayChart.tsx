@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import './charts.css';
+import '../core/charts.css';
 import { createChart, CandlestickSeries, LineSeries, AreaSeries } from 'lightweight-charts';
 import type { ISeriesApi, SeriesType } from 'lightweight-charts';
 import { getTzOffsetSeconds, toTzTime } from '../utils/dates';

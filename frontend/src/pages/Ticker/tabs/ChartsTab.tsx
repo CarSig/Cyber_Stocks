@@ -2,16 +2,25 @@ import FilterSelect from '@/components/common/FilterSelect';
 import { ChartCard } from '@/features/charts/ui';
 import { useTickerContext } from '@/context/TickerContext';
 import {
-  StockChart,
-  VolatilityChart,
-  SentimentHistogramChart,
-  VolumeChart,
-  TradeCountChart,
-} from '@/features/charts/components';
+  ChartAuto,
+  compareOverlay,
+  trumpOverlay,
+  threatIntelOverlay,
+  newsOverlay,
+  analysisMarkersOverlay,
+  hvOverlay,
+  atrOverlay,
+  aggregateSentimentByDay,
+  sentimentArticlesPlugin,
+  type ChartPlugin,
+} from '@/features/charts/core';
 import { PeriodButtons } from '@/features/charts/ui';
+import { toSortedOHLC } from '@/features/charts/utils/series';
+import { useMemo } from 'react';
 import Analysis from '@/features/tickers/components/Analysis';
 import TickerKPI from '@/pages/Ticker/TickerKPI';
-import type { Quote, TickerSummary, NewsArticle, NewsAnalysisMap } from '@/types';
+import type { Quote, TickerSummary, NewsArticle, NewsAnalysisMap, TrumpPost, ThreatIntelItem } from '@/types';
+import type { QuoteAnalysis } from '@/features/charts/types';
 
 type ChartsTabProps = {
   summary?: TickerSummary | null;
@@ -57,8 +66,68 @@ export default function ChartsTab({
     setHideIntelligence,
   } = useTickerContext();
 
-  const newsOverlay = overlays.news as { articles: NewsArticle[]; analysis?: NewsAnalysisMap } | undefined;
-  const cyberNewsOverlay = overlays.cyberNews as { articles?: NewsArticle[]; analysis?: NewsAnalysisMap } | undefined;
+  const news = overlays.news as { articles: NewsArticle[]; analysis?: NewsAnalysisMap } | undefined;
+  const cyberNews = overlays.cyberNews as { articles?: NewsArticle[]; analysis?: NewsAnalysisMap } | undefined;
+
+  const volumeData = useMemo(
+    () =>
+      (allQuotes ?? [])
+        .filter((q) => q.volume != null)
+        .map((q) => ({
+          time: q.date.slice(0, 10) as `${number}-${number}-${number}`,
+          value: Number(q.volume),
+          color: '#3b82f6',
+        })),
+    [allQuotes],
+  );
+
+  const priceData = useMemo(() => toSortedOHLC(allQuotes ?? []), [allQuotes]);
+
+  const volatilityPlugins: ChartPlugin[] = useMemo(
+    () => [hvOverlay({ quotes: allQuotes ?? [] }), atrOverlay({ quotes: allQuotes ?? [] })],
+    [allQuotes],
+  );
+
+  // Plugins for the Prices chart. Order matters: see useChartClickHandler's
+  // precedence (news → trump → nvd → otx → kev). compareOverlay first because
+  // it's a series, not a marker plugin.
+  const trumpPosts = (overlays.trump as { posts?: TrumpPost[] } | undefined)?.posts;
+  const nvdItems = (overlays.nvd as { data?: ThreatIntelItem[] } | undefined)?.data;
+  const otxItems = (overlays.otx as { data?: ThreatIntelItem[] } | undefined)?.data;
+  const kevItems = (overlays.kev as { data?: ThreatIntelItem[] } | undefined)?.data;
+  const pricePlugins: ChartPlugin[] = useMemo(() => {
+    const list: (ChartPlugin | null)[] = [
+      compareQuotes?.length
+        ? compareOverlay({ quotes: compareQuotes, label: compareTicker ?? 'Compare', defaultEnabled: true })
+        : null,
+      news?.articles?.length
+        ? newsOverlay({
+            articles: news.articles,
+            analysis: news.analysis ?? null,
+            quotes: allQuotes ?? [],
+            defaultEnabled: true,
+          })
+        : null,
+      trumpPosts?.length ? trumpOverlay({ posts: trumpPosts, quotes: allQuotes ?? [] }) : null,
+      nvdItems?.length ? threatIntelOverlay({ variant: 'nvd', items: nvdItems }) : null,
+      otxItems?.length ? threatIntelOverlay({ variant: 'otx', items: otxItems }) : null,
+      kevItems?.length ? threatIntelOverlay({ variant: 'kev', items: kevItems }) : null,
+      analysisMarkersOverlay({ analysis: (periodAnalysis as QuoteAnalysis) ?? null }),
+    ];
+    return list.filter((p): p is ChartPlugin => p !== null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    compareQuotes,
+    compareTicker,
+    news?.articles,
+    news?.analysis,
+    trumpPosts,
+    nvdItems,
+    otxItems,
+    kevItems,
+    allQuotes,
+    periodAnalysis,
+  ]);
 
   return (
     <section>
@@ -85,69 +154,66 @@ export default function ChartsTab({
       />
 
       <ChartCard title="Prices" hidden={hidePrice} onToggle={() => setHidePrice(!hidePrice)}>
-        <StockChart
-          quotes={allQuotes ?? []}
-          compareQuotes={compareQuotes?.length ? compareQuotes : undefined}
-          compareName={compareTicker ?? undefined}
-          analysis={periodAnalysis as Parameters<typeof StockChart>[0]['analysis']}
-          period={period}
+        <ChartAuto
+          data={priceData}
+          defaultType="Area"
+          availableTypes={['Candlestick', 'Bar', 'Line', 'Area', 'Baseline']}
+          selectedPeriod={period}
           onPeriodChange={setPeriod}
           visibleRange={visibleRange}
           onRangeChange={setVisibleRange}
-          overlays={overlays as Parameters<typeof StockChart>[0]['overlays']}
+          plugins={pricePlugins}
+          toolbarExtras={
+            compareTicker ? <span className="chart-compare-label">● {compareTicker}</span> : null
+          }
         />
       </ChartCard>
 
       <ChartCard title="Volume">
-        <VolumeChart
-          quotes={allQuotes ?? []}
-          period={period}
+        <ChartAuto
+          data={volumeData}
+          defaultType="Histogram"
+          availableTypes={['Histogram']}
+          hideTypeControls
+          selectedPeriod={period}
           onPeriodChange={setPeriod}
           visibleRange={visibleRange}
           onRangeChange={setVisibleRange}
-        />
-      </ChartCard>
-
-      <ChartCard title="Trade Count">
-        <TradeCountChart
-          period={period}
-          onPeriodChange={setPeriod}
-          visibleRange={visibleRange}
-          onRangeChange={setVisibleRange}
+          resize={{ enabled: true }}
+          toolbarExtras={<span className="chart-series-label chart-series-label-ml">Yahoo Volume</span>}
         />
       </ChartCard>
 
       <ChartCard title="Volatility" hidden={hideVolatility} onToggle={() => setHideVolatility(!hideVolatility)}>
-        <VolatilityChart
-          quotes={allQuotes ?? []}
-          period={period}
+        <ChartAuto
+          data={[]}
+          defaultType="Line"
+          availableTypes={['Line']}
+          hideTypeControls
+          selectedPeriod={period}
           onPeriodChange={setPeriod}
           visibleRange={visibleRange}
           onRangeChange={setVisibleRange}
+          plugins={volatilityPlugins}
         />
       </ChartCard>
 
-      {(newsOverlay?.articles?.length ?? 0) > 0 && (
+      {(news?.articles?.length ?? 0) > 0 && (
         <ChartCard
           title="News Sentiment"
           hidden={hideNewsSentiment}
           onToggle={() => setHideNewsSentiment(!hideNewsSentiment)}
         >
-          <SentimentHistogramChart
-            articles={newsOverlay!.articles}
-            getSentiment={(a) => newsOverlay?.analysis?.[a.link]?.sentiment ?? null}
-            getDate={(a) => {
-              const ts = a.providerPublishTime;
-              if (!ts) return null;
-              return new Date(
-                typeof ts === 'number' || (typeof ts === 'string' && /^\d{10}$/.test(ts)) ? Number(ts) * 1000 : ts,
-              ).toISOString();
-            }}
+          <SentimentHistogram
+            articles={news!.articles}
+            getSentiment={(a) => news?.analysis?.[a.link]?.sentiment ?? null}
+            getDate={timestampDate}
             period={period}
             onPeriodChange={setPeriod}
             visibleRange={visibleRange}
             onRangeChange={setVisibleRange}
             quoteBounds={quoteBounds ?? undefined}
+            instanceId="news"
           />
         </ChartCard>
       )}
@@ -158,7 +224,7 @@ export default function ChartsTab({
           hidden={hideIntelligence}
           onToggle={() => setHideIntelligence(!hideIntelligence)}
         >
-          <SentimentHistogramChart
+          <SentimentHistogram
             articles={intelligenceArticles as NewsArticle[]}
             getSentiment={(a) => {
               const entities = (a as Record<string, unknown>)['entities'] as
@@ -174,31 +240,27 @@ export default function ChartsTab({
             visibleRange={visibleRange}
             onRangeChange={setVisibleRange}
             quoteBounds={quoteBounds ?? undefined}
+            instanceId="intelligence"
           />
         </ChartCard>
       )}
 
-      {(cyberNewsOverlay?.articles?.length ?? 0) > 0 && (
+      {(cyberNews?.articles?.length ?? 0) > 0 && (
         <ChartCard
           title="Cyber News Sentiment"
           hidden={hideCyberNewsSentiment}
           onToggle={() => setHideCyberNewsSentiment?.(!hideCyberNewsSentiment)}
         >
-          <SentimentHistogramChart
-            articles={cyberNewsOverlay!.articles!}
-            getSentiment={(a) => cyberNewsOverlay?.analysis?.[a.link]?.sentiment ?? null}
-            getDate={(a) => {
-              const ts = a.providerPublishTime;
-              if (!ts) return null;
-              return new Date(
-                typeof ts === 'number' || (typeof ts === 'string' && /^\d{10}$/.test(ts)) ? Number(ts) * 1000 : ts,
-              ).toISOString();
-            }}
+          <SentimentHistogram
+            articles={cyberNews!.articles!}
+            getSentiment={(a) => cyberNews?.analysis?.[a.link]?.sentiment ?? null}
+            getDate={timestampDate}
             period={period}
             onPeriodChange={setPeriod}
             visibleRange={visibleRange}
             onRangeChange={setVisibleRange}
             quoteBounds={quoteBounds ?? undefined}
+            instanceId="cyber-news"
           />
         </ChartCard>
       )}
@@ -208,5 +270,71 @@ export default function ChartsTab({
         <Analysis analysis={periodAnalysis as Parameters<typeof Analysis>[0]['analysis']} />
       </section>
     </section>
+  );
+}
+
+// --- Sentiment histogram helper ----------------------------------------
+
+/** Parses the common `providerPublishTime` shape (unix-seconds string, unix-seconds number, or ISO string) into ISO. */
+function timestampDate(a: NewsArticle): string | null {
+  const ts = a.providerPublishTime;
+  if (!ts) return null;
+  return new Date(
+    typeof ts === 'number' || (typeof ts === 'string' && /^\d{10}$/.test(ts)) ? Number(ts) * 1000 : ts,
+  ).toISOString();
+}
+
+type SentimentHistogramProps = {
+  articles: NewsArticle[];
+  getSentiment: (a: NewsArticle) => number | null;
+  getDate: (a: NewsArticle) => string | null;
+  period?: number | null;
+  onPeriodChange?: (days: number) => void;
+  visibleRange?: { from: string; to: string } | null;
+  onRangeChange?: (range: { from: string; to: string }) => void;
+  quoteBounds?: { from: string; to: string };
+  /** Unique id so the click-modal plugin doesn't collide across multiple
+   *  sentiment histograms on the same page. */
+  instanceId: string;
+};
+
+function SentimentHistogram({
+  articles,
+  getSentiment,
+  getDate,
+  period,
+  onPeriodChange,
+  visibleRange,
+  onRangeChange,
+  quoteBounds,
+  instanceId,
+}: SentimentHistogramProps) {
+  const { countData, articlesByDay } = useMemo(
+    () => aggregateSentimentByDay({ articles, getSentiment, getDate, quoteBounds: quoteBounds ?? null }),
+    [articles, getSentiment, getDate, quoteBounds],
+  );
+  const plugins: ChartPlugin[] = useMemo(
+    () => [sentimentArticlesPlugin({ articlesByDay, id: `sentiment-${instanceId}` })],
+    [articlesByDay, instanceId],
+  );
+  return (
+    <ChartAuto
+      data={countData}
+      defaultType="Histogram"
+      availableTypes={['Histogram']}
+      hideTypeControls
+      selectedPeriod={period}
+      onPeriodChange={onPeriodChange}
+      visibleRange={visibleRange}
+      onRangeChange={onRangeChange}
+      plugins={plugins}
+      resize={{ enabled: true }}
+      toolbarExtras={
+        <span className="chart-series-label chart-series-label-ml">
+          Bar height = article count · Color = avg sentiment
+          <span className="sentiment-gradient-legend" />
+        </span>
+      }
+    />
   );
 }

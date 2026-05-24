@@ -1,13 +1,9 @@
-import { useEffect, useRef, type RefObject } from 'react';
+import { type RefObject } from 'react';
 import type { TrumpPost, ThreatIntelItem, NewsArticle, NewsAnalysisMap } from '@/types';
-
-export function useSyncRef<T>(value: T): RefObject<T> {
-  const ref = useRef<T>(value);
-  useEffect(() => {
-    ref.current = value;
-  }, [value]);
-  return ref;
-}
+// Re-exported for back-compat with imports that took `useSyncRef` from here.
+// New code should import from '../useSyncRef' directly.
+import { useSyncRef } from '../useSyncRef';
+export { useSyncRef };
 
 type TrumpOverlay = { posts?: TrumpPost[]; show?: boolean };
 type DataOverlay<T> = { data?: T[]; show?: boolean };
