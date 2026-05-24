@@ -434,6 +434,24 @@ code {
   margin: 0;
 }
 
+/* Sentiment color utilities — replaces inline styles for static sentiment colors */
+.text-positive {
+  color: var(--color-green, #22c55e);
+}
+
+.text-negative {
+  color: var(--color-red, #ef4444);
+}
+
+/* Small caption row used under a stat label (r / p / etc.) */
+.stat-details-row {
+  display: flex;
+  gap: 12px;
+  font-size: 10px;
+  color: var(--muted-foreground);
+  margin-top: 4px;
+}
+
 /* ── LoadingSpinner ─────────────────────────────────────────────────────────── */
 .loading-spinner-wrapper {
   display: flex;
