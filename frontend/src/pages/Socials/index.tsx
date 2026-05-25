@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import Page from '@/components/common/Page';
-import BaseCard from '@/components/common/BaseCard';
-import CardHeader from '@/components/common/CardHeader';
+import Page from '@/components/common/layout/Page';
+import BaseCard from '@/components/common/cards/BaseCard';
+import CardHeader from '@/components/common/cards/CardHeader';
 
 type SocialCardProps = {
   to: string;

@@ -2,7 +2,7 @@ import { useRef, useEffect, useMemo, useReducer } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getSimulationPresets } from '@/features/tickers/api';
 import type { SimulationPreset } from '@/types';
-import DatePicker from '@/components/common/DatePicker';
+import DatePicker from '@/components/common/filters/DatePicker';
 import type { Quote } from '@/types';
 import SimEntryPanel from './components/entry-panel/SimEntryPanel';
 import ChartTypeToggle from './components/ChartTypeToggle';

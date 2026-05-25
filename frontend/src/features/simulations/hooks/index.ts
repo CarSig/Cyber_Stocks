@@ -17,4 +17,5 @@ export { useSimChartClick } from './useSimChartClick';
 export { useSimResult } from './useSimResult';
 export { useSimRefs } from './useSimRefs';
 export { useSimulateAll } from './useSimulateAll';
+export { useCombinationsAll } from './useCombinationsAll';
 export { useTextChange } from './useTextChange';

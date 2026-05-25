@@ -68,11 +68,22 @@ function parseComments(children: RawComment[]): RedditComment[] {
 export const SUBREDDITS = ["ExperiencedDevs", "cybersecurity"] as const;
 export type Subreddit = typeof SUBREDDITS[number];
 
+const TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days
+
+type RedditFile = { fetchedAt: string; posts: RedditPost[] };
+
 export class RedditService {
-  getPosts(subreddit: Subreddit): RedditPost[] {
+  async getPosts(subreddit: Subreddit): Promise<RedditPost[]> {
     const p = PATHS.redditPosts(subreddit);
-    if (!fs.existsSync(p)) return [];
-    return JSON.parse(fs.readFileSync(p, "utf-8")) as RedditPost[];
+    if (fs.existsSync(p)) {
+      const file = JSON.parse(fs.readFileSync(p, "utf-8")) as RedditFile | RedditPost[];
+      if (!Array.isArray(file) && Date.now() - new Date(file.fetchedAt).getTime() <= TTL_MS) {
+        return file.posts;
+      }
+    }
+    await this.sync(subreddit);
+    const file = JSON.parse(fs.readFileSync(p, "utf-8")) as RedditFile;
+    return file.posts;
   }
 
   async sync(subreddit: Subreddit): Promise<void> {
@@ -94,9 +105,10 @@ export class RedditService {
       createdAt: new Date(c.data.created_utc * 1000).toISOString(),
     }));
 
+    const file: RedditFile = { fetchedAt: new Date().toISOString(), posts };
     const p = PATHS.redditPosts(subreddit);
     fs.mkdirSync(path.dirname(p), { recursive: true });
-    fs.writeFileSync(p, JSON.stringify(posts, null, 2));
+    fs.writeFileSync(p, JSON.stringify(file, null, 2));
   }
 
   async syncAll(): Promise<void> {

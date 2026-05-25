@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useTickerStore } from './tickerStore';
+import { useTickerStore } from '@/stores/tickerStore';
 
 // eslint-disable-next-line react-refresh/only-export-components -- hook and provider intentionally co-located
 export function useTickerContext() {

@@ -28,6 +28,29 @@ export type SimAllRow = {
 
 export type IntradaySimState = ReturnType<typeof initialIntradayState>;
 
+export type EntryStrategy = 'first-candle';
+export type ExitStrategy =
+  | '15:45'
+  | '15:59'
+  | 'vol-same-day'
+  | 'vol-next-day'
+  | 'vol-hold'
+  | 'vol-hold-3x'
+  | 'vol-hold-eod'
+  | 'vol-hold-vwap'
+  | 'vol-hold-confirm';
+
+export type CombinationRow = {
+  entryStrategy: EntryStrategy;
+  exitStrategy: ExitStrategy;
+  wins: number;
+  losses: number;
+  total: number;
+  avgWin: number | null;
+  avgLoss: number | null;
+  avgTotal: number | null;
+};
+
 export type IntradaySimAction =
   | BaseSimAction<Action>
   | { type: 'LOAD_EVENT'; event: IntradayEvent; timeframe: string }
@@ -35,10 +58,14 @@ export type IntradaySimAction =
   | { type: 'ADD_EXTRA_DATE'; date: string }
   | { type: 'RESET_EXTRA_DATES' }
   | { type: 'SET_AI_DELAY'; delay: number }
-  | { type: 'SET_EXIT_AT_CLOSE'; exitAtClose: boolean }
+  | { type: 'SET_ENTRY_STRATEGY'; entryStrategy: EntryStrategy }
+  | { type: 'SET_EXIT_STRATEGY'; exitStrategy: ExitStrategy }
   | { type: 'SIM_ALL_START' }
   | { type: 'SIM_ALL_DONE'; results: SimAllRow[] }
-  | { type: 'SIM_ALL_CLOSE' };
+  | { type: 'SIM_ALL_CLOSE' }
+  | { type: 'COMB_START' }
+  | { type: 'COMB_DONE'; results: CombinationRow[] }
+  | { type: 'COMB_CLOSE' };
 
 function syncTextDate(prev: string, newDate: string): string {
   const lines = prev.split('\n');
@@ -64,8 +91,11 @@ export function initialIntradayState() {
     extraDates: [] as string[],
     simAllResults: null as SimAllRow[] | null,
     simAllRunning: false,
+    combResults: null as CombinationRow[] | null,
+    combRunning: false,
     aiDelay: 1,
-    exitAtClose: false,
+    entryStrategy: 'default' as EntryStrategy,
+    exitStrategy: '15:45' as ExitStrategy,
   };
 }
 
@@ -111,14 +141,22 @@ export function intradayReducer(
       return { ...state, extraDates: [] };
     case 'SET_AI_DELAY':
       return { ...state, aiDelay: action.delay };
-    case 'SET_EXIT_AT_CLOSE':
-      return { ...state, exitAtClose: action.exitAtClose };
+    case 'SET_ENTRY_STRATEGY':
+      return { ...state, entryStrategy: action.entryStrategy };
+    case 'SET_EXIT_STRATEGY':
+      return { ...state, exitStrategy: action.exitStrategy };
     case 'SIM_ALL_START':
       return { ...state, simAllRunning: true, simAllResults: null };
     case 'SIM_ALL_DONE':
       return { ...state, simAllRunning: false, simAllResults: action.results };
     case 'SIM_ALL_CLOSE':
       return { ...state, simAllRunning: false, simAllResults: null };
+    case 'COMB_START':
+      return { ...state, combRunning: true, combResults: null };
+    case 'COMB_DONE':
+      return { ...state, combRunning: false, combResults: action.results };
+    case 'COMB_CLOSE':
+      return { ...state, combRunning: false, combResults: null };
     default:
       return baseReducer(state, action as BaseSimAction<Action>);
   }

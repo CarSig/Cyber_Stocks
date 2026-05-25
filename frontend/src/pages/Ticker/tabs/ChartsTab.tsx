@@ -1,4 +1,4 @@
-import FilterSelect from '@/components/common/FilterSelect';
+import FilterSelect from '@/components/common/filters/FilterSelect';
 import { ChartCard } from '@/features/charts/ui';
 import { useTickerContext } from '@/context/TickerContext';
 import {
@@ -13,12 +13,12 @@ import {
   aggregateSentimentByDay,
   sentimentArticlesPlugin,
   type ChartPlugin,
-} from '@/features/charts/core';
+} from '@/features/charts';
 import { PeriodButtons } from '@/features/charts/ui';
 import { toSortedOHLC } from '@/features/charts/utils/series';
 import { useMemo } from 'react';
 import Analysis from '@/features/tickers/components/Analysis';
-import TickerKPI from '@/pages/Ticker/TickerKPI';
+import TickerKPI from '@/features/tickers/components/TickerKPI';
 import type { Quote, TickerSummary, NewsArticle, NewsAnalysisMap, TrumpPost, ThreatIntelItem } from '@/types';
 import type { QuoteAnalysis } from '@/features/charts/types';
 

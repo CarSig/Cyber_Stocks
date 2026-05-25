@@ -1,6 +1,7 @@
 import type { Side, Action } from '@/utils/sim';
 import { DateUtils } from '@/utils/date';
 import type { BaseSimState, BaseSimAction } from './baseReducer';
+import type { ExitStrategy } from './intradayReducer';
 
 // Prop object shapes — kept here so strategies can build them without circular imports
 export type ToolbarExtras = {
@@ -15,10 +16,11 @@ export type ToolbarExtras = {
     aiSimDisabled?: boolean;
     onSimulateAll?: () => void;
     simulateAllLabel?: string;
+    onCombinationsAll?: () => void;
     aiDelay?: number;
     onAiDelayChange?: (v: number) => void;
-    exitAtClose?: boolean;
-    onExitAtCloseChange?: (v: boolean) => void;
+    exitStrategy?: ExitStrategy;
+    onExitStrategyChange?: (v: ExitStrategy) => void;
   };
 };
 

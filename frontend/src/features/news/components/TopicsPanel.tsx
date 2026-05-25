@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import CountBadge from '@/components/common/CountBadge';
-import BaseCard from '@/components/common/BaseCard';
-import CardHeader from '@/components/common/CardHeader';
+import CountBadge from '@/components/common/data-display/CountBadge';
+import BaseCard from '@/components/common/cards/BaseCard';
+import CardHeader from '@/components/common/cards/CardHeader';
 import { useCyberNewsTopics } from '@/features/news/hooks/useCyberNews';
 
 type TopicsPanelProps = { selectedTopic: string | null; onSelectTopic: (topic: string | null) => void };

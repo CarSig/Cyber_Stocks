@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useTimezone } from '@/context/TimezoneContext';
 import { TIMEZONES } from '@/features/charts/utils';
-import NotificationBell from '@/components/common/NotificationBell';
+import NotificationBell from '@/components/common/feedback/NotificationBell';
 
 export default function Navbar() {
   const { pathname } = useLocation();
@@ -21,6 +21,7 @@ export default function Navbar() {
     ![
       'ADMIN',
       'GRAPH',
+      'INTEL',
       'THREAT-INTEL',
       'SOCIALS',
       'INTELLIGENCE',
@@ -57,23 +58,8 @@ export default function Navbar() {
           </Link>
         )}
         {user && (
-          <Link to="/threat-intel" className="navbar-nav-link" onClick={closeMenu}>
-            Threat Intel
-          </Link>
-        )}
-        {user && (
-          <Link to="/socials" className="navbar-nav-link" onClick={closeMenu}>
-            Socials
-          </Link>
-        )}
-        {user && (
-          <Link to="/intelligence" className="navbar-nav-link" onClick={closeMenu}>
-            Intelligence
-          </Link>
-        )}
-        {user && (
-          <Link to="/cyber-news" className="navbar-nav-link" onClick={closeMenu}>
-            Cyber News
+          <Link to="/intel" className="navbar-nav-link" onClick={closeMenu}>
+            Intel
           </Link>
         )}
         {user && (
@@ -82,8 +68,8 @@ export default function Navbar() {
           </Link>
         )}
         {user && (
-          <Link to="/sec-archive" className="navbar-nav-link" onClick={closeMenu}>
-            SEC Archive
+          <Link to="/edgar-archive" className="navbar-nav-link" onClick={closeMenu}>
+            EDGAR Archive
           </Link>
         )}
         {user && (
@@ -133,9 +119,9 @@ export default function Navbar() {
           <span className="navbar-username">{String(user.username ?? user.email)}</span>
           {user.role === 'admin' && (
             <>
-              <span className="navbar-role">admin</span>
               <Link to="/admin" className="navbar-logout">
-                Admin
+                <span className="navbar-role">Admin</span>
+                {/* Admin */}
               </Link>
             </>
           )}

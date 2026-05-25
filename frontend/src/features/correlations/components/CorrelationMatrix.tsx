@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import BaseCard from '@/components/common/BaseCard';
+import BaseCard from '@/components/common/cards/BaseCard';
 import { getCorrelationMatrix } from '../api';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { CorrelationMatrixData } from '@/types';

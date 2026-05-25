@@ -7,7 +7,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import './index.css';
 import App from './App';
 
-import { initFeedbackButton } from './inspect-dom-capture';
+import { initFeedbackButton } from './lib/inspect-dom-capture';
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN,

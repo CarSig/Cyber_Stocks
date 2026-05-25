@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getFeedbackList, reviewFeedback } from '@/api/admin';
 import type { FeedbackEntry, FeedbackStatus } from '@/api/admin';
-import StateHandler from '@/components/common/StateHandler';
-import FilterSelect from '@/components/common/FilterSelect';
-import Pagination from '@/components/common/Pagination';
+import StateHandler from '@/components/common/feedback/StateHandler';
+import FilterSelect from '@/components/common/filters/FilterSelect';
+import Pagination from '@/components/common/data-display/Pagination';
 import { Button } from '@/components/ui/button';
-import Page from '@/components/common/Page';
+import Page from '@/components/common/layout/Page';
 
 const PAGE_SIZE = 50;
 

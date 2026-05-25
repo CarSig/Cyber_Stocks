@@ -1,10 +1,10 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import BaseCard from '@/components/common/BaseCard';
-import FilterSelect from '@/components/common/FilterSelect';
+import BaseCard from '@/components/common/cards/BaseCard';
+import FilterSelect from '@/components/common/filters/FilterSelect';
 import { useTickerContext } from '@/context/TickerContext';
 import { CorrelationBox } from '@/features/correlations/components';
-import CorrLagTable from '@/pages/Ticker/CorrLagTable';
+import CorrLagTable from '@/features/tickers/components/CorrLagTable';
 import type { CorrelationResult } from '@/types';
 
 type TrumpState = {

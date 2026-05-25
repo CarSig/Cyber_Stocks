@@ -1,0 +1,21 @@
+.item-list-page-description {
+  color: var(--muted-foreground);
+  margin-bottom: 24px;
+}
+
+.item-list-page-header {
+  margin-bottom: 16px;
+}
+
+.item-list-page-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.item-list-page-list {
+  margin-bottom: 40px;
+}

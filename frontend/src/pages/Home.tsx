@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
-import StateHandler from '@/components/common/StateHandler';
+import StateHandler from '@/components/common/feedback/StateHandler';
 import { getCompanies, getTicker, getSparklines } from '@/features/tickers/api';
-import { ChartAuto, compareOverlay, type ChartPlugin } from '@/features/charts/core';
+import { ChartAuto, compareOverlay, type ChartPlugin } from '@/features/charts';
 import { toSortedClose } from '@/features/charts/utils/series';
 import { cssVar } from '@/features/charts/utils/theme';
-import DatePicker from '@/components/common/DatePicker';
+import DatePicker from '@/components/common/filters/DatePicker';
 import { CorrelationMatrix } from '@/features/correlations/components';
-import Page from '@/components/common/Page';
-import WatchlistSparkline from './Ticker/WatchlistSparkline';
+import Page from '@/components/common/layout/Page';
+import WatchlistSparkline from '@/features/tickers/components/WatchlistSparkline';
 import type { SparklineMap } from '@algo/shared';
 import type { Quote } from '@/types';
 

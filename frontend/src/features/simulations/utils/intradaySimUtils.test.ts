@@ -183,14 +183,19 @@ describe('lastBarTime', () => {
 // ─── getExitTime ──────────────────────────────────────────────────────────────
 
 describe('getExitTime', () => {
-  it('exitAtClose true + 1Min → 15:59', () => expect(getExitTime(true, '1Min')).toBe('15:59'));
-  it('exitAtClose true + 5Min → 15:55', () => expect(getExitTime(true, '5Min')).toBe('15:55'));
-  it('exitAtClose true + 15Min → 15:45', () => expect(getExitTime(true, '15Min')).toBe('15:45'));
-  it('exitAtClose true + 30Min → 15:30', () => expect(getExitTime(true, '30Min')).toBe('15:30'));
-  it('exitAtClose true + 1Hour → 15:00', () => expect(getExitTime(true, '1Hour')).toBe('15:00'));
-  it('exitAtClose false always → 15:45', () => {
-    expect(getExitTime(false, '1Min')).toBe('15:45');
-    expect(getExitTime(false, '1Hour')).toBe('15:45');
+  it('15:59 strategy + 1Min → last bar 15:59', () => expect(getExitTime('15:59', '1Min')).toBe('15:59'));
+  it('15:59 strategy + 5Min → last bar 15:55', () => expect(getExitTime('15:59', '5Min')).toBe('15:55'));
+  it('15:59 strategy + 15Min → last bar 15:45', () => expect(getExitTime('15:59', '15Min')).toBe('15:45'));
+  it('15:59 strategy + 30Min → last bar 15:30', () => expect(getExitTime('15:59', '30Min')).toBe('15:30'));
+  it('15:59 strategy + 1Hour → last bar 15:00', () => expect(getExitTime('15:59', '1Hour')).toBe('15:00'));
+  it('15:45 strategy always → 15:45', () => {
+    expect(getExitTime('15:45', '1Min')).toBe('15:45');
+    expect(getExitTime('15:45', '1Hour')).toBe('15:45');
+  });
+  it('vol strategies → null', () => {
+    expect(getExitTime('vol-same-day', '1Min')).toBeNull();
+    expect(getExitTime('vol-next-day', '5Min')).toBeNull();
+    expect(getExitTime('vol-hold', '5Min')).toBeNull();
   });
 });
 

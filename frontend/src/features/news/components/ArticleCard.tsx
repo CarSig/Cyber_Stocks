@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import TagBadge from '@/components/common/TagBadge';
-import CountBadge from '@/components/common/CountBadge';
-import BaseCard from '@/components/common/BaseCard';
-import SentimentBar from '@/components/common/SentimentBar';
+import TagBadge from '@/components/common/data-display/TagBadge';
+import CountBadge from '@/components/common/data-display/CountBadge';
+import BaseCard from '@/components/common/cards/BaseCard';
+import SentimentBar from '@/components/common/data-display/SentimentBar';
 import ArticleMeta from './ArticleMeta';
 import ArticleHeader from './ArticleHeader';
 import type { NewsArticle, SentimentAnalysis } from '@/types';

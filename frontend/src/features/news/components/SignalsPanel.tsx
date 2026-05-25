@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import BaseCard from '@/components/common/BaseCard';
-import CardHeader from '@/components/common/CardHeader';
-import CountBadge from '@/components/common/CountBadge';
+import BaseCard from '@/components/common/cards/BaseCard';
+import CardHeader from '@/components/common/cards/CardHeader';
+import CountBadge from '@/components/common/data-display/CountBadge';
 import { useGlobalSignals } from '@/features/intelligence/hooks/useIntelligence';
 
 type SignalsPanelProps = { selectedSignal: string | null; onSelectSignal: (signal: string | null) => void };

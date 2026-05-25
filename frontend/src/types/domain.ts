@@ -20,7 +20,6 @@ export type {
   SimulationResult,
   SentimentAnalysis,
   NewsAnalysisMap,
-  UrgencyKey,
   NewsArticle,
   NewsAnalyzeQueuedResponse,
   StockAnalysis,
@@ -54,13 +53,6 @@ export type {
 } from '@algo/shared';
 
 // ─── Frontend-local types ────────────────────────────────────────────────────
-
-export type UrgencyConfig = {
-  label: string;
-  color: string;
-  bg: string;
-  order: number;
-};
 
 export type SentimentLabel = {
   label: string;

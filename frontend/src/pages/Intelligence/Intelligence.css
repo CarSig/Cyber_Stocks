@@ -176,36 +176,6 @@
   letter-spacing: 0.05em;
 }
 
-.urgency-filter-tabs {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-}
-
-.urgency-filter-button {
-  font-size: 12px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.1s;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--muted-foreground);
-}
-
-.urgency-filter-button-active {
-  font-weight: 600;
-}
-
-.urgency-filter-button-count {
-  font-size: 11px;
-  opacity: 0.7;
-}
-
 /* Entity Name - capitalize text */
 .entity-name-capitalize {
   text-transform: capitalize;
@@ -266,45 +236,6 @@
   font-size: 10px;
   margin-left: 4px;
   flex-shrink: 0;
-}
-
-.sidebar-urgency-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.sidebar-urgency-button {
-  font-size: 12px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.1s;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 1px solid var(--border);
-}
-
-.intelligence-description {
-  color: var(--muted-foreground);
-  margin-bottom: 24px;
-}
-
-.entity-list-header {
-  margin-bottom: 16px;
-  /* flex provided by .header-flex-between */
-}
-
-.entity-list-header-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--muted-foreground);
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 /* Signal Sidebar */

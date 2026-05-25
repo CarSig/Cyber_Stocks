@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
-import InspectHighlight from './components/common/InspectHighlight';
+import InspectHighlight from './components/common/layout/InspectHighlight';
 import { AuthProvider } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -9,7 +9,7 @@ import { TimezoneProvider } from './context/TimezoneContext';
 import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import AdminRoute from './components/routes/AdminRoute';
-import { ErrorBoundary } from './components/common/ErrorBoundary';
+import { ErrorBoundary } from './components/common/feedback/ErrorBoundary';
 
 const Home = lazy(() => import('./pages/Home'));
 const Ticker = lazy(() => import('./pages/Ticker/index'));
@@ -26,8 +26,9 @@ const SocialsTruthSocial = lazy(() => import('./pages/Socials/SocialsTruthSocial
 const SocialsReddit = lazy(() => import('./pages/Socials/SocialsReddit/index'));
 const Intelligence = lazy(() => import('./pages/Intelligence/index'));
 const CyberNews = lazy(() => import('./pages/CyberNews/index'));
-const Events = lazy(() => import('./pages/Events/index'));
-const SecArchive = lazy(() => import('./pages/SecArchive/index'));
+const Intel = lazy(() => import('./pages/Intel'));
+const Events = lazy(() => import('./pages/Events'));
+const EdgarArchive = lazy(() => import('./pages/EdgarArchive/index'));
 const Research = lazy(() => import('./pages/Research/index'));
 const InsiderIntel = lazy(() => import('./pages/InsiderIntel/index'));
 const EdgarUses = lazy(() => import('./pages/Research/EdgarUses'));
@@ -80,6 +81,14 @@ export default function App() {
                           <AdminRoute>
                             <AdminFeedback />
                           </AdminRoute>
+                        }
+                      />
+                      <Route
+                        path="/intel"
+                        element={
+                          <ProtectedRoute>
+                            <Intel />
+                          </ProtectedRoute>
                         }
                       />
                       <Route
@@ -171,10 +180,10 @@ export default function App() {
                         }
                       />
                       <Route
-                        path="/sec-archive"
+                        path="/edgar-archive"
                         element={
                           <ProtectedRoute>
-                            <SecArchive />
+                            <EdgarArchive />
                           </ProtectedRoute>
                         }
                       />

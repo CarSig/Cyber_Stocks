@@ -1,4 +1,4 @@
-import Stat from '@/components/common/Stat';
+import Stat from '@/components/common/data-display/Stat';
 
 type KevData = { count?: number | null; recentCount?: number; ransomwareCount?: number };
 type NvdData = { fetched?: number; criticalCount?: number; highCount?: number };

@@ -1,4 +1,4 @@
-import ThreatIntelShell from '@/components/layout/ThreatIntelShell';
+import ThreatIntelShell from '@/features/threat-intel/components/ThreatIntelShell';
 import MispTable from '@/features/threat-intel/components/MispTable';
 import { usePaginatedThreatIntel } from '@/features/threat-intel/hooks/usePaginatedThreatIntel';
 

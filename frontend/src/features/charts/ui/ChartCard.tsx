@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import BaseCard from '@/components/common/BaseCard';
+import BaseCard from '@/components/common/cards/BaseCard';
 import ChartToggleButton from './ChartToggleButton';
 
 type ChartCardProps = {

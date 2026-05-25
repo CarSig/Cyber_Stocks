@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
-import FilterSelect from '@/components/common/FilterSelect';
-import ThreatIntelShell from '@/components/layout/ThreatIntelShell';
+import FilterSelect from '@/components/common/filters/FilterSelect';
+import ThreatIntelShell from '@/features/threat-intel/components/ThreatIntelShell';
 import { usePaginatedThreatIntel } from '@/features/threat-intel/hooks/usePaginatedThreatIntel';
 import useFilterWithPageReset from '@/features/threat-intel/hooks/useFilterWithPageReset';
 import { DateUtils } from '@/utils/date';

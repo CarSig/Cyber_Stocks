@@ -13,7 +13,7 @@ export class RedditController {
   @ApiQuery({ name: "subreddit", required: false, description: `One of: ${SUBREDDITS.join(", ")}` })
   @ApiResponse({ status: 200, description: "Array of Reddit posts" })
   @ApiResponse({ status: 400, description: "Unknown subreddit" })
-  getPosts(@Query("subreddit") subreddit: string) {
+  async getPosts(@Query("subreddit") subreddit: string) {
     const sub = (subreddit ?? "ExperiencedDevs") as Subreddit;
     if (!SUBREDDITS.includes(sub)) {
       throw new AppError(`Unknown subreddit. Valid: ${SUBREDDITS.join(", ")}`, 400);

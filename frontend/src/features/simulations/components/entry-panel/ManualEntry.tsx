@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import DatePicker from '@/components/common/DatePicker';
+import DatePicker from '@/components/common/filters/DatePicker';
 
 type ManualEntryProps = {
   side: string;

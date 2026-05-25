@@ -1,11 +1,8 @@
 import { Badge } from '@/components/ui/badge';
-import TagBadge from '@/components/common/TagBadge';
+import TagBadge from '@/components/common/data-display/TagBadge';
 import { sentimentColor } from '@/utils/sentimentUtils';
-import { classifyUrgency } from '@/utils/urgencyUtils';
 import { formatArticleTitle } from '@/utils/articleUtils';
-import SentimentBar from '@/components/common/SentimentBar';
-import UrgencyBadge from '@/components/common/UrgencyBadge';
-import type { UrgencyKey } from '@/types';
+import SentimentBar from '@/components/common/data-display/SentimentBar';
 
 type ArticleEntity = {
   entityId: string;
@@ -35,21 +32,12 @@ type ArticleDetailProps = {
 export default function ArticleDetail({ article, focusEntityId }: ArticleDetailProps) {
   const mention = article.entities.find((e) => e.entityId === focusEntityId);
   const title = formatArticleTitle(article);
-  let urgency: UrgencyKey = 'future_short';
-  try {
-    if (article.timestamp != null) {
-      urgency = classifyUrgency(article.timestamp, article.globalSignals ?? [], article.companySignals ?? []);
-    }
-  } catch (e) {
-    console.error('Error classifying urgency:', e);
-  }
 
   return (
     <div className="article-detail">
       <div className="article-detail-header">
         <span className="article-detail-title">{title}</span>
         <div className="article-detail-badges">
-          <UrgencyBadge urgency={urgency} />
           <Badge variant="secondary">{article.newsType.replace(/_/g, ' ')}</Badge>
         </div>
       </div>

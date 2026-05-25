@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import StateHandler from '@/components/common/StateHandler';
+import StateHandler from '@/components/common/feedback/StateHandler';
 import { getAuditLog } from '@/api/admin';
-import FilterSelect from '@/components/common/FilterSelect';
-import Pagination from '@/components/common/Pagination';
-import Page from '@/components/common/Page';
+import FilterSelect from '@/components/common/filters/FilterSelect';
+import Pagination from '@/components/common/data-display/Pagination';
+import Page from '@/components/common/layout/Page';
 import type { AuditEntry as AuditLogEntry } from '@algo/shared';
 
 const ACTION_LABELS: Record<string, string> = {

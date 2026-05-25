@@ -1,6 +1,6 @@
 import { forwardRef, useMemo, useRef } from 'react';
 import type { Time } from 'lightweight-charts';
-import { ChartAuto, simActionsOverlay, type ChartPlugin, type ChartType } from '@/features/charts/core';
+import { ChartAuto, simActionsOverlay, type ChartPlugin, type ChartType } from '@/features/charts';
 import type { MarkerPoint, HistoryPoint } from '@/features/charts/types';
 
 type PortfolioChartProps = {

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import Page from '@/components/common/Page';
+import Page from '@/components/common/layout/Page';
 import './Research.css';
 
 const PLANS = [

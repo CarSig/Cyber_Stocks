@@ -29,29 +29,3 @@
   white-space: nowrap;
 }
 
-/* ── Header & Controls ─────────────────────────────────────────────────────── */
-.cyber-news-header {
-  margin-bottom: 16px;
-  /* flex provided by .header-flex-between */
-}
-
-.cyber-news-companies-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--muted-foreground);
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* ── Containers ────────────────────────────────────────────────────────────── */
-.cyber-news-grid-container,
-.cyber-news-list-container {
-  margin-bottom: 40px;
-}
-
-/* ── Page intro paragraph ──────────────────────────────────────────────────── */
-.cyber-news-intro {
-  color: var(--muted-foreground);
-  margin-bottom: 24px;
-}

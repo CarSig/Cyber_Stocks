@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import CountBadge from '@/components/common/CountBadge';
+import CountBadge from '@/components/common/data-display/CountBadge';
 import type { RedditComment } from '@/types';
 
 type CommentNodeProps = {

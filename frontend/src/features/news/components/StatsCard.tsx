@@ -1,6 +1,6 @@
-import BaseCard from '@/components/common/BaseCard';
-import Stat from '@/components/common/Stat';
-import SentimentBar from '@/components/common/SentimentBar';
+import BaseCard from '@/components/common/cards/BaseCard';
+import Stat from '@/components/common/data-display/Stat';
+import SentimentBar from '@/components/common/data-display/SentimentBar';
 
 type StatsCardSummary = {
   articleCount?: number;

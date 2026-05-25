@@ -10,8 +10,20 @@ export {
   nextWeekday,
   lastBarTime,
   calcEntryDateTime,
+  calcEntryDateTimeForStrategy,
   getExitTime,
+  isVolatilityStrategy,
+  resolveVolatilityExit,
   calcEntryTime,
 } from './intradaySimUtils';
 export { parseIntradayText, parseLongTermText } from './parseSimText';
 export { aiButtonStyle } from './styles';
+export type { Side, Action, Transaction, SimResult } from './sim';
+export {
+  runLongSimulation,
+  runShortSimulation,
+  buildSimStats,
+  fmtMarkerText,
+  simStatsToExportRows,
+  simResultToExportArgs,
+} from './sim';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import BaseCard from '@/components/common/BaseCard';
-import CardHeader from '@/components/common/CardHeader';
+import BaseCard from '@/components/common/cards/BaseCard';
+import CardHeader from '@/components/common/cards/CardHeader';
 
 type StatusCardProps = {
   to?: string;

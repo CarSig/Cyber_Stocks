@@ -1,4 +1,4 @@
-import BaseCard from '@/components/common/BaseCard';
+import BaseCard from '@/components/common/cards/BaseCard';
 
 type TopicEntry = { topic: string; count: number };
 type TopicsSidebarProps = { selectedTopic: string | null; data?: TopicEntry[] };

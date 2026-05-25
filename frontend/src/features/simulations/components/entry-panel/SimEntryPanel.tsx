@@ -77,10 +77,11 @@ export default function SimEntryPanel<A extends ActionRow>({
         aiSimDisabled={toolbar.ai?.aiSimDisabled}
         onSimulateAll={toolbar.ai?.onSimulateAll}
         simulateAllLabel={toolbar.ai?.simulateAllLabel}
+        onCombinationsAll={toolbar.ai?.onCombinationsAll}
         aiDelay={toolbar.ai?.aiDelay}
         onAiDelayChange={toolbar.ai?.onAiDelayChange}
-        exitAtClose={toolbar.ai?.exitAtClose}
-        onExitAtCloseChange={toolbar.ai?.onExitAtCloseChange}
+        exitStrategy={toolbar.ai?.exitStrategy}
+        onExitStrategyChange={toolbar.ai?.onExitStrategyChange}
       />
 
       <ManualEntry

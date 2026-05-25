@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { IntradayEvent } from '@/features/charts/api';
-import FilterSelect from '@/components/common/FilterSelect';
+import FilterSelect from '@/components/common/filters/FilterSelect';
 
 type EventFiltersProps = {
   eventsData: IntradayEvent[];

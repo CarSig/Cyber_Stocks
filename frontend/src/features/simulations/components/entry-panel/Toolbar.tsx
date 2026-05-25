@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { aiButtonStyle } from '../../utils/styles';
+import type { ExitStrategy } from '../../reducers/intradayReducer';
 
 type ToolbarProps = {
   presets: Record<string, unknown> | undefined;
@@ -18,10 +19,11 @@ type ToolbarProps = {
   aiSimDisabled?: boolean;
   onSimulateAll?: () => void;
   simulateAllLabel?: string;
+  onCombinationsAll?: () => void;
   aiDelay?: number;
   onAiDelayChange?: (v: number) => void;
-  exitAtClose?: boolean;
-  onExitAtCloseChange?: (v: boolean) => void;
+  exitStrategy?: ExitStrategy;
+  onExitStrategyChange?: (v: ExitStrategy) => void;
 };
 
 export default function Toolbar({
@@ -39,10 +41,11 @@ export default function Toolbar({
   aiSimDisabled,
   onSimulateAll,
   simulateAllLabel,
+  onCombinationsAll,
   aiDelay,
   onAiDelayChange,
-  exitAtClose,
-  onExitAtCloseChange,
+  exitStrategy,
+  onExitStrategyChange,
 }: ToolbarProps) {
   return (
     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '0.5rem' }}>
@@ -86,31 +89,34 @@ export default function Toolbar({
             />
             <span style={{ fontSize: 12, color: 'var(--text-faint)', whiteSpace: 'nowrap' }}>min delay</span>
           </div>
-          {onExitAtCloseChange !== undefined && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <button
-                type="button"
-                onClick={() => onExitAtCloseChange?.(!exitAtClose)}
-                style={{
-                  padding: '2px 8px',
-                  fontSize: 11,
-                  borderRadius: 4,
-                  border: '1px solid var(--border)',
-                  background: exitAtClose ? 'var(--accent)' : 'transparent',
-                  color: exitAtClose ? 'var(--accent-foreground)' : 'var(--text-faint)',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {exitAtClose ? 'Exit 15:59' : 'Exit 15:45'}
-              </button>
-            </div>
+          {onExitStrategyChange !== undefined && (
+            <Select value={exitStrategy ?? '15:45'} onValueChange={(v) => onExitStrategyChange(v as ExitStrategy)}>
+              <SelectTrigger className="w-44">
+                <SelectValue placeholder="Exit strategy…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="15:45">Exit 15:45</SelectItem>
+                <SelectItem value="15:59">Exit 15:59</SelectItem>
+                <SelectItem value="vol-same-day">Vol same day (ATR)</SelectItem>
+                <SelectItem value="vol-next-day">Vol next day (2% move)</SelectItem>
+                <SelectItem value="vol-hold">Vol hold 2× spike</SelectItem>
+                <SelectItem value="vol-hold-3x">Vol hold 3× spike</SelectItem>
+                <SelectItem value="vol-hold-eod">Vol hold EOD spike</SelectItem>
+                <SelectItem value="vol-hold-vwap">Vol hold VWAP cross</SelectItem>
+                <SelectItem value="vol-hold-confirm">Vol hold price+vol confirm</SelectItem>
+              </SelectContent>
+            </Select>
           )}
         </>
       )}
       {onSimulateAll && (
         <Button variant="ghost" onClick={onSimulateAll} style={aiButtonStyle}>
           ✦ {simulateAllLabel ?? 'Simulate All'}
+        </Button>
+      )}
+      {onCombinationsAll && (
+        <Button variant="ghost" onClick={onCombinationsAll} style={aiButtonStyle}>
+          ✦ All Combinations
         </Button>
       )}
       {hasResult && (

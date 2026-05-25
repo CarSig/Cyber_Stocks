@@ -5,23 +5,24 @@ import type { Action } from '@/utils/sim';
 import { DateUtils } from '@/utils/date';
 import { getExitTime } from '../utils';
 import { intradayStrategy } from '../reducers/baseStrategy';
-import type { IntradaySimAction, SimAllRow } from '../reducers/intradayReducer';
+import type { IntradaySimAction, SimAllRow, ExitStrategy } from '../reducers/intradayReducer';
 
 type Opts = {
   eventsData: IntradayEvent[] | undefined;
   timeframe: string;
-  exitAtClose: boolean;
+  exitStrategy: ExitStrategy;
   dispatch: Dispatch<IntradaySimAction>;
   nextActionId: MutableRefObject<number>;
 };
 
-export function useRowSelect({ eventsData, timeframe, exitAtClose, dispatch, nextActionId }: Opts) {
+export function useRowSelect({ eventsData, timeframe, exitStrategy, dispatch, nextActionId }: Opts) {
   return useCallback(
     (row: SimAllRow) => {
       const ev = eventsData?.find((e) => e.rank === row.rank);
       if (!ev) return;
       dispatch({ type: 'LOAD_EVENT', event: ev, timeframe });
-      const exitTime = getExitTime(exitAtClose, timeframe);
+      const fixedExitTime = getExitTime(exitStrategy, timeframe);
+      const exitTime = fixedExitTime ?? '15:45';
       const entryIso = DateUtils.timeToIso(row.entryTime, row.entryDate);
       const exitIso = DateUtils.timeToIso(exitTime, row.exitDate);
       const newActions: Action[] = [
@@ -48,6 +49,6 @@ export function useRowSelect({ eventsData, timeframe, exitAtClose, dispatch, nex
         textValue: intradayStrategy.toText(row.entryDate, newActions),
       });
     },
-    [eventsData, timeframe, exitAtClose, dispatch, nextActionId],
+    [eventsData, timeframe, exitStrategy, dispatch, nextActionId],
   );
 }

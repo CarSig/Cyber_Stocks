@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import StateHandler from '@/components/common/StateHandler';
+import StateHandler from '@/components/common/feedback/StateHandler';
 import { getRedditComments } from '../api';
-import CountBadge from '@/components/common/CountBadge';
-import TagBadge from '@/components/common/TagBadge';
+import CountBadge from '@/components/common/data-display/CountBadge';
+import TagBadge from '@/components/common/data-display/TagBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';

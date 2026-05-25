@@ -10,6 +10,7 @@ import DayTradeChartSlot from './components/DayTradeChartSlot';
 import IntradayEventCard from './components/intraday/IntradayEventCard';
 import OrderControls from './components/OrderControls';
 import AllDialog from './components/intraday/AllDialog';
+import CombinationsDialog from './components/intraday/CombinationsDialog';
 import { intradayReducer, initialIntradayState } from './reducers/intradayReducer';
 import type { IntradaySimState, IntradaySimAction } from './reducers/intradayReducer';
 import { intradayStrategy } from './reducers/baseStrategy';
@@ -25,6 +26,7 @@ import {
   useEventFilters,
   useAiSim,
   useSimulateAll,
+  useCombinationsAll,
   useRowSelect,
 } from './hooks';
 import { buildIntradayChartConfig } from './utils';
@@ -62,8 +64,11 @@ export default function IntradaySimulation(props: IntradaySimulationProps) {
     extraDates,
     simAllResults,
     simAllRunning,
+    combResults,
+    combRunning,
     aiDelay,
-    exitAtClose,
+    entryStrategy,
+    exitStrategy,
   } = s;
 
   // In daytrade mode, keep query.ticker in sync with the prop.
@@ -203,13 +208,15 @@ export default function IntradaySimulation(props: IntradaySimulationProps) {
   const handleAiSim = useAiSim({
     selectedEvent: selectedEvent ?? null,
     aiDelay,
-    exitAtClose,
+    entryStrategy,
+    exitStrategy,
     timeframe,
     dispatch,
     nextActionId,
   });
-  const handleSimulateAll = useSimulateAll({ filteredEvents, aiDelay, exitAtClose, timeframe, fmtTime, dispatch });
-  const handleRowSelect = useRowSelect({ eventsData, timeframe, exitAtClose, dispatch, nextActionId });
+  const handleSimulateAll = useSimulateAll({ filteredEvents, aiDelay, entryStrategy, exitStrategy, timeframe, fmtTime, dispatch });
+  const handleCombinationsAll = useCombinationsAll({ filteredEvents, aiDelay, timeframe, fmtTime, dispatch });
+  const handleRowSelect = useRowSelect({ eventsData, timeframe, exitStrategy, dispatch, nextActionId });
   const handleExportPdf = useExportSimPdf(
     query.ticker,
     result,
@@ -297,10 +304,11 @@ export default function IntradaySimulation(props: IntradaySimulationProps) {
                     aiSimDisabled: !selectedEvent,
                     onSimulateAll: filteredEvents.length ? handleSimulateAll : undefined,
                     simulateAllLabel: isFiltered ? `Simulate Selected (${filteredEvents.length})` : 'Simulate All',
+                    onCombinationsAll: filteredEvents.length ? handleCombinationsAll : undefined,
                     aiDelay,
                     onAiDelayChange: (d) => dispatch({ type: 'SET_AI_DELAY', delay: d }),
-                    exitAtClose,
-                    onExitAtCloseChange: (v) => dispatch({ type: 'SET_EXIT_AT_CLOSE', exitAtClose: v }),
+                    exitStrategy,
+                    onExitStrategyChange: (v) => dispatch({ type: 'SET_EXIT_STRATEGY', exitStrategy: v }),
                   }
                 : undefined,
           })}
@@ -317,16 +325,28 @@ export default function IntradaySimulation(props: IntradaySimulationProps) {
       )}
 
       {props.mode === 'event' && (
-        <AllDialog
-          open={simAllRunning || !!simAllResults}
-          onClose={() => dispatch({ type: 'SIM_ALL_CLOSE' })}
-          running={simAllRunning}
-          results={simAllResults}
-          aiDelay={aiDelay}
-          onAiDelayChange={(d) => dispatch({ type: 'SET_AI_DELAY', delay: d })}
-          onReload={handleSimulateAll}
-          onRowSelect={handleRowSelect}
-        />
+        <>
+          <AllDialog
+            open={simAllRunning || !!simAllResults}
+            onClose={() => dispatch({ type: 'SIM_ALL_CLOSE' })}
+            running={simAllRunning}
+            results={simAllResults}
+            aiDelay={aiDelay}
+            onAiDelayChange={(d) => dispatch({ type: 'SET_AI_DELAY', delay: d })}
+            onReload={handleSimulateAll}
+            onRowSelect={handleRowSelect}
+            exitStrategy={exitStrategy}
+          />
+          <CombinationsDialog
+            open={combRunning || !!combResults}
+            onClose={() => dispatch({ type: 'COMB_CLOSE' })}
+            running={combRunning}
+            results={combResults}
+            onSelectCombo={(_entry, exit) => {
+              dispatch({ type: 'SET_EXIT_STRATEGY', exitStrategy: exit });
+            }}
+          />
+        </>
       )}
       {popoverNodes}
     </div>

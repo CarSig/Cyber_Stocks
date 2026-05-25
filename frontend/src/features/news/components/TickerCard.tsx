@@ -1,5 +1,5 @@
 import { useCyberNewsSummary } from '@/features/news/hooks/useCyberNews';
-import SummaryCard from '@/components/common/SummaryCard';
+import SummaryCard from '@/features/news/components/SummaryCard';
 import type { CyberNewsTicker, CorrelationResult } from '@/types';
 
 type TickerCardProps = {

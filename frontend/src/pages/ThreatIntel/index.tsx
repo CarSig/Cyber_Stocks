@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import StateHandler from '@/components/common/StateHandler';
+import StateHandler from '@/components/common/feedback/StateHandler';
 import ThreatIntelCard from '@/features/threat-intel/components/ThreatIntelCard';
 import { getStatus } from '@/features/threat-intel/api';
-import Page from '@/components/common/Page';
+import Page from '@/components/common/layout/Page';
 import type { ThreatIntelStatus } from '@/types';
 
 export default function ThreatIntel() {

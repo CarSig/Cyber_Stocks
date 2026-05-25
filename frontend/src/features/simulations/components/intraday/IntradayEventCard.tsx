@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import BaseCard from '@/components/common/BaseCard';
+import BaseCard from '@/components/common/cards/BaseCard';
 import type { IntradayEvent } from '@/features/charts/api';
 
 function severityColor(active: boolean, severity: number): string | undefined {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import FilterSelect from '@/components/common/FilterSelect';
+import FilterSelect from '@/components/common/filters/FilterSelect';
 
 const SEVERITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
 

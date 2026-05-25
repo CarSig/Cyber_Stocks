@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import ThreatIntelShell from '@/components/layout/ThreatIntelShell';
+import ThreatIntelShell from '@/features/threat-intel/components/ThreatIntelShell';
 import useFilterWithPageReset from '@/features/threat-intel/hooks/useFilterWithPageReset';
 import NvdFilters from '@/features/threat-intel/components/NvdFilters';
 import NvdTable from '@/features/threat-intel/components/NvdTable';

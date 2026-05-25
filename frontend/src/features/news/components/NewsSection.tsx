@@ -3,8 +3,8 @@ import { useNewsAnalysis } from '../hooks';
 import CorrelationBox from '@/features/correlations/components/CorrelationBox';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import TagBadge from '@/components/common/TagBadge';
-import CountBadge from '@/components/common/CountBadge';
+import TagBadge from '@/components/common/data-display/TagBadge';
+import CountBadge from '@/components/common/data-display/CountBadge';
 import type { NewsArticle, NewsAnalysisMap } from '@/types';
 
 const PAGE_SIZE = 10;
