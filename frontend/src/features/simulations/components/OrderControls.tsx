@@ -1,4 +1,4 @@
-import { MarketUtils } from '@/utils/market';
+import { MarketUtils } from '@/features/simulations/utils/market';
 import TradeModeControls from './TradeModeControls';
 
 type OrderControlsProps = {

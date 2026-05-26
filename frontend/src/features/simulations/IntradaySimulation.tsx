@@ -1,4 +1,5 @@
 import { useEffect, useRef, useMemo, useReducer, useCallback } from 'react';
+import './Simulation.css';
 import { useQuery, useQueries } from '@tanstack/react-query';
 import { syncIntradayMarkers, setupDayLines } from '@/features/charts/utils';
 import { getBars, getIntradayEvents } from '@/features/charts/api';
@@ -33,7 +34,7 @@ import { buildIntradayChartConfig } from './utils';
 import { DateUtils } from '@/utils/date';
 import { useTimezone } from '@/context/TimezoneContext';
 import { PriceUtils } from '@/utils/price';
-import { buildSimStats, type Action } from '@/utils/sim';
+import { buildSimStats, type Action } from '@/features/simulations/utils/sim';
 import { INTRADAY_SIM_PRESETS } from './eventSimPresets';
 import { DAYTRADE_PRESETS } from './dayTradePresets';
 

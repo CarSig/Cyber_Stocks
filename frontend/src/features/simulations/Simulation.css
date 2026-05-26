@@ -1,0 +1,263 @@
+/* ── Simulation ─────────────────────────────────────────── */
+.sim-editor-toggle {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.sim-editor-toggle .btn {
+  font-size: 12px;
+}
+.sim-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.sim-action-row {
+  display: grid;
+  grid-template-columns: 160px 130px 140px max-content max-content;
+  gap: 12px;
+  align-items: center;
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+    & > *:nth-child(3) {
+      grid-column: 1 / -1;
+    }
+    & > *:nth-child(4),
+    & > *:nth-child(5) {
+      justify-self: start;
+    }
+  }
+}
+.sim-action-row .btn {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+.form-select {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-input);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+.form-input {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-input);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+.form-input--number {
+  width: 130px;
+}
+.sim-textarea {
+  width: 100%;
+  margin-bottom: 12px;
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-input);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: monospace;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.sim-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.error-text {
+  color: var(--color-red);
+}
+.sim-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--surface-1);
+  border: 1px solid var(--surface-3);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.stat-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.stat-value {
+  font-weight: 700;
+}
+.sim-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 16px;
+}
+.sim-table th {
+  text-align: left;
+  padding: 4px 8px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--surface-3);
+}
+.sim-table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--surface-1);
+}
+.sim-buy {
+  color: var(--color-green);
+}
+.sim-sell {
+  color: var(--color-red);
+}
+.sim-chart-controls {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.sim-chart-btn {
+  padding: 3px 12px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--surface-3);
+  background: var(--surface-1);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.sim-chart-btn.active {
+  background: var(--surface-3);
+  color: var(--text-primary);
+}
+
+/* ── Intraday Event Card ─────────────────────────────────────────────────── */
+.severity-bar {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+.severity-bar-cell {
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.severity-bar-readout {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.iec-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  cursor: pointer;
+}
+.iec-rank {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.iec-ticker {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-green);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+.iec-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+.iec-header-toggle {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+.iec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px 16px;
+}
+.iec-field {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.iec-label {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.iec-value {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.iec-value--idea {
+  color: var(--color-green);
+  font-weight: 600;
+}
+.iec-badge {
+  font-size: 0.65rem;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+.iec-badge--pre-market {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+.iec-badge--post-market {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+  border-color: rgba(249, 115, 22, 0.3);
+}
+.iec-badge--during {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.3);
+}
+.iec-notes {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  border-left: 2px solid var(--border-input);
+  padding-left: 10px;
+}
+.iec-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.iec-link {
+  font-size: 0.78rem;
+  color: #60a5fa;
+  text-decoration: none;
+}
+.iec-link:hover {
+  text-decoration: underline;
+}
+.iec-link--source {
+  color: #f59e0b;
+}
+.iec-link--ticker {
+  color: var(--color-green);
+}

@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import TagBadge from '@/components/common/data-display/TagBadge';
 import { sentimentColor } from '@/utils/sentimentUtils';
-import { formatArticleTitle } from '@/utils/articleUtils';
+import { formatArticleTitle } from '@/features/intelligence/utils/articleUtils';
 import SentimentBar from '@/components/common/data-display/SentimentBar';
 
 type ArticleEntity = {

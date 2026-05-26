@@ -1,7 +1,7 @@
 import { useCallback, type RefObject } from 'react';
 import { exportSimPdf } from '../utils';
-import { simResultToExportArgs } from '@/utils/sim';
-import type { SimResult } from '@/utils/sim';
+import { simResultToExportArgs } from '@/features/simulations/utils/sim';
+import type { SimResult } from '@/features/simulations/utils/sim';
 
 type ChartRef = { ref: RefObject<HTMLDivElement | null>; label: string };
 

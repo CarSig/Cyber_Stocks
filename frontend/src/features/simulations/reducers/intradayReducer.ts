@@ -1,5 +1,5 @@
 import { DateUtils } from '@/utils/date';
-import type { Action } from '@/utils/sim';
+import type { Action } from '@/features/simulations/utils/sim';
 import type { IntradayEvent } from '@/features/charts/api';
 import { makeSimReducer, initialBaseSimState } from './baseReducer';
 import type { BaseSimAction } from './baseReducer';

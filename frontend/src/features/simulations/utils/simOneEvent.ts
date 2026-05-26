@@ -1,8 +1,8 @@
 import type { QueryClient } from '@tanstack/react-query';
 import { getBars } from '@/features/charts/api';
 import type { IntradayEvent } from '@/features/charts/api';
-import type { Action } from '@/utils/sim';
-import { runLongSimulation, runShortSimulation } from '@/utils/sim';
+import type { Action } from '@/features/simulations/utils/sim';
+import { runLongSimulation, runShortSimulation } from '@/features/simulations/utils/sim';
 import { DateUtils } from '@/utils/date';
 import {
   detectShortDirection,

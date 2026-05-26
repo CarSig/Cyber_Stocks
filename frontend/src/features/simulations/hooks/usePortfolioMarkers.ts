@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { SimResult } from '@/utils/sim';
+import type { SimResult } from '@/features/simulations/utils/sim';
 
 export function usePortfolioMarkers(result: SimResult | null) {
   return useMemo(

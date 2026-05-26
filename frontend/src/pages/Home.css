@@ -1,0 +1,318 @@
+/* ── Home page ──────────────────────────────────────────── */
+.trump-posts-chart {
+  margin-bottom: 32px;
+}
+
+.socials-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+.socials-post {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  background: var(--surface-1);
+  border: 1px solid var(--surface-3);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+}
+.socials-post:hover {
+  background: var(--surface-2);
+}
+.socials-post-date {
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+.socials-post-text {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+.reddit-post {
+  cursor: default;
+}
+.reddit-post:hover {
+  background: var(--surface-1);
+}
+.reddit-comments {
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--surface-3);
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.reddit-comment-thread {
+  display: flex;
+  flex-direction: column;
+}
+.reddit-comment {
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-2);
+  border-radius: 6px;
+}
+.reddit-comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+.reddit-comment-author {
+  font-size: 0.75rem;
+  color: var(--color-blue);
+  font-weight: 500;
+}
+.reddit-comment-body {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin: 0;
+  white-space: pre-wrap;
+}
+.reddit-replies {
+  margin-top: 0.25rem;
+  margin-left: 20px;
+  padding-left: 12px;
+  border-left: 2px solid var(--border-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.trump-posts-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 8px;
+}
+.home-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  @media (max-width: 640px) {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+}
+.home-header .page-title {
+  margin: 0;
+}
+.date-range-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  @media (max-width: 640px) {
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+}
+.date-range-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.date-range-input {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  border: 1px solid var(--border-input);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+.company-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.company-list-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+  padding-right: 5%;
+}
+.company-list-period {
+  font-size: 10px;
+  color: var(--muted-foreground);
+  letter-spacing: 0.02em;
+}
+.company-item {
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.company-item:hover {
+  background: var(--muted);
+  border-color: var(--ring);
+}
+.company-item-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: var(--foreground);
+}
+.company-item-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.company-item-ticker {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+.company-item-name {
+  font-size: 11px;
+  color: var(--muted-foreground);
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.company-item-data {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.company-item-price {
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-mono, monospace);
+  color: var(--foreground);
+}
+.company-item-change {
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-mono, monospace);
+  min-width: 52px;
+  text-align: right;
+}
+.company-item-change--up {
+  color: var(--color-green, #22c55e);
+}
+.company-item-change--down {
+  color: var(--color-red, #ef4444);
+}
+
+/* ── Home mode switcher ─────────────────────────────────────── */
+.home-mode-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: var(--muted);
+  border-radius: 8px;
+  padding: 3px;
+  width: fit-content;
+}
+.home-mode-btn {
+  padding: 5px 18px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.home-mode-btn--active {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Compare layout ─────────────────────────────────────────── */
+.home-compare-layout {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+.home-compare-sidebar {
+  width: 150px;
+  flex-shrink: 0;
+}
+.home-compare-main {
+  flex: 1;
+  min-width: 0;
+}
+.home-compare-empty {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  margin-top: 32px;
+  text-align: center;
+}
+
+/* ── Company pills (compare mode) ───────────────────────────── */
+.company-list--compare {
+  flex-direction: column;
+  gap: 4px;
+}
+.company-pill {
+  list-style: none;
+}
+.company-pill-btn {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.company-pill-btn:hover:not(:disabled) {
+  background: var(--muted);
+  border-color: var(--ring);
+}
+.company-pill--on .company-pill-btn {
+  background: var(--color-blue-toggle, #3b82f6);
+  border-color: var(--color-blue-toggle, #3b82f6);
+  color: #fff;
+}
+.company-pill--on .company-pill-name {
+  color: rgba(255, 255, 255, 0.75);
+}
+.company-pill--disabled .company-pill-btn {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.company-pill-ticker {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+}
+.company-pill-name {
+  font-size: 10px;
+  color: var(--muted-foreground);
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

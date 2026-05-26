@@ -3,7 +3,7 @@ import type { Dispatch, MutableRefObject } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getBars } from '@/features/charts/api';
 import type { IntradayEvent } from '@/features/charts/api';
-import type { Action } from '@/utils/sim';
+import type { Action } from '@/features/simulations/utils/sim';
 import { DateUtils } from '@/utils/date';
 import { detectShortDirection, calcEntryDateTimeForStrategy, getExitTime, isVolatilityStrategy, resolveVolatilityExit, nextWeekday } from '../utils';
 import { intradayStrategy } from '../reducers/baseStrategy';

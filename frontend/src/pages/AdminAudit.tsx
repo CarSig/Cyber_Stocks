@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './Admin.css';
 import { useQuery } from '@tanstack/react-query';
 import StateHandler from '@/components/common/feedback/StateHandler';
 import { getAuditLog } from '@/api/admin';

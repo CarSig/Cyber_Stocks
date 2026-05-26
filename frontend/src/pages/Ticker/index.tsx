@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import './Ticker.css';
 import { useMemo, useEffect } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic cross-domain cast for buildChatContext
 type AnyRecord = Record<string, any>;
@@ -14,7 +15,7 @@ import { getAnalysis } from '@/features/news/api';
 import { getSparklines } from '@/features/tickers/api';
 import { useCachedQuery } from '@/hooks/useCachedQuery';
 import { useTickerThreatData } from '@/features/threat-intel/hooks/useTickerThreatData';
-import { TickerProvider, useTickerContext } from '@/context/TickerContext';
+import { useTickerStore } from '@/stores/tickerStore';
 import TickerWatchlist from '@/features/tickers/components/TickerWatchlist';
 import { buildChatContext } from '@/features/tickers/utils/buildChatContext';
 import TickerChat from '@/features/tickers/components/TickerChat';
@@ -49,7 +50,7 @@ function TickerContent() {
     showCyberNews,
     setShowCyberNews,
     reset,
-  } = useTickerContext();
+  } = useTickerStore();
 
   const { ticker } = useParams<{ ticker: string }>();
 
@@ -249,9 +250,5 @@ function TickerContent() {
 }
 
 export default function Ticker() {
-  return (
-    <TickerProvider>
-      <TickerContent />
-    </TickerProvider>
-  );
+  return <TickerContent />;
 }

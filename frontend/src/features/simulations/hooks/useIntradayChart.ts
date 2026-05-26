@@ -1,5 +1,5 @@
 import type { RefObject, Dispatch, MutableRefObject } from 'react';
-import type { Action } from '@/utils/sim';
+import type { Action } from '@/features/simulations/utils/sim';
 import type { AlpacaBar } from '@/types';
 import type { BaseSimAction } from '../reducers/baseReducer';
 import type { ChartSeriesConfig } from './usePriceChart';

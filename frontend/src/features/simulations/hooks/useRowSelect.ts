@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import type { Dispatch, MutableRefObject } from 'react';
 import type { IntradayEvent } from '@/features/charts/api';
-import type { Action } from '@/utils/sim';
+import type { Action } from '@/features/simulations/utils/sim';
 import { DateUtils } from '@/utils/date';
 import { getExitTime } from '../utils';
 import { intradayStrategy } from '../reducers/baseStrategy';

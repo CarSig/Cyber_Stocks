@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import '@/features/threat-intel/ThreatIntel.css';
 import StateHandler from '@/components/common/feedback/StateHandler';
 import ThreatIntelCard from '@/features/threat-intel/components/ThreatIntelCard';
 import { getStatus } from '@/features/threat-intel/api';

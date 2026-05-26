@@ -1,5 +1,5 @@
 import type { Dispatch } from 'react';
-import type { Action } from '@/utils/sim';
+import type { Action } from '@/features/simulations/utils/sim';
 import type { BaseSimAction } from '../reducers/baseReducer';
 import { useChartPopover } from './useChartPopover';
 import ChartActionPopover from '../components/ChartActionPopover';

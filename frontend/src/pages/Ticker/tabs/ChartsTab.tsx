@@ -1,6 +1,6 @@
 import FilterSelect from '@/components/common/filters/FilterSelect';
 import { ChartCard } from '@/features/charts/ui';
-import { useTickerContext } from '@/context/TickerContext';
+import { useTickerStore } from '@/stores/tickerStore';
 import {
   ChartAuto,
   compareOverlay,
@@ -64,7 +64,7 @@ export default function ChartsTab({
     setHideNewsSentiment,
     hideIntelligence,
     setHideIntelligence,
-  } = useTickerContext();
+  } = useTickerStore();
 
   const news = overlays.news as { articles: NewsArticle[]; analysis?: NewsAnalysisMap } | undefined;
   const cyberNews = overlays.cyberNews as { articles?: NewsArticle[]; analysis?: NewsAnalysisMap } | undefined;

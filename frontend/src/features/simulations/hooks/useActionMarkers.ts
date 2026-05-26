@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { createSeriesMarkers } from 'lightweight-charts';
 import type { ISeriesApi, SeriesType } from 'lightweight-charts';
-import { fmtMarkerText } from '@/utils/sim';
-import type { Side } from '@/utils/sim';
+import { fmtMarkerText } from '@/features/simulations/utils/sim';
+import type { Side } from '@/features/simulations/utils/sim';
 
 type MarkerAction = {
   timestamp?: string;

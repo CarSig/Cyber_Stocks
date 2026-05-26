@@ -7,8 +7,8 @@ import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { TimezoneProvider } from './context/TimezoneContext';
 import Navbar from './components/layout/Navbar';
-import ProtectedRoute from './components/routes/ProtectedRoute';
-import AdminRoute from './components/routes/AdminRoute';
+import ProtectedRoute from './components/layout/ProtectedRoute';
+import AdminRoute from './components/layout/AdminRoute';
 import { ErrorBoundary } from './components/common/feedback/ErrorBoundary';
 
 const Home = lazy(() => import('./pages/Home'));

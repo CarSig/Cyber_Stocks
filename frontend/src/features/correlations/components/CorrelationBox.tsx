@@ -1,4 +1,5 @@
 import { Input } from '@/components/ui/input';
+import '@/features/correlations/Correlations.css';
 import { Label } from '@/components/ui/label';
 import type { LagImpactResult as LagImpact } from '@algo/shared';
 import type { SingleLagImpact, CorrelationBoxProps } from '../types';

@@ -14,7 +14,7 @@ import { longTermStrategy } from './reducers/baseStrategy';
 import { useAddManualAction } from './hooks/useAddManualAction';
 import { useDailyChart } from './hooks/useDailyChart';
 import { useSimRefs } from './hooks/useSimRefs';
-import { simStatsToExportRows } from '@/utils/sim';
+import { simStatsToExportRows } from '@/features/simulations/utils/sim';
 import { DateUtils, safeOffsetDate } from '@/utils/date';
 
 const { snapToWeekday } = DateUtils;
@@ -330,7 +330,7 @@ export default function LongSimulation({ ticker, quotes = [], onResult }: Simula
         portfolioValue: t.portfolioValue,
       })),
       portfolioHistory: result.portfolioHistory.map((p) => ({ time: p.date, value: p.value })),
-    } as import('@/utils/sim').SimResult;
+    } as import('@/features/simulations/utils/sim').SimResult;
   }, [result]);
 
   const handleExportPdf = useExportSimPdf(

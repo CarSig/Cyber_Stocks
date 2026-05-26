@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { AlpacaBar } from '@/types';
-import type { Action, SimResult } from '@/utils/sim';
-import { runLongSimulation, runShortSimulation } from '@/utils/sim';
+import type { Action, SimResult } from '@/features/simulations/utils/sim';
+import { runLongSimulation, runShortSimulation } from '@/features/simulations/utils/sim';
 
 export function useSimResult(
   bars: AlpacaBar[],

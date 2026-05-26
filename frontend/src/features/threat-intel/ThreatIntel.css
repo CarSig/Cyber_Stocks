@@ -1,0 +1,292 @@
+/* ── Threat Intel shared ──────────────────────────────── */
+.ti-page {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 24px;
+  @media (max-width: 640px) {
+    margin: 20px auto;
+    padding: 0 12px;
+  }
+}
+.ti-page-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 28px;
+  color: var(--text-primary);
+}
+.ti-loading {
+  color: var(--text-muted);
+}
+.ti-error {
+  color: var(--color-red);
+}
+.ti-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: 0;
+}
+.ti-synced {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Dashboard grid */
+.ti-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
+  gap: 12px;
+}
+
+.ti-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ti-card-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+.ti-card-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  flex: 1;
+}
+.ti-card-body {
+  flex: 1;
+}
+
+.ti-stats-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+.ti-stat {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 4px;
+}
+.ti-stat-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.ti-stat-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* Badges */
+.ti-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 20px;
+}
+.ti-badge--warn {
+  background: color-mix(in srgb, var(--color-amber) 15%, transparent);
+  color: var(--color-amber);
+}
+.ti-badge--danger {
+  background: color-mix(in srgb, var(--color-red) 15%, transparent);
+  color: var(--color-red);
+}
+.ti-badge--muted {
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+.ti-badge--tlp-white {
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+.ti-badge--tlp-green {
+  background: color-mix(in srgb, var(--color-green) 15%, transparent);
+  color: var(--color-green);
+}
+.ti-badge--tlp-amber {
+  background: color-mix(in srgb, var(--color-amber) 15%, transparent);
+  color: var(--color-amber);
+}
+.ti-badge--tlp-red {
+  background: color-mix(in srgb, var(--color-red) 15%, transparent);
+  color: var(--color-red);
+}
+
+/* Detail pages */
+.ti-detail-page {
+  max-width: 1200px;
+  margin: 32px auto;
+  padding: 0 24px;
+  @media (max-width: 640px) {
+    margin: 16px auto;
+    padding: 0 12px;
+  }
+}
+.ti-detail-header {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.ti-detail-header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+}
+.ti-back {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+.ti-back:hover {
+  color: var(--text-primary);
+}
+
+.ti-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.ti-search {
+  background: var(--surface-2);
+  border: 1px solid var(--surface-3);
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: var(--text-primary);
+  font-size: 13px;
+  width: 260px;
+  @media (max-width: 640px) {
+    width: 100%;
+  }
+}
+.ti-search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.ti-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+.ti-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.ti-table-wrap {
+  overflow-x: auto;
+}
+.ti-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.ti-table th {
+  text-align: left;
+  padding: 6px 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--surface-3);
+  white-space: nowrap;
+}
+.ti-table td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--surface-1);
+  vertical-align: top;
+}
+.ti-table tr:hover td {
+  background: var(--surface-2);
+}
+
+.ti-link {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+.ti-link:hover {
+  text-decoration: underline;
+}
+.ti-name {
+  max-width: 320px;
+}
+.ti-desc {
+  max-width: 400px;
+  color: var(--text-muted);
+}
+.ti-date {
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+.ti-muted {
+  color: var(--text-muted);
+}
+.ti-score {
+  font-weight: 600;
+}
+.ti-severity {
+  font-weight: 600;
+}
+.ti-pulse-name {
+  font-weight: 500;
+}
+
+.ti-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.ti-tag {
+  font-size: 11px;
+  background: var(--surface-3);
+  color: var(--text-muted);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+
+.ti-pagination {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+.ti-page-info {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.ti-notice {
+  background: var(--surface-2);
+  border: 1px solid var(--surface-3);
+  border-radius: 10px;
+  padding: 20px 24px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.ti-notice strong {
+  color: var(--text-primary);
+}
+.ti-notice code {
+  background: var(--surface-3);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-size: 12px;
+}
+.ti-notice-steps {
+  margin: 12px 0 0 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

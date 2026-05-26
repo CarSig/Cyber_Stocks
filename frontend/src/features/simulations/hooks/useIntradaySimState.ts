@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { IntradayEvent } from '@/features/charts/api';
 import { DateUtils } from '@/utils/date';
-import type { Side, Action } from '@/utils/sim';
+import type { Side, Action } from '@/features/simulations/utils/sim';
 
 export type SimAllRow = {
   rank: number;

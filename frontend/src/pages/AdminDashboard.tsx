@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import './Admin.css';
 import { getAuditLog, triggerJob } from '@/api/admin';
 import { Button } from '@/components/ui/button';
 import Page from '@/components/common/layout/Page';

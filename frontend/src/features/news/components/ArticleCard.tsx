@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import '../News.css';
 import TagBadge from '@/components/common/data-display/TagBadge';
 import CountBadge from '@/components/common/data-display/CountBadge';
 import BaseCard from '@/components/common/cards/BaseCard';

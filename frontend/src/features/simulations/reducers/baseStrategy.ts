@@ -1,4 +1,4 @@
-import type { Side, Action } from '@/utils/sim';
+import type { Side, Action } from '@/features/simulations/utils/sim';
 import { DateUtils } from '@/utils/date';
 import type { BaseSimState, BaseSimAction } from './baseReducer';
 import type { ExitStrategy } from './intradayReducer';
