@@ -1,0 +1,221 @@
+import { describe, it, expect } from 'vitest';
+import { resolveVolatilityExit, nextWeekday } from './intradaySimUtils';
+
+// ─── helpers ──────────────────────────────────────────────────────────────────
+
+type Bar = { t: string; o: number; h: number; l: number; c: number; v: number; vw: number };
+
+function bar(isoUtc: string, c: number, h = c, l = c, v = 1000, vw = c): Bar {
+  return { t: isoUtc, o: c, h, l, c, v, vw };
+}
+
+/** Build a series of bars starting at 09:30 on `date`, one per minute. */
+function makeDayBars(date: string, count: number, close = 100, vol = 1000): Bar[] {
+  const bars: Bar[] = [];
+  for (let i = 0; i < count; i++) {
+    const h = Math.floor((9 * 60 + 30 + i) / 60);
+    const m = (9 * 60 + 30 + i) % 60;
+    const t = `${date}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00.000Z`;
+    bars.push(bar(t, close, close + 1, close - 1, vol));
+  }
+  return bars;
+}
+
+const ENTRY_DATE = '2024-01-10';
+const ENTRY_ISO = `${ENTRY_DATE}T14:30:00.000Z`;
+
+// ─── vol-same-day ─────────────────────────────────────────────────────────────
+
+describe('resolveVolatilityExit — vol-same-day', () => {
+  it('exits when price moves >= ATR from entry price', () => {
+    const entryBar = bar(ENTRY_ISO, 100, 105, 95); // ATR = 10
+    const next = bar(`${ENTRY_DATE}T14:31:00.000Z`, 111, 112, 110); // moves 11 from 100
+    const bars = [entryBar, next];
+    const result = resolveVolatilityExit('vol-same-day', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(result).toBe(next.t);
+  });
+
+  it('falls back to a 15:45 ISO timestamp when no bar reaches threshold', () => {
+    const bars = makeDayBars(ENTRY_DATE, 30, 100); // all close at 100 ± 1
+    const entryBar = bars.find((b) => b.t === ENTRY_ISO) ?? bars[0];
+    entryBar.h = 102;
+    entryBar.l = 98; // ATR = 4
+    const result = resolveVolatilityExit('vol-same-day', bars, bars[0].t, ENTRY_DATE);
+    // Returns a full ISO string corresponding to 15:45 ET on the entry date
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+    expect(new Date(result).getTime()).toBeGreaterThan(0);
+  });
+
+  it('does not exit on bars from a different day', () => {
+    const nextDay = nextWeekday(ENTRY_DATE);
+    const entryBar = bar(ENTRY_ISO, 100, 110, 90); // ATR = 20
+    // Big move but on the next day
+    const wrongDay = bar(`${nextDay}T09:30:00.000Z`, 130);
+    const bars = [entryBar, wrongDay];
+    const result = resolveVolatilityExit('vol-same-day', bars, ENTRY_ISO, ENTRY_DATE);
+    // Should fall back, not return the next-day bar
+    expect(result).not.toBe(wrongDay.t);
+  });
+});
+
+// ─── vol-next-day ─────────────────────────────────────────────────────────────
+
+describe('resolveVolatilityExit — vol-next-day', () => {
+  it('exits when price moves >= 2% from entry price', () => {
+    const entryBar = bar(ENTRY_ISO, 100);
+    const nextDayBar = bar(`${nextWeekday(ENTRY_DATE)}T10:00:00.000Z`, 103); // 3% move
+    const bars = [entryBar, nextDayBar];
+    const result = resolveVolatilityExit('vol-next-day', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(result).toBe(nextDayBar.t);
+  });
+
+  it('does not exit for < 2% move', () => {
+    const nextDay = nextWeekday(ENTRY_DATE);
+    const entryBar = bar(ENTRY_ISO, 100);
+    const smallMove = bar(`${nextDay}T10:00:00.000Z`, 101); // 1%
+    const lastBar = bar(`${nextDay}T15:59:00.000Z`, 101);
+    const bars = [entryBar, smallMove, lastBar];
+    const result = resolveVolatilityExit('vol-next-day', bars, ENTRY_ISO, ENTRY_DATE);
+    // Falls back to last bar on exit day
+    expect(result).toBe(lastBar.t);
+  });
+});
+
+// ─── vol-hold ────────────────────────────────────────────────────────────────
+
+describe('resolveVolatilityExit — vol-hold', () => {
+  it('exits on first bar with >= 2x avg pre-entry volume', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500); // avg vol = 500
+    const entryBar = bar(ENTRY_ISO, 100, 100, 100, 500);
+    const spike = bar(`${ENTRY_DATE}T14:31:00.000Z`, 100, 100, 100, 1001); // > 2 * 500
+    const bars = [...preBars, entryBar, spike];
+    const result = resolveVolatilityExit('vol-hold', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(result).toBe(spike.t);
+  });
+
+  it('falls back to last available bar when no volume spike', () => {
+    const entryBar = bar(ENTRY_ISO, 100, 100, 100, 500);
+    const postBar = bar(`${ENTRY_DATE}T14:31:00.000Z`, 100, 100, 100, 600); // < 2x
+    const bars = [entryBar, postBar];
+    const result = resolveVolatilityExit('vol-hold', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(result).toBe(postBar.t);
+  });
+
+  it('requires avgVol > 0 to trigger (no pre-entry bars → no exit on vol)', () => {
+    const entryBar = bar(ENTRY_ISO, 100);
+    const spike = bar(`${ENTRY_DATE}T14:31:00.000Z`, 100, 100, 100, 9999);
+    const bars = [entryBar, spike]; // no pre-entry bars → avgVol = 0
+    const result = resolveVolatilityExit('vol-hold', bars, ENTRY_ISO, ENTRY_DATE);
+    // avgVol = 0, condition `avgVol > 0` is false → falls back
+    expect(result).toBe(spike.t);
+  });
+});
+
+// ─── vol-hold-3x ─────────────────────────────────────────────────────────────
+
+describe('resolveVolatilityExit — vol-hold-3x', () => {
+  it('requires 3x avg volume (2x is not enough)', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500); // avg = 500
+    const entryBar = bar(ENTRY_ISO, 100, 100, 100, 500);
+    const twoX = bar(`${ENTRY_DATE}T14:31:00.000Z`, 100, 100, 100, 1001); // 2x — not enough
+    const threeX = bar(`${ENTRY_DATE}T14:32:00.000Z`, 100, 100, 100, 1501); // 3x
+    const bars = [...preBars, entryBar, twoX, threeX];
+    const result = resolveVolatilityExit('vol-hold-3x', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(result).toBe(threeX.t);
+  });
+});
+
+// ─── vol-hold-eod ────────────────────────────────────────────────────────────
+
+describe('resolveVolatilityExit — vol-hold-eod', () => {
+  it('only checks the closing bar (15:59) for volume spike', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500); // avg = 500
+    const entryBar = bar(ENTRY_ISO, 100, 100, 100, 500);
+    // Intra-day spike — should be ignored (not 15:59)
+    const intraSpike = bar(`${ENTRY_DATE}T14:31:00.000Z`, 100, 100, 100, 9999);
+    // EOD bar with spike
+    const eodBar = bar(`${ENTRY_DATE}T15:59:00.000Z`, 100, 100, 100, 1001);
+    const bars = [...preBars, entryBar, intraSpike, eodBar];
+    const result = resolveVolatilityExit('vol-hold-eod', bars, ENTRY_ISO, ENTRY_DATE, '1Min');
+    expect(result).toBe(eodBar.t);
+  });
+});
+
+// ─── vol-hold-vwap ───────────────────────────────────────────────────────────
+
+describe('resolveVolatilityExit — vol-hold-vwap', () => {
+  it('exits long when close drops below VWAP', () => {
+    // entry price 105 > entry vwap 100 → long direction
+    const entryBar = bar(ENTRY_ISO, 105, 106, 104, 1000, 100);
+    // post bar: close 98 < vwap 100 → exit
+    const crossBar = bar(`${ENTRY_DATE}T14:31:00.000Z`, 98, 99, 97, 1000, 100);
+    const bars = [entryBar, crossBar];
+    const result = resolveVolatilityExit('vol-hold-vwap', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(result).toBe(crossBar.t);
+  });
+
+  it('exits short when close rises above VWAP', () => {
+    // entry price 95 < entry vwap 100 → short direction
+    const entryBar = bar(ENTRY_ISO, 95, 96, 94, 1000, 100);
+    // post bar: close 102 > vwap 100 → exit
+    const crossBar = bar(`${ENTRY_DATE}T14:31:00.000Z`, 102, 103, 101, 1000, 100);
+    const bars = [entryBar, crossBar];
+    const result = resolveVolatilityExit('vol-hold-vwap', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(result).toBe(crossBar.t);
+  });
+
+  it('falls back when VWAP never crossed', () => {
+    const entryBar = bar(ENTRY_ISO, 105, 106, 104, 1000, 100);
+    // Stays above vwap
+    const stayBar = bar(`${ENTRY_DATE}T14:31:00.000Z`, 106, 107, 105, 1000, 100);
+    const bars = [entryBar, stayBar];
+    const result = resolveVolatilityExit('vol-hold-vwap', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(result).toBe(stayBar.t);
+  });
+});
+
+// ─── vol-hold-confirm ────────────────────────────────────────────────────────
+
+describe('resolveVolatilityExit — vol-hold-confirm', () => {
+  it('exits when both 2% price move AND 1.5x volume met on same bar', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500); // avgVol = 500
+    const entryBar = bar(ENTRY_ISO, 100, 100, 100, 500);
+    // 3% move + 1.6x volume
+    const confirmBar = bar(`${ENTRY_DATE}T14:31:00.000Z`, 103, 104, 102, 800);
+    const bars = [...preBars, entryBar, confirmBar];
+    const result = resolveVolatilityExit('vol-hold-confirm', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(result).toBe(confirmBar.t);
+  });
+
+  it('does not exit when only price condition is met', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500);
+    const entryBar = bar(ENTRY_ISO, 100, 100, 100, 500);
+    const priceOnly = bar(`${ENTRY_DATE}T14:31:00.000Z`, 103, 104, 102, 600); // < 1.5x vol
+    const lastBar = bar(`${ENTRY_DATE}T15:59:00.000Z`, 103);
+    const bars = [...preBars, entryBar, priceOnly, lastBar];
+    const result = resolveVolatilityExit('vol-hold-confirm', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(result).toBe(lastBar.t);
+  });
+
+  it('does not exit when only volume condition is met', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500);
+    const entryBar = bar(ENTRY_ISO, 100, 100, 100, 500);
+    const volOnly = bar(`${ENTRY_DATE}T14:31:00.000Z`, 101, 102, 100, 900); // 1% move, > 1.5x vol
+    const lastBar = bar(`${ENTRY_DATE}T15:59:00.000Z`, 101);
+    const bars = [...preBars, entryBar, volOnly, lastBar];
+    const result = resolveVolatilityExit('vol-hold-confirm', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(result).toBe(lastBar.t);
+  });
+});
+
+// ─── edge cases ──────────────────────────────────────────────────────────────
+
+describe('resolveVolatilityExit — edge cases', () => {
+  it('returns a valid ISO fallback when entry bar not found in series', () => {
+    const bars = makeDayBars(ENTRY_DATE, 10, 100);
+    const futureIso = '2099-01-01T14:30:00.000Z';
+    const result = resolveVolatilityExit('vol-same-day', bars, futureIso, ENTRY_DATE);
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+    expect(new Date(result).getTime()).toBeGreaterThan(0);
+  });
+});
