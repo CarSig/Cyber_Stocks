@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveVolatilityExit, nextWeekday } from './intradaySimUtils';
+import { resolveVolatilityExit, nextWeekday, calcEntryTime } from './intradaySimUtils';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -217,5 +217,33 @@ describe('resolveVolatilityExit — edge cases', () => {
     const result = resolveVolatilityExit('vol-same-day', bars, futureIso, ENTRY_DATE);
     expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
     expect(new Date(result).getTime()).toBeGreaterThan(0);
+  });
+});
+
+// ─── calcEntryTime ────────────────────────────────────────────────────────────
+
+describe('calcEntryTime', () => {
+  it('returns event time + delay for a regular market bar', () => {
+    // 10:00 + 5 min delay = 10:05
+    expect(calcEntryTime('10:00', 5, false)).toBe('10:05');
+  });
+
+  it('returns 09:30 for pre-market events regardless of chart time', () => {
+    // isPreMarket = true → always clamp to 09:30
+    expect(calcEntryTime('07:00', 0, true)).toBe('09:30');
+  });
+
+  it('clamps to 15:44 when delay would exceed market close', () => {
+    // 15:40 + 10 min = 15:50 → clamp to 15:44
+    expect(calcEntryTime('15:40', 10, false)).toBe('15:44');
+  });
+
+  it('returns exact time for zero delay', () => {
+    expect(calcEntryTime('14:30', 0, false)).toBe('14:30');
+  });
+
+  it('pads single-digit hours and minutes', () => {
+    // 09:00 + 1 min = 09:01
+    expect(calcEntryTime('09:00', 1, false)).toBe('09:01');
   });
 });

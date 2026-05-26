@@ -89,9 +89,9 @@ describe('buildMarkers', () => {
       ] as [{ open: number; close: number; date: string }, { open: number; close: number; date: string }, string],
     };
     const markers = buildMarkers(analysis);
-    const swing = markers.find((m) => m.text.startsWith('Swing'));
+    const swing = markers.find((m) => m.text?.startsWith('Swing'));
     expect(swing?.position).toBe('aboveBar');
-    const moves = markers.filter((m) => m.text.startsWith('Move'));
+    const moves = markers.filter((m) => m.text?.startsWith('Move'));
     moves.forEach((m) => expect(m.position).toBe('belowBar'));
   });
 

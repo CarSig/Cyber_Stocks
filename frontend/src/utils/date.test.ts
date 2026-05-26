@@ -1,6 +1,44 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { parseYMD, safeOffsetDate, DateUtils } from './date';
 
+// ─── DateUtils.formatDate ─────────────────────────────────────────────────────
+
+describe('DateUtils.formatDate', () => {
+  it('returns — for null', () => {
+    expect(DateUtils.formatDate(null)).toBe('—');
+  });
+
+  it('returns — for undefined', () => {
+    expect(DateUtils.formatDate(undefined)).toBe('—');
+  });
+
+  it('returns a non-empty string for a valid ISO date', () => {
+    const result = DateUtils.formatDate('2024-06-15T00:00:00Z');
+    expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).not.toBe('—');
+  });
+});
+
+// ─── DateUtils.formatDateTime ─────────────────────────────────────────────────
+
+describe('DateUtils.formatDateTime', () => {
+  it('returns — for null', () => {
+    expect(DateUtils.formatDateTime(null)).toBe('—');
+  });
+
+  it('returns — for undefined', () => {
+    expect(DateUtils.formatDateTime(undefined)).toBe('—');
+  });
+
+  it('returns a non-empty string for a valid ISO timestamp', () => {
+    const result = DateUtils.formatDateTime('2024-06-15T14:30:00Z');
+    expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).not.toBe('—');
+  });
+});
+
 // ─── parseYMD ─────────────────────────────────────────────────────────────────
 
 describe('parseYMD', () => {

@@ -65,6 +65,22 @@ describe('parseIntradayText', () => {
     expect(actions).toHaveLength(0);
   });
 
+  it('skips lines where time is not a valid HH:MM (bad hours)', () => {
+    // "xx:30" → h = NaN → skipped
+    const { actions } = parseIntradayText('xx:30, 100', DATE);
+    expect(actions).toHaveLength(0);
+  });
+
+  it('skips lines where time minutes are not numeric', () => {
+    const { actions } = parseIntradayText('09:zz, 100', DATE);
+    expect(actions).toHaveLength(0);
+  });
+
+  it('skips lines with wrong format (no comma)', () => {
+    const { actions } = parseIntradayText('09:30 100', DATE);
+    expect(actions).toHaveLength(0);
+  });
+
   it('assigns unique ids to each action', () => {
     const raw = '09:30, 100\n10:00, -50\n11:00, 200';
     const { actions } = parseIntradayText(raw, DATE);

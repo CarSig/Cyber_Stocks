@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { runLongSimulation, runShortSimulation, buildSimStats, fmtMarkerText, simStatsToExportRows } from './sim';
+import { runLongSimulation, runShortSimulation, buildSimStats, fmtMarkerText, simStatsToExportRows, simResultToExportArgs } from './sim';
 import type { Action, SimResult } from './sim';
 
 const fmt = (iso: string) => iso.slice(0, 10);
@@ -290,5 +290,47 @@ describe('simStatsToExportRows', () => {
     const rows = simStatsToExportRows({ ...result, profit: -50, profitPct: -5 });
     const profit = rows.find((r) => r.label === 'Profit')!;
     expect(profit.color).toBe('#dc2626');
+  });
+});
+
+// ─── simResultToExportArgs ────────────────────────────────────────────────────
+
+describe('simResultToExportArgs', () => {
+  const result: SimResult = {
+    transactions: [
+      { time: '09:30', timestamp: '2024-01-01T14:30:00Z', side: 'buy', price: 100, shares: 1, value: 100, sharesAfter: 1, portfolioValue: 100 },
+      { time: '10:00', timestamp: '2024-01-01T15:00:00Z', side: 'sell', price: 110, shares: 0.5, value: 55, sharesAfter: 0.5, portfolioValue: 110 },
+    ],
+    portfolioHistory: [],
+    totalInvested: 100,
+    cashWithdrawn: 55,
+    finalShares: 0.5,
+    sharesValue: 55,
+    profit: 10,
+    profitPct: 10,
+  };
+
+  it('returns stats and transactions', () => {
+    const { stats, transactions } = simResultToExportArgs(result);
+    expect(stats).toBeDefined();
+    expect(stats.length).toBeGreaterThan(0);
+    expect(transactions).toHaveLength(2);
+  });
+
+  it('transaction entries have the expected fields', () => {
+    const { transactions } = simResultToExportArgs(result);
+    const tx = transactions[0];
+    expect(tx.label).toBe('09:30');
+    expect(tx.side).toBe('buy');
+    expect(tx.price).toBe(100);
+    expect(tx.shares).toBe(1);
+    expect(tx.value).toBe(100);
+    expect(tx.sharesAfter).toBe(1);
+    expect(tx.portfolioValue).toBe(100);
+  });
+
+  it('stats has 6 rows matching simStatsToExportRows', () => {
+    const { stats } = simResultToExportArgs(result);
+    expect(stats).toHaveLength(6);
   });
 });
