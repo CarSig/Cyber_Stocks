@@ -22,18 +22,21 @@ type Props = {
 };
 
 export default function CombinationsDialog({ open, onClose, running, results, onSelectCombo }: Props) {
-  const fmt = (v: number | null) => v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+  const fmt = (v: number | null) => (v == null ? '—' : (v >= 0 ? '+' : '') + v.toFixed(2) + '%');
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-2xl" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
         <DialogHeader>
           <DialogTitle>All Combinations</DialogTitle>
         </DialogHeader>
 
-        {running && (
-          <p style={{ color: 'var(--text-faint)', fontSize: 13 }}>Running all combinations…</p>
-        )}
+        {running && <p style={{ color: 'var(--text-faint)', fontSize: 13 }}>Running all combinations…</p>}
 
         {results && (
           <>
@@ -54,9 +57,12 @@ export default function CombinationsDialog({ open, onClose, running, results, on
               </thead>
               <tbody>
                 {results.map((row, i) => {
-                  const totalColor = row.avgTotal == null
-                    ? 'var(--text-faint)'
-                    : row.avgTotal >= 0 ? 'var(--color-green)' : 'var(--color-red)';
+                  const totalColor =
+                    row.avgTotal == null
+                      ? 'var(--text-faint)'
+                      : row.avgTotal >= 0
+                        ? 'var(--color-green)'
+                        : 'var(--color-red)';
                   return (
                     <tr
                       key={i}
@@ -70,8 +76,12 @@ export default function CombinationsDialog({ open, onClose, running, results, on
                       <td style={{ textAlign: 'right', color: 'var(--color-green)', fontWeight: 600 }}>{row.wins}</td>
                       <td style={{ textAlign: 'right', color: 'var(--color-red)', fontWeight: 600 }}>{row.losses}</td>
                       <td style={{ textAlign: 'right', color: 'var(--text-faint)', fontSize: 12 }}>{row.total}</td>
-                      <td style={{ textAlign: 'right', color: 'var(--color-green)', fontSize: 12 }}>{fmt(row.avgWin)}</td>
-                      <td style={{ textAlign: 'right', color: 'var(--color-red)', fontSize: 12 }}>{fmt(row.avgLoss)}</td>
+                      <td style={{ textAlign: 'right', color: 'var(--color-green)', fontSize: 12 }}>
+                        {fmt(row.avgWin)}
+                      </td>
+                      <td style={{ textAlign: 'right', color: 'var(--color-red)', fontSize: 12 }}>
+                        {fmt(row.avgLoss)}
+                      </td>
                       <td style={{ textAlign: 'right', fontWeight: 700, color: totalColor }}>{fmt(row.avgTotal)}</td>
                     </tr>
                   );

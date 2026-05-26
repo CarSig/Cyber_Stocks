@@ -28,14 +28,11 @@ export async function simOneEvent(
   const action = isShort ? ('short' as const) : ('buy' as const);
 
   try {
-    const { entryTime, entryDate, exitDate: baseExitDate } = calcEntryDateTimeForStrategy(
-      entryStrategy,
-      ev.chart_time,
-      ev.chart_date,
-      aiDelay,
-      ev.timing,
-      timeframe,
-    );
+    const {
+      entryTime,
+      entryDate,
+      exitDate: baseExitDate,
+    } = calcEntryDateTimeForStrategy(entryStrategy, ev.chart_time, ev.chart_date, aiDelay, ev.timing, timeframe);
 
     const fetchBars = (date: string) =>
       queryClient.fetchQuery({
@@ -49,9 +46,11 @@ export async function simOneEvent(
     if (isVol) {
       const fiveDaysOut = nextWeekday(nextWeekday(nextWeekday(nextWeekday(nextWeekday(entryDate)))));
       const latestDate =
-        exitStrategy === 'vol-next-day' ? nextWeekday(entryDate) :
-        exitStrategy === 'vol-same-day' ? entryDate :
-        fiveDaysOut;
+        exitStrategy === 'vol-next-day'
+          ? nextWeekday(entryDate)
+          : exitStrategy === 'vol-same-day'
+            ? entryDate
+            : fiveDaysOut;
       datesToFetch = Array.from(new Set([entryDate, latestDate]));
     } else {
       datesToFetch = Array.from(new Set([entryDate, baseExitDate]));
@@ -84,10 +83,23 @@ export async function simOneEvent(
 
     if (!bars.length) {
       return {
-        rank: ev.rank, ticker: primaryTicker, event: ev.event, trade_idea: ev.trade_idea, action,
-        chartDate: ev.chart_date, chartTime: ev.chart_time, firstDate: ev.first_date, firstTime: ev.first_time,
-        preMarket: false, afterHours: ev.after_hours, entryDate, entryTime, exitDate, daysAfter,
-        profitPct: null, error: 'No data',
+        rank: ev.rank,
+        ticker: primaryTicker,
+        event: ev.event,
+        trade_idea: ev.trade_idea,
+        action,
+        chartDate: ev.chart_date,
+        chartTime: ev.chart_time,
+        firstDate: ev.first_date,
+        firstTime: ev.first_time,
+        preMarket: false,
+        afterHours: ev.after_hours,
+        entryDate,
+        entryTime,
+        exitDate,
+        daysAfter,
+        profitPct: null,
+        error: 'No data',
       };
     }
 
@@ -96,23 +108,45 @@ export async function simOneEvent(
       { id: 2, timestamp: exitIso, time: exitTime, side: isShort ? 'cover' : 'sell', value: 100 },
     ];
 
-    const result = isShort
-      ? runShortSimulation(bars, actions, fmtTime)
-      : runLongSimulation(bars, actions, fmtTime, 0);
+    const result = isShort ? runShortSimulation(bars, actions, fmtTime) : runLongSimulation(bars, actions, fmtTime, 0);
 
     return {
-      rank: ev.rank, ticker: primaryTicker, event: ev.event, trade_idea: ev.trade_idea, action,
-      chartDate: ev.chart_date, chartTime: ev.chart_time, firstDate: ev.first_date, firstTime: ev.first_time,
-      preMarket: false, afterHours: ev.after_hours, entryDate, entryTime, exitDate, daysAfter,
+      rank: ev.rank,
+      ticker: primaryTicker,
+      event: ev.event,
+      trade_idea: ev.trade_idea,
+      action,
+      chartDate: ev.chart_date,
+      chartTime: ev.chart_time,
+      firstDate: ev.first_date,
+      firstTime: ev.first_time,
+      preMarket: false,
+      afterHours: ev.after_hours,
+      entryDate,
+      entryTime,
+      exitDate,
+      daysAfter,
       profitPct: result.profitPct,
     };
   } catch (err) {
     return {
-      rank: ev.rank, ticker: primaryTicker, event: ev.event, trade_idea: ev.trade_idea, action,
-      chartDate: ev.chart_date, chartTime: ev.chart_time, firstDate: ev.first_date, firstTime: ev.first_time,
-      preMarket: false, afterHours: ev.after_hours,
-      entryDate: ev.chart_date, entryTime: '15:59', exitDate: ev.chart_date, daysAfter: null,
-      profitPct: null, error: err instanceof Error ? err.message : 'Failed',
+      rank: ev.rank,
+      ticker: primaryTicker,
+      event: ev.event,
+      trade_idea: ev.trade_idea,
+      action,
+      chartDate: ev.chart_date,
+      chartTime: ev.chart_time,
+      firstDate: ev.first_date,
+      firstTime: ev.first_time,
+      preMarket: false,
+      afterHours: ev.after_hours,
+      entryDate: ev.chart_date,
+      entryTime: '15:59',
+      exitDate: ev.chart_date,
+      daysAfter: null,
+      profitPct: null,
+      error: err instanceof Error ? err.message : 'Failed',
     };
   }
 }

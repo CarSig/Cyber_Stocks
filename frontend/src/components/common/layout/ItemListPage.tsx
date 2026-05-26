@@ -97,9 +97,17 @@ export default function ItemListPage<T>({
         {itemsLoading ? (
           <LoadingSpinner />
         ) : viewMode === 'grid' ? (
-          <div className="ti-grid item-list-page-list">{items.map((item) => <div key={getItemKey(item)}>{renderCard(item)}</div>)}</div>
+          <div className="ti-grid item-list-page-list">
+            {items.map((item) => (
+              <div key={getItemKey(item)}>{renderCard(item)}</div>
+            ))}
+          </div>
         ) : (
-          <div className="item-list-page-list">{items.map((item) => <div key={getItemKey(item)}>{renderRow(item)}</div>)}</div>
+          <div className="item-list-page-list">
+            {items.map((item) => (
+              <div key={getItemKey(item)}>{renderRow(item)}</div>
+            ))}
+          </div>
         )}
 
         {detailPanel}

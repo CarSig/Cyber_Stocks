@@ -7,9 +7,15 @@ import type { IntradaySimAction, CombinationRow, EntryStrategy, ExitStrategy } f
 
 const ALL_ENTRY_STRATEGIES: EntryStrategy[] = ['first-candle'];
 const ALL_EXIT_STRATEGIES: ExitStrategy[] = [
-  '15:45', '15:59',
-  'vol-same-day', 'vol-next-day',
-  'vol-hold', 'vol-hold-3x', 'vol-hold-eod', 'vol-hold-vwap', 'vol-hold-confirm',
+  '15:45',
+  '15:59',
+  'vol-same-day',
+  'vol-next-day',
+  'vol-hold',
+  'vol-hold-3x',
+  'vol-hold-eod',
+  'vol-hold-vwap',
+  'vol-hold-confirm',
 ];
 
 type Opts = {
@@ -54,7 +60,16 @@ export function useCombinationsAll({ filteredEvents, aiDelay, timeframe, fmtTime
       const avgLoss = losses.length ? losses.reduce((s, p) => s + p, 0) / losses.length : null;
       const avgTotal = profitPcts.length ? profitPcts.reduce((s, p) => s + p, 0) / profitPcts.length : null;
 
-      rows.push({ entryStrategy, exitStrategy, wins: wins.length, losses: losses.length, total: profitPcts.length, avgWin, avgLoss, avgTotal });
+      rows.push({
+        entryStrategy,
+        exitStrategy,
+        wins: wins.length,
+        losses: losses.length,
+        total: profitPcts.length,
+        avgWin,
+        avgLoss,
+        avgTotal,
+      });
     }
 
     rows.sort((a, b) => (b.avgTotal ?? -Infinity) - (a.avgTotal ?? -Infinity));

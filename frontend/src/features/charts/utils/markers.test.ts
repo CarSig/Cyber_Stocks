@@ -70,11 +70,11 @@ describe('buildMarkers', () => {
   it('omits markers when dates are missing', () => {
     const analysis = {
       biggestSameDayDiff: { open: 90, close: 110, date: '', difference: '+10%' },
-      biggestNextDayDiff: [
-        { open: 95, close: 105, date: '' },
-        { open: 80, close: 100, date: '' },
-        '+5%',
-      ] as [{ open: number; close: number; date: string }, { open: number; close: number; date: string }, string],
+      biggestNextDayDiff: [{ open: 95, close: 105, date: '' }, { open: 80, close: 100, date: '' }, '+5%'] as [
+        { open: number; close: number; date: string },
+        { open: number; close: number; date: string },
+        string,
+      ],
     };
     expect(buildMarkers(analysis)).toHaveLength(0);
   });
@@ -113,7 +113,13 @@ describe('buildMarkers', () => {
 // ─── buildCountMarkers ───────────────────────────────────────────────────────
 
 describe('buildCountMarkers', () => {
-  const opts = { dateField: 'created', position: 'belowBar' as const, color: '#3b82f6', shape: 'circle' as const, label: 'OTX' };
+  const opts = {
+    dateField: 'created',
+    position: 'belowBar' as const,
+    color: '#3b82f6',
+    shape: 'circle' as const,
+    label: 'OTX',
+  };
 
   it('returns empty for null/undefined/empty input', () => {
     expect(buildCountMarkers(null, opts)).toEqual([]);
@@ -178,9 +184,7 @@ describe('buildNvdMarkers', () => {
   });
 
   it('uses UNKNOWN color for missing severity', () => {
-    const vulns: ThreatIntelItem[] = [
-      { published: '2024-02-10' } as ThreatIntelItem & { published: string },
-    ];
+    const vulns: ThreatIntelItem[] = [{ published: '2024-02-10' } as ThreatIntelItem & { published: string }];
     const markers = buildNvdMarkers(vulns);
     expect(markers[0].color).toBe(NVD_SEVERITY_COLORS['UNKNOWN']);
   });
@@ -213,9 +217,7 @@ describe('buildTrumpMarkers', () => {
   });
 
   it('filters posts earlier than the earliest quote date', () => {
-    const posts: TrumpPost[] = [
-      { id: '1', created_at: '2024-01-01', content: 'old', sentiment: 'positive' },
-    ];
+    const posts: TrumpPost[] = [{ id: '1', created_at: '2024-01-01', content: 'old', sentiment: 'positive' }];
     // earliest quote date is 2024-01-05, so 2024-01-01 post is filtered
     expect(buildTrumpMarkers(posts, quotes)).toEqual([]);
   });
@@ -231,17 +233,13 @@ describe('buildTrumpMarkers', () => {
   });
 
   it('uses neutral color as fallback for unknown sentiment', () => {
-    const posts: TrumpPost[] = [
-      { id: '1', created_at: '2024-01-10', content: 'hmm', sentiment: 'weird' },
-    ];
+    const posts: TrumpPost[] = [{ id: '1', created_at: '2024-01-10', content: 'hmm', sentiment: 'weird' }];
     const markers = buildTrumpMarkers(posts, quotes);
     expect(markers[0].color).toBe('#eab308');
   });
 
   it('all markers use aboveBar position', () => {
-    const posts: TrumpPost[] = [
-      { id: '1', created_at: '2024-01-10', content: 'x', sentiment: 'positive' },
-    ];
+    const posts: TrumpPost[] = [{ id: '1', created_at: '2024-01-10', content: 'x', sentiment: 'positive' }];
     const markers = buildTrumpMarkers(posts, quotes);
     markers.forEach((m) => expect(m.position).toBe('aboveBar'));
   });
@@ -252,7 +250,11 @@ describe('buildTrumpMarkers', () => {
 describe('buildNewsMarkers', () => {
   const quotes: Quote[] = [q('2024-01-10'), q('2024-01-11'), q('2024-01-12')];
 
-  const article = (link: string, time: number, sentiment: number): [NewsArticle, Record<string, { sentiment: number }>] => [
+  const article = (
+    link: string,
+    time: number,
+    sentiment: number,
+  ): [NewsArticle, Record<string, { sentiment: number }>] => [
     { link, providerPublishTime: time, title: 'T', publisher: 'P' } as NewsArticle,
     { [link]: { sentiment } },
   ];

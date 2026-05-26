@@ -23,11 +23,7 @@ function makeAction(id: number, timestamp: string, side: Action['side'], value: 
 
 describe('runLongSimulation', () => {
   // Bar times as plain date strings — must be lexicographically comparable with timestamps
-  const bars = [
-    makeBar('2024-01-01', 100),
-    makeBar('2024-01-02', 110),
-    makeBar('2024-01-03', 105),
-  ];
+  const bars = [makeBar('2024-01-01', 100), makeBar('2024-01-02', 110), makeBar('2024-01-03', 105)];
 
   it('returns zero result for no actions', () => {
     const result = runLongSimulation(bars, [], fmt);
@@ -53,16 +49,13 @@ describe('runLongSimulation', () => {
   it('sells as percentage of position', () => {
     // Buy on bar 1 (price=100): spend $110 → 1.1 shares
     // Sell 50% on bar 2 (price=110): 0.55 shares * 110 = $60.5
-    const actions = [
-      makeAction(1, '2024-01-01', 'buy', 110),
-      makeAction(2, '2024-01-02', 'sell', 50),
-    ];
+    const actions = [makeAction(1, '2024-01-01', 'buy', 110), makeAction(2, '2024-01-02', 'sell', 50)];
     const result = runLongSimulation(bars, actions, fmt);
     expect(result.transactions).toHaveLength(2);
     const sellTx = result.transactions[1];
     expect(sellTx.side).toBe('sell');
     expect(sellTx.shares).toBeCloseTo(0.55, 5); // 1.1 * 0.5
-    expect(sellTx.value).toBeCloseTo(60.5, 5);  // 0.55 * 110
+    expect(sellTx.value).toBeCloseTo(60.5, 5); // 0.55 * 110
     expect(result.cashWithdrawn).toBeCloseTo(60.5, 5);
   });
 
@@ -105,10 +98,7 @@ describe('runLongSimulation', () => {
   });
 
   it('sorts actions by timestamp before processing', () => {
-    const actions = [
-      makeAction(2, '2024-01-02', 'sell', 50),
-      makeAction(1, '2024-01-01', 'buy', 100),
-    ];
+    const actions = [makeAction(2, '2024-01-02', 'sell', 50), makeAction(1, '2024-01-01', 'buy', 100)];
     const result = runLongSimulation(bars, actions, fmt);
     // First tx should be the buy even though sell was listed first
     expect(result.transactions[0].side).toBe('buy');
@@ -124,11 +114,7 @@ describe('runLongSimulation', () => {
 
 describe('runShortSimulation', () => {
   // Same timestamp convention as long sim: timestamp before bar date to fire on that bar.
-  const bars = [
-    makeBar('2024-01-01', 100),
-    makeBar('2024-01-02', 90),
-    makeBar('2024-01-03', 80),
-  ];
+  const bars = [makeBar('2024-01-01', 100), makeBar('2024-01-02', 90), makeBar('2024-01-03', 80)];
 
   it('returns zero result for no actions', () => {
     const result = runShortSimulation(bars, [], fmt);
@@ -153,10 +139,7 @@ describe('runShortSimulation', () => {
 
   it('covers as percentage of short position', () => {
     // Short on bar 1 (price=100) → 1 share. Cover 100% on bar 2 (price=90) → cost $90.
-    const actions = [
-      makeAction(1, '2024-01-01', 'short', 100),
-      makeAction(2, '2024-01-02', 'cover', 100),
-    ];
+    const actions = [makeAction(1, '2024-01-01', 'short', 100), makeAction(2, '2024-01-02', 'cover', 100)];
     const result = runShortSimulation(bars, actions, fmt);
     expect(result.transactions).toHaveLength(2);
     const coverTx = result.transactions[1];

@@ -90,7 +90,10 @@ describe('calcHV', () => {
   });
 
   it('returns 0 volatility for perfectly flat prices', () => {
-    const flat = Array.from({ length: 30 }, (_, i) => ({ time: `2024-01-${String(i + 1).padStart(2, '0')}`, close: 100 }));
+    const flat = Array.from({ length: 30 }, (_, i) => ({
+      time: `2024-01-${String(i + 1).padStart(2, '0')}`,
+      close: 100,
+    }));
     const result = calcHV(flat, 20);
     result.forEach((r) => expect(r.value).toBe(0));
   });

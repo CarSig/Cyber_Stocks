@@ -59,10 +59,7 @@ describe('aggregateSentimentByDay', () => {
   });
 
   it('maps articles to correct days in articlesByDay', () => {
-    const pairs = [
-      art('http://a.com/1', '2024-01-10', 0.5),
-      art('http://a.com/2', '2024-01-11', -0.5),
-    ];
+    const pairs = [art('http://a.com/1', '2024-01-10', 0.5), art('http://a.com/2', '2024-01-11', -0.5)];
     const { articlesByDay } = aggregateSentimentByDay(buildOpts(pairs));
     expect(articlesByDay.get('2024-01-10')).toHaveLength(1);
     expect(articlesByDay.get('2024-01-11')).toHaveLength(1);
@@ -70,9 +67,7 @@ describe('aggregateSentimentByDay', () => {
 
   it('fills gaps between quoteBounds dates with transparent zero-value bars', () => {
     const pairs = [art('http://a.com/1', '2024-01-10', 0.5)];
-    const { countData } = aggregateSentimentByDay(
-      buildOpts(pairs, { from: '2024-01-08', to: '2024-01-12' }),
-    );
+    const { countData } = aggregateSentimentByDay(buildOpts(pairs, { from: '2024-01-08', to: '2024-01-12' }));
     // Should have bars for 2024-01-08 through 2024-01-12 (5 days)
     expect(countData).toHaveLength(5);
     const jan08 = countData.find((d) => d.time === '2024-01-08');
@@ -85,19 +80,14 @@ describe('aggregateSentimentByDay', () => {
 
   it('extends range to quoteBounds even when bounds are wider than article dates', () => {
     const pairs = [art('http://a.com/1', '2024-01-15', 0.5)];
-    const { countData } = aggregateSentimentByDay(
-      buildOpts(pairs, { from: '2024-01-10', to: '2024-01-20' }),
-    );
+    const { countData } = aggregateSentimentByDay(buildOpts(pairs, { from: '2024-01-10', to: '2024-01-20' }));
     const times = countData.map((d) => d.time);
     expect(times[0]).toBe('2024-01-10');
     expect(times[times.length - 1]).toBe('2024-01-20');
   });
 
   it('uses article range when no quoteBounds provided', () => {
-    const pairs = [
-      art('http://a.com/1', '2024-02-01', 0.5),
-      art('http://a.com/2', '2024-02-05', -0.5),
-    ];
+    const pairs = [art('http://a.com/1', '2024-02-01', 0.5), art('http://a.com/2', '2024-02-05', -0.5)];
     const { countData } = aggregateSentimentByDay(buildOpts(pairs));
     const times = countData.map((d) => d.time);
     expect(times[0]).toBe('2024-02-01');
@@ -124,10 +114,7 @@ describe('aggregateSentimentByDay', () => {
   });
 
   it('preserves article order within a day in articlesByDay', () => {
-    const pairs = [
-      art('http://a.com/first', '2024-01-10', 0.5),
-      art('http://a.com/second', '2024-01-10', -0.2),
-    ];
+    const pairs = [art('http://a.com/first', '2024-01-10', 0.5), art('http://a.com/second', '2024-01-10', -0.2)];
     const { articlesByDay } = aggregateSentimentByDay(buildOpts(pairs));
     const entries = articlesByDay.get('2024-01-10')!;
     expect(entries[0].article.link).toBe('http://a.com/first');

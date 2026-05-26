@@ -5,7 +5,14 @@ import { getBars } from '@/features/charts/api';
 import type { IntradayEvent } from '@/features/charts/api';
 import type { Action } from '@/features/simulations/utils/sim';
 import { DateUtils } from '@/utils/date';
-import { detectShortDirection, calcEntryDateTimeForStrategy, getExitTime, isVolatilityStrategy, resolveVolatilityExit, nextWeekday } from '../utils';
+import {
+  detectShortDirection,
+  calcEntryDateTimeForStrategy,
+  getExitTime,
+  isVolatilityStrategy,
+  resolveVolatilityExit,
+  nextWeekday,
+} from '../utils';
 import { intradayStrategy } from '../reducers/baseStrategy';
 import type { IntradaySimAction, EntryStrategy, ExitStrategy } from '../reducers/intradayReducer';
 
@@ -19,7 +26,15 @@ type Opts = {
   nextActionId: MutableRefObject<number>;
 };
 
-export function useAiSim({ selectedEvent, aiDelay, entryStrategy, exitStrategy, timeframe, dispatch, nextActionId }: Opts) {
+export function useAiSim({
+  selectedEvent,
+  aiDelay,
+  entryStrategy,
+  exitStrategy,
+  timeframe,
+  dispatch,
+  nextActionId,
+}: Opts) {
   const queryClient = useQueryClient();
 
   return useCallback(async () => {
@@ -28,7 +43,11 @@ export function useAiSim({ selectedEvent, aiDelay, entryStrategy, exitStrategy, 
     const isShort = detectShortDirection(primaryTicker, selectedEvent.trade_idea);
 
     const chartDate = selectedEvent.chart_date;
-    const { entryTime, entryDate, exitDate: baseExitDate } = calcEntryDateTimeForStrategy(
+    const {
+      entryTime,
+      entryDate,
+      exitDate: baseExitDate,
+    } = calcEntryDateTimeForStrategy(
       entryStrategy,
       selectedEvent.chart_time,
       chartDate,
@@ -48,18 +67,23 @@ export function useAiSim({ selectedEvent, aiDelay, entryStrategy, exitStrategy, 
     if (isVolStrategy) {
       const fiveDaysOut = nextWeekday(nextWeekday(nextWeekday(nextWeekday(nextWeekday(entryDate)))));
       // Determine latest date we may need bars for
-      const latestDate = exitStrategy === 'vol-next-day' ? nextWeekday(entryDate)
-        : exitStrategy === 'vol-same-day' ? entryDate
-        : fiveDaysOut;
+      const latestDate =
+        exitStrategy === 'vol-next-day'
+          ? nextWeekday(entryDate)
+          : exitStrategy === 'vol-same-day'
+            ? entryDate
+            : fiveDaysOut;
 
       const dates = Array.from(new Set([entryDate, latestDate]));
       const allBarsArrays = await Promise.all(
         dates.map((d) =>
-          queryClient.fetchQuery({
-            queryKey: ['alpaca-bars', primaryTicker, d, timeframe],
-            queryFn: () => getBars(primaryTicker, d, timeframe),
-            staleTime: Infinity,
-          }).then((r) => r.bars),
+          queryClient
+            .fetchQuery({
+              queryKey: ['alpaca-bars', primaryTicker, d, timeframe],
+              queryFn: () => getBars(primaryTicker, d, timeframe),
+              staleTime: Infinity,
+            })
+            .then((r) => r.bars),
         ),
       );
       const allBars = allBarsArrays.flat().sort((a, b) => a.t.localeCompare(b.t));

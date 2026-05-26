@@ -215,7 +215,15 @@ export default function IntradaySimulation(props: IntradaySimulationProps) {
     dispatch,
     nextActionId,
   });
-  const handleSimulateAll = useSimulateAll({ filteredEvents, aiDelay, entryStrategy, exitStrategy, timeframe, fmtTime, dispatch });
+  const handleSimulateAll = useSimulateAll({
+    filteredEvents,
+    aiDelay,
+    entryStrategy,
+    exitStrategy,
+    timeframe,
+    fmtTime,
+    dispatch,
+  });
   const handleCombinationsAll = useCombinationsAll({ filteredEvents, aiDelay, timeframe, fmtTime, dispatch });
   const handleRowSelect = useRowSelect({ eventsData, timeframe, exitStrategy, dispatch, nextActionId });
   const handleExportPdf = useExportSimPdf(

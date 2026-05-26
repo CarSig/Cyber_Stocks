@@ -15,7 +15,15 @@ type Opts = {
   dispatch: Dispatch<IntradaySimAction>;
 };
 
-export function useSimulateAll({ filteredEvents, aiDelay, entryStrategy, exitStrategy, timeframe, fmtTime, dispatch }: Opts) {
+export function useSimulateAll({
+  filteredEvents,
+  aiDelay,
+  entryStrategy,
+  exitStrategy,
+  timeframe,
+  fmtTime,
+  dispatch,
+}: Opts) {
   const queryClient = useQueryClient();
 
   return useCallback(async () => {
