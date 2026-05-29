@@ -1,0 +1,447 @@
+.insiders-blurb {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  max-width: 72ch;
+  line-height: 1.6;
+}
+
+.insiders-back {
+  display: inline-block;
+  color: var(--muted-foreground);
+  text-decoration: none;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+.insiders-back:hover { color: var(--foreground); }
+
+.insiders-loading,
+.insiders-empty {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  padding: 1.5rem 0;
+}
+.insiders-error {
+  color: var(--destructive);
+  font-size: 0.875rem;
+  padding: 1.5rem 0;
+}
+
+/* ─── Insiders index cards ──────────────────────────────────────────────── */
+
+.insiders-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  max-width: 720px;
+}
+
+.insiders-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--foreground);
+  transition: border-color 120ms, transform 120ms;
+}
+.insiders-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.insiders-card-icon {
+  font-size: 1.75rem;
+}
+.insiders-card-label {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+.insiders-card-sub {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+/* ─── Companies grid ────────────────────────────────────────────────────── */
+
+.insider-companies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.insider-company-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.9rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--foreground);
+  transition: border-color 120ms;
+}
+.insider-company-card:hover { border-color: var(--primary); }
+
+.insider-company-ticker {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--primary);
+}
+.insider-company-stats {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+.insider-company-date {
+  font-size: 0.75rem;
+}
+
+/* ─── Filter ────────────────────────────────────────────────────────────── */
+
+.insider-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  max-width: 540px;
+}
+.insider-filter-count {
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+/* ─── Insider row list (shared) ─────────────────────────────────────────── */
+
+.insider-row-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.insider-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  text-decoration: none;
+  color: var(--foreground);
+  transition: border-color 120ms;
+}
+.insider-row:hover { border-color: var(--primary); }
+
+.insider-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.insider-row-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.insider-row-cik {
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.insider-row-companies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  max-width: 280px;
+  justify-content: flex-end;
+}
+.insider-company-badge {
+  font-size: 0.7rem;
+}
+
+.insider-row-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+  gap: 0.15rem;
+  white-space: nowrap;
+}
+.insider-row-count { font-weight: 500; }
+.insider-row-date { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* ─── Person page ───────────────────────────────────────────────────────── */
+
+.insider-person-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+}
+.insider-person-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+}
+.insider-person-cik {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+.insider-person-companies {
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+.insider-person-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+.insider-role-badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.insider-edgar-link {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  text-decoration: none;
+}
+.insider-edgar-link:hover { color: var(--primary); text-decoration: underline; }
+
+.insider-timelines {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.insider-timeline {
+  padding: 1rem 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.insider-timeline-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.insider-timeline-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0;
+}
+
+.insider-timeline-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.insider-timeline-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius);
+  background: var(--background);
+}
+.insider-timeline-date {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 500;
+}
+.insider-timeline-period {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+.insider-timeline-link {
+  margin-left: auto;
+  color: var(--primary);
+  text-decoration: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+}
+.insider-timeline-link:hover { text-decoration: underline; }
+
+.sec-form-tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Expand button in timeline ─────────────────────────────────────────────── */
+
+.insider-expand-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+.insider-expand-btn:hover { color: var(--foreground); }
+
+.insider-transaction-wrap {
+  flex-basis: 100%;
+  padding-top: 0.5rem;
+}
+
+/* ─── Transaction table ─────────────────────────────────────────────────────── */
+
+.insider-transaction-list {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.insider-transaction-list th,
+.insider-transaction-list td {
+  padding: 0.3rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.insider-transaction-list th {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+.insider-transaction-list td.num,
+.insider-transaction-list th.num {
+  text-align: right;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ─── Aggregate card ────────────────────────────────────────────────────────── */
+
+.insider-aggregate-card {
+  padding: 1rem 1.25rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.insider-agg-overall {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.insider-agg-overall-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.insider-agg-meta {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  margin-left: auto;
+}
+
+.insider-agg-buckets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.insider-agg-bucket {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.insider-agg-bucket-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.insider-agg-bucket-count {
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+}
+.insider-agg-no-data {
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
+}
+
+/* ─── Leaderboard table ─────────────────────────────────────────────────────── */
+
+.insider-leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.insider-leaderboard-table th,
+.insider-leaderboard-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.insider-lb-th {
+  color: var(--muted-foreground);
+  font-weight: 500;
+  background: var(--card);
+  position: sticky;
+  top: 0;
+}
+.insider-lb-th.active { color: var(--primary); }
+.insider-lb-row:hover { background: var(--card); }
+.insider-lb-rank {
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.insider-lb-name {
+  font-weight: 600;
+  color: var(--foreground);
+  text-decoration: none;
+}
+.insider-lb-name:hover { color: var(--primary); }
+.insider-lb-cik {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.insider-leaderboard-table td.num {
+  text-align: right;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}

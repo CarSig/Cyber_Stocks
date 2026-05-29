@@ -1,0 +1,14 @@
+-inside same neon , i would like to create it as separate database (edgar)
+will this hurt performance?
+
+is it better to keep file contents on disc, to be read from there? it will gorw in future, byt not couple of months
+or jsut some basic info
+
+
+I want to have all forms of com,panies , inclduing insdier trainming
+
+how should i have tables ?
+
+per company? per form type ?
+
+or just 1 ?
