@@ -231,9 +231,7 @@ export type ExitLeg = { t: string; fraction: number };
 function atrAtEntry(bars: VolBar[], entryIdx: number): number {
   const entryBar = bars[entryIdx];
   const entryPrice = entryBar.c;
-  const series = bars
-    .slice(0, entryIdx + 1)
-    .map((b) => ({ time: b.t, high: b.h, low: b.l, close: b.c }));
+  const series = bars.slice(0, entryIdx + 1).map((b) => ({ time: b.t, high: b.h, low: b.l, close: b.c }));
   const atrPct = calcATR(series, 14).at(-1)?.value;
   if (atrPct != null && atrPct > 0) return (atrPct / 100) * entryPrice;
   const range = entryBar.h - entryBar.l;
