@@ -20,6 +20,9 @@ function daysBefore(anchor: string, days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** Trailing debounce (ms) before a pan/zoom is pushed to shared range state. */
+const EMIT_DEBOUNCE_MS = 5;
+
 type UseChartRangeOpts = {
   period?: number | null;
   visibleRange?: { from: string; to: string } | null;
@@ -37,6 +40,10 @@ export function useChartRange(
   const visibleRangeRef = useSyncRef(visibleRange);
   const onPeriodChangeRef = useSyncRef(onPeriodChange);
   const onRangeChangeRef = useSyncRef(onRangeChange);
+  // Trailing-debounce the range emission so a fast pan/zoom doesn't push a new
+  // shared-state value (and re-render every follower chart) on every event —
+  // we emit once the user pauses. The chart being driven moves freely meanwhile.
+  const emitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const rangeTimer = setTimeout(() => {
@@ -44,14 +51,21 @@ export function useChartRange(
       skipRangeRef.current = false;
       chartRef.current.timeScale().subscribeVisibleTimeRangeChange((range) => {
         if (skipRangeRef.current || !range) return;
-        onRangeChangeRef.current?.({ from: String(range.from), to: String(range.to) });
-        const days = Math.round(
-          (new Date(String(range.to)).getTime() - new Date(String(range.from)).getTime()) / 86400000,
-        );
-        onPeriodChangeRef.current?.(days);
+        const from = String(range.from);
+        const to = String(range.to);
+        if (emitTimerRef.current) clearTimeout(emitTimerRef.current);
+        emitTimerRef.current = setTimeout(() => {
+          emitTimerRef.current = null;
+          onRangeChangeRef.current?.({ from, to });
+          const days = Math.round((new Date(to).getTime() - new Date(from).getTime()) / 86400000);
+          onPeriodChangeRef.current?.(days);
+        }, EMIT_DEBOUNCE_MS);
       });
     }, 150);
-    return () => clearTimeout(rangeTimer);
+    return () => {
+      clearTimeout(rangeTimer);
+      if (emitTimerRef.current) clearTimeout(emitTimerRef.current);
+    };
   }, [chartRef]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
