@@ -73,12 +73,15 @@ export default function FilingSimModal({ open, onClose, filing }: Props) {
     }
   }
 
-  const profitColor = result
-    ? result.profitPct >= 0 ? 'var(--color-green)' : 'var(--color-red)'
-    : undefined;
+  const profitColor = result ? (result.profitPct >= 0 ? 'var(--color-green)' : 'var(--color-red)') : undefined;
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
+    >
       <DialogContent style={{ maxWidth: 420 }}>
         <DialogHeader>
           <DialogTitle>Buy simulation — {filing.form}</DialogTitle>
@@ -94,13 +97,21 @@ export default function FilingSimModal({ open, onClose, filing }: Props) {
 
         <div>
           <Label style={{ marginBottom: 6, display: 'block' }}>Exit time</Label>
-          <Select value={exitTime} onValueChange={(v) => { setExitTime(v as ExitTime); setResult(null); }}>
+          <Select
+            value={exitTime}
+            onValueChange={(v) => {
+              setExitTime(v as ExitTime);
+              setResult(null);
+            }}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {EXIT_OPTIONS.map((o) => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -120,7 +131,8 @@ export default function FilingSimModal({ open, onClose, filing }: Props) {
                 Exit <strong>${result.exitPrice.toFixed(2)}</strong>
               </span>
               <span style={{ color: profitColor, fontWeight: 600 }}>
-                {result.profitPct >= 0 ? '+' : ''}{result.profitPct.toFixed(2)}%
+                {result.profitPct >= 0 ? '+' : ''}
+                {result.profitPct.toFixed(2)}%
               </span>
             </div>
           )}

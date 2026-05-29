@@ -19,10 +19,7 @@ export async function apiFetch<T = unknown>(path: string, opts: ApiOpts = {}): P
   const { timeoutMs = 30_000, signal: callerSignal, ...rest } = opts;
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(
-    () => controller.abort(new DOMException('Request timeout', 'TimeoutError')),
-    timeoutMs,
-  );
+  const timeoutId = setTimeout(() => controller.abort(new DOMException('Request timeout', 'TimeoutError')), timeoutMs);
 
   const onCallerAbort = () => controller.abort((callerSignal as AbortSignal).reason);
   if (callerSignal) {

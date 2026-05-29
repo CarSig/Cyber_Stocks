@@ -27,10 +27,14 @@ export function groupByCompany(notifications: AppNotification[]): CompanyActivit
   for (const n of notifications) {
     if (n.type === 'news.analyzed') {
       const counts = n.tickerCounts as Array<{ ticker: string; count: number }> | undefined;
-      counts?.forEach(({ ticker, count }) => { get(ticker).news += count; });
+      counts?.forEach(({ ticker, count }) => {
+        get(ticker).news += count;
+      });
     } else if (n.type === 'edgar.new_filings') {
       const changes = n.changes as Array<{ ticker: string; count: number }> | undefined;
-      changes?.forEach(({ ticker, count }) => { get(ticker).filings += count; });
+      changes?.forEach(({ ticker, count }) => {
+        get(ticker).filings += count;
+      });
     } else if (n.type === 'stocks.updated') {
       const changes = n.changes as Array<{ ticker: string; changePct: number }> | undefined;
       changes?.forEach(({ ticker, changePct }) => {

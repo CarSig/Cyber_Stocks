@@ -219,15 +219,17 @@ function TickerContent() {
 
             <StickyHead>
               <nav className="ticker-tabs">
-                {['charts', 'simulation', 'correlations', 'articles', 'info', 'day trade', 'insiders', 'edgar'].map((tab) => (
-                  <button
-                    key={tab}
-                    className={`ticker-tab${activeTab === tab ? ' ticker-tab--active' : ''}${tab === 'simulation' ? ' ticker-tab--accent' : ''}`}
-                    onClick={() => setActiveTab(tab)}
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </button>
-                ))}
+                {['charts', 'simulation', 'correlations', 'articles', 'info', 'day trade', 'insiders', 'edgar'].map(
+                  (tab) => (
+                    <button
+                      key={tab}
+                      className={`ticker-tab${activeTab === tab ? ' ticker-tab--active' : ''}${tab === 'simulation' ? ' ticker-tab--accent' : ''}`}
+                      onClick={() => setActiveTab(tab)}
+                    >
+                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    </button>
+                  ),
+                )}
               </nav>
               {activeTab === 'charts' && (
                 <div className="ticker-period-bar">

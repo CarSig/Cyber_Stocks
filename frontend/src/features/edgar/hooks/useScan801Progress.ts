@@ -50,7 +50,9 @@ export function useScan801Progress(active: boolean) {
         } else if (data.type === 'done') {
           onComplete();
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     };
 
     es.onerror = () => {

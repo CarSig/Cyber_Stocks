@@ -18,7 +18,13 @@ describe('groupByCompany', () => {
 
   it('separates multiple tickers and sums repeated counts', () => {
     const result = groupByCompany([
-      notif({ type: 'news.analyzed', tickerCounts: [{ ticker: 'MSFT', count: 2 }, { ticker: 'NVDA', count: 1 }] }),
+      notif({
+        type: 'news.analyzed',
+        tickerCounts: [
+          { ticker: 'MSFT', count: 2 },
+          { ticker: 'NVDA', count: 1 },
+        ],
+      }),
       notif({ type: 'news.analyzed', tickerCounts: [{ ticker: 'MSFT', count: 3 }] }),
     ]);
     const msft = result.find((r) => r.ticker === 'MSFT');

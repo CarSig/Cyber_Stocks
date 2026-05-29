@@ -25,18 +25,27 @@ afterEach(() => {
 
 describe('apiFetch', () => {
   it('returns parsed JSON for a 200 response', async () => {
-    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(makeResponse(200, { result: 42 }))));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(makeResponse(200, { result: 42 }))),
+    );
     const data = await apiFetch('/test');
     expect(data).toEqual({ result: 42 });
   });
 
   it('throws "Unauthorized" for a 401 response', async () => {
-    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(makeResponse(401, {}))));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(makeResponse(401, {}))),
+    );
     await expect(apiFetch('/test')).rejects.toThrow('Unauthorized');
   });
 
   it('calls Sentry.captureMessage for a 500 response', async () => {
-    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(makeResponse(500, { error: 'boom' }))));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(makeResponse(500, { error: 'boom' }))),
+    );
     await expect(apiFetch('/test')).rejects.toThrow();
     expect(Sentry.captureMessage).toHaveBeenCalledWith(
       expect.stringContaining('500'),
@@ -45,7 +54,10 @@ describe('apiFetch', () => {
   });
 
   it('does NOT call Sentry.captureMessage for a 4xx response', async () => {
-    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(makeResponse(404, { error: 'not found' }))));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(makeResponse(404, { error: 'not found' }))),
+    );
     await expect(apiFetch('/test')).rejects.toThrow();
     expect(Sentry.captureMessage).not.toHaveBeenCalled();
   });

@@ -6,7 +6,16 @@ import SecVolatilityChart from '@/features/edgar/components/SecVolatilityChart';
 import FilingsControls from '@/features/edgar/components/FilingsControls';
 import SecTimeline from '@/features/edgar/components/SecTimeline';
 import SecFilingImpactTable from '@/features/edgar/components/SecFilingImpactTable';
-import { useSecCoverage, useAllSecFiles, useSecTickers, useSecSync, useSecSyncStatus, useScan801, useScan801Status, useScan801Results } from '@/features/edgar/hooks/useSecData';
+import {
+  useSecCoverage,
+  useAllSecFiles,
+  useSecTickers,
+  useSecSync,
+  useSecSyncStatus,
+  useScan801,
+  useScan801Status,
+  useScan801Results,
+} from '@/features/edgar/hooks/useSecData';
 import { useSecFilings } from '@/features/edgar/hooks/useSecFilings';
 import { useFilingSwings } from '@/features/edgar/hooks/useFilingSwings';
 import type { FilingSwing } from '@/features/edgar/filingSwings';
@@ -56,9 +65,7 @@ function TickerCardGrid({ onSelect }: { onSelect: (t: string) => void }) {
       {tickers.map((t) => (
         <button key={t} className="edgar-ticker-card" onClick={() => onSelect(t)}>
           <span className="edgar-ticker-card-symbol">{t}</span>
-          {countByTicker[t] != null && (
-            <span className="edgar-ticker-card-count">{countByTicker[t]} filings</span>
-          )}
+          {countByTicker[t] != null && <span className="edgar-ticker-card-count">{countByTicker[t]} filings</span>}
         </button>
       ))}
     </div>
@@ -85,15 +92,26 @@ function SyncStrip({ ticker, dateFrom, dateTo }: { ticker: string; dateFrom: str
       <Button size="sm" disabled={active} onClick={() => run(false)}>
         {active ? 'Downloading…' : 'Download'}
       </Button>
-      <Button size="sm" variant="outline" disabled={active} onClick={() => run(true)} title="Re-download even if already saved">
+      <Button
+        size="sm"
+        variant="outline"
+        disabled={active}
+        onClick={() => run(true)}
+        title="Re-download even if already saved"
+      >
         Re-download
       </Button>
       {active && progress && (
         <>
           <div className="edgar-sync-bar-wrap">
-            <div className="edgar-sync-bar" style={{ width: progress.total > 0 ? `${(progress.current / progress.total) * 100}%` : '0%' }} />
+            <div
+              className="edgar-sync-bar"
+              style={{ width: progress.total > 0 ? `${(progress.current / progress.total) * 100}%` : '0%' }}
+            />
           </div>
-          <span className="edgar-sync-label">{progress.current}/{progress.total} — {progress.form}</span>
+          <span className="edgar-sync-label">
+            {progress.current}/{progress.total} — {progress.form}
+          </span>
         </>
       )}
       {active && !progress && <span className="edgar-sync-label">Fetching list…</span>}
@@ -177,14 +195,19 @@ function SecArchiveContent({ ticker, onBack }: { ticker: string; onBack: () => v
 
   return (
     <>
-      <button className="edgar-back-link" onClick={onBack}>← All companies</button>
+      <button className="edgar-back-link" onClick={onBack}>
+        ← All companies
+      </button>
       <SyncStrip ticker={ticker} dateFrom={dateFrom} dateTo={dateTo} />
       <StickyHead>
         <div className="edgar-period-bar">
           <PeriodButtons activeDays={isCustomRange ? undefined : period} onSelect={selectPeriod} />
           {isCustomRange && visibleRange && (
             <span className="edgar-period-custom">
-              Custom <span className="edgar-period-custom-range">{visibleRange.from} → {visibleRange.to}</span>
+              Custom{' '}
+              <span className="edgar-period-custom-range">
+                {visibleRange.from} → {visibleRange.to}
+              </span>
             </span>
           )}
         </div>
@@ -373,7 +396,14 @@ function AllFilingsTab({ formTypes }: { formTypes: string[] }) {
                       size="sm"
                       variant="outline"
                       style={{ fontSize: 11, padding: '2px 7px', height: 'auto' }}
-                      onClick={() => setSimModal({ accession: row.accession, form: row.form, filingDate: row.filingDate, ticker: row.ticker })}
+                      onClick={() =>
+                        setSimModal({
+                          accession: row.accession,
+                          form: row.form,
+                          filingDate: row.filingDate,
+                          ticker: row.ticker,
+                        })
+                      }
                     >
                       AI Sim
                     </Button>
@@ -385,9 +415,7 @@ function AllFilingsTab({ formTypes }: { formTypes: string[] }) {
         </>
       )}
 
-      {simModal && (
-        <FilingSimModal open onClose={() => setSimModal(null)} filing={simModal} />
-      )}
+      {simModal && <FilingSimModal open onClose={() => setSimModal(null)} filing={simModal} />}
     </>
   );
 }
@@ -480,9 +508,7 @@ function MetadataIncidentList({ notableOnly }: { notableOnly: boolean }) {
       if (!meta?.filingDate) continue;
       total++;
       const items = meta.items ?? [];
-      const match = notableOnly
-        ? items.some((i) => i in NOTABLE_ITEMS)
-        : items.includes('1.05');
+      const match = notableOnly ? items.some((i) => i in NOTABLE_ITEMS) : items.includes('1.05');
       if (!match) continue;
       inc.push({
         ticker: l.ticker,
@@ -504,8 +530,7 @@ function MetadataIncidentList({ notableOnly }: { notableOnly: boolean }) {
   return (
     <div className="incident-results">
       <div className="incident-summary">
-        <strong>{incidents.length}</strong>{' '}
-        {notableOnly ? 'notable filing' : 'material cybersecurity incident'}
+        <strong>{incidents.length}</strong> {notableOnly ? 'notable filing' : 'material cybersecurity incident'}
         {incidents.length !== 1 ? 's' : ''}
         {notableOnly ? '' : ' (item 1.05)'}
         {' — '}
@@ -514,11 +539,15 @@ function MetadataIncidentList({ notableOnly }: { notableOnly: boolean }) {
       {incidents.length === 0 ? (
         <p className="incident-status">
           {notableOnly ? 'No notable filings found.' : 'No 1.05 filings found.'}{' '}
-          {allListings.length === 0 ? 'No filings downloaded yet — sync from the Per Company tab first.' : 'Try syncing more filings.'}
+          {allListings.length === 0
+            ? 'No filings downloaded yet — sync from the Per Company tab first.'
+            : 'Try syncing more filings.'}
         </p>
       ) : (
         <div className="incident-list">
-          {incidents.map((row) => <IncidentCard key={row.accession} row={row} />)}
+          {incidents.map((row) => (
+            <IncidentCard key={row.accession} row={row} />
+          ))}
         </div>
       )}
     </div>
@@ -630,10 +659,15 @@ function Scanned801View() {
                   )}
                   {confirmed && r.ai_incident_type && r.ai_incident_type !== 'none' && (
                     <Badge variant="outline" className="incident-item-badge incident-item-badge--primary">
-                      {r.ai_incident_type}{conf != null ? ` · ${conf}%` : ''}
+                      {r.ai_incident_type}
+                      {conf != null ? ` · ${conf}%` : ''}
                     </Badge>
                   )}
-                  {pending && <Badge variant="outline" className="incident-item-badge">unclassified</Badge>}
+                  {pending && (
+                    <Badge variant="outline" className="incident-item-badge">
+                      unclassified
+                    </Badge>
+                  )}
                   <div className="incident-items">
                     {r.matched_keywords.map((kw) => (
                       <Badge key={kw} variant="outline" className="incident-item-badge incident-item-keyword">
@@ -648,7 +682,12 @@ function Scanned801View() {
                 <div className="incident-card-body">
                   <code className="incident-accession">{r.accession}</code>
                   <div className="incident-links">
-                    <a href={docUrl} target="_blank" rel="noreferrer" className="incident-link incident-link--secondary">
+                    <a
+                      href={docUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="incident-link incident-link--secondary"
+                    >
                       All files ↗
                     </a>
                   </div>
@@ -670,8 +709,8 @@ function IncidentsTab() {
       <p className="incident-intro">
         SEC Rule 8-K Item 1.05 — Material Cybersecurity Incidents. Companies must disclose material cyber incidents
         within 4 business days of determining materiality. Note: operational events not caused by a cyberattack (e.g.
-        CrowdStrike's 2024 Falcon outage) file under Item 8.01, not 1.05 — use the scanned view to catch those.
-        Sourced from locally downloaded EDGAR archives — sync from the Per Company tab.
+        CrowdStrike's 2024 Falcon outage) file under Item 8.01, not 1.05 — use the scanned view to catch those. Sourced
+        from locally downloaded EDGAR archives — sync from the Per Company tab.
       </p>
       <div className="incident-toggle">
         <button
@@ -683,7 +722,9 @@ function IncidentsTab() {
         <button
           className={`incident-toggle-btn${mode === 'notable' ? ' incident-toggle-btn--active' : ''}`}
           onClick={() => setMode('notable')}
-          title={Object.entries(NOTABLE_ITEMS).map(([k, v]) => `${k} ${v}`).join('\n')}
+          title={Object.entries(NOTABLE_ITEMS)
+            .map(([k, v]) => `${k} ${v}`)
+            .join('\n')}
         >
           All notable items
         </button>

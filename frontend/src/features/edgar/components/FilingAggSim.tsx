@@ -88,7 +88,15 @@ export function useAggSim() {
             continue;
           }
 
-          rows.push({ date: filingDate, accession, form, ticker, entryPrice: entry.price, exitPrice: exit.price, profitPct: sim.profitPct });
+          rows.push({
+            date: filingDate,
+            accession,
+            form,
+            ticker,
+            entryPrice: entry.price,
+            exitPrice: exit.price,
+            profitPct: sim.profitPct,
+          });
         } catch {
           skipped++;
         }
@@ -129,16 +137,24 @@ export function AggSimResultsModal({
 }) {
   const avgColor = result.avgPct >= 0 ? 'var(--color-green)' : 'var(--color-red)';
   return (
-    <Dialog open onOpenChange={(v) => { if (!v) onClose(); }}>
+    <Dialog
+      open
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
+    >
       <DialogContent style={{ maxWidth: 600, maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div style={{ fontSize: 12, color: 'var(--muted-foreground)', marginBottom: 10, display: 'flex', gap: 16 }}>
           <span style={{ color: avgColor, fontWeight: 600 }}>
-            {result.avgPct >= 0 ? '+' : ''}{result.avgPct.toFixed(2)}% avg
+            {result.avgPct >= 0 ? '+' : ''}
+            {result.avgPct.toFixed(2)}% avg
           </span>
-          <span>{result.wins}W / {result.losses}L</span>
+          <span>
+            {result.wins}W / {result.losses}L
+          </span>
           {result.skipped > 0 && <span>{result.skipped} skipped (no data)</span>}
         </div>
         <div style={{ overflowY: 'auto', flex: 1 }}>
@@ -164,7 +180,8 @@ export function AggSimResultsModal({
                     <td style={{ padding: '4px 8px', textAlign: 'right' }}>${row.entryPrice.toFixed(2)}</td>
                     <td style={{ padding: '4px 8px', textAlign: 'right' }}>${row.exitPrice.toFixed(2)}</td>
                     <td style={{ padding: '4px 8px', textAlign: 'right', color, fontWeight: 600 }}>
-                      {row.profitPct >= 0 ? '+' : ''}{row.profitPct.toFixed(2)}%
+                      {row.profitPct >= 0 ? '+' : ''}
+                      {row.profitPct.toFixed(2)}%
                     </td>
                   </tr>
                 );
@@ -200,7 +217,11 @@ export function AggResultBadge({
     );
   }
   if (state.status === 'running') {
-    return <span style={{ fontSize: 11, color: 'var(--muted-foreground)' }}>{state.done}/{state.total}…</span>;
+    return (
+      <span style={{ fontSize: 11, color: 'var(--muted-foreground)' }}>
+        {state.done}/{state.total}…
+      </span>
+    );
   }
   if (state.status === 'error') {
     return <span style={{ fontSize: 11, color: 'var(--color-red)' }}>{state.message}</span>;
@@ -211,12 +232,24 @@ export function AggResultBadge({
   return (
     <>
       <span
-        style={{ fontSize: 11, display: 'inline-flex', gap: 6, alignItems: 'center', cursor: 'pointer', textDecoration: 'underline dotted' }}
+        style={{
+          fontSize: 11,
+          display: 'inline-flex',
+          gap: 6,
+          alignItems: 'center',
+          cursor: 'pointer',
+          textDecoration: 'underline dotted',
+        }}
         onClick={() => setModalOpen(true)}
         title="Click to see details"
       >
-        <span style={{ color, fontWeight: 600 }}>{result.avgPct >= 0 ? '+' : ''}{result.avgPct.toFixed(2)}% avg</span>
-        <span style={{ color: 'var(--muted-foreground)' }}>{result.wins}W/{result.losses}L</span>
+        <span style={{ color, fontWeight: 600 }}>
+          {result.avgPct >= 0 ? '+' : ''}
+          {result.avgPct.toFixed(2)}% avg
+        </span>
+        <span style={{ color: 'var(--muted-foreground)' }}>
+          {result.wins}W/{result.losses}L
+        </span>
         {result.skipped > 0 && <span style={{ color: 'var(--muted-foreground)' }}>({result.skipped} skip)</span>}
       </span>
       {modalOpen && (

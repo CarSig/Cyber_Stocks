@@ -1,5 +1,14 @@
 import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSecTickers, getSecFiles, syncSec, getSecCoverage, getSecSyncStatus, startScan801, getScan801Status, getScan801Results } from '../api';
+import {
+  getSecTickers,
+  getSecFiles,
+  syncSec,
+  getSecCoverage,
+  getSecSyncStatus,
+  startScan801,
+  getScan801Status,
+  getScan801Results,
+} from '../api';
 
 export function useSecTickers() {
   return useQuery({
@@ -52,9 +61,7 @@ export function useAllSecFiles(tickers: string[]): {
   });
 
   const isPending = results.some((r) => r.isPending);
-  const data = results.flatMap((r, i) =>
-    (r.data ?? []).map((listing) => ({ ...listing, ticker: tickers[i] })),
-  );
+  const data = results.flatMap((r, i) => (r.data ?? []).map((listing) => ({ ...listing, ticker: tickers[i] })));
 
   return { data, isPending };
 }

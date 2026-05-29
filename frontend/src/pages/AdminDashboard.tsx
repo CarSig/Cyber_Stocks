@@ -65,7 +65,10 @@ function EdgarSyncAllJob() {
   const esRef = useRef<EventSource | null>(null);
 
   function startStream() {
-    if (esRef.current) { esRef.current.close(); esRef.current = null; }
+    if (esRef.current) {
+      esRef.current.close();
+      esRef.current = null;
+    }
     const token = localStorage.getItem('auth_token') ?? '';
     const url = `${API_BASE}/admin/edgar-sync-all/progress?token=${encodeURIComponent(token)}`;
     const es = new EventSource(url);
@@ -81,9 +84,14 @@ function EdgarSyncAllJob() {
           es.close();
           esRef.current = null;
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     };
-    es.onerror = () => { es.close(); esRef.current = null; };
+    es.onerror = () => {
+      es.close();
+      esRef.current = null;
+    };
   }
 
   useEffect(() => {
@@ -93,10 +101,17 @@ function EdgarSyncAllJob() {
     })
       .then((r) => r.json())
       .then((data: { running: boolean }) => {
-        if (data.running) { setRunning(true); startStream(); }
+        if (data.running) {
+          setRunning(true);
+          startStream();
+        }
       })
-      .catch(() => { /* ignore — admin page may not be accessible yet */ });
-    return () => { esRef.current?.close(); };
+      .catch(() => {
+        /* ignore — admin page may not be accessible yet */
+      });
+    return () => {
+      esRef.current?.close();
+    };
   }, []);
 
   async function trigger() {
@@ -195,7 +210,7 @@ function EdgarBackfillCoverageButton() {
         method: 'POST',
         headers: { Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}` },
       });
-      const data = await res.json() as { updated: number; at: string };
+      const data = (await res.json()) as { updated: number; at: string };
       setStatus('done');
       setMessage(`${data.updated} tickers updated`);
     } catch (e) {
@@ -229,9 +244,11 @@ function StockHistoryBackfillButton() {
         method: 'POST',
         headers: { Authorization: `Bearer ${localStorage.getItem('auth_token') ?? ''}` },
       });
-      const data = await res.json() as { started: boolean; fromDate: string; at: string };
+      const data = (await res.json()) as { started: boolean; fromDate: string; at: string };
       // Bust stale stock quote cache so the next page load fetches fresh data
-      Object.keys(localStorage).filter((k) => k.includes('ticker_')).forEach((k) => localStorage.removeItem(k));
+      Object.keys(localStorage)
+        .filter((k) => k.includes('ticker_'))
+        .forEach((k) => localStorage.removeItem(k));
       setStatus('done');
       setMessage(`started from ${data.fromDate} — cache cleared, running in background`);
     } catch (e) {
@@ -248,7 +265,14 @@ function StockHistoryBackfillButton() {
         value={fromDate}
         onChange={(e) => setFromDate(e.target.value)}
         disabled={status === 'running'}
-        style={{ fontSize: 12, padding: '2px 6px', borderRadius: 4, border: '1px solid #444', background: 'transparent', color: 'inherit' }}
+        style={{
+          fontSize: 12,
+          padding: '2px 6px',
+          borderRadius: 4,
+          border: '1px solid #444',
+          background: 'transparent',
+          color: 'inherit',
+        }}
       />
       <Button size="sm" variant="outline" disabled={status === 'running'} onClick={trigger}>
         {status === 'running' ? 'Running…' : 'Backfill'}

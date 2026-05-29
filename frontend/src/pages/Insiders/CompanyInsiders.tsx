@@ -13,13 +13,13 @@ export default function CompanyInsiders() {
 
   return (
     <Page title={`Insiders — ${upper}`}>
-      <Link to="/insiders/companies" className="insiders-back">← Companies</Link>
+      <Link to="/insiders/companies" className="insiders-back">
+        ← Companies
+      </Link>
       {isPending && <p className="insiders-loading">Loading…</p>}
       {error && <p className="insiders-error">{(error as Error).message}</p>}
       <AggregateCard agg={agg} />
-      {!isPending && data.length === 0 && (
-        <p className="insiders-empty">No insiders on disk for {upper}.</p>
-      )}
+      {!isPending && data.length === 0 && <p className="insiders-empty">No insiders on disk for {upper}.</p>}
       <div className="insider-row-list">
         {data.map((row) => (
           <InsiderRowItem key={row.personCik} row={row} showCompanies={false} />

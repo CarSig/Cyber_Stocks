@@ -73,10 +73,15 @@ export default function NotificationBell() {
                 <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-0.5">
                   <span className="font-semibold">{ticker}</span>
                   {news > 0 && <span>{news} news</span>}
-                  {filings > 0 && <span>{filings} filing{filings !== 1 ? 's' : ''}</span>}
+                  {filings > 0 && (
+                    <span>
+                      {filings} filing{filings !== 1 ? 's' : ''}
+                    </span>
+                  )}
                   {changePct !== null && (
                     <span style={{ color: changePct >= 0 ? 'var(--color-green)' : 'var(--color-red)' }}>
-                      {changePct >= 0 ? '+' : ''}{changePct.toFixed(1)}%
+                      {changePct >= 0 ? '+' : ''}
+                      {changePct.toFixed(1)}%
                     </span>
                   )}
                 </div>
@@ -110,20 +115,21 @@ export default function NotificationBell() {
                       )}
                     </div>
                   ) : n.type === 'edgar.new_filings' &&
-                  (n as Record<string, unknown>).changes &&
-                  ((n as Record<string, unknown>).changes as Array<{ ticker: string; count: number }>).length ? (
+                    (n as Record<string, unknown>).changes &&
+                    ((n as Record<string, unknown>).changes as Array<{ ticker: string; count: number }>).length ? (
                     <div className="notif-edgar flex flex-wrap gap-x-3 gap-y-0.5">
                       {((n as Record<string, unknown>).changes as Array<{ ticker: string; count: number }>).map(
                         ({ ticker, count }) => (
                           <span key={ticker}>
-                            <span className="font-semibold">{ticker}</span>: {count} filing{count !== 1 ? 's' : ''} published
+                            <span className="font-semibold">{ticker}</span>: {count} filing{count !== 1 ? 's' : ''}{' '}
+                            published
                           </span>
                         ),
                       )}
                     </div>
                   ) : n.type === 'news.analyzed' &&
-                  (n as Record<string, unknown>).tickerCounts &&
-                  ((n as Record<string, unknown>).tickerCounts as Array<{ ticker: string; count: number }>).length ? (
+                    (n as Record<string, unknown>).tickerCounts &&
+                    ((n as Record<string, unknown>).tickerCounts as Array<{ ticker: string; count: number }>).length ? (
                     <div className="notif-news flex flex-wrap gap-x-3 gap-y-0.5">
                       {((n as Record<string, unknown>).tickerCounts as Array<{ ticker: string; count: number }>).map(
                         ({ ticker, count }) => (

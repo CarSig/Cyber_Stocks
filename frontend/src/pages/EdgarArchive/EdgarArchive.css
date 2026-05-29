@@ -413,7 +413,11 @@
   border-radius: 6px;
   cursor: pointer;
   opacity: 0.55;
-  transition: opacity 0.15s, color 0.15s, border-color 0.15s, background 0.15s;
+  transition:
+    opacity 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s;
 }
 .sec-filing-swatch-btn:hover {
   color: var(--text-primary);
@@ -826,7 +830,9 @@
   background: var(--surface, var(--card));
   cursor: pointer;
   text-align: left;
-  transition: border-color 120ms, background 120ms;
+  transition:
+    border-color 120ms,
+    background 120ms;
   &:hover {
     border-color: var(--primary);
     background: var(--surface-hover, var(--accent, transparent));
@@ -943,7 +949,9 @@
   border: none;
   cursor: pointer;
   padding: 0;
-  &:hover { color: var(--foreground); }
+  &:hover {
+    color: var(--foreground);
+  }
 }
 
 /* ── Page tabs ─────────────────────────────────────────────────────────── */
@@ -1270,7 +1278,9 @@
   font-size: 0.8rem;
   color: var(--primary);
   text-decoration: none;
-  &:hover { text-decoration: underline; }
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .incident-link--secondary {

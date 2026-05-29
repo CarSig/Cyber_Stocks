@@ -43,7 +43,11 @@ export function useFilingSwings(rows: SwingRow[], lagDays = 1): Map<string, Fili
     const m = new Map<string, TickerData['history']['quotes']>();
     tickers.forEach((t, i) => {
       const quotes = results[i]?.data?.history?.quotes;
-      if (quotes?.length) m.set(t, [...quotes].sort((a, b) => a.date.localeCompare(b.date)));
+      if (quotes?.length)
+        m.set(
+          t,
+          [...quotes].sort((a, b) => a.date.localeCompare(b.date)),
+        );
     });
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps

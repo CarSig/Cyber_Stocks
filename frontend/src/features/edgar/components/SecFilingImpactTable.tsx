@@ -25,7 +25,6 @@ function useFilingSim() {
   };
 }
 
-
 const EDGAR_ARCHIVES = 'https://www.sec.gov/Archives/edgar/data';
 
 function fmtPct(val: number, signed = false): string {
@@ -84,9 +83,7 @@ export default function SecFilingImpactTable({ ticker, dateRange }: Props) {
   const impactAccessions = new Set(groups.flatMap((g) => g.filings.map((f) => f.accession)));
   const inRange = (d?: string) =>
     !dateRange || (!!d && (!dateRange.from || d >= dateRange.from) && (!dateRange.to || d <= dateRange.to));
-  const ungroupedListings = listings.filter(
-    (l) => !impactAccessions.has(l.accession) && inRange(l.meta?.filingDate),
-  );
+  const ungroupedListings = listings.filter((l) => !impactAccessions.has(l.accession) && inRange(l.meta?.filingDate));
 
   return (
     <div className="sec-section">
@@ -102,7 +99,13 @@ export default function SecFilingImpactTable({ ticker, dateRange }: Props) {
         <AggResultBadge
           label={`All forms — ${ticker}`}
           state={agg.states['__all__']}
-          onRun={() => agg.run('__all__', groups.flatMap((g) => g.filings.map((f) => ({ ...f, ticker }))), exitTime)}
+          onRun={() =>
+            agg.run(
+              '__all__',
+              groups.flatMap((g) => g.filings.map((f) => ({ ...f, ticker }))),
+              exitTime,
+            )
+          }
         />
         <div className="sec-impact-lag">
           <Label htmlFor="sec-lag" className="sec-impact-lag-label">
@@ -130,9 +133,18 @@ export default function SecFilingImpactTable({ ticker, dateRange }: Props) {
             <th className="sec-impact-th sec-impact-th--count">#</th>
             <th className="sec-impact-th sec-impact-th--num">Avg Swing |Δ|</th>
             <th className="sec-impact-th sec-impact-th--num">Avg Gain / Loss</th>
-            <th className="sec-impact-th sec-impact-th--num" title="Filing day open → close (daily quotes)">Intraday O→C</th>
-            <th className="sec-impact-th sec-impact-th--num" title="True Range vs prior close: gap from yesterday's close + intraday high–low swing">Avg Volatility</th>
-            <th className="sec-impact-th sec-impact-th--num" title="Filing-day volume vs prior 20-day average">Avg Vol Swing</th>
+            <th className="sec-impact-th sec-impact-th--num" title="Filing day open → close (daily quotes)">
+              Intraday O→C
+            </th>
+            <th
+              className="sec-impact-th sec-impact-th--num"
+              title="True Range vs prior close: gap from yesterday's close + intraday high–low swing"
+            >
+              Avg Volatility
+            </th>
+            <th className="sec-impact-th sec-impact-th--num" title="Filing-day volume vs prior 20-day average">
+              Avg Vol Swing
+            </th>
             <th className="sec-impact-th" />
           </tr>
         </thead>
@@ -155,13 +167,17 @@ export default function SecFilingImpactTable({ ticker, dateRange }: Props) {
                   <td className="sec-impact-td sec-impact-count">{group.filings.length}</td>
                   <td className="sec-impact-td sec-impact-swing">{fmtPct(group.avgSwing)}</td>
                   <td className={`sec-impact-td sec-impact-signed ${gainClass}`}>{fmtPct(group.avgChangePct, true)}</td>
-                  <td className={`sec-impact-td sec-impact-signed ${group.avgIntradayPct != null ? (group.avgIntradayPct >= 0 ? 'sec-impact-positive' : 'sec-impact-negative') : ''}`}>
+                  <td
+                    className={`sec-impact-td sec-impact-signed ${group.avgIntradayPct != null ? (group.avgIntradayPct >= 0 ? 'sec-impact-positive' : 'sec-impact-negative') : ''}`}
+                  >
                     {group.avgIntradayPct != null ? fmtPct(group.avgIntradayPct, true) : '—'}
                   </td>
                   <td className="sec-impact-td sec-impact-swing">
                     {group.avgTrueRangePct != null ? fmtPct(group.avgTrueRangePct) : '—'}
                   </td>
-                  <td className={`sec-impact-td sec-impact-signed ${group.avgVolSpikePct != null ? (group.avgVolSpikePct >= 0 ? 'sec-impact-positive' : 'sec-impact-negative') : ''}`}>
+                  <td
+                    className={`sec-impact-td sec-impact-signed ${group.avgVolSpikePct != null ? (group.avgVolSpikePct >= 0 ? 'sec-impact-positive' : 'sec-impact-negative') : ''}`}
+                  >
                     {group.avgVolSpikePct != null ? fmtPct(group.avgVolSpikePct, true) : '—'}
                   </td>
                   <td className="sec-impact-td" style={{ width: 1, whiteSpace: 'nowrap' }}>
@@ -169,7 +185,13 @@ export default function SecFilingImpactTable({ ticker, dateRange }: Props) {
                       <AggResultBadge
                         label={`${group.form} — ${ticker}`}
                         state={agg.states[group.form]}
-                        onRun={() => agg.run(group.form, group.filings.map((f) => ({ ...f, ticker })), exitTime)}
+                        onRun={() =>
+                          agg.run(
+                            group.form,
+                            group.filings.map((f) => ({ ...f, ticker })),
+                            exitTime,
+                          )
+                        }
                       />
                     </span>
                   </td>
@@ -224,13 +246,17 @@ export default function SecFilingImpactTable({ ticker, dateRange }: Props) {
                           <td className={`sec-impact-td sec-impact-signed ${fGainClass}`}>
                             {fmtPct(f.changePct, true)}
                           </td>
-                          <td className={`sec-impact-td sec-impact-signed ${f.intradayPct != null ? (f.intradayPct >= 0 ? 'sec-impact-positive' : 'sec-impact-negative') : ''}`}>
+                          <td
+                            className={`sec-impact-td sec-impact-signed ${f.intradayPct != null ? (f.intradayPct >= 0 ? 'sec-impact-positive' : 'sec-impact-negative') : ''}`}
+                          >
                             {f.intradayPct != null ? fmtPct(f.intradayPct, true) : '—'}
                           </td>
                           <td className="sec-impact-td sec-impact-swing">
                             {f.trueRangePct != null ? fmtPct(f.trueRangePct) : '—'}
                           </td>
-                          <td className={`sec-impact-td sec-impact-signed ${f.volSpikePct != null ? (f.volSpikePct >= 0 ? 'sec-impact-positive' : 'sec-impact-negative') : ''}`}>
+                          <td
+                            className={`sec-impact-td sec-impact-signed ${f.volSpikePct != null ? (f.volSpikePct >= 0 ? 'sec-impact-positive' : 'sec-impact-negative') : ''}`}
+                          >
                             {f.volSpikePct != null ? fmtPct(f.volSpikePct, true) : '—'}
                           </td>
                           <td className="sec-impact-td" style={{ width: 1, whiteSpace: 'nowrap' }}>
@@ -240,7 +266,12 @@ export default function SecFilingImpactTable({ ticker, dateRange }: Props) {
                               style={{ fontSize: 11, padding: '2px 7px', height: 'auto' }}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                sim.open({ accession: f.accession, form: listing?.meta?.form ?? '', filingDate: f.date, ticker });
+                                sim.open({
+                                  accession: f.accession,
+                                  form: listing?.meta?.form ?? '',
+                                  filingDate: f.date,
+                                  ticker,
+                                });
                               }}
                             >
                               AI Sim
@@ -254,7 +285,8 @@ export default function SecFilingImpactTable({ ticker, dateRange }: Props) {
                             <td colSpan={8} className="sec-impact-files-cell">
                               <ul className="sec-file-items">
                                 {sortedFiles.map((file) => {
-                                  const isPrimary = !!listing?.meta?.primaryDocument && file === listing.meta.primaryDocument;
+                                  const isPrimary =
+                                    !!listing?.meta?.primaryDocument && file === listing.meta.primaryDocument;
                                   return (
                                     <li
                                       key={file}
@@ -304,72 +336,67 @@ export default function SecFilingImpactTable({ ticker, dateRange }: Props) {
               {ungroupedListings.length} filing{ungroupedListings.length > 1 ? 's' : ''} outside price data coverage
             </span>
           </button>
-          {ungroupedOpen && ungroupedListings.map((l) => {
-            const accNoDashes = l.accession.replace(/-/g, '');
-            const { cik, filingDate, form, primaryDocument } = l.meta ?? {};
-            const baseUrl = cik ? `${EDGAR_ARCHIVES}/${cik}/${accNoDashes}` : null;
-            const formStyle = getFormStyle(form);
-            const isOpen = expandedAccessions.has(l.accession);
-            const sortedFiles = [...l.files].sort((a, b) => {
-              if (a === primaryDocument) return -1;
-              if (b === primaryDocument) return 1;
-              return a.localeCompare(b);
-            });
+          {ungroupedOpen &&
+            ungroupedListings.map((l) => {
+              const accNoDashes = l.accession.replace(/-/g, '');
+              const { cik, filingDate, form, primaryDocument } = l.meta ?? {};
+              const baseUrl = cik ? `${EDGAR_ARCHIVES}/${cik}/${accNoDashes}` : null;
+              const formStyle = getFormStyle(form);
+              const isOpen = expandedAccessions.has(l.accession);
+              const sortedFiles = [...l.files].sort((a, b) => {
+                if (a === primaryDocument) return -1;
+                if (b === primaryDocument) return 1;
+                return a.localeCompare(b);
+              });
 
-            return (
-              <div key={l.accession} className="sec-accession">
-                <button type="button" className="sec-accession-header" onClick={() => toggleAccession(l.accession)}>
-                  <span className="sec-form-tag" style={{ background: formStyle.color }}>
-                    {formStyle.label}
-                  </span>
-                  <span className="sec-accession-name">{l.accession}</span>
-                  {filingDate && <span className="sec-filing-date">{filingDate}</span>}
-                  <Badge variant="outline">{l.files.length} files</Badge>
-                  <span className="sec-chevron">{isOpen ? '▲' : '▼'}</span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    style={{ fontSize: 11, padding: '2px 7px', height: 'auto', marginLeft: 4 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      sim.open({ accession: l.accession, form: form ?? '', filingDate: filingDate ?? '', ticker });
-                    }}
-                  >
-                    AI Sim
-                  </Button>
-                </button>
-                {isOpen && (
-                  <ul className="sec-file-items">
-                    {sortedFiles.map((f) => {
-                      const isPrimary = !!primaryDocument && f === primaryDocument;
-                      return (
-                        <li key={f} className={`sec-file-item${isPrimary ? ' sec-file-item--primary' : ''}`}>
-                          {isPrimary && <span className="sec-primary-tag">PRIMARY</span>}
-                          {baseUrl ? (
-                            <a href={`${baseUrl}/${f}`} target="_blank" rel="noreferrer" className="sec-file-link">
-                              {f} ↗
-                            </a>
-                          ) : (
-                            f
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
-            );
-          })}
+              return (
+                <div key={l.accession} className="sec-accession">
+                  <button type="button" className="sec-accession-header" onClick={() => toggleAccession(l.accession)}>
+                    <span className="sec-form-tag" style={{ background: formStyle.color }}>
+                      {formStyle.label}
+                    </span>
+                    <span className="sec-accession-name">{l.accession}</span>
+                    {filingDate && <span className="sec-filing-date">{filingDate}</span>}
+                    <Badge variant="outline">{l.files.length} files</Badge>
+                    <span className="sec-chevron">{isOpen ? '▲' : '▼'}</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      style={{ fontSize: 11, padding: '2px 7px', height: 'auto', marginLeft: 4 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        sim.open({ accession: l.accession, form: form ?? '', filingDate: filingDate ?? '', ticker });
+                      }}
+                    >
+                      AI Sim
+                    </Button>
+                  </button>
+                  {isOpen && (
+                    <ul className="sec-file-items">
+                      {sortedFiles.map((f) => {
+                        const isPrimary = !!primaryDocument && f === primaryDocument;
+                        return (
+                          <li key={f} className={`sec-file-item${isPrimary ? ' sec-file-item--primary' : ''}`}>
+                            {isPrimary && <span className="sec-primary-tag">PRIMARY</span>}
+                            {baseUrl ? (
+                              <a href={`${baseUrl}/${f}`} target="_blank" rel="noreferrer" className="sec-file-link">
+                                {f} ↗
+                              </a>
+                            ) : (
+                              f
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
         </div>
       )}
 
-      {sim.modal && (
-        <FilingSimModal
-          open
-          onClose={sim.close}
-          filing={sim.modal}
-        />
-      )}
+      {sim.modal && <FilingSimModal open onClose={sim.close} filing={sim.modal} />}
     </div>
   );
 }

@@ -44,7 +44,9 @@ export function useSecSyncProgress(ticker: string | null, active: boolean) {
           // Server completes the subject when all filings are done; refresh listings then.
           if (data.total > 0 && data.current >= data.total) onComplete();
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     };
 
     es.onerror = () => {

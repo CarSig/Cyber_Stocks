@@ -4,7 +4,14 @@ import { getBars } from '@/features/charts/api';
 import type { AlpacaBar } from '@/types';
 import { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from '@/features/charts/utils';
 import { useTimezone } from '@/context/TimezoneContext';
-import { ChartAuto, lineSeriesOverlay, PRICE_SCALE_MIN_WIDTH, formatVolumeAxis, type ChartPlugin, type ChartType } from '@/features/charts';
+import {
+  ChartAuto,
+  lineSeriesOverlay,
+  PRICE_SCALE_MIN_WIDTH,
+  formatVolumeAxis,
+  type ChartPlugin,
+  type ChartType,
+} from '@/features/charts';
 import { getTzOffsetSeconds, toTzTime } from '@/features/charts/utils/dates';
 import type { Time } from 'lightweight-charts';
 

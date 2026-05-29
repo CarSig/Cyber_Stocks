@@ -8,12 +8,26 @@ import type { InsiderImpactAggregate, InsiderLeaderboardRow } from '@algo/shared
 import './Insiders.css';
 
 const CODE_LABELS: Record<string, string> = {
-  P: 'Purchase', S: 'Sale', A: 'Grant', D: 'Disposition', F: 'Tax withhold',
-  M: 'Option exercise', C: 'Conversion', G: 'Gift', V: 'Voluntary',
-  J: 'Other', K: 'Equity swap', L: 'Small acq.', U: 'Tender disp.',
-  W: 'Inheritance', Z: 'Voting trust', I: 'Discretionary',
-  E: 'Short deriv. expiry', H: 'Long deriv. expiry',
-  O: 'OTM exercise', X: 'ITM exercise',
+  P: 'Purchase',
+  S: 'Sale',
+  A: 'Grant',
+  D: 'Disposition',
+  F: 'Tax withhold',
+  M: 'Option exercise',
+  C: 'Conversion',
+  G: 'Gift',
+  V: 'Voluntary',
+  J: 'Other',
+  K: 'Equity swap',
+  L: 'Small acq.',
+  U: 'Tender disp.',
+  W: 'Inheritance',
+  Z: 'Voting trust',
+  I: 'Discretionary',
+  E: 'Short deriv. expiry',
+  H: 'Long deriv. expiry',
+  O: 'OTM exercise',
+  X: 'ITM exercise',
 };
 
 type SortKey = 'overall' | 'buy' | 'sell' | 'filings' | string;
@@ -60,9 +74,13 @@ function OtherCell({ agg, topCodes }: { agg: InsiderImpactAggregate; topCodes: s
 type ThProps = { label: string; sortKey: SortKey; current: SortKey; onClick: (k: SortKey) => void };
 function Th({ label, sortKey, current, onClick }: ThProps) {
   return (
-    <th className={`insider-lb-th${current === sortKey ? ' active' : ''}`}
-      onClick={() => onClick(sortKey)} style={{ cursor: 'pointer', userSelect: 'none' }}>
-      {label}{current === sortKey ? ' ▼' : ''}
+    <th
+      className={`insider-lb-th${current === sortKey ? ' active' : ''}`}
+      onClick={() => onClick(sortKey)}
+      style={{ cursor: 'pointer', userSelect: 'none' }}
+    >
+      {label}
+      {current === sortKey ? ' ▼' : ''}
     </th>
   );
 }
@@ -77,9 +95,12 @@ export default function Leaderboard() {
 
   return (
     <Page title="Insider Impact Leaderboard">
-      <Link to="/insiders" className="insiders-back">← Insiders</Link>
+      <Link to="/insiders" className="insiders-back">
+        ← Insiders
+      </Link>
       <p className="insiders-blurb">
-        Insiders ranked by same-day price delta (filing date open → close). Buy = open-market purchase (P); Sell = open-market sale (S). Other columns are the top transaction types by frequency.
+        Insiders ranked by same-day price delta (filing date open → close). Buy = open-market purchase (P); Sell =
+        open-market sale (S). Other columns are the top transaction types by frequency.
       </p>
       {isPending && <p className="insiders-loading">Loading…</p>}
       {error && <p className="insiders-error">{(error as Error).message}</p>}
@@ -95,7 +116,13 @@ export default function Leaderboard() {
                 <Th label="Buy avg Δ" sortKey="buy" current={sortKey} onClick={setSortKey} />
                 <Th label="Sell avg Δ" sortKey="sell" current={sortKey} onClick={setSortKey} />
                 {topCodes.map((code) => (
-                  <Th key={code} label={`${CODE_LABELS[code] ?? code} Δ`} sortKey={code} current={sortKey} onClick={setSortKey} />
+                  <Th
+                    key={code}
+                    label={`${CODE_LABELS[code] ?? code} Δ`}
+                    sortKey={code}
+                    current={sortKey}
+                    onClick={setSortKey}
+                  />
                 ))}
                 <th className="insider-lb-th">Other Δ</th>
                 <Th label="Overall |Δ|" sortKey="overall" current={sortKey} onClick={setSortKey} />
@@ -114,7 +141,9 @@ export default function Leaderboard() {
                   <td>
                     <div className="insider-row-companies">
                       {row.companies.map((t) => (
-                        <Badge key={t} variant="outline" className="insider-company-badge">{t}</Badge>
+                        <Badge key={t} variant="outline" className="insider-company-badge">
+                          {t}
+                        </Badge>
                       ))}
                     </div>
                   </td>
@@ -130,7 +159,9 @@ export default function Leaderboard() {
                   {topCodes.map((code) => (
                     <td key={code} className="num">
                       <ImpactBadge deltaPct={row.aggregate.byCode[code]?.avgDeltaPct} />
-                      {(row.aggregate.byCode[code]?.avgDeltaPct == null) && <span className="insider-agg-no-data">—</span>}
+                      {row.aggregate.byCode[code]?.avgDeltaPct == null && (
+                        <span className="insider-agg-no-data">—</span>
+                      )}
                     </td>
                   ))}
                   <OtherCell agg={row.aggregate} topCodes={topCodes} />

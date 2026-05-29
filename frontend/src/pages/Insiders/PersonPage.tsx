@@ -36,7 +36,9 @@ export default function PersonPage() {
 
   return (
     <Page title={data?.name ?? 'Insider'}>
-      <Link to="/insiders/all" className="insiders-back">← All Insiders</Link>
+      <Link to="/insiders/all" className="insiders-back">
+        ← All Insiders
+      </Link>
       {isPending && <p className="insiders-loading">Loading…</p>}
       {error && <p className="insiders-error">{(error as Error).message}</p>}
       {data && (
@@ -50,16 +52,13 @@ export default function PersonPage() {
             {data.roles.length > 0 && (
               <div className="insider-person-roles">
                 {data.roles.map((r, i) => (
-                  <span key={i} className="insider-role-badge">{roleLabel(r)}</span>
+                  <span key={i} className="insider-role-badge">
+                    {roleLabel(r)}
+                  </span>
                 ))}
               </div>
             )}
-            <a
-              href={edgarUrl(data.personCik)}
-              target="_blank"
-              rel="noreferrer"
-              className="insider-edgar-link"
-            >
+            <a href={edgarUrl(data.personCik)} target="_blank" rel="noreferrer" className="insider-edgar-link">
               SEC EDGAR profile ↗
             </a>
           </header>
@@ -68,14 +67,7 @@ export default function PersonPage() {
             {orderedTickers.map((t) => {
               const filings = data.filingsByCompany[t];
               const issuerCik = filings[0]?.issuerCik;
-              return (
-                <PersonFilingTimeline
-                  key={t}
-                  ticker={t}
-                  filings={filings}
-                  issuerCik={issuerCik}
-                />
-              );
+              return <PersonFilingTimeline key={t} ticker={t} filings={filings} issuerCik={issuerCik} />;
             })}
           </div>
         </>

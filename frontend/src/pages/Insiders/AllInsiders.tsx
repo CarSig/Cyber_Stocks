@@ -13,23 +13,19 @@ export default function AllInsiders() {
   const filtered = useMemo(() => {
     if (!filter.trim()) return data;
     const q = filter.toLowerCase();
-    return data.filter(
-      (r) =>
-        r.name.toLowerCase().includes(q) ||
-        r.companies.some((c) => c.toLowerCase().includes(q)),
-    );
+    return data.filter((r) => r.name.toLowerCase().includes(q) || r.companies.some((c) => c.toLowerCase().includes(q)));
   }, [data, filter]);
 
   return (
     <Page title="All Insiders">
-      <Link to="/insiders" className="insiders-back">← Insiders</Link>
+      <Link to="/insiders" className="insiders-back">
+        ← Insiders
+      </Link>
       <div className="insider-filter">
-        <Input
-          placeholder="Filter by name or ticker…"
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-        />
-        <span className="insider-filter-count">{filtered.length} of {data.length}</span>
+        <Input placeholder="Filter by name or ticker…" value={filter} onChange={(e) => setFilter(e.target.value)} />
+        <span className="insider-filter-count">
+          {filtered.length} of {data.length}
+        </span>
       </div>
       {isPending && <p className="insiders-loading">Loading…</p>}
       {error && <p className="insiders-error">{(error as Error).message}</p>}

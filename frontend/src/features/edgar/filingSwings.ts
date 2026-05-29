@@ -85,16 +85,13 @@ export function computeFilingSwing(sortedQuotes: Quote[], filingDate: string, la
   // True Range vs prior close: overnight gap from baselineClose + intraday swing.
   const trueRangePct =
     filingDayQuote && baselineClose
-      ? ((Math.max(filingDayQuote.high, baselineClose) - Math.min(filingDayQuote.low, baselineClose)) /
-          baselineClose) *
+      ? ((Math.max(filingDayQuote.high, baselineClose) - Math.min(filingDayQuote.low, baselineClose)) / baselineClose) *
         100
       : null;
 
   // Volume spike: filing-day volume vs avg of the prior N trading days (window
   // ending at baseIdx, before the market saw the filing).
-  const priorVols = sortedQuotes
-    .slice(Math.max(0, baseIdx - VOL_BASELINE_DAYS + 1), baseIdx + 1)
-    .map((q) => q.volume);
+  const priorVols = sortedQuotes.slice(Math.max(0, baseIdx - VOL_BASELINE_DAYS + 1), baseIdx + 1).map((q) => q.volume);
   const volSpikePct = volumeSpikePct(filingDayQuote?.volume, priorVols);
 
   return { baselineClose, lagClose, changePct, swing, intradayPct, trueRangePct, volSpikePct };

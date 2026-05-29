@@ -8,7 +8,9 @@ export default function CompaniesList() {
 
   return (
     <Page title="Insiders — Companies">
-      <Link to="/insiders" className="insiders-back">← Insiders</Link>
+      <Link to="/insiders" className="insiders-back">
+        ← Insiders
+      </Link>
       {isPending && <p className="insiders-loading">Loading…</p>}
       {error && <p className="insiders-error">{(error as Error).message}</p>}
       {!isPending && data.length === 0 && (

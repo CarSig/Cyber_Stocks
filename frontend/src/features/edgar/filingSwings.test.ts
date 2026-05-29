@@ -38,10 +38,7 @@ describe('computeFilingSwing', () => {
   });
 
   it('intradayPct is filing-day open → close', () => {
-    const quotes = [
-      q('2024-01-01', 100, 100, 100, 100),
-      q('2024-01-02', 100, 110, 95, 108),
-    ];
+    const quotes = [q('2024-01-01', 100, 100, 100, 100), q('2024-01-02', 100, 110, 95, 108)];
     const s = computeFilingSwing(quotes, '2024-01-02', 1)!;
     expect(s.intradayPct).toBeCloseTo(8, 5); // 100 → 108
   });

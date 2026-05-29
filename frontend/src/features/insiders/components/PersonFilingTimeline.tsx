@@ -35,9 +35,7 @@ export default function PersonFilingTimeline({ ticker, filings, issuerCik }: Pro
         {filings.map((f) => {
           const style = getFormStyle(f.form);
           const accNoDashes = f.accession.replace(/-/g, '');
-          const href = issuerCik
-            ? `${EDGAR_ARCHIVES}/${issuerCik}/${accNoDashes}/${f.accession}-index.html`
-            : null;
+          const href = issuerCik ? `${EDGAR_ARCHIVES}/${issuerCik}/${accNoDashes}/${f.accession}-index.html` : null;
           const hasTransactions = (f.transactions?.length ?? 0) > 0;
           const isExpanded = expanded.has(f.accession);
 
@@ -61,11 +59,7 @@ export default function PersonFilingTimeline({ ticker, filings, issuerCik }: Pro
               )}
               <ImpactBadge deltaPct={f.priceImpact?.deltaPct} />
               {hasTransactions && (
-                <button
-                  className="insider-expand-btn"
-                  onClick={() => toggle(f.accession)}
-                  aria-expanded={isExpanded}
-                >
+                <button className="insider-expand-btn" onClick={() => toggle(f.accession)} aria-expanded={isExpanded}>
                   {isExpanded ? '▲' : '▼'}
                 </button>
               )}

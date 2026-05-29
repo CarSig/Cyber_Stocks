@@ -43,7 +43,9 @@ export function useSecFilings(ticker: string | null) {
   }, []);
 
   const toggleAll = useCallback(() => {
-    setEnabledForms((prev) => (prev.size === presentForms.length ? new Set() : new Set(presentForms.map((f) => f.label))));
+    setEnabledForms((prev) =>
+      prev.size === presentForms.length ? new Set() : new Set(presentForms.map((f) => f.label)),
+    );
   }, [presentForms]);
 
   // One plugin instance per chart id. Each ChartAuto must get its own so the

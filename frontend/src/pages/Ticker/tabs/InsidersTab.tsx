@@ -15,16 +15,18 @@ export default function InsidersTab({ ticker }: Props) {
       {isPending && <p className="insiders-loading">Loading…</p>}
       {error && <p className="insiders-error">{(error as Error).message}</p>}
       <AggregateCard agg={agg} />
-      {!isPending && data.length === 0 && (
-        <p className="insiders-empty">No insider filings on disk for {ticker}.</p>
-      )}
+      {!isPending && data.length === 0 && <p className="insiders-empty">No insider filings on disk for {ticker}.</p>}
       <div className="insider-row-list">
         {data.map((row) => (
           <InsiderRowItem key={row.personCik} row={row} showCompanies={false} />
         ))}
       </div>
       {data.length > 0 && (
-        <Link to={`/insiders/company/${ticker}`} className="insiders-back" style={{ marginTop: '1rem', display: 'inline-block' }}>
+        <Link
+          to={`/insiders/company/${ticker}`}
+          className="insiders-back"
+          style={{ marginTop: '1rem', display: 'inline-block' }}
+        >
           Full page ↗
         </Link>
       )}

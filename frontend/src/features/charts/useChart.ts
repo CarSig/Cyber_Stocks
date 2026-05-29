@@ -77,7 +77,15 @@ type UseChartResult = {
  *
  * This keeps the chart from being recreated on every prop change.
  */
-export function useChart({ data, type, plugins = [], enabled, topScaleMargin, priceFormat, priceScaleMinWidth }: UseChartOpts): UseChartResult {
+export function useChart({
+  data,
+  type,
+  plugins = [],
+  enabled,
+  topScaleMargin,
+  priceFormat,
+  priceScaleMinWidth,
+}: UseChartOpts): UseChartResult {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const primaryRef = useRef<ISeriesApi<SeriesType> | null>(null);

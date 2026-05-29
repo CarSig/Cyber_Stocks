@@ -11,7 +11,9 @@ function BucketCell({ label, count, avgDeltaPct }: Bucket) {
       <span className="insider-agg-bucket-label">{label}</span>
       <ImpactBadge deltaPct={avgDeltaPct} />
       {avgDeltaPct == null && <span className="insider-agg-no-data">—</span>}
-      <span className="insider-agg-bucket-count">{count} filing{count !== 1 ? 's' : ''}</span>
+      <span className="insider-agg-bucket-count">
+        {count} filing{count !== 1 ? 's' : ''}
+      </span>
     </div>
   );
 }
@@ -24,7 +26,9 @@ export default function AggregateCard({ agg }: Props) {
         <span className="insider-agg-overall-label">Overall avg same-day delta</span>
         <ImpactBadge deltaPct={agg.overall.avgDeltaPct} />
         {agg.overall.avgDeltaPct == null && <span className="insider-agg-no-data">—</span>}
-        <span className="insider-agg-meta">{agg.withPriceData}/{agg.filingCount} filings with price data</span>
+        <span className="insider-agg-meta">
+          {agg.withPriceData}/{agg.filingCount} filings with price data
+        </span>
       </div>
       <div className="insider-agg-buckets">
         <BucketCell label="Buy (P)" count={agg.buy.count} avgDeltaPct={agg.buy.avgDeltaPct} />
