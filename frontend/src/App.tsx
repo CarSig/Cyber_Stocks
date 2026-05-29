@@ -7,8 +7,8 @@ import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { TimezoneProvider } from './context/TimezoneContext';
 import Navbar from './components/layout/Navbar';
-import ProtectedRoute from './components/layout/ProtectedRoute';
-import AdminRoute from './components/layout/AdminRoute';
+import RouteBoundary from './components/layout/RouteBoundary';
+import AdminRouteBoundary from './components/layout/AdminRouteBoundary';
 import { ErrorBoundary } from './components/common/feedback/ErrorBoundary';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -29,6 +29,12 @@ const CyberNews = lazy(() => import('./pages/CyberNews/index'));
 const Intel = lazy(() => import('./pages/Intel'));
 const Events = lazy(() => import('./pages/Events'));
 const EdgarArchive = lazy(() => import('./pages/EdgarArchive/index'));
+const Insiders = lazy(() => import('./pages/Insiders/index'));
+const InsidersCompanies = lazy(() => import('./pages/Insiders/CompaniesList'));
+const InsidersCompany = lazy(() => import('./pages/Insiders/CompanyInsiders'));
+const InsidersAll = lazy(() => import('./pages/Insiders/AllInsiders'));
+const InsidersPerson = lazy(() => import('./pages/Insiders/PersonPage'));
+const InsidersLeaderboard = lazy(() => import('./pages/Insiders/Leaderboard'));
 const Research = lazy(() => import('./pages/Research/index'));
 const InsiderIntel = lazy(() => import('./pages/InsiderIntel/index'));
 const EdgarUses = lazy(() => import('./pages/Research/EdgarUses'));
@@ -54,210 +60,258 @@ export default function App() {
                       <Route
                         path="/"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="Home">
                             <Home />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/admin"
                         element={
-                          <AdminRoute>
+                          <AdminRouteBoundary name="AdminDashboard">
                             <AdminDashboard />
-                          </AdminRoute>
+                          </AdminRouteBoundary>
                         }
                       />
                       <Route
                         path="/admin/audit"
                         element={
-                          <AdminRoute>
+                          <AdminRouteBoundary name="AdminAudit">
                             <AdminAudit />
-                          </AdminRoute>
+                          </AdminRouteBoundary>
                         }
                       />
                       <Route
                         path="/admin/feedback"
                         element={
-                          <AdminRoute>
+                          <AdminRouteBoundary name="AdminFeedback">
                             <AdminFeedback />
-                          </AdminRoute>
+                          </AdminRouteBoundary>
                         }
                       />
                       <Route
                         path="/intel"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="Intel">
                             <Intel />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/threat-intel"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="ThreatIntel">
                             <ThreatIntel />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/threat-intel/list/kev"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="ThreatIntelKev">
                             <ThreatIntelKev />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/threat-intel/list/nvd"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="ThreatIntelNvd">
                             <ThreatIntelNvd />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/threat-intel/list/otx"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="ThreatIntelOtx">
                             <ThreatIntelOtx />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/threat-intel/list/misp"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="ThreatIntelMisp">
                             <ThreatIntelMisp />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/socials"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="Socials">
                             <Socials />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/socials/truth-social"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="SocialsTruthSocial">
                             <SocialsTruthSocial />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/socials/reddit"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="SocialsReddit">
                             <SocialsReddit />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/intelligence"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="Intelligence">
                             <Intelligence />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/cyber-news"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="CyberNews">
                             <CyberNews />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/events"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="Events">
                             <Events />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/edgar-archive"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="EdgarArchive">
                             <EdgarArchive />
-                          </ProtectedRoute>
+                          </RouteBoundary>
+                        }
+                      />
+                      <Route
+                        path="/insiders"
+                        element={
+                          <RouteBoundary name="Insiders">
+                            <Insiders />
+                          </RouteBoundary>
+                        }
+                      />
+                      <Route
+                        path="/insiders/companies"
+                        element={
+                          <RouteBoundary name="InsidersCompanies">
+                            <InsidersCompanies />
+                          </RouteBoundary>
+                        }
+                      />
+                      <Route
+                        path="/insiders/company/:ticker"
+                        element={
+                          <RouteBoundary name="InsidersCompany">
+                            <InsidersCompany />
+                          </RouteBoundary>
+                        }
+                      />
+                      <Route
+                        path="/insiders/all"
+                        element={
+                          <RouteBoundary name="InsidersAll">
+                            <InsidersAll />
+                          </RouteBoundary>
+                        }
+                      />
+                      <Route
+                        path="/insiders/leaderboard"
+                        element={
+                          <RouteBoundary name="InsidersLeaderboard">
+                            <InsidersLeaderboard />
+                          </RouteBoundary>
+                        }
+                      />
+                      <Route
+                        path="/insiders/person/:personCik"
+                        element={
+                          <RouteBoundary name="InsidersPerson">
+                            <InsidersPerson />
+                          </RouteBoundary>
                         }
                       />
                       <Route
                         path="/research"
                         element={
-                          <AdminRoute>
+                          <AdminRouteBoundary name="Research">
                             <Research />
-                          </AdminRoute>
+                          </AdminRouteBoundary>
                         }
                       />
                       <Route
                         path="/research/insider-intel"
                         element={
-                          <AdminRoute>
+                          <AdminRouteBoundary name="InsiderIntel">
                             <InsiderIntel />
-                          </AdminRoute>
+                          </AdminRouteBoundary>
                         }
                       />
                       <Route
                         path="/research/edgar-uses"
                         element={
-                          <AdminRoute>
+                          <AdminRouteBoundary name="ResearchEdgarUses">
                             <EdgarUses />
-                          </AdminRoute>
+                          </AdminRouteBoundary>
                         }
                       />
                       <Route
                         path="/research/edgar-deeper"
                         element={
-                          <AdminRoute>
+                          <AdminRouteBoundary name="ResearchEdgarDeeper">
                             <EdgarDeeper />
-                          </AdminRoute>
+                          </AdminRouteBoundary>
                         }
                       />
                       <Route
                         path="/research/edgar-entities"
                         element={
-                          <AdminRoute>
+                          <AdminRouteBoundary name="ResearchEdgarEntities">
                             <EdgarEntities />
-                          </AdminRoute>
+                          </AdminRouteBoundary>
                         }
                       />
                       <Route
                         path="/research/edgar-8k-items"
                         element={
-                          <AdminRoute>
+                          <AdminRouteBoundary name="ResearchEdgar8kItems">
                             <Edgar8kItems />
-                          </AdminRoute>
+                          </AdminRouteBoundary>
                         }
                       />
                       <Route
                         path="/research/gov-contracts"
                         element={
-                          <AdminRoute>
+                          <AdminRouteBoundary name="ResearchGovContracts">
                             <GovContracts />
-                          </AdminRoute>
+                          </AdminRouteBoundary>
                         }
                       />
                       <Route
                         path="/research/usa-spending"
                         element={
-                          <AdminRoute>
+                          <AdminRouteBoundary name="ResearchUsaSpending">
                             <UsaSpending />
-                          </AdminRoute>
+                          </AdminRouteBoundary>
                         }
                       />
 
                       <Route
                         path="/:ticker"
                         element={
-                          <ProtectedRoute>
+                          <RouteBoundary name="Ticker">
                             <Ticker />
-                          </ProtectedRoute>
+                          </RouteBoundary>
                         }
                       />
                       <Route path="*" element={<Navigate to="/" replace />} />

@@ -8,7 +8,9 @@ describe('CronService', () => {
     const mockCoreDb = {} as any; // intentionally no .pool
     const mockReddit = {} as any;
     const mockEmitter = {} as any;
+    const mockEdgarPoller = {} as any;
+    const mockCache = {} as any;
 
-    expect(() => new CronService(mockReddit, mockEmitter, mockCoreDb)).not.toThrow();
+    expect(() => new CronService(mockReddit, mockEmitter, mockCoreDb, mockEdgarPoller, mockCache)).not.toThrow();
   });
 });

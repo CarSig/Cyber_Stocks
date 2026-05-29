@@ -4,7 +4,7 @@ import { getBars } from '@/features/charts/api';
 import type { AlpacaBar } from '@/types';
 import { TIMEFRAMES, TIMEZONES, CHART_TYPES, COMPARE_COLORS } from '@/features/charts/utils';
 import { useTimezone } from '@/context/TimezoneContext';
-import { ChartAuto, lineSeriesOverlay, type ChartPlugin, type ChartType } from '@/features/charts';
+import { ChartAuto, lineSeriesOverlay, PRICE_SCALE_MIN_WIDTH, formatVolumeAxis, type ChartPlugin, type ChartType } from '@/features/charts';
 import { getTzOffsetSeconds, toTzTime } from '@/features/charts/utils/dates';
 import type { Time } from 'lightweight-charts';
 
@@ -119,6 +119,8 @@ function AlpacaVolumeAndTradeCount({ bars }: { bars: AlpacaBar[] }) {
         hideTypeControls
         hidePeriodControls
         resize={{ enabled: true }}
+        priceFormat={formatVolumeAxis}
+        priceScaleMinWidth={PRICE_SCALE_MIN_WIDTH}
         toolbarExtras={<span className="chart-series-label chart-series-label-ml">Alpaca Volume (v)</span>}
       />
       <ChartAuto
@@ -128,6 +130,8 @@ function AlpacaVolumeAndTradeCount({ bars }: { bars: AlpacaBar[] }) {
         hideTypeControls
         hidePeriodControls
         resize={{ enabled: true }}
+        priceFormat={formatVolumeAxis}
+        priceScaleMinWidth={PRICE_SCALE_MIN_WIDTH}
         toolbarExtras={
           <span className="chart-series-label chart-series-label-ml">
             {hasTradeCount ? 'Alpaca Trade Count (n)' : 'Trade Count (n) — N/A'}

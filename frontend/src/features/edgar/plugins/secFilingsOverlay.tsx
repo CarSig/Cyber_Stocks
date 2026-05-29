@@ -13,10 +13,10 @@ type SecFilingsOverlayOpts = {
 };
 
 function filingUrl(f: SecFileListing): string | undefined {
-  if (!f.cik) return undefined;
+  if (!f.meta?.cik) return undefined;
   const accNoDashes = f.accession.replace(/-/g, '');
-  const base = `${EDGAR_ARCHIVES}/${f.cik}/${accNoDashes}`;
-  return f.primaryDoc ? `${base}/${f.primaryDoc}` : `${base}/`;
+  const base = `${EDGAR_ARCHIVES}/${f.meta.cik}/${accNoDashes}`;
+  return f.meta.primaryDocument ? `${base}/${f.meta.primaryDocument}` : `${base}/`;
 }
 
 /**
@@ -39,8 +39,8 @@ export function secFilingsOverlay({
   // Index filings by date for fast click lookup.
   const byDate = new Map<string, SecFileListing[]>();
   for (const f of filings) {
-    if (!f.date) continue;
-    const key = f.date.slice(0, 10);
+    if (!f.meta?.filingDate) continue;
+    const key = f.meta.filingDate.slice(0, 10);
     if (!byDate.has(key)) byDate.set(key, []);
     byDate.get(key)!.push(f);
   }
@@ -62,12 +62,12 @@ export function secFilingsOverlay({
         body: (
           <div className="sec-filings-modal-list">
             {items.map((f) => {
-              const { color } = getFormStyle(f.form);
+              const { color } = getFormStyle(f.meta?.form);
               const url = filingUrl(f);
               const inner = (
                 <>
                   <span className="sec-legend-swatch" style={{ background: color }} />
-                  <span className="sec-filings-modal-form">{f.form ?? '?'}</span>
+                  <span className="sec-filings-modal-form">{f.meta?.form ?? '?'}</span>
                   <span className="sec-filings-modal-acc">{f.accession}</span>
                 </>
               );

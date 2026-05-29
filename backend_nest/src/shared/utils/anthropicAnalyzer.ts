@@ -64,6 +64,43 @@ export async function analyzeArticleWithAnthropic(text: string, companyName: str
   };
 }
 
+const FILING_CYBER_SYSTEM_PROMPT = `You classify SEC 8-K "Item 8.01 (Other Events)" filings. A keyword prefilter already flagged this filing for containing cyber/security/outage terms, but those words often appear only in boilerplate (risk factors, forward-looking statements, marketing copy, company descriptions) rather than describing an actual event.
+
+Decide whether this filing is DISCLOSING AN ACTUAL cybersecurity incident, data breach, ransomware attack, or material service outage that the company experienced. Boilerplate risk-factor language, generic descriptions of a security company's products, or routine forward-looking statements do NOT count.
+
+Return ONLY a JSON object:
+- "isRealIncident": boolean — true only if the filing discloses an actual incident/breach/outage the company experienced
+- "confidence": float 0.0-1.0
+- "incidentType": one of "breach", "ransomware", "outage", "unauthorized-access", "other", or "none" (if not a real incident)
+- "summary": one sentence describing the event, or why it's not a real incident`;
+
+export async function classifyFiling8kCyber(text: string, companyName: string) {
+  const anthropic = new Anthropic();
+  const endTimer = llmRequestDuration.startTimer({ model: MODEL });
+  const msg = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 256,
+    system: [{ type: "text", text: FILING_CYBER_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+    // 8-K bodies can be long; the event language is near the Item header, so cap input.
+    messages: [{ role: "user", content: `Company: ${companyName}\n\n8-K Item 8.01 body:\n${text.slice(0, 8000)}` }],
+  });
+  endTimer();
+
+  llmTokensTotal.inc({ model: msg.model, type: "input" }, msg.usage.input_tokens);
+  llmTokensTotal.inc({ model: msg.model, type: "output" }, msg.usage.output_tokens);
+  const raw = msg.content.find((b) => b.type === "text")?.text ?? "{}";
+  const parsed = JSON.parse(raw.match(/\{[\s\S]*\}/)?.[0] ?? "{}") as Record<string, unknown>;
+
+  const types = ["breach", "ransomware", "outage", "unauthorized-access", "other", "none"];
+  return {
+    isRealIncident: parsed.isRealIncident === true,
+    confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || 0)),
+    incidentType: types.includes(parsed.incidentType as string) ? (parsed.incidentType as string) : "none",
+    summary: typeof parsed.summary === "string" ? parsed.summary : null,
+    model: msg.model,
+  };
+}
+
 export async function checkAnthropic() {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error("ANTHROPIC_API_KEY not set");

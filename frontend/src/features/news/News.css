@@ -206,28 +206,3 @@
   margin-top: 0.375rem;
 }
 
-/* ── TopicsSidebar ────────────────────────────────────────────────────────── */
-.topics-sidebar {
-  min-width: 200px;
-}
-.topics-sidebar-header {
-  margin-bottom: 0.75rem;
-}
-.topics-sidebar-title {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--foreground);
-  margin: 0;
-}
-.topics-sidebar-card {
-  background: var(--background);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-.topics-sidebar-description {
-  font-size: 0.8125rem;
-  color: var(--muted-foreground);
-  line-height: 1.55;
-}

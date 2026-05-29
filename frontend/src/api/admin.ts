@@ -8,8 +8,16 @@ type AuditLogOpts = {
   action?: string;
 };
 
+export function runMigrations(): Promise<{ ok: boolean; at: string }> {
+  return apiFetch<{ ok: boolean; at: string }>('/admin/run-migrations', { method: 'POST' });
+}
+
 export function triggerJob(job: string): Promise<{ triggered: string; at: string }> {
   return apiFetch<{ triggered: string; at: string }>(`/admin/trigger/${job}`, { method: 'POST' });
+}
+
+export function invalidateTickerCache(ticker: string): Promise<{ invalidated: string; at: string }> {
+  return apiFetch<{ invalidated: string; at: string }>(`/admin/cache/invalidate/${ticker}`, { method: 'POST' });
 }
 
 export function getAuditLog(opts: AuditLogOpts = {}): Promise<PaginatedAudit> {

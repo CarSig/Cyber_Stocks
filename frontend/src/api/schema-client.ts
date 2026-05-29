@@ -28,10 +28,11 @@ import type {
 // ─── Core extractor ───────────────────────────────────────────────────────────
 
 // Pull the 200 response JSON body for any path + method pair.
-export type ApiResponse<
-  P extends keyof paths,
-  M extends keyof paths[P],
-> = paths[P][M] extends { responses: { 200: { content: { 'application/json': infer T } } } } ? T : never;
+export type ApiResponse<P extends keyof paths, M extends keyof paths[P]> = paths[P][M] extends {
+  responses: { 200: { content: { 'application/json': infer T } } };
+}
+  ? T
+  : never;
 
 // ─── Schema DTO aliases ───────────────────────────────────────────────────────
 
@@ -65,15 +66,27 @@ export type NewsAnalysisResponse = ApiResponse<'/api/v1/news/analysis/{ticker}',
 // specific as (or a superset of) what the backend promises to send.
 
 type _AssertUser = SchemaUser extends User ? true : 'User drifted from SchemaUser';
-type _AssertAuthResponse = SchemaAuthResponse extends AuthResponse ? true : 'AuthResponse drifted from SchemaAuthResponse';
+type _AssertAuthResponse = SchemaAuthResponse extends AuthResponse
+  ? true
+  : 'AuthResponse drifted from SchemaAuthResponse';
 type _AssertQuote = SchemaQuote extends Quote ? true : 'Quote drifted from SchemaQuote';
-type _AssertTrumpPost = Omit<SchemaTrumpPost, 'tags'> extends Omit<TrumpPost, 'tags'> ? true : 'TrumpPost drifted from SchemaTrumpPost';
-type _AssertCorrelationResult = Omit<SchemaCorrelationResult, 'rolling'> extends Omit<CorrelationResult, 'rolling' | 'ci'> ? true : 'CorrelationResult drifted from SchemaCorrelationResult';
+type _AssertTrumpPost =
+  Omit<SchemaTrumpPost, 'tags'> extends Omit<TrumpPost, 'tags'> ? true : 'TrumpPost drifted from SchemaTrumpPost';
+type _AssertCorrelationResult =
+  Omit<SchemaCorrelationResult, 'rolling'> extends Omit<CorrelationResult, 'rolling' | 'ci'>
+    ? true
+    : 'CorrelationResult drifted from SchemaCorrelationResult';
 type _AssertLagImpact = SchemaLagImpact extends LagImpactResult ? true : 'LagImpactResult drifted from SchemaLagImpact';
-type _AssertSimulationResult = SchemaSimulationResult extends SimulationResult ? true : 'SimulationResult drifted from SchemaSimulationResult';
-type _AssertSimulationAction = SchemaSimulationAction extends SimulationAction ? true : 'SimulationAction drifted from SchemaSimulationAction';
+type _AssertSimulationResult = SchemaSimulationResult extends SimulationResult
+  ? true
+  : 'SimulationResult drifted from SchemaSimulationResult';
+type _AssertSimulationAction = SchemaSimulationAction extends SimulationAction
+  ? true
+  : 'SimulationAction drifted from SchemaSimulationAction';
 type _AssertAuditEntry = SchemaAuditEntry extends AuditEntry ? true : 'AuditEntry drifted from SchemaAuditEntry';
-type _AssertPaginatedAudit = SchemaPaginatedAudit extends PaginatedAudit ? true : 'PaginatedAudit drifted from SchemaPaginatedAudit';
+type _AssertPaginatedAudit = SchemaPaginatedAudit extends PaginatedAudit
+  ? true
+  : 'PaginatedAudit drifted from SchemaPaginatedAudit';
 
 // Unused variable trick to surface assertion failures as errors (not just unused types).
 declare const _checks: [

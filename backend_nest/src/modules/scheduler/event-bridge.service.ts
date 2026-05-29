@@ -25,6 +25,19 @@ export class EventBridgeService {
     this.notificationsService.broadcast({ type: "stocks.updated", message, at: payload.at, changes: sorted });
   }
 
+  @OnEvent("edgar.new_filings")
+  onEdgarNewFilings(payload: { at: string; count: number; changes: { ticker: string; count: number }[] }) {
+    const sorted = [...payload.changes].sort((a, b) => b.count - a.count);
+    const message = sorted.map(({ ticker, count }) => `${ticker} +${count}`).join(", ");
+    this.notificationsService.broadcast({
+      type: "edgar.new_filings",
+      at: payload.at,
+      count: payload.count,
+      changes: sorted,
+      message,
+    });
+  }
+
   @OnEvent("threatintel.updated")
   onThreatIntelUpdated(payload: { at: string; newKev: number; criticalNvd: number; newOtx: number }) {
     const parts: string[] = [];

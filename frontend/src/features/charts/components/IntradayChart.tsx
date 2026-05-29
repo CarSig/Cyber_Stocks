@@ -4,6 +4,7 @@ import { createChart, CandlestickSeries, LineSeries, AreaSeries } from 'lightwei
 import type { ISeriesApi, SeriesType } from 'lightweight-charts';
 import { getTzOffsetSeconds, toTzTime } from '../utils/dates';
 import { COMPARE_COLORS } from '../constants';
+import { PRICE_SCALE_MIN_WIDTH } from '../utils/priceScale';
 import { useTimezone } from '@/context/TimezoneContext';
 import type { AlpacaBar } from '@/types';
 
@@ -63,7 +64,7 @@ export default function IntradayChart({ bars, compareBars, chartType }: Intraday
       layout: { background: { color: 'transparent' }, textColor: 'var(--foreground, #e5e7eb)' },
       grid: { vertLines: { color: 'rgba(255,255,255,0.05)' }, horzLines: { color: 'rgba(255,255,255,0.05)' } },
       timeScale: { timeVisible: true, secondsVisible: false, borderColor: 'rgba(255,255,255,0.1)' },
-      rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)' },
+      rightPriceScale: { borderColor: 'rgba(255,255,255,0.1)', minimumWidth: PRICE_SCALE_MIN_WIDTH },
       crosshair: { mode: 1 },
       handleScroll: true,
       handleScale: true,

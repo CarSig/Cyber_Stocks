@@ -1,4 +1,142 @@
 // ─────────────────────────────────────────────────────────────────────────────
+// SEC EDGAR
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const SUPPORTED_FORMS = [
+  // Earnings & operations
+  '10-K', '10-K/A', '10-Q', '10-Q/A',
+  '8-K', '8-K/A',
+  // Proxy
+  'DEF 14A', 'DEFA14A', 'DEFM14A', 'PRE 14A', 'DEFR14A', 'PREM14A',
+  // Insider transactions
+  '3', '4', '5',
+  // Beneficial ownership
+  'SC 13G', 'SC 13G/A', 'SC 13D', 'SC 13D/A',
+  // M&A
+  '425', 'SC TO-T', 'SC TO-I', 'S-4',
+  // Capital raises
+  'S-1', 'S-1/A', 'S-3', 'S-3/A', '424B4', '424B3', '424B5', 'FWP',
+  // Institutional holdings
+  '13F-HR', '13F-HR/A',
+  // Foreign issuers
+  '20-F', '20-F/A', '6-K', '40-F',
+  // Admin / SEC correspondence
+  'CORRESP', 'UPLOAD', 'EFFECT', 'SD',
+] as const;
+
+export type FormType = typeof SUPPORTED_FORMS[number];
+
+export function isSupportedForm(s: string): s is FormType {
+  return (SUPPORTED_FORMS as readonly string[]).includes(s);
+}
+
+export type FilingMetadata = {
+  accession: string;
+  cik: string;
+  form: FormType;
+  filingDate: string;
+  reportDate?: string;
+  acceptanceDateTime?: string;
+  primaryDocument: string;
+  primaryDocDescription?: string;
+  items?: string[];
+  isXBRL: boolean;
+  isInlineXBRL: boolean;
+  size: number;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Insiders (Form 3/4/5)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type InsiderFormType = '3' | '4' | '5' | '3/A' | '4/A' | '5/A';
+
+export type Form4TransactionCode =
+  | 'P' | 'S' | 'A' | 'D' | 'F' | 'I' | 'M' | 'C' | 'E' | 'H' | 'O' | 'X' | 'G' | 'V' | 'J' | 'K' | 'L' | 'U' | 'W' | 'Z';
+
+export type Form4Transaction = {
+  table: 'nonDerivative' | 'derivative';
+  securityTitle: string;
+  transactionDate?: string;
+  code: Form4TransactionCode | string;
+  acquiredDisposed: 'A' | 'D' | null;
+  shares: number | null;
+  pricePerShare: number | null;
+  priceFromFootnote: boolean;
+  sharesOwnedAfter: number | null;
+  directOrIndirect: 'D' | 'I' | null;
+};
+
+export type FilingPriceImpact = {
+  open: number;
+  close: number;
+  deltaPct: number;
+};
+
+export type InsiderOwnerProfile = {
+  isDirector: boolean;
+  isOfficer: boolean;
+  isTenPercentOwner: boolean;
+  officerTitle?: string;
+};
+
+export type InsiderFiling = {
+  accession: string;
+  form: InsiderFormType;
+  filingDate: string;
+  ticker: string;
+  issuerCik: string;
+  reportPeriod?: string;
+  transactions?: Form4Transaction[];
+  priceImpact?: FilingPriceImpact | null;
+  ownerProfile?: InsiderOwnerProfile;
+};
+
+export type InsiderRow = {
+  personCik: string;
+  name: string;
+  companies: string[];
+  filingCount: number;
+  latestFilingDate: string;
+};
+
+export type InsiderCompanySummary = {
+  ticker: string;
+  insiderCount: number;
+  latestFilingDate: string;
+};
+
+export type PersonDetail = {
+  personCik: string;
+  name: string;
+  filingsByCompany: Record<string, InsiderFiling[]>;
+  roles: InsiderOwnerProfile[];
+};
+
+export type InsiderImpactAggregate = {
+  filingCount: number;
+  withPriceData: number;
+  buy: { count: number; avgDeltaPct: number | null };
+  sell: { count: number; avgDeltaPct: number | null };
+  other: { count: number; avgDeltaPct: number | null };
+  overall: { avgDeltaPct: number | null };
+  byCode: Record<string, { count: number; avgDeltaPct: number | null }>;
+};
+
+export type InsiderLeaderboardRow = {
+  personCik: string;
+  name: string;
+  companies: string[];
+  filingCount: number;
+  aggregate: InsiderImpactAggregate;
+};
+
+export type InsiderLeaderboardResponse = {
+  rows: InsiderLeaderboardRow[];
+  topCodes: string[];
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Auth
 // ─────────────────────────────────────────────────────────────────────────────
 

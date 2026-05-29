@@ -1,5 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSecTickers, getSecFiles, syncSec, getSecCoverage } from '../api';
+import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
+import { getSecTickers, getSecFiles, syncSec, getSecCoverage, getSecSyncStatus, startScan801, getScan801Status, getScan801Results } from '../api';
 
 export function useSecTickers() {
   return useQuery({
@@ -24,11 +24,46 @@ export function useSecCoverage(ticker: string | null) {
   });
 }
 
+/** Polls whether a sync is in flight for the ticker, so a freshly-loaded page can re-attach to it. */
+export function useSecSyncStatus(ticker: string | null) {
+  return useQuery({
+    queryKey: ['sec-sync-status', ticker],
+    queryFn: () => getSecSyncStatus(ticker!),
+    enabled: !!ticker,
+    refetchInterval: (query) => (query.state.data?.running ? 3000 : false),
+  });
+}
+
+import { getSecFiles as _getSecFiles } from '../api';
+import type { SecFileListing } from '../api';
+import type { FormType } from '../api';
+
+/** Fetches files for every ticker in parallel. Returns a flat list tagged with ticker. */
+export function useAllSecFiles(tickers: string[]): {
+  data: (SecFileListing & { ticker: string })[];
+  isPending: boolean;
+} {
+  const results = useQueries({
+    queries: tickers.map((t) => ({
+      queryKey: ['sec-files', t],
+      queryFn: () => _getSecFiles(t),
+      enabled: tickers.length > 0,
+    })),
+  });
+
+  const isPending = results.some((r) => r.isPending);
+  const data = results.flatMap((r, i) =>
+    (r.data ?? []).map((listing) => ({ ...listing, ticker: tickers[i] })),
+  );
+
+  return { data, isPending };
+}
+
 type SyncVars = {
   ticker: string;
   dateFrom?: string;
   dateTo?: string;
-  formTypes?: string[];
+  formTypes?: FormType[];
   force?: boolean;
 };
 
@@ -37,10 +72,35 @@ export function useSecSync() {
   return useMutation({
     mutationFn: ({ ticker, dateFrom, dateTo, formTypes, force }: SyncVars) =>
       syncSec(ticker, dateFrom, dateTo, formTypes, force),
+    // Sync runs async on the server; results land via the SSE progress stream.
+    // Only kick the status query so polling/progress can pick it up.
     onSuccess: (_data, vars) => {
-      qc.invalidateQueries({ queryKey: ['sec-sessions', vars.ticker] });
-      qc.invalidateQueries({ queryKey: ['sec-files', vars.ticker] });
-      qc.invalidateQueries({ queryKey: ['sec-coverage', vars.ticker] });
+      qc.invalidateQueries({ queryKey: ['sec-sync-status', vars.ticker] });
     },
+  });
+}
+
+export function useScan801() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => startScan801(),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['sec-scan801-status'] });
+    },
+  });
+}
+
+export function useScan801Status() {
+  return useQuery({
+    queryKey: ['sec-scan801-status'],
+    queryFn: getScan801Status,
+    refetchInterval: (query) => (query.state.data?.running ? 3000 : false),
+  });
+}
+
+export function useScan801Results() {
+  return useQuery({
+    queryKey: ['sec-scan801-results'],
+    queryFn: getScan801Results,
   });
 }

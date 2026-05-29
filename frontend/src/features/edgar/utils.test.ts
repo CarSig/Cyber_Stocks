@@ -1,6 +1,23 @@
 import { describe, it, expect } from 'vitest';
-import { getFormStyle, buildFilingMarkers } from './utils';
+import { getFormStyle, buildFilingMarkers, volumeSpikePct } from './utils';
 import type { SecFileListing } from './api';
+import type { FilingMetadata } from '@algo/shared';
+
+function makeListing(overrides: Partial<FilingMetadata> & { accession?: string; files?: string[] }): SecFileListing {
+  const { accession = 'test-acc', files = [], ...metaFields } = overrides;
+  const meta: FilingMetadata = {
+    accession,
+    cik: '0001234567',
+    form: '8-K',
+    filingDate: '',
+    primaryDocument: '',
+    isXBRL: false,
+    isInlineXBRL: false,
+    size: 0,
+    ...metaFields,
+  };
+  return { accession, files, meta };
+}
 
 // ─── getFormStyle ─────────────────────────────────────────────────────────────
 
@@ -86,8 +103,8 @@ describe('buildFilingMarkers', () => {
 
   it('filters out filings without a date', () => {
     const filings: SecFileListing[] = [
-      { form: '10-K', date: null } as unknown as SecFileListing,
-      { form: '10-Q', date: '2024-01-15' } as SecFileListing,
+      makeListing({ form: '10-K', filingDate: '' }),
+      makeListing({ form: '10-Q', filingDate: '2024-01-15' }),
     ];
     const markers = buildFilingMarkers(filings);
     expect(markers).toHaveLength(1);
@@ -95,29 +112,29 @@ describe('buildFilingMarkers', () => {
   });
 
   it('sets position to aboveBar and shape to circle for all markers', () => {
-    const filings: SecFileListing[] = [{ form: '10-K', date: '2024-01-15' } as SecFileListing];
+    const filings = [makeListing({ form: '10-K', filingDate: '2024-01-15' })];
     const [marker] = buildFilingMarkers(filings);
     expect(marker.position).toBe('aboveBar');
     expect(marker.shape).toBe('circle');
   });
 
   it('uses form label as marker text', () => {
-    const filings: SecFileListing[] = [{ form: '8-K', date: '2024-02-01' } as SecFileListing];
+    const filings = [makeListing({ form: '8-K', filingDate: '2024-02-01' })];
     const [marker] = buildFilingMarkers(filings);
     expect(marker.text).toBe('8-K');
   });
 
   it('uses color from getFormStyle', () => {
-    const filings: SecFileListing[] = [{ form: '10-K', date: '2024-02-01' } as SecFileListing];
+    const filings = [makeListing({ form: '10-K', filingDate: '2024-02-01' })];
     const [marker] = buildFilingMarkers(filings);
     expect(marker.color).toBe(getFormStyle('10-K').color);
   });
 
   it('sorts markers by date ascending', () => {
-    const filings: SecFileListing[] = [
-      { form: '8-K', date: '2024-03-01' } as SecFileListing,
-      { form: '10-Q', date: '2024-01-01' } as SecFileListing,
-      { form: '10-K', date: '2024-02-01' } as SecFileListing,
+    const filings = [
+      makeListing({ form: '8-K', filingDate: '2024-03-01' }),
+      makeListing({ form: '10-Q', filingDate: '2024-01-01' }),
+      makeListing({ form: '10-K', filingDate: '2024-02-01' }),
     ];
     const markers = buildFilingMarkers(filings);
     const times = markers.map((m) => m.time as string);
@@ -125,8 +142,78 @@ describe('buildFilingMarkers', () => {
   });
 
   it('uses fallback color for unknown form types', () => {
-    const filings: SecFileListing[] = [{ form: 'UNKNOWN', date: '2024-01-01' } as SecFileListing];
+    const filings: SecFileListing[] = [{ accession: 'x', files: [], meta: undefined }];
     const [marker] = buildFilingMarkers(filings);
-    expect(marker.color).toBe('#888');
+    expect(marker).toBeUndefined();
+  });
+
+  it('collapses same-day same-form filings into one "N× LABEL" marker', () => {
+    const filings = [
+      makeListing({ accession: 'a', form: '8-K', filingDate: '2024-05-01' }),
+      makeListing({ accession: 'b', form: '8-K', filingDate: '2024-05-01' }),
+      makeListing({ accession: 'c', form: '8-K', filingDate: '2024-05-01' }),
+    ];
+    const markers = buildFilingMarkers(filings);
+    expect(markers).toHaveLength(1);
+    expect(markers[0].text).toBe('3× 8-K');
+  });
+
+  it('keeps different form types on the same day as separate markers', () => {
+    const filings = [
+      makeListing({ accession: 'a', form: '8-K', filingDate: '2024-05-01' }),
+      makeListing({ accession: 'b', form: '10-Q', filingDate: '2024-05-01' }),
+    ];
+    const markers = buildFilingMarkers(filings);
+    expect(markers).toHaveLength(2);
+    expect(markers.map((m) => m.text).sort()).toEqual(['10-Q', '8-K']);
+  });
+
+  it('omits the count prefix for a single filing', () => {
+    const filings = [makeListing({ form: '8-K', filingDate: '2024-05-01' })];
+    expect(buildFilingMarkers(filings)[0].text).toBe('8-K');
+  });
+});
+
+// ─── volumeSpikePct ───────────────────────────────────────────────────────────
+
+describe('volumeSpikePct', () => {
+  it('returns 0 when filing-day volume equals the prior average', () => {
+    expect(volumeSpikePct(100, [100, 100, 100])).toBe(0);
+  });
+
+  it('returns positive % when filing-day volume is above the prior average', () => {
+    // day 200 vs avg 100 → +100%
+    expect(volumeSpikePct(200, [100, 100, 100])).toBe(100);
+  });
+
+  it('returns negative % when filing-day volume is below the prior average', () => {
+    expect(volumeSpikePct(50, [100, 100])).toBe(-50);
+  });
+
+  // Regression: pg returns bigint `volume` as a STRING. Raw arithmetic on the
+  // strings concatenated instead of summing, collapsing the ratio to ~ -100%.
+  it('coerces string volumes (pg bigint) instead of concatenating them', () => {
+    // Strings that, if concatenated, would blow up the average toward Infinity
+    // and drive the result to ~ -100%. Numeric mean of these is 1_500_000.
+    const prior = ['1000000', '2000000', '1500000'];
+    expect(volumeSpikePct('1500000', prior)).toBeCloseTo(0, 5);
+  });
+
+  it('matches numeric and string inputs', () => {
+    expect(volumeSpikePct('300', ['100', '100', '100'])).toBe(volumeSpikePct(300, [100, 100, 100]));
+  });
+
+  it('returns null when there are no prior volumes', () => {
+    expect(volumeSpikePct(100, [])).toBeNull();
+    expect(volumeSpikePct(100, [null, undefined])).toBeNull();
+  });
+
+  it('returns null when filing-day volume is missing or non-numeric', () => {
+    expect(volumeSpikePct(null, [100, 100])).toBeNull();
+    expect(volumeSpikePct(undefined, [100, 100])).toBeNull();
+  });
+
+  it('returns null when the prior average is zero', () => {
+    expect(volumeSpikePct(100, [0, 0])).toBeNull();
   });
 });

@@ -3,6 +3,10 @@ import path from "path";
 import { getCik, toPaddedCik } from "@/data/CIK";
 import { PATHS } from "@/shared/paths";
 import { logger } from "@/shared/logger";
+import { type FormType, type FilingMetadata, isSupportedForm, SUPPORTED_FORMS } from "@algo/shared";
+import type { SecFilingsRepository } from "@/modules/edgar/sec-filings.repository";
+import { parseInsiderSgmlHeader } from "@/modules/insiders/insider.parser";
+import { parseForm4Xml, parseOwnerProfile } from "@/modules/insiders/form4.parser";
 
 const SEC_USER_AGENT = "AlgoTrading/1.0 lovro.boric@gmail.com";
 
@@ -35,7 +39,7 @@ function shouldSkipFile(name: string): boolean {
 const SUBMISSIONS_BASE = "https://data.sec.gov/submissions";
 const EDGAR_ARCHIVES = "https://www.sec.gov/Archives/edgar/data";
 
-const DEFAULT_FORM_TYPES = [
+const DEFAULT_FORM_TYPES: FormType[] = [
   // Earnings & operations
   "10-K", "10-Q", "8-K", "8-K/A",
   // Proxy
@@ -79,6 +83,12 @@ function writeCoverage(coverage: CoverageIndex): void {
   const dir = PATHS.secArchive(coverage.ticker);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(coveragePath(coverage.ticker), JSON.stringify(coverage, null, 2));
+}
+
+export function writeCoverageForTicker(ticker: string, from: string, to: string): void {
+  const coverage = readCoverage(ticker);
+  coverage.ranges = mergeRange(coverage.ranges, { from, to });
+  writeCoverage(coverage);
 }
 
 function mergeRange(ranges: CoverageRange[], newRange: CoverageRange): CoverageRange[] {
@@ -130,8 +140,15 @@ type SubmissionsJson = {
     recent: {
       accessionNumber: string[];
       filingDate: string[];
+      reportDate: string[];
+      acceptanceDateTime: string[];
       form: string[];
       primaryDocument: string[];
+      primaryDocDescription: string[];
+      items: string[];
+      size: number[];
+      isXBRL: number[];
+      isInlineXBRL: number[];
     };
   };
 };
@@ -159,11 +176,10 @@ export type SyncResult = {
 export type LocalFileListing = {
   accession: string;
   files: string[];
-  date?: string;
-  form?: string;
-  cik?: string;
-  primaryDoc?: string;
+  meta?: FilingMetadata;
 };
+
+export { type FormType, type FilingMetadata, isSupportedForm, SUPPORTED_FORMS };
 
 // ── HTTP ──────────────────────────────────────────────────────────────────────
 
@@ -179,19 +195,107 @@ async function secFetch(url: string): Promise<Response> {
 
 // ── Client ────────────────────────────────────────────────────────────────────
 
+export type SyncProgressEvent = { current: number; total: number; form: string; accession: string };
+
+export type RecentFiling = {
+  accession: string;
+  form: string;
+  filingDate: string;
+  acceptanceDateTime?: string;
+};
+
 export class SecEdgarClient {
+  constructor(private readonly repo?: SecFilingsRepository) {}
+
+  async fetchRecentFilings(ticker: string): Promise<RecentFiling[]> {
+    const cik = getCik(ticker);
+    if (!cik) throw new Error(`Unknown ticker: ${ticker}`);
+    const paddedCik = toPaddedCik(cik);
+    const submissionsUrl = `${SUBMISSIONS_BASE}/CIK${paddedCik}.json`;
+    const res = await secFetch(submissionsUrl);
+    if (!res.ok) throw new Error(`SEC submissions fetch failed: ${res.status} ${submissionsUrl}`);
+    const submissions = await res.json() as SubmissionsJson;
+    const recent = submissions.filings.recent;
+    const out: RecentFiling[] = [];
+    for (let i = 0; i < recent.accessionNumber.length; i++) {
+      const form = recent.form[i];
+      if (!isSupportedForm(form) || !DEFAULT_FORM_TYPES.includes(form as FormType)) continue;
+      out.push({
+        accession: recent.accessionNumber[i],
+        form,
+        filingDate: recent.filingDate[i],
+        acceptanceDateTime: recent.acceptanceDateTime?.[i] || undefined,
+      });
+    }
+    return out;
+  }
+
+  private async indexFilingToDb(
+    ticker: string,
+    cik: string,
+    meta: FilingMetadata,
+    files: string[],
+    destDir: string,
+  ): Promise<void> {
+    if (!this.repo) return;
+    try {
+      let header = null;
+      let transactions: ReturnType<typeof parseForm4Xml> = [];
+      let ownerProfile: ReturnType<typeof parseOwnerProfile> = undefined;
+      const txtFile = path.join(destDir, `${meta.accession}.txt`);
+      if (fs.existsSync(txtFile)) {
+        const fullText = fs.readFileSync(txtFile, "utf8");
+        header = parseInsiderSgmlHeader(fullText);
+        if (header?.formType === "4" || header?.formType === "4/A") {
+          transactions = parseForm4Xml(fullText);
+          ownerProfile = parseOwnerProfile(fullText);
+        }
+      }
+
+      await this.repo.upsertFiling({
+        accession: meta.accession,
+        ticker,
+        issuerCik: meta.cik || cik,
+        form: meta.form,
+        filingDate: meta.filingDate,
+        reportPeriod: meta.reportDate ?? null,
+        primaryDocument: meta.primaryDocument ?? null,
+        items: meta.items ?? null,
+        files,
+        isXBRL: meta.isXBRL,
+        isInlineXBRL: meta.isInlineXBRL,
+        sizeBytes: meta.size,
+      });
+
+      if (header) {
+        await this.repo.replaceOwners(meta.accession, [{
+          personCik: header.ownerCik,
+          personName: header.ownerName,
+          profile: ownerProfile,
+        }]);
+      }
+
+      if (transactions.length > 0) {
+        await this.repo.replaceTransactions(meta.accession, transactions);
+      }
+    } catch (e) {
+      logger.warn({ err: e, accession: meta.accession }, "SEC: DB index failed");
+    }
+  }
+
   async sync(
     ticker: string,
     dateFrom?: string,
     dateTo?: string,
-    formTypes: string[] = DEFAULT_FORM_TYPES,
+    formTypes: FormType[] = DEFAULT_FORM_TYPES,
     force = false,
+    onProgress?: (event: SyncProgressEvent) => void,
   ): Promise<SyncResult> {
     const cik = getCik(ticker);
     if (!cik) throw new Error(`Unknown ticker: ${ticker}`);
 
     const endDate = dateTo ? new Date(dateTo) : new Date();
-    const startDate = dateFrom ? new Date(dateFrom) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const startDate = dateFrom ? new Date(dateFrom) : new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
     const fromStr = startDate.toISOString().slice(0, 10);
     const toStr = endDate.toISOString().slice(0, 10);
 
@@ -203,19 +307,46 @@ export class SecEdgarClient {
     const submissions = await subRes.json() as SubmissionsJson;
     const recent = submissions.filings.recent;
 
-    const matched: { accession: string; form: string; date: string }[] = [];
+    type MatchedFiling = {
+      accession: string;
+      form: FormType;
+      filingDate: string;
+      reportDate?: string;
+      acceptanceDateTime?: string;
+      primaryDocument: string;
+      primaryDocDescription?: string;
+      items?: string[];
+      isXBRL: boolean;
+      isInlineXBRL: boolean;
+      size: number;
+    };
+    const matched: MatchedFiling[] = [];
     for (let i = 0; i < recent.accessionNumber.length; i++) {
       const date = recent.filingDate[i];
       const form = recent.form[i];
       if (date < fromStr || date > toStr) continue;
-      if (!formTypes.includes(form)) continue;
-      matched.push({ accession: recent.accessionNumber[i], form, date });
+      if (!isSupportedForm(form) || !formTypes.includes(form as FormType)) continue;
+      const rawItems = recent.items?.[i];
+      matched.push({
+        accession: recent.accessionNumber[i],
+        form: form as FormType,
+        filingDate: date,
+        reportDate: recent.reportDate?.[i] || undefined,
+        acceptanceDateTime: recent.acceptanceDateTime?.[i] || undefined,
+        primaryDocument: recent.primaryDocument[i] ?? '',
+        primaryDocDescription: recent.primaryDocDescription?.[i] || undefined,
+        items: rawItems ? rawItems.split(',').map((s) => s.trim()).filter(Boolean) : undefined,
+        isXBRL: !!recent.isXBRL?.[i],
+        isInlineXBRL: !!recent.isInlineXBRL?.[i],
+        size: recent.size?.[i] ?? 0,
+      });
     }
 
     logger.info({ ticker, matched: matched.length, from: fromStr, to: toStr }, "SEC: matched filings");
 
     let filesAdded = 0;
     let skippedFilings = 0;
+    let filingsDone = 0;
 
     for (const filing of matched) {
       const accDashes = filing.accession;
@@ -224,6 +355,8 @@ export class SecEdgarClient {
 
       if (!force && fs.existsSync(destDir) && fs.readdirSync(destDir).length > 0) {
         skippedFilings++;
+        filingsDone++;
+        onProgress?.({ current: filingsDone, total: matched.length, form: filing.form, accession: accDashes });
         continue;
       }
 
@@ -237,18 +370,30 @@ export class SecEdgarClient {
       }
 
       const index = await idxRes.json() as FilingIndex;
-      const items = Array.isArray(index.directory.item)
+      const indexItems = Array.isArray(index.directory.item)
         ? index.directory.item
         : [index.directory.item];
 
-      const downloadable = items.filter((item) => item?.name && !shouldSkipFile(item.name));
-      const primaryDoc = downloadable.find((item) => /\.(htm|html|txt)$/i.test(item.name)) ?? downloadable[0];
+      const downloadable = indexItems.filter((item) => item?.name && !shouldSkipFile(item.name));
+      const primaryDocFile = downloadable.find((item) => /\.(htm|html|txt)$/i.test(item.name)) ?? downloadable[0];
+
+      const meta: FilingMetadata = {
+        accession: accDashes,
+        cik,
+        form: filing.form,
+        filingDate: filing.filingDate,
+        reportDate: filing.reportDate,
+        acceptanceDateTime: filing.acceptanceDateTime,
+        primaryDocument: primaryDocFile?.name ?? filing.primaryDocument,
+        primaryDocDescription: filing.primaryDocDescription,
+        items: filing.items,
+        isXBRL: filing.isXBRL,
+        isInlineXBRL: filing.isInlineXBRL,
+        size: filing.size,
+      };
 
       fs.mkdirSync(destDir, { recursive: true });
-      fs.writeFileSync(
-        path.join(destDir, "_meta.json"),
-        JSON.stringify({ date: filing.date, form: filing.form, cik, primaryDoc: primaryDoc?.name ?? null }),
-      );
+      fs.writeFileSync(path.join(destDir, "_meta.json"), JSON.stringify(meta, null, 2));
 
       for (const item of downloadable) {
         const fileUrl = `${EDGAR_ARCHIVES}/${cik}/${accNoDashes}/${item.name}`;
@@ -262,7 +407,13 @@ export class SecEdgarClient {
         filesAdded++;
       }
 
-      logger.info({ ticker, accession: accDashes, form: filing.form, files: items.length }, "SEC: filing saved");
+      logger.info({ ticker, accession: accDashes, form: filing.form, files: indexItems.length }, "SEC: filing saved");
+
+      const writtenFiles = downloadable.map((d) => d.name);
+      await this.indexFilingToDb(ticker, cik, meta, writtenFiles, destDir);
+
+      filingsDone++;
+      onProgress?.({ current: filingsDone, total: matched.length, form: filing.form, accession: accDashes });
     }
 
     // Update coverage — mark this entire date range as covered
@@ -288,22 +439,30 @@ export class SecEdgarClient {
         const accDir = path.join(dir, accession);
         const allFiles = fs.readdirSync(accDir);
         const metaPath = path.join(accDir, "_meta.json");
-        let date: string | undefined;
-        let form: string | undefined;
-        let cik: string | undefined;
-        let primaryDoc: string | undefined;
+        let meta: FilingMetadata | undefined;
         if (fs.existsSync(metaPath)) {
           try {
-            const meta = JSON.parse(fs.readFileSync(metaPath, "utf8")) as { date?: string; form?: string; cik?: string; primaryDoc?: string };
-            date = meta.date;
-            form = meta.form;
-            cik = meta.cik;
-            primaryDoc = meta.primaryDoc ?? undefined;
+            const raw = JSON.parse(fs.readFileSync(metaPath, "utf8"));
+            // Support both new FilingMetadata shape and legacy { date, form, cik, primaryDoc }
+            if (raw.filingDate) {
+              meta = raw as FilingMetadata;
+            } else if (raw.date && raw.form) {
+              meta = {
+                accession,
+                cik: raw.cik ?? '',
+                form: isSupportedForm(raw.form) ? raw.form : '8-K' as FormType,
+                filingDate: raw.date,
+                primaryDocument: raw.primaryDoc ?? '',
+                isXBRL: false,
+                isInlineXBRL: false,
+                size: 0,
+              };
+            }
           } catch { /* ignore malformed meta */ }
         }
-        return { accession, files: allFiles.filter((f) => f !== "_meta.json"), date, form, cik, primaryDoc };
+        return { accession, files: allFiles.filter((f) => f !== "_meta.json"), meta };
       })
-      .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''));
+      .sort((a, b) => (b.meta?.filingDate ?? '').localeCompare(a.meta?.filingDate ?? ''));
   }
 
   getCoverage(ticker: string): CoverageIndex {

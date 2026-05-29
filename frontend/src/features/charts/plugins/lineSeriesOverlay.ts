@@ -66,7 +66,7 @@ export function lineSeriesOverlay(opts: LineSeriesOverlayOpts): ChartPlugin {
       if (applyMargins) {
         ctrl.chart.priceScale(scaleId).applyOptions({ scaleMargins: { top: 0.1, bottom: 0.1 } });
       }
-      return { unmount: () => ctrl.chart.removeSeries(series) };
+      return { unmount: () => { try { ctrl.chart.removeSeries(series); } catch { /* chart already destroyed */ } } };
     },
   };
 }

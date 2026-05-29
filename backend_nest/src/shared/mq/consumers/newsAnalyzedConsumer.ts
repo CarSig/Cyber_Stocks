@@ -7,6 +7,26 @@ type NotificationService = {
 };
 
 const MAX_ATTEMPTS = 20;
+const BATCH_FLUSH_MS = 3000;
+
+type BatchState = { perTicker: Map<string, number>; firstAt: string; timer: NodeJS.Timeout | null };
+const batch: BatchState = { perTicker: new Map(), firstAt: "", timer: null };
+
+function flushBatch(notificationService: NotificationService): void {
+  if (batch.perTicker.size === 0) return;
+  const tickerCounts = Array.from(batch.perTicker.entries()).map(([ticker, count]) => ({ ticker, count }));
+  const total = tickerCounts.reduce((s, t) => s + t.count, 0);
+  notificationService.broadcast({
+    type: "news.analyzed",
+    at: batch.firstAt,
+    count: total,
+    tickerCounts,
+    message: tickerCounts.map((t) => `${t.ticker}: ${t.count}`).join(", "),
+  });
+  batch.perTicker.clear();
+  batch.firstAt = "";
+  batch.timer = null;
+}
 
 async function connect(notificationService: NotificationService, attempt: number): Promise<void> {
   if (attempt > MAX_ATTEMPTS) {
@@ -23,15 +43,9 @@ async function connect(notificationService: NotificationService, attempt: number
       if (!msg) return;
       try {
         const { ticker, title, scores } = JSON.parse(msg.content.toString()) as { ticker: string; title: string; scores: { sentiment: number } };
-        const arrow = scores.sentiment >= 0.6 ? "▲▲" : scores.sentiment >= 0.1 ? "▲" : scores.sentiment <= -0.6 ? "▼▼" : scores.sentiment <= -0.1 ? "▼" : "●";
-        notificationService.broadcast({
-          type: "news.analyzed",
-          at: new Date().toISOString(),
-          ticker,
-          title,
-          sentiment: scores.sentiment,
-          message: `${ticker} ${arrow} ${title}`,
-        });
+        if (batch.perTicker.size === 0) batch.firstAt = new Date().toISOString();
+        batch.perTicker.set(ticker, (batch.perTicker.get(ticker) ?? 0) + 1);
+        if (!batch.timer) batch.timer = setTimeout(() => flushBatch(notificationService), BATCH_FLUSH_MS);
         notificationService.broadcastProgress(ticker, title, scores.sentiment);
         ch.ack(msg);
       } catch (e) {

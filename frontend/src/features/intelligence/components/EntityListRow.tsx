@@ -1,5 +1,5 @@
 import { useEntityIntelligence } from '@/features/intelligence/hooks/useIntelligence';
-import SummaryListRow from '@/features/news/components/SummaryListRow';
+import SummaryListRow from '@/components/common/data-display/SummaryListRow';
 import type { IntelligenceEntity, CorrelationResult } from '@/types';
 
 type EntityListRowProps = {

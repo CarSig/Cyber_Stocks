@@ -1,6 +1,6 @@
 import { useEntityIntelligence } from '../hooks/useIntelligence';
 import SentimentBar from '@/components/common/data-display/SentimentBar';
-import StatRowSummary from './StatRowSummary';
+import StatRowSummary from '@/components/common/data-display/StatRowSummary';
 import DetailPanelOverlay from '@/components/common/layout/DetailPanelOverlay';
 import EntityCorrelation from './EntityCorrelation';
 import ArticleDetail from './ArticleDetail';

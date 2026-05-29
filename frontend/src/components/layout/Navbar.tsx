@@ -29,6 +29,9 @@ export default function Navbar() {
       'CYBER-NEWS',
       'EVENTS',
       'SEC-ARCHIVE',
+      'EDGAR-ARCHIVE',
+      'INSIDERS',
+      'LEADERBOARD',
       'RESEARCH',
     ].includes(segments[0].toUpperCase());
   const ticker = isTicker ? segments[0].toUpperCase() : null;
@@ -71,6 +74,11 @@ export default function Navbar() {
         {user && (
           <Link to="/edgar-archive" className="navbar-nav-link" onClick={closeMenu}>
             EDGAR Archive
+          </Link>
+        )}
+        {user && (
+          <Link to="/insiders" className="navbar-nav-link" onClick={closeMenu}>
+            Insiders
           </Link>
         )}
         {user && (

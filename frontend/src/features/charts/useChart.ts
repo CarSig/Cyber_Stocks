@@ -44,6 +44,16 @@ type UseChartOpts = {
   plugins?: ChartPlugin[];
   /** Optional enabled-state map keyed by plugin.id. If omitted, defaultEnabled is used. */
   enabled?: Record<string, boolean>;
+  /** Fraction (0–1) of pane height reserved at the top of the primary series'
+   *  price scale. Set this to leave constant headroom for `aboveBar` markers so
+   *  toggling them on doesn't rescale (squeeze) the series. */
+  topScaleMargin?: number;
+  /** Custom formatter for the primary series' price-scale labels (e.g. abbreviate
+   *  volume as `1.2M`). Applied via the series' `priceFormat: { type: 'custom' }`. */
+  priceFormat?: (value: number) => string;
+  /** Fixed minimum width (px) for the right price scale. Set the same value on
+   *  stacked charts so their time axes align regardless of label content. */
+  priceScaleMinWidth?: number;
 };
 
 type UseChartResult = {
@@ -67,7 +77,7 @@ type UseChartResult = {
  *
  * This keeps the chart from being recreated on every prop change.
  */
-export function useChart({ data, type, plugins = [], enabled }: UseChartOpts): UseChartResult {
+export function useChart({ data, type, plugins = [], enabled, topScaleMargin, priceFormat, priceScaleMinWidth }: UseChartOpts): UseChartResult {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const primaryRef = useRef<ISeriesApi<SeriesType> | null>(null);
@@ -126,7 +136,10 @@ export function useChart({ data, type, plugins = [], enabled }: UseChartOpts): U
       markersRef.current = null;
     }
 
-    const series = chart.addSeries(SERIES_CTORS[type]);
+    const series = chart.addSeries(
+      SERIES_CTORS[type],
+      priceFormat ? { priceFormat: { type: 'custom', formatter: priceFormat, minMove: 1 } } : undefined,
+    );
     primaryRef.current = series;
     series.setData(dataRef.current);
 
@@ -140,13 +153,28 @@ export function useChart({ data, type, plugins = [], enabled }: UseChartOpts): U
     });
 
     setReady(true);
-  }, [type]);
+  }, [type, priceFormat]);
+
+  // Pin the right price scale to a fixed width so stacked charts (e.g. price +
+  // volume) keep their time axes aligned regardless of label content.
+  useEffect(() => {
+    if (!chartRef.current || priceScaleMinWidth == null) return;
+    chartRef.current.applyOptions({ rightPriceScale: { minimumWidth: priceScaleMinWidth } });
+  }, [priceScaleMinWidth, ready]);
 
   // --- 3. Push data updates without recreating the series ---
   useEffect(() => {
     if (!primaryRef.current) return;
     primaryRef.current.setData(data);
   }, [data]);
+
+  // Reserve constant top headroom so aboveBar markers don't rescale (squeeze)
+  // the series when toggled on. Re-applied after each series swap (`type`) since
+  // a new series resets its price-scale options. bottom:0.1 = library default.
+  useEffect(() => {
+    if (!primaryRef.current || topScaleMargin == null) return;
+    primaryRef.current.priceScale().applyOptions({ scaleMargins: { top: topScaleMargin, bottom: 0.1 } });
+  }, [topScaleMargin, type, ready]);
 
   // --- 4. Mount plugins ---
   // Keyed on plugin identity array + enabled map. We compute a string key so

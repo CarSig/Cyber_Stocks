@@ -22,3 +22,4 @@ export { atrOverlay } from './plugins/atrOverlay';
 export { aggregateSentimentByDay, sentimentArticlesPlugin } from './plugins/sentimentHistogram';
 export { simActionsOverlay } from './plugins/simActionsOverlay';
 export { lineSeriesOverlay } from './plugins/lineSeriesOverlay';
+export { PRICE_SCALE_MIN_WIDTH, formatVolumeAxis } from './utils/priceScale';

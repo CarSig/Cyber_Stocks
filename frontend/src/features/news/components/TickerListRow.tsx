@@ -1,5 +1,5 @@
 import { useCyberNewsSummary } from '@/features/news/hooks/useCyberNews';
-import SummaryListRow from '@/features/news/components/SummaryListRow';
+import SummaryListRow from '@/components/common/data-display/SummaryListRow';
 import type { CyberNewsTicker, CorrelationResult } from '@/types';
 
 type TickerListRowProps = {

@@ -1,5 +1,4 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { withLsCache } from '@/utils/lsCache';
 
 type UseCachedQueryOpts = {
   ttl?: number;
@@ -10,11 +9,11 @@ type UseCachedQueryOpts = {
 export function useCachedQuery<T>(
   queryKey: readonly unknown[],
   fetcher: () => Promise<T>,
-  { ttl, enabled = true, cacheKey }: UseCachedQueryOpts = {},
+  { ttl, enabled = true }: UseCachedQueryOpts = {},
 ): UseQueryResult<T> {
   return useQuery({
     queryKey,
-    queryFn: withLsCache<T>(cacheKey ?? (queryKey as string[]).join('_'), ttl, fetcher),
+    queryFn: fetcher,
     enabled,
     staleTime: ttl,
     gcTime: ttl,

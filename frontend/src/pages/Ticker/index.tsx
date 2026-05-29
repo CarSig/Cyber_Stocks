@@ -1,6 +1,11 @@
 import { useParams } from 'react-router-dom';
 import './Ticker.css';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
+import { invalidateTickerCache } from '@/api/admin';
+import PeriodButtons from '@/features/charts/ui/PeriodButtons';
+import StickyHead from '@/components/common/layout/StickyHead';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic cross-domain cast for buildChatContext
 type AnyRecord = Record<string, any>;
 import StateHandler from '@/components/common/feedback/StateHandler';
@@ -25,6 +30,8 @@ import CorrelationsTab from './tabs/CorrelationsTab';
 import ArticlesTab from './tabs/ArticlesTab';
 import InfoTab from './tabs/InfoTab';
 import DayTradeTab from './tabs/DayTradeTab';
+import InsidersTab from './tabs/InsidersTab';
+import EdgarTab from './tabs/EdgarTab';
 
 function TickerContent() {
   const {
@@ -32,6 +39,8 @@ function TickerContent() {
     setActiveTab,
     compareTicker,
     period,
+    setPeriod,
+    setVisibleRange,
     correlagDays,
     showChat,
     setShowChat,
@@ -53,6 +62,10 @@ function TickerContent() {
   } = useTickerStore();
 
   const { ticker } = useParams<{ ticker: string }>();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [invalidating, setInvalidating] = useState(false);
+  const [invalidateError, setInvalidateError] = useState<string | null>(null);
 
   useEffect(() => {
     reset();
@@ -178,19 +191,57 @@ function TickerContent() {
           />
 
           <div className="ticker-main">
-            <h1>{ticker}</h1>
-
-            <nav className="ticker-tabs">
-              {['charts', 'simulation', 'correlations', 'articles', 'info', 'day trade'].map((tab) => (
+            <div className="ticker-header">
+              <h1>{ticker}</h1>
+              {user?.role === 'admin' && ticker && (
                 <button
-                  key={tab}
-                  className={`ticker-tab${activeTab === tab ? ' ticker-tab--active' : ''}${tab === 'simulation' ? ' ticker-tab--accent' : ''}`}
-                  onClick={() => setActiveTab(tab)}
+                  type="button"
+                  className="ticker-action-btn"
+                  disabled={invalidating}
+                  title={invalidateError ?? undefined}
+                  onClick={async () => {
+                    setInvalidating(true);
+                    setInvalidateError(null);
+                    try {
+                      await invalidateTickerCache(ticker);
+                      await queryClient.invalidateQueries({ queryKey: ['ticker', ticker] });
+                    } catch (e) {
+                      setInvalidateError(e instanceof Error ? e.message : 'Failed to invalidate cache');
+                    } finally {
+                      setInvalidating(false);
+                    }
+                  }}
                 >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  {invalidating ? 'Refreshing…' : invalidateError ? 'Retry invalidate' : 'Invalidate cache'}
                 </button>
-              ))}
-            </nav>
+              )}
+            </div>
+
+            <StickyHead>
+              <nav className="ticker-tabs">
+                {['charts', 'simulation', 'correlations', 'articles', 'info', 'day trade', 'insiders', 'edgar'].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`ticker-tab${activeTab === tab ? ' ticker-tab--active' : ''}${tab === 'simulation' ? ' ticker-tab--accent' : ''}`}
+                    onClick={() => setActiveTab(tab)}
+                  >
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  </button>
+                ))}
+              </nav>
+              {activeTab === 'charts' && (
+                <div className="ticker-period-bar">
+                  <PeriodButtons
+                    activeDays={period}
+                    onSelect={(days) => {
+                      setVisibleRange(null);
+                      setPeriod(days);
+                    }}
+                    showCustomLabel
+                  />
+                </div>
+              )}
+            </StickyHead>
 
             {activeTab === 'charts' && (
               <ChartsTab
@@ -235,6 +286,10 @@ function TickerContent() {
             )}
 
             {activeTab === 'day trade' && <DayTradeTab ticker={ticker ?? ''} companies={companies} />}
+
+            {activeTab === 'insiders' && <InsidersTab ticker={ticker ?? ''} />}
+
+            {activeTab === 'edgar' && <EdgarTab ticker={ticker ?? ''} />}
           </div>
 
           <TickerChat

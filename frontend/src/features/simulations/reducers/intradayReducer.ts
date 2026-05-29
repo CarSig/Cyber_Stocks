@@ -99,6 +99,28 @@ export function initialIntradayState() {
   };
 }
 
+export function pickPersistable(s: IntradaySimState) {
+  return {
+    date: s.date,
+    timeframe: s.timeframe,
+    query: s.query,
+    actions: s.actions,
+    value: s.value,
+    startShares: s.startShares,
+    manualTime: s.manualTime,
+    nextSide: s.nextSide,
+    textValue: s.textValue,
+    chartType: s.chartType,
+    tradeMode: s.tradeMode,
+    selectedEvent: s.selectedEvent,
+    extraDates: s.extraDates,
+    aiDelay: s.aiDelay,
+    entryStrategy: s.entryStrategy,
+    exitStrategy: s.exitStrategy,
+    // NOT persisted: simAllResults, simAllRunning, combResults, combRunning, textMode
+  };
+}
+
 export function intradayReducer(
   state: ReturnType<typeof initialIntradayState>,
   action: IntradaySimAction,

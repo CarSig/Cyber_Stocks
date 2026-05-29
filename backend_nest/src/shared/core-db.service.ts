@@ -11,7 +11,8 @@ export class CoreDbService implements OnApplicationBootstrap {
     connectionString: process.env.DATABASE_URL,
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 10000,
+    query_timeout: 30000,
   });
 
   async onApplicationBootstrap() {
@@ -23,7 +24,7 @@ export class CoreDbService implements OnApplicationBootstrap {
     }
   }
 
-  private async runMigrations() {
+  async runMigrations() {
     const client = await this.pool.connect();
     try {
       await client.query(`
@@ -33,7 +34,7 @@ export class CoreDbService implements OnApplicationBootstrap {
         )
       `);
 
-      const migrationsDir = path.join(__dirname, "..", "db", "migrations");
+      const migrationsDir = path.join(process.cwd(), "src", "db", "migrations");
       const files = fs.readdirSync(migrationsDir).filter((f) => f.endsWith(".sql")).sort();
 
       const { rows: applied } = await client.query<{ filename: string }>(

@@ -37,18 +37,23 @@ import { PriceUtils } from '@/utils/price';
 import { buildSimStats, type Action } from '@/features/simulations/utils/sim';
 import { INTRADAY_SIM_PRESETS } from './eventSimPresets';
 import { DAYTRADE_PRESETS } from './dayTradePresets';
+import { load, save } from './persistence';
+import { pickPersistable } from './reducers/intradayReducer';
 
 type IntradaySimulationProps = { mode: 'daytrade'; ticker: string } | { mode: 'event' };
 
-function initState(tickerOverride: string | undefined): IntradaySimState {
+function initState(tickerOverride: string | undefined, mode: 'daytrade' | 'event'): IntradaySimState {
   const base = initialIntradayState();
-  return tickerOverride ? { ...base, query: { ...base.query, ticker: tickerOverride } } : base;
+  const ticker = tickerOverride ?? base.query.ticker;
+  const persisted = load<IntradaySimState>('intraday', mode, ticker);
+  const seeded = persisted ? { ...base, ...persisted } : base;
+  return tickerOverride ? { ...seeded, query: { ...seeded.query, ticker: tickerOverride } } : seeded;
 }
 
 export default function IntradaySimulation(props: IntradaySimulationProps) {
   const { fmtTime, toChartTime } = useTimezone();
   const tickerOverride = props.mode === 'daytrade' ? props.ticker : undefined;
-  const [s, dispatch] = useReducer(intradayReducer, tickerOverride, initState);
+  const [s, dispatch] = useReducer(intradayReducer, undefined, () => initState(tickerOverride, props.mode));
   const {
     date,
     timeframe,
@@ -79,6 +84,13 @@ export default function IntradaySimulation(props: IntradaySimulationProps) {
     dispatch({ type: 'LOAD_BARS', ticker: props.ticker, date, timeframe });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.mode === 'daytrade' ? props.ticker : null]);
+
+  // Persist user input to sessionStorage so a page reload restores the session.
+  useEffect(() => {
+    const ticker = props.mode === 'daytrade' ? props.ticker : s.query.ticker;
+    save('intraday', props.mode, ticker, pickPersistable(s));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s]);
 
   const nextActionId = useRef(Math.max(0, ...s.actions.map((a) => a.id)) + 1);
   const containerRef = useRef<HTMLDivElement>(null);

@@ -14,13 +14,13 @@ import {
   sentimentArticlesPlugin,
   type ChartPlugin,
 } from '@/features/charts';
-import { PeriodButtons } from '@/features/charts/ui';
 import { toSortedOHLC } from '@/features/charts/utils/series';
 import { useMemo } from 'react';
 import Analysis from '@/features/tickers/components/Analysis';
 import TickerKPI from '@/features/tickers/components/TickerKPI';
 import type { Quote, TickerSummary, NewsArticle, NewsAnalysisMap, TrumpPost, ThreatIntelItem } from '@/types';
 import type { QuoteAnalysis } from '@/features/charts/types';
+import { PRICE_SCALE_MIN_WIDTH, formatVolumeAxis } from '@/features/charts';
 
 type ChartsTabProps = {
   summary?: TickerSummary | null;
@@ -143,25 +143,18 @@ export default function ChartsTab({
 
       <TickerKPI summary={summary} quotes={allQuotes} />
 
-      <PeriodButtons
-        activeDays={period}
-        onSelect={(days) => {
-          setVisibleRange(null);
-          setPeriod(days);
-        }}
-        showCustomLabel
-      />
-
       <ChartCard title="Prices" hidden={hidePrice} onToggle={() => setHidePrice(!hidePrice)}>
         <ChartAuto
           data={priceData}
           defaultType="Area"
           availableTypes={['Candlestick', 'Bar', 'Line', 'Area', 'Baseline']}
+          hidePeriodControls
           selectedPeriod={period}
           onPeriodChange={setPeriod}
           visibleRange={visibleRange}
           onRangeChange={setVisibleRange}
           plugins={pricePlugins}
+          priceScaleMinWidth={PRICE_SCALE_MIN_WIDTH}
           toolbarExtras={compareTicker ? <span className="chart-compare-label">● {compareTicker}</span> : null}
         />
       </ChartCard>
@@ -172,11 +165,14 @@ export default function ChartsTab({
           defaultType="Histogram"
           availableTypes={['Histogram']}
           hideTypeControls
+          hidePeriodControls
           selectedPeriod={period}
           onPeriodChange={setPeriod}
           visibleRange={visibleRange}
           onRangeChange={setVisibleRange}
           resize={{ enabled: true }}
+          priceFormat={formatVolumeAxis}
+          priceScaleMinWidth={PRICE_SCALE_MIN_WIDTH}
           toolbarExtras={<span className="chart-series-label chart-series-label-ml">Yahoo Volume</span>}
         />
       </ChartCard>
@@ -187,11 +183,13 @@ export default function ChartsTab({
           defaultType="Line"
           availableTypes={['Line']}
           hideTypeControls
+          hidePeriodControls
           selectedPeriod={period}
           onPeriodChange={setPeriod}
           visibleRange={visibleRange}
           onRangeChange={setVisibleRange}
           plugins={volatilityPlugins}
+          priceScaleMinWidth={PRICE_SCALE_MIN_WIDTH}
         />
       </ChartCard>
 
@@ -320,6 +318,7 @@ function SentimentHistogram({
       defaultType="Histogram"
       availableTypes={['Histogram']}
       hideTypeControls
+      hidePeriodControls
       selectedPeriod={period}
       onPeriodChange={onPeriodChange}
       visibleRange={visibleRange}

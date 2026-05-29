@@ -1,0 +1,14 @@
+.sticky-head {
+  position: sticky;
+  /* Pin below the navbar with a padded band above the controls so content
+     scrolling underneath stays covered instead of getting clipped at the bar's
+     top edge. */
+  top: calc(var(--navbar-height, 48px) + 12px);
+  padding-top: 12px;
+  z-index: 20;
+  /* Slightly raised surface + bottom border so the pinned bar reads as distinct
+     from the content scrolling underneath it. */
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}

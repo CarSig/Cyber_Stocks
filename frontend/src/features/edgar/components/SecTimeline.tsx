@@ -50,7 +50,7 @@ function buildSegments(
 
   const filingByDate = new Map<string, SecFileListing>();
   for (const f of filings) {
-    if (f.date) filingByDate.set(f.date, f);
+    if (f.meta?.filingDate) filingByDate.set(f.meta.filingDate, f);
   }
 
   const coveredSet = new Set<string>();
@@ -70,7 +70,7 @@ function buildSegments(
 
     const state: Segment['state'] = filing ? 'filing' : covered ? 'covered' : 'gap';
     const color = filing
-      ? (getFormStyle(filing.form).color ?? '#4f8ef7')
+      ? (getFormStyle(filing.meta?.form).color ?? '#4f8ef7')
       : covered
         ? 'rgba(74,222,128,0.3)'
         : 'transparent';
@@ -82,7 +82,7 @@ function buildSegments(
       const nextCovered = coveredSet.has(next);
       const nextState: Segment['state'] = nextFiling ? 'filing' : nextCovered ? 'covered' : 'gap';
       const nextColor = nextFiling
-        ? (getFormStyle(nextFiling.form).color ?? '#4f8ef7')
+        ? (getFormStyle(nextFiling.meta?.form).color ?? '#4f8ef7')
         : nextCovered
           ? 'rgba(74,222,128,0.3)'
           : 'transparent';
@@ -90,7 +90,7 @@ function buildSegments(
       j++;
     }
 
-    segments.push({ from: date, to: addDays(windowFrom, j - 1), days: j - i, state, form: filing?.form, color });
+    segments.push({ from: date, to: addDays(windowFrom, j - 1), days: j - i, state, form: filing?.meta?.form, color });
     i = j;
   }
 

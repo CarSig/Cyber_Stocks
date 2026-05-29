@@ -35,6 +35,7 @@ import { AlpacaModule } from "@/modules/alpaca/alpaca.module";
 import { HealthModule } from "@/modules/health/health.module";
 import { InspectDomCaptureModule } from "@/modules/inspect-dom-capture/inspect-dom-capture.module";
 import { EdgarModule } from "@/modules/edgar/edgar.module";
+import { InsiderModule } from "@/modules/insiders/insider.module";
 import { CoreDbModule } from "@/shared/core-db.module";
 import { CacheModule } from "@/shared/cache.module";
 import { AuthService } from "@/modules/auth/auth.service";
@@ -85,6 +86,7 @@ import { AuthService } from "@/modules/auth/auth.service";
     HealthModule,
     InspectDomCaptureModule,
     EdgarModule,
+    InsiderModule,
   ],
   providers: [
     { provide: APP_FILTER,      useClass: HttpExceptionFilter },

@@ -226,7 +226,17 @@ describe('intradayStrategy.buildActions', () => {
   ];
 
   function makeState(): BaseSimState<Action> {
-    return { actions, tradeMode: 'long', textMode: false, manualTime: '', value: '', nextSide: 'buy', startShares: '0', textValue: '', chartType: 'line' } as BaseSimState<Action>;
+    return {
+      actions,
+      tradeMode: 'long',
+      textMode: false,
+      manualTime: '',
+      value: '',
+      nextSide: 'buy',
+      startShares: '0',
+      textValue: '',
+      chartType: 'line',
+    } as BaseSimState<Action>;
   }
 
   it('exposes list from state.actions', () => {
@@ -238,7 +248,9 @@ describe('intradayStrategy.buildActions', () => {
     const dispatch = vi.fn();
     const result = intradayStrategy.buildActions(makeState(), dispatch);
     result.onUpdate(1, 'value', '200');
-    expect(dispatch).toHaveBeenCalledWith(expect.objectContaining({ type: 'UPDATE_ACTION', id: 1, field: 'value', val: '200' }));
+    expect(dispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'UPDATE_ACTION', id: 1, field: 'value', val: '200' }),
+    );
   });
 
   it('onRemove dispatches REMOVE_ACTION', () => {
@@ -264,7 +276,17 @@ describe('intradayStrategy.buildActions', () => {
 
 describe('intradayStrategy.buildToolbar', () => {
   function makeState(textMode = false): BaseSimState<Action> {
-    return { actions: [], tradeMode: 'long', textMode, manualTime: '', value: '', nextSide: 'buy', startShares: '0', textValue: '', chartType: 'line' } as BaseSimState<Action>;
+    return {
+      actions: [],
+      tradeMode: 'long',
+      textMode,
+      manualTime: '',
+      value: '',
+      nextSide: 'buy',
+      startShares: '0',
+      textValue: '',
+      chartType: 'line',
+    } as BaseSimState<Action>;
   }
 
   const extras = {

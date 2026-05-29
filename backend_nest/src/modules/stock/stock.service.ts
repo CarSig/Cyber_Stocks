@@ -5,6 +5,7 @@ import { analyzeHistory } from "@/shared/utils/analysis";
 import { correlate, pearsonLag } from "@/shared/utils/stockCorrelation";
 import { CoreDbService } from "@/shared/core-db.service";
 import { CacheService } from "@/shared/cache.service";
+import { invalidateTickerCacheKeys } from "@/shared/cache-keys";
 
 type SparklineEntry = { closes: number[]; closes90: number[]; closes252: number[]; dates: string[]; latestPrice: number | null; changePct: number | null };
 
@@ -27,6 +28,10 @@ export class StockService {
         analysis: analyzeHistory(history),
       };
     });
+  }
+
+  async invalidateTicker(name: string): Promise<void> {
+    await invalidateTickerCacheKeys(this.cache, name);
   }
 
   async sparkline(name: string): Promise<SparklineEntry> {

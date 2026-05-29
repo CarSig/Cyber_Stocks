@@ -1,16 +1,12 @@
 import { useMemo } from 'react';
 import { useSecFiles } from './useSecData';
 import { useStock } from '@/features/tickers/hooks/useStock';
-import type { Quote } from '@/types';
+import { computeFilingSwing, type FilingSwing } from '../filingSwings';
 
-export type FilingImpact = {
+export type FilingImpact = FilingSwing & {
   accession: string;
   date: string;
   form: string;
-  baselineClose: number; // last close BEFORE filing date (pre-filing baseline)
-  lagClose: number; // close N trading days after filing date
-  changePct: number;
-  swing: number;
 };
 
 export type FormGroup = {
@@ -18,49 +14,25 @@ export type FormGroup = {
   filings: FilingImpact[];
   avgSwing: number;
   avgChangePct: number;
+  avgIntradayPct: number | null;
+  avgTrueRangePct: number | null;
+  avgVolSpikePct: number | null;
 };
-
-// Returns index of the last quote strictly before `date`, or -1 if none.
-function findQuoteBefore(quotes: Quote[], date: string): number {
-  let lo = 0;
-  let hi = quotes.length - 1;
-  let result = -1;
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1;
-    if (quotes[mid].date < date) {
-      result = mid;
-      lo = mid + 1;
-    } else {
-      hi = mid - 1;
-    }
-  }
-  return result;
-}
-
-// Returns index of the first quote on or after `date`, or -1 if none.
-function findQuoteOnOrAfter(quotes: Quote[], date: string): number {
-  let lo = 0;
-  let hi = quotes.length - 1;
-  let result = -1;
-  while (lo <= hi) {
-    const mid = (lo + hi) >> 1;
-    if (quotes[mid].date >= date) {
-      result = mid;
-      hi = mid - 1;
-    } else {
-      lo = mid + 1;
-    }
-  }
-  return result;
-}
 
 function avg(vals: number[]): number {
   return vals.reduce((s, v) => s + v, 0) / vals.length;
 }
 
-export function useSecFilingImpact(ticker: string, lagDays = 1): FormGroup[] {
+/** Optional inclusive filing-date window (YYYY-MM-DD). Filings outside it are
+ *  excluded before grouping, so counts and averages reflect only the range. */
+export type DateRange = { from: string; to: string };
+
+export function useSecFilingImpact(ticker: string, lagDays = 1, dateRange?: DateRange | null): FormGroup[] {
   const { data: listings = [] } = useSecFiles(ticker);
   const { allQuotes } = useStock(ticker, {});
+
+  const from = dateRange?.from ?? null;
+  const to = dateRange?.to ?? null;
 
   return useMemo(() => {
     if (!listings.length || !allQuotes.length) return [];
@@ -70,34 +42,12 @@ export function useSecFilingImpact(ticker: string, lagDays = 1): FormGroup[] {
     const impacts: FilingImpact[] = [];
 
     for (const l of listings) {
-      if (!l.date || !l.form) continue;
-
-      // Baseline: last close before the filing date (market hadn't seen the filing yet)
-      const baseIdx = findQuoteBefore(sorted, l.date);
-      if (baseIdx === -1) continue;
-
-      // First trading day on or after filing date, then +lagDays-1 more = lagDays days of reaction
-      const firstReactionIdx = findQuoteOnOrAfter(sorted, l.date);
-      if (firstReactionIdx === -1) continue;
-      const lagIdx = firstReactionIdx + lagDays - 1;
-      if (lagIdx >= sorted.length) continue;
-
-      const baselineClose = sorted[baseIdx].close;
-      const lagClose = sorted[lagIdx].close;
-      if (baselineClose == null || lagClose == null) continue;
-
-      const changePct = ((lagClose - baselineClose) / baselineClose) * 100;
-      const swing = Math.abs(changePct);
-
-      impacts.push({
-        accession: l.accession,
-        date: l.date,
-        form: l.form,
-        baselineClose,
-        lagClose,
-        changePct,
-        swing,
-      });
+      if (!l.meta?.filingDate || !l.meta.form) continue;
+      const d = l.meta.filingDate;
+      if ((from && d < from) || (to && d > to)) continue;
+      const swing = computeFilingSwing(sorted, d, lagDays);
+      if (!swing) continue;
+      impacts.push({ accession: l.accession, date: d, form: l.meta.form, ...swing });
     }
 
     const map = new Map<string, FilingImpact[]>();
@@ -110,15 +60,21 @@ export function useSecFilingImpact(ticker: string, lagDays = 1): FormGroup[] {
     const groups: FormGroup[] = [];
     for (const [form, filings] of map) {
       filings.sort((a, b) => b.date.localeCompare(a.date));
+      const intradayValues = filings.map((f) => f.intradayPct).filter((v): v is number => v !== null);
+      const trValues = filings.map((f) => f.trueRangePct).filter((v): v is number => v !== null);
+      const volValues = filings.map((f) => f.volSpikePct).filter((v): v is number => v !== null);
       groups.push({
         form,
         filings,
         avgSwing: avg(filings.map((f) => f.swing)),
         avgChangePct: avg(filings.map((f) => f.changePct)),
+        avgIntradayPct: intradayValues.length ? avg(intradayValues) : null,
+        avgTrueRangePct: trValues.length ? avg(trValues) : null,
+        avgVolSpikePct: volValues.length ? avg(volValues) : null,
       });
     }
 
     groups.sort((a, b) => b.filings.length - a.filings.length);
     return groups;
-  }, [listings, allQuotes, lagDays]);
+  }, [listings, allQuotes, lagDays, from, to]);
 }

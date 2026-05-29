@@ -1,5 +1,5 @@
 import { useEntityIntelligence } from '@/features/intelligence/hooks/useIntelligence';
-import SummaryCard from '@/features/news/components/SummaryCard';
+import SummaryCard from '@/components/common/data-display/SummaryCard';
 import type { IntelligenceEntity, CorrelationResult } from '@/types';
 
 type EntityCardProps = {

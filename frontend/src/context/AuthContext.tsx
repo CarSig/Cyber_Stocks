@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth as useClerkAuth, useUser } from '@clerk/react';
+import * as Sentry from '@sentry/react';
 import { clerkAuth } from '@/api/auth';
 import type { AuthUser } from '@/types';
 
@@ -28,6 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('auth_token', token);
     localStorage.setItem('auth_user', JSON.stringify(userData));
     setUser(userData);
+    Sentry.setUser({ id: userData.id, username: userData.username });
   };
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!clerkUser) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
+      Sentry.setUser(null);
       queueMicrotask(() => {
         setUser(null);
         setReady(true);
@@ -61,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
     setUser(null);
+    Sentry.setUser(null);
     await signOut();
   }, [signOut]);
 

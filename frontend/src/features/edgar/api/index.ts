@@ -1,12 +1,12 @@
 import { apiFetch, postJson } from '@/api/core';
+import type { FilingMetadata, FormType } from '@algo/shared';
+
+export type { FilingMetadata, FormType };
 
 export type SecFileListing = {
   accession: string;
   files: string[];
-  date?: string;
-  form?: string;
-  cik?: string;
-  primaryDoc?: string;
+  meta?: FilingMetadata;
 };
 
 export type CoverageRange = { from: string; to: string };
@@ -16,31 +16,63 @@ export type CoverageIndex = {
   ranges: CoverageRange[];
 };
 
-export type SecSyncResult = {
-  filesAdded: number;
-  skippedFilings: number;
-  coveredRanges: CoverageRange[];
-  gaps: CoverageRange[];
+export type SecSyncStarted = {
+  started: boolean;
+  running: boolean;
 };
 
 export function getSecTickers(): Promise<string[]> {
-  return apiFetch<string[]>('/sec/tickers');
+  return apiFetch<string[]>('/edgar/tickers');
 }
 
 export function getSecFiles(ticker: string): Promise<SecFileListing[]> {
-  return apiFetch<SecFileListing[]>(`/sec/files/${ticker}`);
+  return apiFetch<SecFileListing[]>(`/edgar/files/${ticker}`);
 }
 
 export function syncSec(
   ticker: string,
   dateFrom?: string,
   dateTo?: string,
-  formTypes?: string[],
+  formTypes?: FormType[],
   force?: boolean,
-): Promise<SecSyncResult> {
-  return postJson<SecSyncResult>('/sec/sync', { ticker, dateFrom, dateTo, formTypes, force });
+): Promise<SecSyncStarted> {
+  return postJson<SecSyncStarted>('/edgar/sync', { ticker, dateFrom, dateTo, formTypes, force });
+}
+
+export function getSecSyncStatus(ticker: string): Promise<{ running: boolean }> {
+  return apiFetch<{ running: boolean }>(`/edgar/sync/status/${ticker}`);
 }
 
 export function getSecCoverage(ticker: string): Promise<CoverageIndex> {
-  return apiFetch<CoverageIndex>(`/sec/coverage/${ticker}`);
+  return apiFetch<CoverageIndex>(`/edgar/coverage/${ticker}`);
+}
+
+export type Scan801Result = {
+  accession: string;
+  ticker: string;
+  issuer_cik: string;
+  filing_date: string;
+  report_period: string | null;
+  primary_document: string | null;
+  items: string[] | null;
+  files: string[];
+  matched: boolean;
+  matched_keywords: string[];
+  snippet: string | null;
+  ai_real_incident: boolean | null;
+  ai_confidence: string | null;
+  ai_incident_type: string | null;
+  ai_summary: string | null;
+};
+
+export function startScan801(): Promise<SecSyncStarted> {
+  return postJson<SecSyncStarted>('/edgar/scan/801', {});
+}
+
+export function getScan801Status(): Promise<{ running: boolean }> {
+  return apiFetch<{ running: boolean }>('/edgar/scan/801/status');
+}
+
+export function getScan801Results(): Promise<Scan801Result[]> {
+  return apiFetch<Scan801Result[]>('/edgar/scan/801/results');
 }

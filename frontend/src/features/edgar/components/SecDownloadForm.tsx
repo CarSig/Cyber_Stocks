@@ -1,11 +1,11 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useSecTickers, useSecSync } from '../hooks/useSecData';
-import type { SecSyncResult } from '../api';
+import { useSecTickers, useSecSync, useSecSyncStatus } from '../hooks/useSecData';
+import { useSecSyncProgress } from '../hooks/useSecSyncProgress';
 import type { DownloadProps } from '../types';
+
 export default function SecDownloadForm({
   selectedTicker,
   onTickerChange,
@@ -15,13 +15,18 @@ export default function SecDownloadForm({
   onDateToChange,
 }: DownloadProps) {
   const { data: tickers = [] } = useSecTickers();
-  const [lastResult, setLastResult] = useState<SecSyncResult | null>(null);
-  const { mutate, isPending, error } = useSecSync();
+  const { mutate, isPending: isStarting, error } = useSecSync();
+  const { data: status } = useSecSyncStatus(selectedTicker);
+
+  // A sync is "active" if the server says it's running, or we just kicked one off.
+  const running = status?.running ?? false;
+  const active = running || isStarting;
+  const { progress, reset } = useSecSyncProgress(selectedTicker, active);
 
   function run(force: boolean) {
     if (!selectedTicker) return;
-    setLastResult(null);
-    mutate({ ticker: selectedTicker, dateFrom, dateTo, force }, { onSuccess: (res) => setLastResult(res) });
+    reset();
+    mutate({ ticker: selectedTicker, dateFrom, dateTo, force });
   }
 
   return (
@@ -60,13 +65,13 @@ export default function SecDownloadForm({
         </div>
 
         <div className="sec-form-buttons">
-          <Button type="submit" disabled={!selectedTicker || isPending}>
-            {isPending ? 'Downloading…' : 'Download'}
+          <Button type="submit" disabled={!selectedTicker || active}>
+            {active ? 'Downloading…' : 'Download'}
           </Button>
           <Button
             type="button"
             variant="outline"
-            disabled={!selectedTicker || isPending}
+            disabled={!selectedTicker || active}
             onClick={() => run(true)}
             title="Re-download all filings in range, even if already saved"
           >
@@ -75,13 +80,23 @@ export default function SecDownloadForm({
         </div>
       </div>
 
-      {error && <p className="sec-error">{(error as Error).message}</p>}
-
-      {lastResult && (
-        <p className="sec-result">
-          Done — {lastResult.filesAdded} files saved, {lastResult.skippedFilings} filings skipped
-        </p>
+      {active && progress && (
+        <div className="sec-progress">
+          <div className="sec-progress-bar-wrap">
+            <div
+              className="sec-progress-bar"
+              style={{ width: progress.total > 0 ? `${(progress.current / progress.total) * 100}%` : '0%' }}
+            />
+          </div>
+          <span className="sec-progress-label">
+            {progress.current} / {progress.total} — {progress.form}
+          </span>
+        </div>
       )}
+
+      {active && !progress && <p className="sec-progress-label">Fetching filing list…</p>}
+
+      {error && <p className="sec-error">{(error as Error).message}</p>}
     </form>
   );
 }

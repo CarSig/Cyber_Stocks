@@ -4,9 +4,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from './AuthContext';
 import { BASE } from '@/api/core';
 import type { AppNotification } from '@/types';
+import { groupByCompany, type CompanyActivity } from './groupByCompany';
 
 type NotificationContextValue = {
   notifications: AppNotification[];
+  byCompany: CompanyActivity[];
   unread: number;
   markAllRead: () => void;
   dismiss: (id: string) => void;
@@ -93,8 +95,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(STORAGE_KEY);
   }
 
+  const byCompany = groupByCompany(notifications);
+
   return (
-    <NotificationContext.Provider value={{ notifications, unread, markAllRead, dismiss, clearAll }}>
+    <NotificationContext.Provider value={{ notifications, byCompany, unread, markAllRead, dismiss, clearAll }}>
       {children}
     </NotificationContext.Provider>
   );

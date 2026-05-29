@@ -19,11 +19,47 @@
   overflow-y: auto;
   height: 100%;
 }
+.ticker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ticker-action-btn {
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  &:hover:not(:disabled) {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+  }
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+/* When chat is open, .ticker-main is the scroll container and the navbar is
+   outside it — so the sticky head pins to the top of that container, not below
+   the navbar. */
+.ticker-layout--chat-open .sticky-head {
+  top: 0;
+}
+.ticker-period-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 0;
+}
 .ticker-tabs {
   display: flex;
   gap: 2px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 1.5rem;
 }
 .ticker-tab {
   padding: 8px 18px;

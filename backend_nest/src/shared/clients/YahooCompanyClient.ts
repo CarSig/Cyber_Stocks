@@ -61,7 +61,7 @@ class CybersecurityClient {
   }
 
   async search() {
-    return this.yahooClient.search(this.companyName);
+    return this.yahooClient.search(this.companyName, {}, { validateResult: false });
   }
 
   toString(): string {
@@ -156,6 +156,29 @@ class CybersecurityClient {
       this.ticker,
       newNews as Record<string, unknown>[],
     );
+  }
+
+  async backfillHistory(fromDate: string): Promise<number> {
+    const today = new Date().toISOString().slice(0, 10);
+    if (fromDate >= today) return 0;
+    const result = await this.yahooClient.historical(this.ticker, {
+      period1: fromDate,
+      period2: today,
+      interval: '1d',
+    });
+    if (!result.length) return 0;
+    let inserted = 0;
+    for (const row of result) {
+      const date = row.date instanceof Date ? row.date.toISOString().slice(0, 10) : String(row.date).slice(0, 10);
+      const r = await this.pool.query(
+        `INSERT INTO stock_quotes (ticker, date, open, high, low, close, adjclose, volume)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         ON CONFLICT (ticker, date) DO NOTHING`,
+        [this.ticker, date, row.open ?? 0, row.high ?? 0, row.low ?? 0, row.close ?? 0, row.adjClose ?? row.close ?? 0, row.volume ?? 0],
+      );
+      if ((r.rowCount ?? 0) > 0) inserted++;
+    }
+    return inserted;
   }
 
   async populateNews(): Promise<number> {
@@ -264,7 +287,10 @@ class CybersecurityConsumer {
         low: r.low ?? 0,
         close: r.close ?? 0,
         adjclose: r.adjclose ?? undefined,
-        volume: r.volume ?? undefined,
+        // `volume` is a Postgres bigint → the pg driver returns it as a STRING.
+        // Coerce so the Quote.volume `number` type is actually true and callers
+        // can do arithmetic without silently concatenating strings.
+        volume: r.volume != null ? Number(r.volume) : undefined,
       }));
       return { meta: {}, quotes };
     };

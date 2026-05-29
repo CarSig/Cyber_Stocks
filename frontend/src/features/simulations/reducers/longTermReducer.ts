@@ -19,6 +19,20 @@ export function initialLongTermState() {
   return initialBaseSimState<LongTermAction>('', 'line');
 }
 
+export function pickPersistable(s: LongTermSimState) {
+  return {
+    actions: s.actions,
+    value: s.value,
+    startShares: s.startShares,
+    manualTime: s.manualTime,
+    nextSide: s.nextSide,
+    textValue: s.textValue,
+    chartType: s.chartType,
+    tradeMode: s.tradeMode,
+    // NOT persisted: textMode
+  };
+}
+
 export function longTermReducer(state: LongTermSimState, action: LongTermSimAction): LongTermSimState {
   if (action.type === 'SET_DATE') return { ...state };
   if (action.type === 'SET_TIMEFRAME') return { ...state };

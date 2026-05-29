@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { runLongSimulation, runShortSimulation, buildSimStats, fmtMarkerText, simStatsToExportRows, simResultToExportArgs } from './sim';
+import {
+  runLongSimulation,
+  runShortSimulation,
+  buildSimStats,
+  fmtMarkerText,
+  simStatsToExportRows,
+  simResultToExportArgs,
+} from './sim';
 import type { Action, SimResult } from './sim';
 
 const fmt = (iso: string) => iso.slice(0, 10);
@@ -298,8 +305,26 @@ describe('simStatsToExportRows', () => {
 describe('simResultToExportArgs', () => {
   const result: SimResult = {
     transactions: [
-      { time: '09:30', timestamp: '2024-01-01T14:30:00Z', side: 'buy', price: 100, shares: 1, value: 100, sharesAfter: 1, portfolioValue: 100 },
-      { time: '10:00', timestamp: '2024-01-01T15:00:00Z', side: 'sell', price: 110, shares: 0.5, value: 55, sharesAfter: 0.5, portfolioValue: 110 },
+      {
+        time: '09:30',
+        timestamp: '2024-01-01T14:30:00Z',
+        side: 'buy',
+        price: 100,
+        shares: 1,
+        value: 100,
+        sharesAfter: 1,
+        portfolioValue: 100,
+      },
+      {
+        time: '10:00',
+        timestamp: '2024-01-01T15:00:00Z',
+        side: 'sell',
+        price: 110,
+        shares: 0.5,
+        value: 55,
+        sharesAfter: 0.5,
+        portfolioValue: 110,
+      },
     ],
     portfolioHistory: [],
     totalInvested: 100,

@@ -25,6 +25,14 @@ export type ChartShellOpts = {
   /** Drag/scroll-to-resize support. When `enabled`, the consumer should
    *  render the returned resize handle below the chart container. */
   resize?: ResizeConfig;
+  /** Fraction (0–1) of pane height reserved at the top of the primary price
+   *  scale — leaves constant room for aboveBar markers so toggling them on
+   *  doesn't squeeze the series. */
+  topScaleMargin?: number;
+  /** Custom formatter for the primary series' price-scale labels. */
+  priceFormat?: (value: number) => string;
+  /** Fixed minimum width (px) for the right price scale — align stacked charts. */
+  priceScaleMinWidth?: number;
 };
 
 export type ChartShell = {
@@ -60,6 +68,9 @@ export function useChartShell(opts: ChartShellOpts): ChartShell {
     type,
     plugins: opts.plugins,
     enabled,
+    topScaleMargin: opts.topScaleMargin,
+    priceFormat: opts.priceFormat,
+    priceScaleMinWidth: opts.priceScaleMinWidth,
   });
   useChartRange(
     chartRef,

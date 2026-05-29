@@ -4,7 +4,10 @@ const mark = (label: string) => console.log(`[startup] +${Date.now() - t0}ms —
 mark('main.ts start');
 import { Logger as NestLogger } from '@nestjs/common';
 const startupLogger = new NestLogger('Bootstrap');
-import './tracing';
+if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  require('./tracing');
+}
 mark('tracing loaded');
 import 'reflect-metadata';
 import { EventEmitter } from 'events';
@@ -65,7 +68,9 @@ async function bootstrap() {
 
   const port = Number(process.env.PORT ?? 3000);
   mark('app.listen — start');
-  await app.listen(port);
+  const server = await app.listen(port);
+  // SEC sync downloads can take several minutes — raise timeout to 10 min
+  server.setTimeout(10 * 60 * 1000);
   mark('app.listen — done');
   startupLogger.log(`Server running on http://localhost:${port}`);
   startupLogger.log(`API docs at http://localhost:${port}/api-docs`);

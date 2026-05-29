@@ -43,6 +43,16 @@ type ChartAutoProps = {
    *  below the chart that the user can drag (or wheel-scroll) to change
    *  chart height. */
   resize?: ResizeConfig;
+  /** Fraction (0–1) of pane height reserved at the top of the primary price
+   *  scale. Use to leave constant headroom for `aboveBar` markers so toggling
+   *  them on doesn't squeeze the series. */
+  topScaleMargin?: number;
+  /** Custom formatter for the primary series' price-scale labels (e.g. `1.2M`
+   *  for volume). */
+  priceFormat?: (value: number) => string;
+  /** Fixed minimum width (px) for the right price scale. Set the same value on
+   *  stacked charts so their time axes align. */
+  priceScaleMinWidth?: number;
 };
 
 const DEFAULT_TYPES: ChartType[] = ['Candlestick', 'Bar', 'Line', 'Area'];
@@ -69,6 +79,9 @@ export function ChartAuto({
   hidePeriodControls,
   hideTypeControls,
   resize,
+  topScaleMargin,
+  priceFormat,
+  priceScaleMinWidth,
 }: ChartAutoProps) {
   const {
     ctx,
@@ -87,6 +100,9 @@ export function ChartAuto({
     visibleRange,
     onRangeChange,
     resize,
+    topScaleMargin,
+    priceFormat,
+    priceScaleMinWidth,
   });
 
   return (

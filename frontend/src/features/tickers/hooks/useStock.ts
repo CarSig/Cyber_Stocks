@@ -2,7 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { getTicker, getCompanies } from '../api';
 import { getCorrelation } from '@/features/correlations/api';
-import { withLsCache } from '@/utils/lsCache';
 import type { Quote, TickerData, CorrelationResult, NewsArticle } from '@/types';
 
 type MiniQuote = { open: number; close: number; date: string };
@@ -60,21 +59,21 @@ type UseStockOpts = {
 export function useStock(ticker: string, { compareTicker, period }: UseStockOpts = {}) {
   const { data, error, isPending } = useQuery({
     queryKey: ['ticker', ticker],
-    queryFn: withLsCache<TickerData>(`ticker_${ticker}`, TICKER_TTL, () => getTicker(ticker)),
+    queryFn: () => getTicker(ticker),
     staleTime: TICKER_TTL,
     gcTime: TICKER_TTL,
   });
 
   const { data: companies } = useQuery({
     queryKey: ['companies'],
-    queryFn: withLsCache<Record<string, string>>('companies', TICKER_TTL, getCompanies),
+    queryFn: getCompanies,
     staleTime: TICKER_TTL,
     gcTime: TICKER_TTL,
   });
 
   const { data: compareData } = useQuery({
     queryKey: ['ticker', compareTicker],
-    queryFn: withLsCache<TickerData>(`ticker_${compareTicker}`, TICKER_TTL, () => getTicker(compareTicker!)),
+    queryFn: () => getTicker(compareTicker!),
     enabled: !!compareTicker,
     staleTime: TICKER_TTL,
     gcTime: TICKER_TTL,

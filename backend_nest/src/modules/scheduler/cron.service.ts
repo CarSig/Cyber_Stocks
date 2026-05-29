@@ -2,14 +2,17 @@ import { Injectable } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { DataSyncService } from "./data-sync.service";
+import { EdgarPollerService } from "@/modules/edgar/edgar-poller.service";
 import { RedditService } from "@/modules/reddit/reddit.service";
 import { KevClient } from "@/shared/clients/KevClient";
 import { NvdClient } from "@/shared/clients/NvdClient";
 import { OtxClient } from "@/shared/clients/OtxClient";
 import { MispClient } from "@/shared/clients/MispClient";
-import { CybersecurityConsumer } from "@/shared/clients/YahooCompanyClient";
+import { CybersecurityClient, CybersecurityConsumer } from "@/shared/clients/YahooCompanyClient";
 import { fetchTrump } from "@/shared/socials/trump";
 import { CoreDbService } from "@/shared/core-db.service";
+import { CacheService } from "@/shared/cache.service";
+import { invalidateTickerCacheKeys } from "@/shared/cache-keys";
 import { logger } from "@/shared/logger";
 import { cronJobDuration, cronJobRunsTotal, threatIntelNewEntriesTotal } from "@/shared/metrics";
 import companies from "@/data/companies";
@@ -26,10 +29,12 @@ export class CronService {
     private readonly redditService: RedditService,
     private readonly emitter: EventEmitter2,
     private readonly coreDb: CoreDbService,
+    private readonly edgarPoller: EdgarPollerService,
+    private readonly cache: CacheService,
   ) {}
 
   private get dataSyncService() {
-    return new DataSyncService(this.coreDb.pool);
+    return new DataSyncService(this.coreDb.pool, this.cache);
   }
 
   @Cron("0 23 * * *")
@@ -157,5 +162,51 @@ export class CronService {
     if (result.newOtx > 0) threatIntelNewEntriesTotal.inc({ source: "otx" }, result.newOtx);
     logger.info({ ...result }, "cron: threat intel sync done");
     this.emitter.emit("threatintel.updated", { at: new Date().toISOString(), ...result });
+  }
+
+  async backfillStockHistory(fromDate: string): Promise<{ tickers: number; totalQuotes: number }> {
+    logger.info({ fromDate }, "backfillStockHistory: starting");
+    const names = Object.keys(companies);
+    const results = await Promise.allSettled(
+      names.map((name) =>
+        new CybersecurityClient(name, this.coreDb.pool)
+          .backfillHistory(fromDate)
+          .then(async (inserted) => {
+            if (inserted > 0) await invalidateTickerCacheKeys(this.cache, name);
+            return inserted;
+          })
+          .catch((e: unknown) => { logger.error({ err: e, name }, "backfillStockHistory: ticker failed"); return 0; }),
+      ),
+    );
+    const totalQuotes = results.reduce(
+      (sum, r) => sum + (r.status === "fulfilled" ? r.value : 0),
+      0,
+    );
+    logger.info({ tickers: names.length, totalQuotes }, "backfillStockHistory: done");
+    return { tickers: names.length, totalQuotes };
+  }
+
+  @Cron("0 * * * *")
+  async runEdgarNewFilings(): Promise<void> {
+    logger.info("cron: running edgarNewFilings");
+    const end = cronJobDuration.startTimer({ job: "edgar" });
+    try {
+      const results = await this.edgarPoller.pollNewFilings();
+      const count = results.reduce((n, r) => n + r.newAccessions.length, 0);
+      cronJobRunsTotal.inc({ job: "edgar", status: "success" });
+      logger.info({ tickers: results.length, count }, "cron: edgarNewFilings done");
+      if (count > 0) {
+        this.emitter.emit("edgar.new_filings", {
+          at: new Date().toISOString(),
+          count,
+          changes: results.map((r) => ({ ticker: r.ticker, count: r.newAccessions.length })),
+        });
+      }
+    } catch (e: unknown) {
+      logger.error({ err: e }, "cron: edgarNewFilings failed");
+      cronJobRunsTotal.inc({ job: "edgar", status: "failure" });
+    } finally {
+      end();
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsString, IsOptional, Matches } from "class-validator";
+import { IsString, IsOptional, Matches, IsIn, IsArray } from "class-validator";
+import { SUPPORTED_FORMS } from "@algo/shared";
 
 export class CoverageRangeDto {
   @ApiProperty() from!: string;
@@ -30,9 +31,19 @@ export class EdgarSyncDto {
   @IsOptional()
   force?: boolean;
 
-  @ApiPropertyOptional({ description: "Form types to sync. Defaults to standard set." })
+  @ApiPropertyOptional({ description: "Form types to sync. Must be from the supported forms list.", type: [String], enum: SUPPORTED_FORMS })
   @IsOptional()
+  @IsArray()
+  @IsIn(SUPPORTED_FORMS, { each: true })
   formTypes?: string[];
+}
+
+export class EdgarSyncStartedDto {
+  @ApiProperty({ description: "True if a new sync was kicked off, false if one was already running." })
+  started!: boolean;
+
+  @ApiProperty({ description: "True if a sync is now in flight for this ticker." })
+  running!: boolean;
 }
 
 export class EdgarSyncResultDto {
@@ -42,11 +53,23 @@ export class EdgarSyncResultDto {
   @ApiProperty({ type: [CoverageRangeDto] }) gaps!: CoverageRangeDto[];
 }
 
+export class FilingMetadataDto {
+  @ApiProperty() accession!: string;
+  @ApiProperty() cik!: string;
+  @ApiProperty() form!: string;
+  @ApiProperty() filingDate!: string;
+  @ApiPropertyOptional() reportDate?: string;
+  @ApiPropertyOptional() acceptanceDateTime?: string;
+  @ApiProperty() primaryDocument!: string;
+  @ApiPropertyOptional() primaryDocDescription?: string;
+  @ApiPropertyOptional({ type: [String] }) items?: string[];
+  @ApiProperty() isXBRL!: boolean;
+  @ApiProperty() isInlineXBRL!: boolean;
+  @ApiProperty() size!: number;
+}
+
 export class EdgarFileListingDto {
   @ApiProperty() accession!: string;
   @ApiProperty({ type: [String] }) files!: string[];
-  @ApiPropertyOptional() date?: string;
-  @ApiPropertyOptional() form?: string;
-  @ApiPropertyOptional() cik?: string;
-  @ApiPropertyOptional() primaryDoc?: string;
+  @ApiPropertyOptional({ type: FilingMetadataDto }) meta?: FilingMetadataDto;
 }

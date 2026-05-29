@@ -8,8 +8,9 @@ import SimEntryPanel from './components/entry-panel/SimEntryPanel';
 import ChartTypeToggle from './components/ChartTypeToggle';
 import TradeModeControls from './components/TradeModeControls';
 import { useExportSimPdf } from './hooks/useExportSimPdf';
-import { longTermReducer, initialLongTermState } from './reducers/longTermReducer';
-import type { LongTermAction } from './reducers/longTermReducer';
+import { longTermReducer, initialLongTermState, pickPersistable } from './reducers/longTermReducer';
+import type { LongTermAction, LongTermSimState } from './reducers/longTermReducer';
+import { load, save } from './persistence';
 import { longTermStrategy } from './reducers/baseStrategy';
 import { useAddManualAction } from './hooks/useAddManualAction';
 import { useDailyChart } from './hooks/useDailyChart';
@@ -236,12 +237,21 @@ export default function LongSimulation({ ticker, quotes = [], onResult }: Simula
   const minDate = dates[0] ?? '';
   const maxDate = dates.at(-1) ?? '';
 
-  const [s, dispatch] = useReducer(longTermReducer, undefined, initialLongTermState);
+  const [s, dispatch] = useReducer(longTermReducer, undefined, () => {
+    const base = initialLongTermState();
+    const persisted = load<LongTermSimState>('long', 'default', ticker);
+    return persisted ? { ...base, ...persisted } : base;
+  });
   const { actions, startShares, textValue, chartType, value: clickValue, tradeMode } = s;
 
   const portfolioChartRef = useRef<HTMLDivElement>(null);
   const interactiveChartRef = useRef<HTMLDivElement>(null);
   const { valueRef, tradeModeRef, actionsRef } = useSimRefs(clickValue, tradeMode, actions);
+
+  useEffect(() => {
+    save('long', 'default', ticker, pickPersistable(s));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s]);
 
   type PresetsMap = Record<string, SimulationPreset[]>;
   const {
