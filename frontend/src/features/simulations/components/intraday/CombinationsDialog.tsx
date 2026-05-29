@@ -11,6 +11,8 @@ const EXIT_LABELS: Record<ExitStrategy, string> = {
   'vol-hold-eod': 'Vol EOD spike',
   'vol-hold-vwap': 'Vol VWAP cross',
   'vol-hold-confirm': 'Vol price+vol',
+  'vol-trail': 'Vol trailing ATR',
+  'vol-staged': 'Vol staged scale-out',
 };
 
 type Props = {

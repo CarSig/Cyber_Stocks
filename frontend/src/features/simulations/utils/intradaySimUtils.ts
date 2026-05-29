@@ -1,4 +1,5 @@
 import { DateUtils } from '@/utils/date';
+import { calcATR } from '@/features/charts/utils/series';
 import type { EntryStrategy, ExitStrategy } from '../reducers/intradayReducer';
 
 /** Returns true if the trade idea indicates a short position for the given ticker. */
@@ -217,6 +218,119 @@ export function resolveVolatilityExit(
     if (priceCondition && volCondition) return b.t;
   }
   return lastAvailableBar;
+}
+
+/** One exit "leg": close `fraction` (0–1) of the ORIGINAL position at time `t`. */
+export type ExitLeg = { t: string; fraction: number };
+
+/**
+ * Dollar ATR at the entry bar, using the real 14-period ATR (% of close) over the
+ * bars up to and including entry. Falls back to the entry bar's high−low range,
+ * then 1% of entry price — intraday windows are often shorter than calcATR needs.
+ */
+function atrAtEntry(bars: VolBar[], entryIdx: number): number {
+  const entryBar = bars[entryIdx];
+  const entryPrice = entryBar.c;
+  const series = bars
+    .slice(0, entryIdx + 1)
+    .map((b) => ({ time: b.t, high: b.h, low: b.l, close: b.c }));
+  const atrPct = calcATR(series, 14).at(-1)?.value;
+  if (atrPct != null && atrPct > 0) return (atrPct / 100) * entryPrice;
+  const range = entryBar.h - entryBar.l;
+  return range > 0 ? range : entryPrice * 0.01;
+}
+
+/** True if `b`'s close is below VWAP-implied short side. Direction is inferred at entry. */
+function pullbackFromHwm(longSide: boolean, hwm: number, close: number): number {
+  // For longs, pullback = drop from the high-water mark; for shorts, rise from the low-water mark.
+  return longSide ? hwm - close : close - hwm;
+}
+
+/**
+ * Resolves the full exit schedule for a strategy as a list of legs. Existing
+ * single-exit strategies return one 100% leg (delegating to resolveVolatilityExit).
+ * The two complex strategies use volume + 14-period ATR and may hold up to 5 days:
+ *
+ *  vol-trail   Trailing ATR stop, single full exit: high-water mark trailing stop;
+ *              exit 100% on the first of — 2×ATR pullback from HWM, a 3×avg-volume
+ *              climax bar, or the 5-day time stop.
+ *  vol-staged  Staged scale-out, multiple legs: 50% on first 2×avg-volume spike,
+ *              25% on a ≥1×ATR move from entry, remaining 25% on a 2×ATR pullback
+ *              from HWM or the 5-day time stop. Any unfilled fraction is flushed at
+ *              the time stop so the position always fully closes.
+ */
+export function resolveExitLegs(
+  exitStrategy: ExitStrategy,
+  bars: VolBar[],
+  entryIso: string,
+  entryDate: string,
+  timeframe = '1Min',
+): ExitLeg[] {
+  if (exitStrategy !== 'vol-trail' && exitStrategy !== 'vol-staged') {
+    return [{ t: resolveVolatilityExit(exitStrategy, bars, entryIso, entryDate, timeframe), fraction: 1 }];
+  }
+
+  const entryIdx = bars.findIndex((b) => b.t >= entryIso);
+  if (entryIdx === -1) return [{ t: DateUtils.timeToIso('15:45', entryDate), fraction: 1 }];
+
+  const entryBar = bars[entryIdx];
+  const entryPrice = entryBar.c;
+  const longSide = entryPrice >= entryBar.vw; // same heuristic as vol-hold-vwap
+  const atr = atrAtEntry(bars, entryIdx);
+
+  const preBars = bars.slice(0, entryIdx);
+  const avgVol = preBars.length > 0 ? preBars.reduce((s, b) => s + b.v, 0) / preBars.length : 0;
+  const maxDate = nextWeekday(nextWeekday(nextWeekday(nextWeekday(nextWeekday(entryDate)))));
+  const postBars = bars.filter((b, i) => i > entryIdx && b.t.slice(0, 10) <= maxDate);
+  const lastAvailableBar = postBars.at(-1)?.t ?? bars.at(-1)?.t ?? DateUtils.timeToIso('15:45', entryDate);
+
+  // Track the high-water mark (long) / low-water mark (short) as we scan forward.
+  let hwm = entryPrice;
+
+  if (exitStrategy === 'vol-trail') {
+    for (const b of postBars) {
+      hwm = longSide ? Math.max(hwm, b.c) : Math.min(hwm, b.c);
+      const pulledBack = pullbackFromHwm(longSide, hwm, b.c) >= 2 * atr;
+      const volumeClimax = avgVol > 0 && b.v >= avgVol * 3;
+      if (pulledBack || volumeClimax) return [{ t: b.t, fraction: 1 }];
+    }
+    return [{ t: lastAvailableBar, fraction: 1 }];
+  }
+
+  // vol-staged: build ordered legs, never exceeding 100% total.
+  const legs: ExitLeg[] = [];
+  let firedSpike = false;
+  let firedTarget = false;
+  let remaining = 1;
+
+  const pushLeg = (t: string, fraction: number) => {
+    const f = Math.min(fraction, remaining);
+    if (f <= 0) return;
+    const existing = legs.find((l) => l.t === t); // merge same-bar legs
+    if (existing) existing.fraction += f;
+    else legs.push({ t, fraction: f });
+    remaining -= f;
+  };
+
+  for (const b of postBars) {
+    hwm = longSide ? Math.max(hwm, b.c) : Math.min(hwm, b.c);
+    if (remaining <= 0) break;
+    if (!firedSpike && avgVol > 0 && b.v >= avgVol * 2) {
+      firedSpike = true;
+      pushLeg(b.t, 0.5);
+    }
+    if (firedSpike && !firedTarget && Math.abs(b.c - entryPrice) >= atr) {
+      firedTarget = true;
+      pushLeg(b.t, 0.25);
+    }
+    if (pullbackFromHwm(longSide, hwm, b.c) >= 2 * atr) {
+      pushLeg(b.t, remaining); // close everything left on the volatility stop
+      break;
+    }
+  }
+
+  if (remaining > 0) pushLeg(lastAvailableBar, remaining); // flush at time stop
+  return legs;
 }
 
 /** @deprecated Use calcEntryDateTime instead. */

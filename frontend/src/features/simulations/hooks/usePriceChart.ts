@@ -83,7 +83,15 @@ export function usePriceChart(
     const el = containerRef.current;
     let disposed = false;
     const ro = new ResizeObserver(() => {
-      if (!disposed && containerRef.current) chart.applyOptions({ width: containerRef.current.clientWidth });
+      // A resize callback can be queued before this effect's cleanup runs; once
+      // the chart is removed, touching it throws "Object is disposed". Guard on
+      // the flag and swallow the late callback defensively.
+      if (disposed || !containerRef.current) return;
+      try {
+        chart.applyOptions({ width: containerRef.current.clientWidth });
+      } catch {
+        /* chart disposed between the guard and the call — ignore */
+      }
     });
     ro.observe(el);
 

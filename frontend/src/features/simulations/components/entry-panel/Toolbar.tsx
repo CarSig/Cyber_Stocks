@@ -104,6 +104,8 @@ export default function Toolbar({
                 <SelectItem value="vol-hold-eod">Vol hold EOD spike</SelectItem>
                 <SelectItem value="vol-hold-vwap">Vol hold VWAP cross</SelectItem>
                 <SelectItem value="vol-hold-confirm">Vol hold price+vol confirm</SelectItem>
+                <SelectItem value="vol-trail">Vol trailing ATR stop</SelectItem>
+                <SelectItem value="vol-staged">Vol staged scale-out</SelectItem>
               </SelectContent>
             </Select>
           )}

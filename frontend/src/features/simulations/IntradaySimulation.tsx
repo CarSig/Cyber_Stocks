@@ -132,10 +132,17 @@ export default function IntradaySimulation(props: IntradaySimulationProps) {
     })),
   });
 
+  // `useQueries` returns a fresh array reference every render, so keying the memo
+  // on `extraQueries` itself would recompute `bars` (new ref) every render and
+  // rebuild the chart on every render — which races lightweight-charts' draw loop
+  // and can freeze the UI. Key on a stable signature derived from each query's
+  // last update time instead, so `bars` only changes when bar data actually does.
+  const extraSig = extraQueries.map((q) => `${q.dataUpdatedAt}`).join('|');
   const bars = useMemo(() => {
     const all = [...extraQueries.flatMap((q) => q.data?.bars ?? []), ...(data?.bars ?? [])];
     return all.sort((a, b) => a.t.localeCompare(b.t));
-  }, [data, extraQueries]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, extraSig]);
 
   useEffect(() => {
     if (!bars.length) return;
@@ -227,6 +234,17 @@ export default function IntradaySimulation(props: IntradaySimulationProps) {
     dispatch,
     nextActionId,
   });
+
+  // When the exit-strategy preset changes (with an event already selected),
+  // regenerate the AI actions so the chart markers and the ACTIONS panel reflect
+  // the new preset's entry/exit timing immediately — no need to re-click "AI".
+  useEffect(() => {
+    if (props.mode !== 'event' || !selectedEvent) return;
+    void handleAiSim();
+    // handleAiSim is keyed on exitStrategy (and the rest of its inputs); re-run
+    // only when the preset or the selected event changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exitStrategy, selectedEvent]);
   const handleSimulateAll = useSimulateAll({
     filteredEvents,
     aiDelay,

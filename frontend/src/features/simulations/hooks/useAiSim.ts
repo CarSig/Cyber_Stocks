@@ -10,7 +10,7 @@ import {
   calcEntryDateTimeForStrategy,
   getExitTime,
   isVolatilityStrategy,
-  resolveVolatilityExit,
+  resolveExitLegs,
   nextWeekday,
 } from '../utils';
 import { intradayStrategy } from '../reducers/baseStrategy';
@@ -59,10 +59,9 @@ export function useAiSim({
 
     const isVolStrategy = isVolatilityStrategy(exitStrategy);
 
-    // For volatility strategies we need bars to resolve the exit bar
-    let exitIso: string;
-    let exitTime: string;
-    let exitDate: string;
+    // Exit legs: complex strategies may scale out across several bars/days; the
+    // rest resolve to a single full-close leg.
+    let legs: { t: string; fraction: number }[];
 
     if (isVolStrategy) {
       const fiveDaysOut = nextWeekday(nextWeekday(nextWeekday(nextWeekday(nextWeekday(entryDate)))));
@@ -74,9 +73,14 @@ export function useAiSim({
             ? entryDate
             : fiveDaysOut;
 
-      const dates = Array.from(new Set([entryDate, latestDate]));
+      // Fetch every weekday from entry through the latest possible exit, not just
+      // the endpoints — resolveExitLegs scans bars across the whole holding window
+      // (volume spikes / ATR moves on the middle days must be visible), and warming
+      // the cache here means the chart's per-date queries resolve from cache.
+      const dates: string[] = [entryDate];
+      for (let d = nextWeekday(entryDate); d <= latestDate; d = nextWeekday(d)) dates.push(d);
       const allBarsArrays = await Promise.all(
-        dates.map((d) =>
+        Array.from(new Set(dates)).map((d) =>
           queryClient
             .fetchQuery({
               queryKey: ['alpaca-bars', primaryTicker, d, timeframe],
@@ -87,31 +91,52 @@ export function useAiSim({
         ),
       );
       const allBars = allBarsArrays.flat().sort((a, b) => a.t.localeCompare(b.t));
-      exitIso = resolveVolatilityExit(exitStrategy, allBars, entryIso, entryDate, timeframe);
-      exitTime = exitIso.slice(11, 16);
-      exitDate = exitIso.slice(0, 10);
+      legs = resolveExitLegs(exitStrategy, allBars, entryIso, entryDate, timeframe);
     } else {
       const fixedExitTime = getExitTime(exitStrategy, timeframe) as string;
-      exitDate = baseExitDate;
-      exitTime = fixedExitTime;
-      exitIso = DateUtils.timeToIso(exitTime, exitDate);
+      const exitIso = DateUtils.timeToIso(fixedExitTime, baseExitDate);
+      legs = [{ t: exitIso, fraction: 1 }];
 
-      if (entryDate !== exitDate) {
+      if (entryDate !== baseExitDate) {
         await queryClient.prefetchQuery({
-          queryKey: ['alpaca-bars', primaryTicker, exitDate, timeframe],
-          queryFn: () => getBars(primaryTicker, exitDate, timeframe),
+          queryKey: ['alpaca-bars', primaryTicker, baseExitDate, timeframe],
+          queryFn: () => getBars(primaryTicker, baseExitDate, timeframe),
           staleTime: Infinity,
         });
       }
     }
 
+    const exitSide: Action['side'] = isShort ? 'cover' : 'sell';
     const newActions: Action[] = [
       { id: nextActionId.current++, timestamp: entryIso, time: entryTime, side: isShort ? 'short' : 'buy', value: 100 },
-      { id: nextActionId.current++, timestamp: exitIso, time: exitTime, side: isShort ? 'cover' : 'sell', value: 100 },
+      ...legs.map((leg) => ({
+        id: nextActionId.current++,
+        timestamp: leg.t,
+        time: leg.t.slice(11, 16),
+        side: exitSide,
+        value: Math.round(leg.fraction * 100),
+      })),
     ];
 
     const mode = isShort ? 'short' : 'long';
     dispatch({ type: 'SET_TRADE_MODE', mode, date: chartDate });
+
+    // Multi-day strategies can place an exit leg several days out. The chart only
+    // loads bars for the dates it knows about, so extend the chart to cover the
+    // full holding period — every weekday from the event day up to the furthest
+    // action date — otherwise those days' markers have no bars to anchor to and
+    // the exit appears to be missing.
+    const lastActionDate = newActions.reduce((max, a) => {
+      const d = a.timestamp.slice(0, 10);
+      return d > max ? d : max;
+    }, chartDate);
+    const holdingDates: string[] = [];
+    for (let d = nextWeekday(chartDate); d <= lastActionDate; d = nextWeekday(d)) {
+      holdingDates.push(d);
+    }
+    // Dispatch once so bars (and the chart) rebuild a single time, not per day.
+    if (holdingDates.length) dispatch({ type: 'ADD_EXTRA_DATES', dates: holdingDates });
+
     dispatch({ type: 'SET_ACTIONS', actions: newActions, textValue: intradayStrategy.toText(chartDate, newActions) });
   }, [selectedEvent, aiDelay, entryStrategy, exitStrategy, timeframe, dispatch, nextActionId, queryClient]);
 }

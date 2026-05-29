@@ -38,7 +38,9 @@ export type ExitStrategy =
   | 'vol-hold-3x'
   | 'vol-hold-eod'
   | 'vol-hold-vwap'
-  | 'vol-hold-confirm';
+  | 'vol-hold-confirm'
+  | 'vol-trail'
+  | 'vol-staged';
 
 export type CombinationRow = {
   entryStrategy: EntryStrategy;
@@ -56,6 +58,7 @@ export type IntradaySimAction =
   | { type: 'LOAD_EVENT'; event: IntradayEvent; timeframe: string }
   | { type: 'LOAD_BARS'; ticker: string; date: string; timeframe: string }
   | { type: 'ADD_EXTRA_DATE'; date: string }
+  | { type: 'ADD_EXTRA_DATES'; dates: string[] }
   | { type: 'RESET_EXTRA_DATES' }
   | { type: 'SET_AI_DELAY'; delay: number }
   | { type: 'SET_ENTRY_STRATEGY'; entryStrategy: EntryStrategy }
@@ -159,6 +162,12 @@ export function intradayReducer(
       return { ...state, timeframe: action.timeframe };
     case 'ADD_EXTRA_DATE':
       return { ...state, extraDates: [...new Set([...state.extraDates, action.date])] };
+    case 'ADD_EXTRA_DATES': {
+      const merged = [...new Set([...state.extraDates, ...action.dates])];
+      // No-op if nothing new — avoids a redundant re-render / chart rebuild.
+      if (merged.length === state.extraDates.length) return state;
+      return { ...state, extraDates: merged };
+    }
     case 'RESET_EXTRA_DATES':
       return { ...state, extraDates: [] };
     case 'SET_AI_DELAY':

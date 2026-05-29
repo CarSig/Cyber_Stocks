@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveVolatilityExit, nextWeekday, calcEntryTime } from './intradaySimUtils';
+import { resolveVolatilityExit, resolveExitLegs, nextWeekday, calcEntryTime } from './intradaySimUtils';
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -217,6 +217,109 @@ describe('resolveVolatilityExit — edge cases', () => {
     const result = resolveVolatilityExit('vol-same-day', bars, futureIso, ENTRY_DATE);
     expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
     expect(new Date(result).getTime()).toBeGreaterThan(0);
+  });
+});
+
+// ─── resolveExitLegs: back-compat ─────────────────────────────────────────────
+
+describe('resolveExitLegs — back-compat with single-exit strategies', () => {
+  it('returns one full-close leg equal to resolveVolatilityExit for vol-hold', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500);
+    const entryBar = bar(ENTRY_ISO, 100, 100, 100, 500);
+    const spike = bar(`${ENTRY_DATE}T14:31:00.000Z`, 100, 100, 100, 1001);
+    const bars = [...preBars, entryBar, spike];
+    const legs = resolveExitLegs('vol-hold', bars, ENTRY_ISO, ENTRY_DATE);
+    const single = resolveVolatilityExit('vol-hold', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(legs).toEqual([{ t: single, fraction: 1 }]);
+  });
+});
+
+// ─── resolveExitLegs: vol-trail ───────────────────────────────────────────────
+
+describe('resolveExitLegs — vol-trail', () => {
+  // Entry bar range 10 (h-l) → with few bars calcATR returns nothing, so ATR=10.
+  it('exits long fully on a 2x ATR pullback from the high-water mark', () => {
+    const entryBar = bar(ENTRY_ISO, 100, 105, 95, 1000, 90); // long (100 >= vwap 90), ATR=10
+    const up = bar(`${ENTRY_DATE}T14:31:00.000Z`, 130, 131, 129, 1000, 90); // HWM = 130
+    const pull = bar(`${ENTRY_DATE}T14:32:00.000Z`, 109, 110, 108, 1000, 90); // 130-109=21 >= 2*10
+    const bars = [entryBar, up, pull];
+    const legs = resolveExitLegs('vol-trail', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(legs).toEqual([{ t: pull.t, fraction: 1 }]);
+  });
+
+  it('exits on a 3x average-volume climax bar', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500); // avgVol = 500
+    const entryBar = bar(ENTRY_ISO, 100, 105, 95, 500, 90); // long, ATR=10
+    const climax = bar(`${ENTRY_DATE}T14:31:00.000Z`, 101, 102, 100, 1600, 90); // 3.2x vol, no big pullback
+    const bars = [...preBars, entryBar, climax];
+    const legs = resolveExitLegs('vol-trail', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(legs).toEqual([{ t: climax.t, fraction: 1 }]);
+  });
+
+  it('falls back to the last available bar when neither condition triggers', () => {
+    const entryBar = bar(ENTRY_ISO, 100, 105, 95, 1000, 90); // ATR=10
+    const calm = bar(`${ENTRY_DATE}T14:31:00.000Z`, 101, 102, 100, 1100, 90); // tiny move, < 2x vol
+    const bars = [entryBar, calm];
+    const legs = resolveExitLegs('vol-trail', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(legs).toEqual([{ t: calm.t, fraction: 1 }]);
+  });
+});
+
+// ─── resolveExitLegs: vol-staged ──────────────────────────────────────────────
+
+describe('resolveExitLegs — vol-staged', () => {
+  it('scales out 50/25/25 across spike, ATR-target, and pullback bars', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500); // avgVol = 500
+    const entryBar = bar(ENTRY_ISO, 100, 105, 95, 500, 90); // long, ATR = 10
+    const spike = bar(`${ENTRY_DATE}T14:31:00.000Z`, 101, 102, 100, 1001, 90); // 2x vol → 50%
+    const target = bar(`${ENTRY_DATE}T14:32:00.000Z`, 111, 112, 110, 600, 90); // |111-100|>=10 ATR → 25% ; HWM=111
+    const pull = bar(`${ENTRY_DATE}T14:33:00.000Z`, 90, 91, 89, 600, 90); // 111-90=21 >= 2*10 → final 25%
+    const bars = [...preBars, entryBar, spike, target, pull];
+    const legs = resolveExitLegs('vol-staged', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(legs).toEqual([
+      { t: spike.t, fraction: 0.5 },
+      { t: target.t, fraction: 0.25 },
+      { t: pull.t, fraction: 0.25 },
+    ]);
+  });
+
+  it('flushes the remaining position at the time stop when later legs never trigger', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500); // avgVol = 500
+    const entryBar = bar(ENTRY_ISO, 100, 105, 95, 500, 90); // long, ATR = 10
+    const spike = bar(`${ENTRY_DATE}T14:31:00.000Z`, 101, 102, 100, 1001, 90); // 50%
+    const calm = bar(`${ENTRY_DATE}T14:32:00.000Z`, 102, 103, 101, 600, 90); // no target, no pullback
+    const bars = [...preBars, entryBar, spike, calm];
+    const legs = resolveExitLegs('vol-staged', bars, ENTRY_ISO, ENTRY_DATE);
+    // 50% on the spike, remaining 50% flushed at the last available bar
+    expect(legs).toEqual([
+      { t: spike.t, fraction: 0.5 },
+      { t: calm.t, fraction: 0.5 },
+    ]);
+    expect(legs.reduce((s, l) => s + l.fraction, 0)).toBeCloseTo(1);
+  });
+
+  it('merges fractions when multiple conditions hit the same bar', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500); // avgVol = 500
+    const entryBar = bar(ENTRY_ISO, 100, 105, 95, 500, 90); // long, ATR = 10
+    // One bar that is both a 2x volume spike AND a >=1 ATR move from entry.
+    const combo = bar(`${ENTRY_DATE}T14:31:00.000Z`, 111, 112, 110, 1001, 90);
+    const lastBar = bar(`${ENTRY_DATE}T15:59:00.000Z`, 111, 112, 110, 600, 90);
+    const bars = [...preBars, entryBar, combo, lastBar];
+    const legs = resolveExitLegs('vol-staged', bars, ENTRY_ISO, ENTRY_DATE);
+    // spike 50% + target 25% merge on the same bar → 75%, remaining 25% at time stop
+    expect(legs[0]).toEqual({ t: combo.t, fraction: 0.75 });
+    expect(legs.reduce((s, l) => s + l.fraction, 0)).toBeCloseTo(1);
+  });
+
+  it('fractions never exceed 100% total', () => {
+    const preBars = makeDayBars(ENTRY_DATE, 5, 100, 500);
+    const entryBar = bar(ENTRY_ISO, 100, 105, 95, 500, 90);
+    const spike = bar(`${ENTRY_DATE}T14:31:00.000Z`, 101, 102, 100, 1001, 90);
+    const target = bar(`${ENTRY_DATE}T14:32:00.000Z`, 111, 112, 110, 600, 90);
+    const pull = bar(`${ENTRY_DATE}T14:33:00.000Z`, 90, 91, 89, 600, 90);
+    const bars = [...preBars, entryBar, spike, target, pull];
+    const legs = resolveExitLegs('vol-staged', bars, ENTRY_ISO, ENTRY_DATE);
+    expect(legs.reduce((s, l) => s + l.fraction, 0)).toBeLessThanOrEqual(1);
   });
 });
 

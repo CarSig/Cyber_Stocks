@@ -14,8 +14,10 @@ export {
   getExitTime,
   isVolatilityStrategy,
   resolveVolatilityExit,
+  resolveExitLegs,
   calcEntryTime,
 } from './intradaySimUtils';
+export type { ExitLeg } from './intradaySimUtils';
 export { parseIntradayText, parseLongTermText } from './parseSimText';
 export { aiButtonStyle } from './styles';
 export type { Side, Action, Transaction, SimResult } from './sim';

@@ -9,7 +9,7 @@ import {
   calcEntryDateTimeForStrategy,
   getExitTime,
   isVolatilityStrategy,
-  resolveVolatilityExit,
+  resolveExitLegs,
   nextWeekday,
 } from './index';
 import type { EntryStrategy, ExitStrategy, SimAllRow } from '../reducers/intradayReducer';
@@ -51,7 +51,10 @@ export async function simOneEvent(
           : exitStrategy === 'vol-same-day'
             ? entryDate
             : fiveDaysOut;
-      datesToFetch = Array.from(new Set([entryDate, latestDate]));
+      // Every weekday in the window — resolveExitLegs scans the middle days too.
+      const range = [entryDate];
+      for (let d = nextWeekday(entryDate); d <= latestDate; d = nextWeekday(d)) range.push(d);
+      datesToFetch = Array.from(new Set(range));
     } else {
       datesToFetch = Array.from(new Set([entryDate, baseExitDate]));
     }
@@ -61,20 +64,18 @@ export async function simOneEvent(
 
     const entryIso = DateUtils.timeToIso(entryTime, entryDate);
 
-    let exitIso: string;
-    let exitTime: string;
-    let exitDate: string;
-
+    // Exit legs: complex strategies may scale out over several bars; others
+    // resolve to a single full-close leg. The reported exit reflects the FINAL
+    // leg (the bar at which the position is fully closed).
+    let legs: { t: string; fraction: number }[];
     if (isVol) {
-      exitIso = resolveVolatilityExit(exitStrategy, bars, entryIso, entryDate, timeframe);
-      exitTime = exitIso.slice(11, 16);
-      exitDate = exitIso.slice(0, 10);
+      legs = resolveExitLegs(exitStrategy, bars, entryIso, entryDate, timeframe);
     } else {
       const fixedExitTime = getExitTime(exitStrategy, timeframe) as string;
-      exitDate = baseExitDate;
-      exitTime = fixedExitTime;
-      exitIso = DateUtils.timeToIso(exitTime, exitDate);
+      legs = [{ t: DateUtils.timeToIso(fixedExitTime, baseExitDate), fraction: 1 }];
     }
+    const finalLegIso = legs.at(-1)?.t ?? DateUtils.timeToIso('15:45', entryDate);
+    const exitDate = finalLegIso.slice(0, 10);
 
     const daysAfter =
       ev.timing !== 'during'
@@ -103,9 +104,17 @@ export async function simOneEvent(
       };
     }
 
+    const exitSide: Action['side'] = isShort ? 'cover' : 'sell';
+    let nextId = 1;
     const actions: Action[] = [
-      { id: 1, timestamp: entryIso, time: entryTime, side: isShort ? 'short' : 'buy', value: 100 },
-      { id: 2, timestamp: exitIso, time: exitTime, side: isShort ? 'cover' : 'sell', value: 100 },
+      { id: nextId++, timestamp: entryIso, time: entryTime, side: isShort ? 'short' : 'buy', value: 100 },
+      ...legs.map((leg) => ({
+        id: nextId++,
+        timestamp: leg.t,
+        time: leg.t.slice(11, 16),
+        side: exitSide,
+        value: Math.round(leg.fraction * 100),
+      })),
     ];
 
     const result = isShort ? runShortSimulation(bars, actions, fmtTime) : runLongSimulation(bars, actions, fmtTime, 0);

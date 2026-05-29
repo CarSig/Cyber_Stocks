@@ -81,6 +81,16 @@ const EXIT_DESCRIPTIONS: Record<ExitStrategy, { label: string; description: stri
     description:
       'Requires both a ≥ 2% price move AND ≥ 1.5× volume on the same bar. Higher conviction — avoids false signals from price alone or volume alone.',
   },
+  'vol-trail': {
+    label: 'Vol trailing ATR stop',
+    description:
+      'Holds across up to 5 days with a high-water-mark trailing stop. Exits the full position on the first of: a 2× ATR (14-period) pullback from the peak, a 3× average-volume climax bar, or the 5-day time stop.',
+  },
+  'vol-staged': {
+    label: 'Vol staged scale-out',
+    description:
+      'Scales out across up to 5 days: sells 50% on the first 2× average-volume spike, 25% on a ≥ 1× ATR move from entry, and the final 25% on a 2× ATR pullback from the peak or the 5-day time stop.',
+  },
 };
 
 function getEventTiming(chartTime: string, afterHours: boolean): { label: string; color: string } {
