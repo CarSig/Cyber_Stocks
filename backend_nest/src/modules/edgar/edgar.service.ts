@@ -201,6 +201,10 @@ export class EdgarService {
     return this.repo.listByTicker(upper);
   }
 
+  filesAll() {
+    return this.repo.listAllAsListings();
+  }
+
   coverage(ticker: string) {
     const upper = ticker.toUpperCase();
     if (!COMPANY_CIK[upper]) throw notFound(`Unknown ticker: ${upper}`);

@@ -29,6 +29,13 @@ export function getSecFiles(ticker: string): Promise<SecFileListing[]> {
   return apiFetch<SecFileListing[]>(`/edgar/files/${ticker}`);
 }
 
+export type SecFileListingTagged = SecFileListing & { ticker: string };
+
+/** All filings across every ticker in one request, each tagged with its ticker. */
+export function getAllSecFiles(): Promise<SecFileListingTagged[]> {
+  return apiFetch<SecFileListingTagged[]>('/edgar/files');
+}
+
 export function syncSec(
   ticker: string,
   dateFrom?: string,

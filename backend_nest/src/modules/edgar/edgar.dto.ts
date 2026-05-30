@@ -73,3 +73,8 @@ export class EdgarFileListingDto {
   @ApiProperty({ type: [String] }) files!: string[];
   @ApiPropertyOptional({ type: FilingMetadataDto }) meta?: FilingMetadataDto;
 }
+
+// `extends` (not intersection) is required here: Swagger introspects DTO classes.
+export class EdgarFileListingWithTickerDto extends EdgarFileListingDto {
+  @ApiProperty() ticker!: string;
+}

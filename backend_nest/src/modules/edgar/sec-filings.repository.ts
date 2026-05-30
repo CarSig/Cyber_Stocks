@@ -247,6 +247,17 @@ export class SecFilingsRepository {
     }));
   }
 
+  /** All filings across every ticker, mapped to listings tagged with ticker. One query. */
+  async listAllAsListings(): Promise<(LocalFileListing & { ticker: string })[]> {
+    const rows = await this.listAllFilings();
+    return rows.map((row) => ({
+      ticker: row.ticker,
+      accession: row.accession,
+      files: row.files,
+      meta: rowToMeta(row),
+    }));
+  }
+
   async listAllFilings(): Promise<FilingRow[]> {
     const r = await this.db.pool.query<FilingRow>(
       `SELECT accession, ticker, issuer_cik, form, to_char(filing_date, 'YYYY-MM-DD') AS filing_date, to_char(report_period, 'YYYY-MM-DD') AS report_period, primary_document, items, files, is_xbrl, is_inline_xbrl, size_bytes, indexed_at FROM edgar.filings ORDER BY 5 DESC`,

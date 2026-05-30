@@ -2,7 +2,7 @@ import { Controller, Post, Get, Param, Body, Sse, MessageEvent } from "@nestjs/c
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from "@nestjs/swagger";
 import { Observable } from "rxjs";
 import { EdgarService } from "./edgar.service";
-import { EdgarSyncDto, EdgarSyncStartedDto, EdgarFileListingDto, CoverageIndexDto } from "./edgar.dto";
+import { EdgarSyncDto, EdgarSyncStartedDto, EdgarFileListingDto, EdgarFileListingWithTickerDto, CoverageIndexDto } from "./edgar.dto";
 import { AllowQueryToken } from "@/common/decorators/allow-query-token.decorator";
 import { type FormType } from "@algo/shared";
 
@@ -39,6 +39,13 @@ export class EdgarController {
   @ApiParam({ name: "ticker" })
   syncProgress(@Param("ticker") ticker: string): Observable<MessageEvent> {
     return this.sec.streamProgress(ticker);
+  }
+
+  @Get("files")
+  @ApiOperation({ summary: "List all locally saved filings across every ticker, tagged with ticker" })
+  @ApiResponse({ status: 200, type: [EdgarFileListingWithTickerDto] })
+  filesAll(): Promise<EdgarFileListingWithTickerDto[]> {
+    return this.sec.filesAll() as unknown as Promise<EdgarFileListingWithTickerDto[]>;
   }
 
   @Get("files/:ticker")

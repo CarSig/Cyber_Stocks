@@ -1,7 +1,8 @@
-import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   getSecTickers,
   getSecFiles,
+  getAllSecFiles,
   syncSec,
   getSecCoverage,
   getSecSyncStatus,
@@ -43,25 +44,19 @@ export function useSecSyncStatus(ticker: string | null) {
   });
 }
 
-import { getSecFiles as _getSecFiles } from '../api';
 import type { SecFileListing } from '../api';
 import type { FormType } from '../api';
 
-/** Fetches files for every ticker in parallel. Returns a flat list tagged with ticker. */
+/** Fetches files for every ticker in one batched request. Returns a flat list tagged with ticker. */
 export function useAllSecFiles(tickers: string[]): {
   data: (SecFileListing & { ticker: string })[];
   isPending: boolean;
 } {
-  const results = useQueries({
-    queries: tickers.map((t) => ({
-      queryKey: ['sec-files', t],
-      queryFn: () => _getSecFiles(t),
-      enabled: tickers.length > 0,
-    })),
+  const { data = [], isPending } = useQuery({
+    queryKey: ['sec-files-all'],
+    queryFn: getAllSecFiles,
+    enabled: tickers.length > 0,
   });
-
-  const isPending = results.some((r) => r.isPending);
-  const data = results.flatMap((r, i) => (r.data ?? []).map((listing) => ({ ...listing, ticker: tickers[i] })));
 
   return { data, isPending };
 }
