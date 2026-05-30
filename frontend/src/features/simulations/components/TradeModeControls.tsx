@@ -44,8 +44,8 @@ export default function TradeModeControls({
         </>
       ) : (
         <>
-          <span className="dtrade-side-btn dtrade-side-btn--sell">▼ Left click = Short ($)</span>
-          <span className="dtrade-side-btn dtrade-side-btn--buy">▲ Right click = Cover (%)</span>
+          <span className="dtrade-side-btn dtrade-side-btn--short">▼ Left click = Short ($)</span>
+          <span className="dtrade-side-btn dtrade-side-btn--cover">▲ Right click = Cover (%)</span>
         </>
       )}
       <span style={{ width: '0.5rem' }} />
