@@ -10,6 +10,7 @@ const SOCIALS = path.join(STORAGE, "socials");
 const THREAT_INTEL = path.join(STORAGE, "threat-intel");
 
 const SEC_ARCHIVE = path.join(STORAGE, "SEC_Archive");
+const CONTEXT = path.join(STORAGE, "context");
 
 export const PATHS = {
   redditPosts: (subreddit: string) => path.join(SOCIALS, `reddit_${subreddit}.json`),
@@ -18,4 +19,9 @@ export const PATHS = {
   otx: path.join(THREAT_INTEL, "otx.json"),
   misp: path.join(THREAT_INTEL, "misp.json"),
   secArchive: (ticker: string) => path.join(SEC_ARCHIVE, ticker),
+  // Simulation context (dummy seed JSON) — see modules/context
+  contextMarket: path.join(CONTEXT, "market.json"),
+  contextSectors: path.join(CONTEXT, "sectors.json"),
+  contextCompanies: path.join(CONTEXT, "companies.json"),
+  contextTickerSector: path.join(CONTEXT, "ticker-sector.json"),
 };

@@ -36,6 +36,7 @@ import { HealthModule } from "@/modules/health/health.module";
 import { InspectDomCaptureModule } from "@/modules/inspect-dom-capture/inspect-dom-capture.module";
 import { EdgarModule } from "@/modules/edgar/edgar.module";
 import { InsiderModule } from "@/modules/insiders/insider.module";
+import { ContextModule } from "@/modules/context/context.module";
 import { CoreDbModule } from "@/shared/core-db.module";
 import { CacheModule } from "@/shared/cache.module";
 import { AuthService } from "@/modules/auth/auth.service";
@@ -87,6 +88,7 @@ import { AuthService } from "@/modules/auth/auth.service";
     InspectDomCaptureModule,
     EdgarModule,
     InsiderModule,
+    ContextModule,
   ],
   providers: [
     { provide: APP_FILTER,      useClass: HttpExceptionFilter },

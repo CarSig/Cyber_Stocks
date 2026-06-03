@@ -24,6 +24,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@algo/shared': path.resolve(__dirname, '../shared/src/types.ts'),
     },
   },
   build: {

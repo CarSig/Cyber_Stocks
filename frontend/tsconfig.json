@@ -13,7 +13,10 @@
     "resolveJsonModule": true,
     "ignoreDeprecations": "6.0",
     "baseUrl": ".",
-    "paths": { "@/*": ["./src/*"] },
+    "paths": {
+      "@/*": ["./src/*"],
+      "@algo/shared": ["../shared/src/types.ts"]
+    },
     "types": ["vitest/globals", "vite/client", "@testing-library/jest-dom"]
   },
   "include": ["src"],

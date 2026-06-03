@@ -437,5 +437,43 @@ export type AppNotification = {
     message?: string;
     [key: string]: unknown;
 };
+export type ContextLayer = 'market' | 'industry' | 'company';
+/** A single dated, graded, described event — used for both actuals and predictions. */
+export type GradedEvent = {
+    /** YYYY-MM-DD */
+    date: string;
+    /** free-form bucket, e.g. 'earnings', 'regulatory', 'macro', 'sentiment' */
+    category: string;
+    /** 1–10 */
+    grade: number;
+    description: string;
+};
+/** One context layer (market / industry / company): a current snapshot + history. */
+export type LayerData = {
+    layer: ContextLayer;
+    /** 'MARKET' | sector name | ticker */
+    key: string;
+    /** current snapshot summary (the "one property") */
+    current: string;
+    /** historical, dated, graded events */
+    events: GradedEvent[];
+};
+/** Predicted outlook for a ticker (or sector) — same event shape as actuals. */
+export type PredictionData = {
+    /** ticker (or sector) */
+    key: string;
+    /** predicted current outlook */
+    current: string;
+    /** predicted dated/graded events */
+    events: GradedEvent[];
+};
+/** Full context bundle returned for one ticker. */
+export type SimContext = {
+    ticker: string;
+    market: LayerData;
+    industry: LayerData;
+    company: LayerData;
+    prediction: PredictionData;
+};
 export {};
 //# sourceMappingURL=types.d.ts.map

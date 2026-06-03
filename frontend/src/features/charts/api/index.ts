@@ -1,4 +1,5 @@
 import { apiFetch } from '@/api/core';
+import type { SimContext } from '@algo/shared';
 import type { AlpacaBarsResponse, IntradayEvent } from '../types';
 
 export type { IntradayEvent } from '../types';
@@ -9,4 +10,8 @@ export function getBars(ticker: string, date: string, timeframe = '1Min'): Promi
 
 export function getIntradayEvents(): Promise<IntradayEvent[]> {
   return apiFetch<IntradayEvent[]>('/alpaca/events');
+}
+
+export function getSimContext(ticker: string): Promise<SimContext> {
+  return apiFetch<SimContext>(`/context/${encodeURIComponent(ticker)}`);
 }

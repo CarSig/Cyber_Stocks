@@ -9,6 +9,7 @@ import EventFilters from './components/EventFilters';
 import EventChartSlot from './components/EventChartSlot';
 import DayTradeChartSlot from './components/DayTradeChartSlot';
 import IntradayEventCard from './components/intraday/IntradayEventCard';
+import ContextPanel from './components/intraday/ContextPanel';
 import OrderControls from './components/OrderControls';
 import AllDialog from './components/intraday/AllDialog';
 import CombinationsDialog from './components/intraday/CombinationsDialog';
@@ -300,7 +301,12 @@ export default function IntradaySimulation(props: IntradaySimulationProps) {
         })}
       />
 
-      {props.mode === 'event' && selectedEvent && <IntradayEventCard event={selectedEvent} />}
+      {props.mode === 'event' && selectedEvent && (
+        <>
+          <IntradayEventCard event={selectedEvent} />
+          <ContextPanel ticker={selectedEvent.ticker.split('/')[0].trim()} />
+        </>
+      )}
 
       {bars.length > 0 && (
         <SimEntryPanel
