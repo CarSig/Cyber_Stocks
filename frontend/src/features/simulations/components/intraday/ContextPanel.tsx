@@ -19,9 +19,7 @@ function GradeBar({ grade }: { grade: number }) {
       {Array.from({ length: 10 }).map((_, i) => {
         const active = i < grade;
         const color = gradeColor(active, grade);
-        return (
-          <div key={i} className="severity-bar-cell" style={color ? { background: color } : undefined} />
-        );
+        return <div key={i} className="severity-bar-cell" style={color ? { background: color } : undefined} />;
       })}
       <span className="severity-bar-readout">{grade}/10</span>
     </div>
@@ -55,7 +53,13 @@ function PairRow({ pair }: { pair: Pair }) {
         {predicted && <p className="ctx-pair-desc">{predicted.description}</p>}
       </div>
       <span className="ctx-pair-delta">
-        {delta === null ? (status === 'missed' ? 'miss' : 'extra') : delta === 0 ? '✓' : `Δ${delta > 0 ? '+' : ''}${delta}`}
+        {delta === null
+          ? status === 'missed'
+            ? 'miss'
+            : 'extra'
+          : delta === 0
+            ? '✓'
+            : `Δ${delta > 0 ? '+' : ''}${delta}`}
       </span>
     </div>
   );
@@ -99,7 +103,11 @@ function ComparisonView({ ctx }: { ctx: SimContext }) {
 type Props = { ticker: string };
 
 export default function ContextPanel({ ticker }: Props) {
-  const { data: ctx, isLoading, error } = useQuery({
+  const {
+    data: ctx,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['sim-context', ticker],
     queryFn: () => getSimContext(ticker),
     enabled: !!ticker,
