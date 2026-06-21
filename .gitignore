@@ -25,8 +25,12 @@ shared/node_modules/
 
 # Root-level files not needed in repo
 prometheus.yml
-.claude/
-CLAUDE.md
-docs/
 archive/
 storage/
+
+# Claude Code config — track shareable config, ignore personal/machine-specific files
+.claude/settings.local.json
+.claude/agent-memory/
+.claude/worktrees/
+.claude/hooks/.state/
+CLAUDE.old.md

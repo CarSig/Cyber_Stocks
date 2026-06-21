@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "PowerShell(*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Lovro\\.claude\\plans"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR}/.claude/hooks/detect-throwaway-tests.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
