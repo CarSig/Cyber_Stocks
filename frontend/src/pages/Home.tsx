@@ -244,7 +244,7 @@ export default function Home() {
                         />
                         {(rangeFrom || rangeTo) && (
                           <button className="btn btn-ghost" onClick={() => handleRangeChange(null, null)}>
-                            Clear
+                            Clear!
                           </button>
                         )}
                       </>
