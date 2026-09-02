@@ -1,6 +1,6 @@
 ---
 name: caching
-description: Caching on both layers — React Query + localStorage on the frontend, Redis (ioredis) on the NestJS backend.
+description: Caching on both layers — React Query on the frontend, Redis (ioredis) on the NestJS backend.
 ---
 
 # caching
@@ -9,8 +9,8 @@ Two independent caches. Match the layer you're editing.
 
 ## Frontend
 - **React Query** is the primary cache (`frontend/src/api/queryClient.ts`): `staleTime 5min`, `gcTime 30min`. Tune per-query via `staleTime` when data is more/less volatile; don't globally lower it.
-- **localStorage persistence**: `src/hooks/useCachedQuery.ts` wraps React Query with TTL-based localStorage persistence for data that should survive a refresh.
-- Other localStorage: `auth_token`/`auth_user` (AuthContext), `notifications` (NotificationContext). No service worker.
+- **TTL convenience wrapper**: `src/hooks/useCachedQuery.ts` is a thin `useQuery` wrapper that forwards one `ttl` to both `staleTime` and `gcTime`. **It does NOT persist to localStorage** (despite the name) — it's purely an in-memory React Query cache with a shorthand TTL.
+- localStorage IS used, but by Contexts, not the query cache: `auth_token`/`auth_user` (AuthContext), `notifications` (NotificationContext). No service worker.
 - Invalidate via query keys from the feature's `queryKeys.ts` — see `skills/state-management.md`.
 
 ## Backend

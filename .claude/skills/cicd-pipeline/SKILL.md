@@ -19,10 +19,10 @@ Reproduce CI locally: run those exact npm scripts in each package.
 ## Docker
 - `backend_nest/Dockerfile` & `frontend/Dockerfile`: Node 20 Alpine, multi-stage (build shared + package; backend runtime `node dist/main` on 3000, frontend serves `dist/` via Nginx on 80).
 - `docker-compose.yml` (repo root): **infra only** — prometheus, grafana, pgvector, rabbitmq, jaeger, redis.
+- `docker-compose.prod.yml` (repo root): full prod stack — `backend`, `frontend`, `pgvector`, `rabbitmq`, `redis`, `prometheus`, `grafana` (defines a `caddy` service that mounts a `Caddyfile`). This is what `deploy.yml` runs.
 
-## ⚠ Not yet built (referenced by deploy but missing)
-- `docker-compose.prod.yml` (must add `backend`, `worker`, `content_analysis` services on top of infra).
-- `Caddyfile` (SSL + reverse proxy). Also pending: `.env.production` on server, `prometheus.yml` target `backend:3000`, frontend `VITE_API_URL`.
+## ⚠ Not yet built (referenced but missing)
+- `Caddyfile` (SSL + reverse proxy) — referenced by the `caddy` service in `docker-compose.prod.yml` but not checked in; create it on the server from the template in `docs/plans/deployment.md`. Also created on-server, not in git: `.env.production` files.
 - Strategy detail: `docs/plans/deployment.md` (Oracle Cloud ARM / Hetzner, Neon Postgres, Vercel for static FE).
 
 ## Commits

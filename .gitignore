@@ -34,3 +34,7 @@ storage/
 .claude/worktrees/
 .claude/hooks/.state/
 CLAUDE.old.md
+
+# Personal Django learning material (not part of the app)
+docs/django/
+.claude/commands/django-learning.md

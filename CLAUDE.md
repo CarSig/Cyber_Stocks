@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Universal guidance for this repo. Domain detail lives in `claude_new/skills/`; pick the agent in `claude_new/agents/` that matches the work. Code is the source of truth; `/docs/` holds specs.
+Universal guidance for this repo. Domain detail lives in `.claude/skills/`; pick the agent in `.claude/agents/` that matches the work. Code is the source of truth; `/docs/` holds specs.
 
 ## Stack
 React 19 + Vite (TS) frontend · NestJS + raw `pg` backend · Postgres (core + pgvector) · RabbitMQ · Redis · GitHub Actions CI → Oracle Cloud (Docker).
